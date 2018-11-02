@@ -149,12 +149,13 @@
               description: '$BUILD_DESCRIPTION'
               test_description: 'Real camera tests'
               kind: '$RUN_KIND'
+          EOF
 
             LAST_RUN_DIR=$(find $RCT_COMPONENT -maxdepth 1 -type d -name "run_*" | sort | tail -n 1)
 
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/cameratest/save_results_main.py \
               --junk-shop-db="$JUNK_SHOP_DB" \
-              --config "$CONFIG_PATH" \
+              --config="$CONFIG_PATH" \
               "$LAST_RUN_DIR"
 
     publishers:

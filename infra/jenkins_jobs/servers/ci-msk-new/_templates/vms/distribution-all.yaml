@@ -51,6 +51,8 @@
         default: '{customization}'
     - p_PLATFORM(hidden):
         default: '{platform}'
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -85,6 +87,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)
@@ -104,3 +107,4 @@
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$RUNNER_URL
+            RUN_KIND=$RUN_KIND

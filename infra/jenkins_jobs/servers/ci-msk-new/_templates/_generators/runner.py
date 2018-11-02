@@ -159,6 +159,7 @@ print '''#
           NX_VMS_COMMIT
           BUILD_IDENTITY
           CLOUD_GROUP
+          RUN_KIND
     - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
@@ -201,6 +202,7 @@ print '''#
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -248,6 +250,7 @@ for platform in PLATFORMS_LIST:
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 '''
         else:
             print '''
@@ -272,6 +275,7 @@ for platform in PLATFORMS_LIST:
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 '''
 print '''
     - multijob:

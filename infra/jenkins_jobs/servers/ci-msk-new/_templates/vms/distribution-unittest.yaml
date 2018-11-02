@@ -50,6 +50,8 @@
         default: '{customization}'
     - p_PLATFORM(hidden):
         default: '{platform}'
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -226,6 +228,7 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -246,6 +249,7 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     - cleaners/custom-clean-workspace:
         keep_files: [ devtools, venv ]

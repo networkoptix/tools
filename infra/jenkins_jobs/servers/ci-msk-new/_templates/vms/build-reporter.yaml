@@ -66,6 +66,8 @@
     - p_RUNNER_URL
     - p_PIPELINE(hidden):
         default: '{pipeline}'
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -171,35 +173,52 @@
             JUNKSHOP_PLATFORM="$PLATFORM"
           fi
 
-          # register build
-          BUILD_PARAMETERS=(
-            "project={junkshop_project_name}"
-            "branch=$BRANCH"
-            "build_num=$BUILD_IDENTITY"
-            "platform=$JUNKSHOP_PLATFORM"
-            "jenkins_url=$RUNNER_URL"
-            "repository_url=ssh://hg@hdw.mx/nx_vms"
-            "revision=$REVISION"
-            )
+          CONFIG_PATH="$WORKSPACE/save-build-info-config.yaml"
+
+          cat > "$CONFIG_PATH" <<EOF
+            build_parameters:
+              project: {junkshop_project_name}
+              branch: '$BRANCH'
+              build_num: '$BUILD_IDENTITY'
+              platform: '$JUNKSHOP_PLATFORM'
+              jenkins_url: '$RUNNER_URL'
+              repository_url: 'ssh://hg@hdw.mx/nx_vms'
+              revision: '$REVISION'
+            run_properties:
+              name: build
+              jenkins_url: '$RUNNER_URL'
+              revision: '$REVISION'
+              description: '$BUILD_DESCRIPTION'
+              test_description: 'Build'
+              kind: '$RUN_KIND'
+        EOF
 
           devtools/ci/junk_shop/junk_shop/save_build_info.py \
             --junk-shop-db="$JUNK_SHOP_DB" \
-            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
-            -- \
+            --config="$CONFIG_PATH" \
             nx_vms
 
-          # upload build results
-          BUILD_PARAMETERS=(
-            "project={junkshop_project_name}"
-            "branch=$BRANCH"
-            "build_num=$BUILD_IDENTITY"
-            "customization=$CUSTOMIZATION"
-            "platform=$JUNKSHOP_PLATFORM"
-            )
+        CONFIG_PATH="$WORKSPACE/build-config.yaml"
+
+          cat > "$CONFIG_PATH" <<EOF
+            build_parameters:
+              project: {junkshop_project_name}
+              branch: '$BRANCH'
+              build_num: '$BUILD_IDENTITY'
+              customization: '$CUSTOMIZATION'
+              platform: '$JUNKSHOP_PLATFORM'
+            run_properties:
+              name: build
+              jenkins_url: '$RUNNER_URL'
+              revision: '$REVISION'
+              description: '$BUILD_DESCRIPTION'
+              test_description: 'Build'
+              kind: '$RUN_KIND'
+        EOF
 
           devtools/ci/junk_shop/junk_shop/build.py \
             --junk-shop-db="$JUNK_SHOP_DB" \
-            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
+            --config="$CONFIG_PATH" \
             "--outcome=$BUILD_STATUS" \
             full_build.log
 

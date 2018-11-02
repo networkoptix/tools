@@ -31,6 +31,8 @@
     - p_RUNNER_URL # do we need it here?
     - p_PIPELINE(hidden):
         default: '{pipeline}'
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - build-name:
@@ -107,28 +109,52 @@
 
             JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
 
-            BUILD_PARAMETERS=(
-              "project={junkshop_project_name}"
-              "branch=$BRANCH"
-              "build_num=$BUILD_IDENTITY"
-              "customization=$CUSTOMIZATION"
-              "platform=$JUNKSHOP_PLATFORM"
-              )
-
             if [ -d unit_tests ] ; then
+
+              CONFIG_PATH="$WORKSPACE/unit-tests-config.yaml"
+
+              cat > "$CONFIG_PATH" <<EOF
+                build_parameters:
+                  project: {junkshop_project_name}
+                  branch: '$BRANCH'
+                  build_num: '$BUILD_IDENTITY'
+                  customization: '$CUSTOMIZATION"'
+                  platform: '$JUNKSHOP_PLATFORM'
+                run_properties:
+                  description: '$BUILD_DESCRIPTION'
+                  test_description: 'Unit tests'
+                kind: '$RUN_KIND'
+          EOF
+
               pushd unit_tests
                 $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
                   --junk-shop-db="$JUNK_SHOP_DB" \
-                  --build-parameters "${{BUILD_PARAMETERS[@]}}" \
+                  --config="$CONFIG_PATH" \
                   --test-name "unit"
               popd
             fi
 
             if [ -d unit_tests_sdk ] ; then
+
+            CONFIG_PATH="$WORKSPACE/sdk-tests-config.yaml"
+
+              cat > "$CONFIG_PATH" <<EOF
+                build_parameters:
+                  project: {junkshop_project_name}
+                  branch: '$BRANCH'
+                  build_num: '$BUILD_IDENTITY'
+                  customization: '$CUSTOMIZATION"'
+                  platform: '$JUNKSHOP_PLATFORM'
+                run_properties:
+                  description: '$BUILD_DESCRIPTION'
+                  test_description: 'SDK unit tests'
+                  kind: '$RUN_KIND'
+          EOF
+
               pushd unit_tests_sdk
                 $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
                   --junk-shop-db="$JUNK_SHOP_DB" \
-                  --build-parameters "${{BUILD_PARAMETERS[@]}}" \
+                  --config="$CONFIG_PATH" \
                   --test-name "sdk_unit"
               popd
             fi
