@@ -258,7 +258,7 @@ class BuildInfoLoader(object):
                 for run in models.Run if
                 run.build is self.build and
                 run.outcome == 'failed' and
-                run.test and
+                run.test and not run.test.is_leaf and
                 not exists(child for child in run.children if
                                child.path.startswith(run.path) and
                                child is not run and
