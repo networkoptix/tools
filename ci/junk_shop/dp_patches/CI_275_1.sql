@@ -9,9 +9,8 @@ ALTER TABLE public.run_kind OWNER TO postgres;
 
 INSERT INTO public.run_kind  (id, name, order_num)
 VALUES
- (1, 'production', 1),
- (2, 'test', 50);
- (3, 'test', 100);
+ (1, 'voting_for_build', 1),
+ (2, 'voting_for_test', 50);
 
  CREATE SEQUENCE public.run_kind_id_seq
     AS integer
