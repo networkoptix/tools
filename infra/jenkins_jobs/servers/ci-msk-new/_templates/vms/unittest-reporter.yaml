@@ -118,7 +118,7 @@
             project: '{junkshop_project_name}'
             branch: '$BRANCH'
             build_num: '$BUILD_IDENTITY'
-            customization: '$CUSTOMIZATION"'
+            customization: '$CUSTOMIZATION'
             platform: '$JUNKSHOP_PLATFORM'
           run_properties:
             description: '$BUILD_DESCRIPTION'
