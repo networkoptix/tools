@@ -114,16 +114,16 @@
               CONFIG_PATH="$WORKSPACE/unit-tests-config.yaml"
 
               cat > "$CONFIG_PATH" <<EOF
-                build_parameters:
-                  project: {junkshop_project_name}
-                  branch: '$BRANCH'
-                  build_num: '$BUILD_IDENTITY'
-                  customization: '$CUSTOMIZATION"'
-                  platform: '$JUNKSHOP_PLATFORM'
-                run_properties:
-                  description: '$BUILD_DESCRIPTION'
-                  test_description: 'Unit tests'
-                kind: '$RUN_KIND'
+          build_parameters:
+            project: '{junkshop_project_name}'
+            branch: '$BRANCH'
+            build_num: '$BUILD_IDENTITY'
+            customization: '$CUSTOMIZATION"'
+            platform: '$JUNKSHOP_PLATFORM'
+          run_properties:
+            description: '$BUILD_DESCRIPTION'
+            test_description: 'Unit tests'
+            kind: '$RUN_KIND'
           EOF
 
               pushd unit_tests
@@ -136,19 +136,19 @@
 
             if [ -d unit_tests_sdk ] ; then
 
-            CONFIG_PATH="$WORKSPACE/sdk-tests-config.yaml"
+              CONFIG_PATH="$WORKSPACE/sdk-tests-config.yaml"
 
               cat > "$CONFIG_PATH" <<EOF
-                build_parameters:
-                  project: {junkshop_project_name}
-                  branch: '$BRANCH'
-                  build_num: '$BUILD_IDENTITY'
-                  customization: '$CUSTOMIZATION"'
-                  platform: '$JUNKSHOP_PLATFORM'
-                run_properties:
-                  description: '$BUILD_DESCRIPTION'
-                  test_description: 'SDK unit tests'
-                  kind: '$RUN_KIND'
+          build_parameters:
+            project: '{junkshop_project_name}'
+            branch: '$BRANCH'
+            build_num: '$BUILD_IDENTITY'
+            customization: '$CUSTOMIZATION"'
+            platform: '$JUNKSHOP_PLATFORM'
+          run_properties:
+            description: '$BUILD_DESCRIPTION'
+            test_description: 'SDK unit tests'
+            kind: '$RUN_KIND'
           EOF
 
               pushd unit_tests_sdk

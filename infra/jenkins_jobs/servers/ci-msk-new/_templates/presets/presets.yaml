@@ -127,7 +127,7 @@
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
     - hidden:
         name: RUN_KIND
-        default: !j2: '{{run_kind | default("production") }}'
+        default: !j2: '{{run_kind | default(default_run_kind) }}'
 
     # TODO: Add additional sections and options...
     # - parameter-separator/simple-colored:
@@ -286,7 +286,7 @@
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
     - hidden:
         name: RUN_KIND
-        default: !j2: '{{run_kind | default("production") }}'
+        default: !j2: '{{run_kind | default(default_run_kind) }}'
 
 - job-template:
     <<: *preset
@@ -377,4 +377,4 @@
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
     - hidden:
         name: RUN_KIND
-        default: !j2: '{{run_kind | default("production") }}'
+        default: !j2: '{{run_kind | default(default_run_kind) }}'

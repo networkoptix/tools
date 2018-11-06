@@ -177,7 +177,7 @@
 
           cat > "$CONFIG_PATH" <<EOF
             build_parameters:
-              project: {junkshop_project_name}
+              project: '{junkshop_project_name}'
               branch: '$BRANCH'
               build_num: '$BUILD_IDENTITY'
               platform: '$JUNKSHOP_PLATFORM'
@@ -202,7 +202,7 @@
 
           cat > "$CONFIG_PATH" <<EOF
             build_parameters:
-              project: {junkshop_project_name}
+              project: '{junkshop_project_name}'
               branch: '$BRANCH'
               build_num: '$BUILD_IDENTITY'
               customization: '$CUSTOMIZATION'

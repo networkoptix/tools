@@ -42,7 +42,6 @@
     - preset:
         preset-name:
         - on-push-vms:
-            run_kind: production
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: ''
             ut_enabled: 'ON'
@@ -58,7 +57,7 @@
             default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
         - on-push-ft:
-            run_kind: test
+            run_kind: voting_for_test
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
@@ -74,7 +73,6 @@
             test_list: self_tests
             test_select_expr: 'not windows and not smb'
         - on-push-rct:
-            run_kind: test
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
@@ -89,7 +87,6 @@
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
         - vms-nightly:
-            run_kind: production
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: 'vms_3.2'
             ut_enabled: 'ON'

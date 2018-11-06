@@ -42,7 +42,6 @@
     - preset:
         preset-name:
         - on-push-vms:
-            run_kind: production
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -67,7 +66,7 @@
             st_commit_choice_option_default: ''
 
         - on-push-rct-to-vms_rct:
-            run_kind: test
+            run_kind: voting_for_test
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -96,7 +95,6 @@
             st_commit_choice_option_default: ''
 
         - nightly-rct:
-            run_kind: production
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -124,7 +122,6 @@
             st_commit_choice_option_default: ''
 
         - manual:
-            run_kind: manual
             max_concurrent_presets: 2
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'

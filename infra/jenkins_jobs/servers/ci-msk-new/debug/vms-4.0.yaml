@@ -19,7 +19,6 @@
     version: vms
     default_branch: vms
     use_nx_vms_commit: vms  # FIXME: this is temp fix
-    devtools_revision: 'new_junk_shop_params'
 
     poll_scm_timer: '' # disable triggers
 
@@ -47,7 +46,6 @@
     - preset:
         preset-name:
         - custom:
-            run_kind: manual
             max_concurrent_presets: 2
             cancel_in_fav_of_newer_build: 'true'
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
@@ -65,7 +63,6 @@
             default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
         - on-push-vms:
-            run_kind: production
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
             vms_build_choice_option_default: ''
             ut_enabled: 'ON'
@@ -81,7 +78,7 @@
             default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
         - on-push-ft:
-            run_kind: test
+            run_kind: voting_for_test
             vms_build_choice_default: VMS_EXISTING_BUILD_FROM_STABLE_PUSH  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
@@ -99,7 +96,6 @@
             test_list: self_tests
             test_select_expr: 'not windows and not smb'
         - on-push-rct:
-            run_kind: test
             vms_build_choice_default: VMS_EXISTING_BUILD_FROM_STABLE_PUSH  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
@@ -115,7 +111,6 @@
             default_platforms: ''
             default_customizations: default
         - vms-nightly:
-            run_kind: production
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
             vms_build_choice_option_default: 'vms'
             ut_enabled: 'ON'
