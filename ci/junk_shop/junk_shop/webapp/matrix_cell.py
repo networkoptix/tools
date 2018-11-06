@@ -11,7 +11,8 @@ class MatrixCell(object):
 
     def add_run(self, run):
         # run.test.path is one of 'build', 'unit' or 'functional'
-        if not self.stages.get(run.test.path) or run.outcome != 'passed':
+        last_run = self.stages.get(run.test.path)
+        if not last_run or run.started_at > last_run.run.started_at:
             # failed one must be preferred to be shown
             self.stages[run.test.path] = SimpleNamespace(run=run)
         if not self.started_at or run.started_at < self.started_at:

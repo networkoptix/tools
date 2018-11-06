@@ -58,6 +58,12 @@ class JinjaFilters(object):
     def format_timedelta(self, td):
         return timedelta_to_str(td)
 
+    def extract_run_id_from_jenkins_url(self, url):
+        match = re.search(r'/(\d+)/$', url)
+        if match:
+            return match.group(1)
+        return url
+
     def _make_jira_ref(self, jira_url, ref):
         return '<a class="link" href="%s/%s">%s</a>' % (jira_url, ref.upper(), ref)
 

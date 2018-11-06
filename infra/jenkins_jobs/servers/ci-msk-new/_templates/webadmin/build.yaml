@@ -84,6 +84,9 @@
         default: default
     - p_PLATFORM(hidden):
         default: universal  # webadmin platform is called universal
+    - string:
+        name: RUN_KIND
+
 
     wrappers:
     - timestamps
@@ -203,6 +206,7 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -224,6 +228,7 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     - failure-email:
         email-recipients: '{build_watchers}'

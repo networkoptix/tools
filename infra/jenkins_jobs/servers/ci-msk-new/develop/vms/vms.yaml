@@ -69,6 +69,7 @@
         - on-push-ft:
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
+            run_kind: voting_for_test
 
             auth_kind: system
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'

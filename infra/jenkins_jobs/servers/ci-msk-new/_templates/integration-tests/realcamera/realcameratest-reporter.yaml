@@ -58,6 +58,11 @@
         name: RCT_COMPONENT
     - p_PIPELINE(hidden):
         default: '{pipeline}'
+    - p_RUNNER_URL
+    - string:
+        name: NX_TEST_FRAMEWORK_COMMIT
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - build-name:
@@ -128,20 +133,29 @@
 
             JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
 
-            BUILD_PARAMETERS=(
-              "project={junkshop_project_name}"
-              "branch=$BRANCH"
-              "build_num=$BUILD_IDENTITY"
-              "platform=linux-x64"
-              "customization=$CUSTOMIZATION"
-              )
+          CONFIG_PATH="$WORKSPACE/real-camera-test-config.yaml"
+
+          cat > "$CONFIG_PATH" <<EOF
+            build_parameters:
+              project: '{junkshop_project_name}'
+              branch: '$BRANCH'
+              build_num: '$BUILD_IDENTITY'
+              platform: 'linux-x64'
+              customization: '$CUSTOMIZATION'
+            run_properties:
+              name: cameratest
+              jenkins_url: '$RUNNER_URL'
+              revision: '$NX_TEST_FRAMEWORK_COMMIT'
+              description: '$BUILD_DESCRIPTION'
+              test_description: 'Real camera tests'
+              kind: '$RUN_KIND'
+          EOF
 
             LAST_RUN_DIR=$(find $RCT_COMPONENT -maxdepth 1 -type d -name "run_*" | sort | tail -n 1)
 
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/cameratest/save_results_main.py \
               --junk-shop-db="$JUNK_SHOP_DB" \
-              --build-parameters "${{BUILD_PARAMETERS[@]}}" \
-              -- \
+              --config="$CONFIG_PATH" \
               "$LAST_RUN_DIR"
 
     publishers:

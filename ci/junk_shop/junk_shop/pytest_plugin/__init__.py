@@ -8,6 +8,7 @@ from ..config import Config
 from ..parameters import (
     build_parameters_from_value_list,
     run_parameters_from_value_list,
+    run_properties_from_value_list,
     enum_db_arguments,
     )
 from .plugin import DbCapturePlugin
@@ -22,6 +23,7 @@ def pytest_addoption(parser):
     parser.addoption('--run-name', help='Run name (by default is root test name)')
     parser.addoption('--run-id-file', help='Store root run id into this file')
 
+
 def pytest_configure(config):
     file_config = Config.merge(config.getoption('--config'))
     db_config = (
@@ -32,12 +34,20 @@ def pytest_configure(config):
         file_config.get_pytest_option(
             config, '--build-parameters', compose(list, build_parameters_from_value_list))
         or [])
-    run_name = file_config.get_pytest_option(config, '--run-name')
     run_parameters = dict(
         file_config.get_pytest_option(
             config, '--run-parameters', compose(list, run_parameters_from_value_list))
         or [])
+    run_properties = dict(
+        file_config.get_option(
+            'run_properties', compose(list, run_properties_from_value_list))
+        or [])
     run_id_file = file_config.get_pytest_option(config, '--run-id-file')
     if db_config:
-        repository = DbCaptureRepository(db_config, build_parameters, run_parameters)
-        config.pluginmanager.register(DbCapturePlugin(config, repository, run_id_file, run_name), JUNK_SHOP_PLUGIN_NAME)
+        repository = DbCaptureRepository(
+            db_config, build_parameters,
+            run_parameters, run_properties)
+        config.pluginmanager.register(
+            DbCapturePlugin(
+                config, repository,
+                run_id_file, run_properties.get('name')), JUNK_SHOP_PLUGIN_NAME)

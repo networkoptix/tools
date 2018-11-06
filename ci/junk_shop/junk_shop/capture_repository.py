@@ -54,10 +54,13 @@ class DbCaptureRepository(object):
 
     prev_select_mutex = threading.Lock()
 
-    def __init__(self, db_config, build_parameters, run_parameters=None):
+    def __init__(
+            self, db_config, build_parameters,
+            run_parameters=None, run_properties=None):
         self.db_config = db_config
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
+        self.run_properties = run_properties or dict()
         self.artifact_type = ArtifactTypeFactory([
             ArtifactType('traceback', 'text/plain', '.txt'),
             ArtifactType('output', 'text/plain', '.txt'),
@@ -104,6 +107,10 @@ class DbCaptureRepository(object):
             run.build = self.produce_build()
             run.customization = self._produce_build_parameter('customization')
             run.platform = self._produce_build_parameter('platform')
+            run.description = self._produce_run_property('description')
+            run.jenkins_url = self._produce_run_property('jenkins_url')
+            run.revision = self._produce_run_property('revision')
+            run.kind = self._produce_run_property('kind')
         if self.run_parameters:
             for name, value in self.run_parameters.iteritems():
                 param = models.RunParameter.get(name=name)
@@ -151,6 +158,14 @@ class DbCaptureRepository(object):
                 setattr(build, name, value)
         return build
 
+    def _produce_run_property(self, name):
+        value = self.run_properties.get(name, '')
+        if name == 'kind':
+            model = models.RunKind
+            return model.get(name=value) or model(name=value)
+        else:
+            return value
+
     def _produce_build_parameter(self, name):
         value = self.build_parameters.get(name)
         param2model = dict(
@@ -176,19 +191,25 @@ class DbCaptureRepository(object):
             run = self.add_run(name, parent)
         return run
 
-    def produce_test(self, test_path, is_leaf):
+    def produce_test(self, test_path, is_leaf, description=None):
         test = models.Test.get(path=test_path)
         if test:
             assert test.is_leaf == is_leaf, repr((is_leaf, test_path))
         else:
-            test = models.Test(path=test_path, is_leaf=is_leaf)
+            test = models.Test(
+                path=test_path,
+                is_leaf=is_leaf,
+                description=description or '')
         return test
 
     def produce_test_run(self, root_run, test_path_list, is_test=False):
         run = root_run
         # create all parent nodes too
         for path, name, is_leaf in self._iter_path_parents(test_path_list):
-            test = self.produce_test(path, is_leaf=is_leaf and is_test)
+            test = self.produce_test(
+                path,
+                is_leaf=is_leaf and is_test,
+                description=None if root_run else self._produce_run_property('test_description'))
             parent_run = run
             run = self.test_run.get(path)
             if not run:

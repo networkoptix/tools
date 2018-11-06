@@ -24,7 +24,6 @@ import logging
 import argparse
 import oyaml as yaml
 import json
-import sys
 
 from pony.orm import db_session
 from datetime import datetime, timedelta
@@ -39,7 +38,7 @@ import junk_shop.models as models
 _logger = logging.getLogger(__name__)
 
 
-DEFAULT_UNIT_TEST_NAME = 'cameratest'
+DEFAULT_RCT_NAME = 'cameratest'
 MESSAGES_ARTIFACT_NAME = 'messages'
 ERRORS_ARTIFACT_NAME = 'errors'
 EXCEPTION_ARTIFACT_NAME = 'exceptions'
@@ -155,8 +154,9 @@ class CameraTestStorage(object):
 
 
 @db_session
-def make_root_run(repository, root_name):
-    # type: (DbCaptureRepository, str) -> models.Run
+def make_root_run(repository):
+    # type: (DbCaptureRepository) -> models.Run
+    root_name = repository.run_properties.get('name', DEFAULT_RCT_NAME)
     root_run = repository.produce_test_run(root_run=None, test_path_list=[root_name])
     return root_run
 
@@ -309,10 +309,6 @@ def main():
         'test_work_dir',
         type=dir_path,
         help='Test results file path')
-    parser.add_argument(
-        '--test-name',
-        default=DEFAULT_UNIT_TEST_NAME,
-        help='Name of test, default=%(default)r')
 
     args = parser.parse_args()
 
@@ -324,7 +320,7 @@ def main():
     artifacts = collect_test_artifacts(args.test_work_dir)
 
     results_file = artifacts.get(TEST_RESULTS_FILE_NAME)
-    root_run = make_root_run(repository, args.test_name)
+    root_run = make_root_run(repository)
     error_message = None
     if not results_file:
         error_message = "Can't find test report, '%s' not found." % TEST_RESULTS_FILE_NAME

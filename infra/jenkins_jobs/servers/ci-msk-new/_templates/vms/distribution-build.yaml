@@ -188,6 +188,8 @@
     - hidden:
         name: USE_WEBADMIN
         default: '{use_webadmin}'
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -620,6 +622,7 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -642,6 +645,7 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 RUNNER_URL=$RUNNER_URL
+                RUN_KIND=$RUN_KIND
 
     # after everything is published, delete results
     - postbuildscript:

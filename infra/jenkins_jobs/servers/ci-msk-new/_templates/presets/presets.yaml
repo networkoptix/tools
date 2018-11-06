@@ -125,6 +125,9 @@
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default(default_run_kind) }}'
 
     # TODO: Add additional sections and options...
     # - parameter-separator/simple-colored:
@@ -181,6 +184,7 @@
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           UPSTREAM_JOB_NAME=$JOB_NAME
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          RUN_KIND=$RUN_KIND
 
     publishers:
     - archive:
@@ -280,6 +284,9 @@
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default(default_run_kind) }}'
 
 - job-template:
     <<: *preset
@@ -368,3 +375,6 @@
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default(default_run_kind) }}'

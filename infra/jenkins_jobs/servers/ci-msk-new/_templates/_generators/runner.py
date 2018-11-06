@@ -137,6 +137,8 @@ print '''#
     - string:
         name: ST_COMMIT
         default: ''
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -157,6 +159,7 @@ print '''#
           NX_VMS_COMMIT
           BUILD_IDENTITY
           CLOUD_GROUP
+          RUN_KIND
     - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
@@ -199,6 +202,7 @@ print '''#
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -246,6 +250,7 @@ for platform in PLATFORMS_LIST:
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 '''
         else:
             print '''
@@ -270,6 +275,7 @@ for platform in PLATFORMS_LIST:
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 '''
 print '''
     - multijob:
@@ -301,6 +307,7 @@ print '''
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.realcameratest'
           condition: COMPLETED # allow unstable
@@ -320,6 +327,8 @@ print '''
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
             RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER
+            RUN_KIND=$RUN_KIND
+
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.scalability-test'
           condition: COMPLETED # allow unstable
@@ -337,6 +346,7 @@ print '''
             ST_SCENARIOS=$ST_SCENARIOS
             CLEAN_WORKSPACE=true
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
 '''
 print '''

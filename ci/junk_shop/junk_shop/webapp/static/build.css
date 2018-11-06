@@ -15,6 +15,21 @@
 	font-weight: bold;
 }
 
+.run-info {
+	margin: 0 0 10px 0;
+}
+.run-info > div {
+	display: inline-block;
+	margin: 5px 30px 5px 0;
+}
+.run-info .value, .run-info .description-value, .run-info .markup-value {
+	font-size: 110%;
+	color: #404040;
+}
+.run-info .value {
+	font-weight: bold;
+}
+
 .platform-name {
 	margin: 30px 0 0 0;
 	font-style: italic;

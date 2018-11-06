@@ -12,10 +12,12 @@ class Project(db.Entity):
     order_num = Required(int, default=100)
     builds = Set('Build')
 
+
 class CloudGroup(db.Entity):
     _table_ = 'cloud_group'
     name = Required(str)
     builds = Set('Build')
+
 
 class Customization(db.Entity):
     name = Required(str)
@@ -23,16 +25,26 @@ class Customization(db.Entity):
     builds = Set('Build')
     runs = Set('Run')
 
+
 class Branch(db.Entity):
     name = Required(str)
     order_num = Required(int, default=1000)
     is_active = Required(bool, default=True)
     builds = Set('Build')
 
+
 class Platform(db.Entity):
     name = Required(str)
     order_num = Required(int, default=100)
     runs = Set('Run')
+
+
+class RunKind(db.Entity):
+    _table_ = 'run_kind'
+    name = Required(str)
+    order_num = Required(int, default=100)
+    runs = Set('Run')
+
 
 class RunParameter(db.Entity):
     _table_ = 'run_parameter'
@@ -47,13 +59,16 @@ class ArtifactType(db.Entity):
     content_type = Required(str)
     artifacts = Set('Artifact')
 
+
 class Metric(db.Entity):
     name = Required(str)
     values = Set('MetricValue')
 
+
 class Test(db.Entity):
     path = Required(str)  # functional/some_dir/something_test.py/test_that
     is_leaf = Required(bool)  # False for dir and modules aggregates, True for actual tests
+    description = Optional(str)  # description (for root test only)
     runs = Set('Run')
 
 
@@ -114,6 +129,11 @@ class Run(db.Entity):
     artifacts = Set('Artifact')
     run_parameters = Set('RunParameterValue')
     metrics = Set('MetricValue')
+    description = Optional(str)
+    jenkins_url = Optional(str)
+    revision = Optional(str)
+    kind = Optional(RunKind)
+
 
 class Artifact(db.Entity):
     run = Required(Run)
@@ -124,11 +144,13 @@ class Artifact(db.Entity):
     encoding = Optional(str)
     data = Required(buffer, lazy=True)
 
+
 class RunParameterValue(db.Entity):
     _table_ = 'run_parameter_value'
     run_parameter = Required(RunParameter)
     run = Required(Run)
     value = Required(str)
+
 
 class MetricValue(db.Entity):
     _table_ = 'metric_value'

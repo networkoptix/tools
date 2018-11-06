@@ -82,6 +82,8 @@
     - string:
         name: ST_COMMIT
         default: ''
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -102,6 +104,7 @@
           NX_VMS_COMMIT
           BUILD_IDENTITY
           CLOUD_GROUP
+          RUN_KIND
     - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
@@ -144,6 +147,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -172,6 +176,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_cn.build'
@@ -195,6 +200,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_zh_CN.build'
@@ -218,6 +224,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.cox.build'
@@ -241,6 +248,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog.build'
@@ -264,6 +272,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog_global.build'
@@ -287,6 +296,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.hanwha.build'
@@ -310,6 +320,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ipera.build'
@@ -333,6 +344,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ionetworks.build'
@@ -356,6 +368,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.nutech.build'
@@ -379,6 +392,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ras.build'
@@ -402,6 +416,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.senturian.build'
@@ -425,6 +440,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.systemk.build'
@@ -448,6 +464,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.tricom.build'
@@ -471,6 +488,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ust.build'
@@ -494,6 +512,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vista.build'
@@ -517,6 +536,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoblue.build'
@@ -540,6 +560,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoorange.build'
@@ -563,6 +584,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.build-and-ut'
@@ -587,6 +609,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xccelo.build'
@@ -610,6 +633,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.build'
@@ -633,6 +657,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_cn.build'
@@ -656,6 +681,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_zh_CN.build'
@@ -679,6 +705,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.cox.build'
@@ -702,6 +729,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog.build'
@@ -725,6 +753,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog_global.build'
@@ -748,6 +777,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.hanwha.build'
@@ -771,6 +801,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ipera.build'
@@ -794,6 +825,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ionetworks.build'
@@ -817,6 +849,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.nutech.build'
@@ -840,6 +873,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ras.build'
@@ -863,6 +897,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.senturian.build'
@@ -886,6 +921,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.systemk.build'
@@ -909,6 +945,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.tricom.build'
@@ -932,6 +969,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ust.build'
@@ -955,6 +993,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vista.build'
@@ -978,6 +1017,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoblue.build'
@@ -1001,6 +1041,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoorange.build'
@@ -1024,6 +1065,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.metavms.build'
@@ -1047,6 +1089,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xccelo.build'
@@ -1070,6 +1113,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default.build'
@@ -1093,6 +1137,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_cn.build'
@@ -1116,6 +1161,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_zh_CN.build'
@@ -1139,6 +1185,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.cox.build'
@@ -1162,6 +1209,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog.build'
@@ -1185,6 +1233,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog_global.build'
@@ -1208,6 +1257,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.hanwha.build'
@@ -1231,6 +1281,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ipera.build'
@@ -1254,6 +1305,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ionetworks.build'
@@ -1277,6 +1329,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.nutech.build'
@@ -1300,6 +1353,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ras.build'
@@ -1323,6 +1377,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.senturian.build'
@@ -1346,6 +1401,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.systemk.build'
@@ -1369,6 +1425,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.tricom.build'
@@ -1392,6 +1449,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ust.build'
@@ -1415,6 +1473,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vista.build'
@@ -1438,6 +1497,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoblue.build'
@@ -1461,6 +1521,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoorange.build'
@@ -1484,6 +1545,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.metavms.build'
@@ -1507,6 +1569,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.xccelo.build'
@@ -1530,6 +1593,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default.build'
@@ -1553,6 +1617,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_cn.build'
@@ -1576,6 +1641,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_zh_CN.build'
@@ -1599,6 +1665,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.cox.build'
@@ -1622,6 +1689,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog.build'
@@ -1645,6 +1713,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog_global.build'
@@ -1668,6 +1737,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.hanwha.build'
@@ -1691,6 +1761,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ipera.build'
@@ -1714,6 +1785,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ionetworks.build'
@@ -1737,6 +1809,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.nutech.build'
@@ -1760,6 +1833,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ras.build'
@@ -1783,6 +1857,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.senturian.build'
@@ -1806,6 +1881,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.systemk.build'
@@ -1829,6 +1905,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.tricom.build'
@@ -1852,6 +1929,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ust.build'
@@ -1875,6 +1953,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vista.build'
@@ -1898,6 +1977,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoblue.build'
@@ -1921,6 +2001,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoorange.build'
@@ -1944,6 +2025,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.metavms.build'
@@ -1967,6 +2049,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.xccelo.build'
@@ -1990,6 +2073,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default.build'
@@ -2013,6 +2097,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_cn.build'
@@ -2036,6 +2121,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_zh_CN.build'
@@ -2059,6 +2145,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.cox.build'
@@ -2082,6 +2169,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog.build'
@@ -2105,6 +2193,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog_global.build'
@@ -2128,6 +2217,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.hanwha.build'
@@ -2151,6 +2241,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ipera.build'
@@ -2174,6 +2265,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ionetworks.build'
@@ -2197,6 +2289,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.nutech.build'
@@ -2220,6 +2313,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ras.build'
@@ -2243,6 +2337,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.senturian.build'
@@ -2266,6 +2361,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.systemk.build'
@@ -2289,6 +2385,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.tricom.build'
@@ -2312,6 +2409,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ust.build'
@@ -2335,6 +2433,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vista.build'
@@ -2358,6 +2457,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoblue.build'
@@ -2381,6 +2481,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoorange.build'
@@ -2404,6 +2505,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.metavms.build'
@@ -2427,6 +2529,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.xccelo.build'
@@ -2450,6 +2553,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.edge1.digitalwatchdog.build'
@@ -2473,6 +2577,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default.build'
@@ -2496,6 +2601,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_cn.build'
@@ -2519,6 +2625,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_zh_CN.build'
@@ -2542,6 +2649,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.cox.build'
@@ -2565,6 +2673,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog.build'
@@ -2588,6 +2697,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog_global.build'
@@ -2611,6 +2721,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.hanwha.build'
@@ -2634,6 +2745,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ipera.build'
@@ -2657,6 +2769,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ionetworks.build'
@@ -2680,6 +2793,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.nutech.build'
@@ -2703,6 +2817,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ras.build'
@@ -2726,6 +2841,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.senturian.build'
@@ -2749,6 +2865,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.systemk.build'
@@ -2772,6 +2889,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.tricom.build'
@@ -2795,6 +2913,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ust.build'
@@ -2818,6 +2937,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vista.build'
@@ -2841,6 +2961,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoblue.build'
@@ -2864,6 +2985,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoorange.build'
@@ -2887,6 +3009,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.metavms.build'
@@ -2910,6 +3033,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.xccelo.build'
@@ -2933,6 +3057,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.build'
@@ -2956,6 +3081,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_cn.build'
@@ -2979,6 +3105,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_zh_CN.build'
@@ -3002,6 +3129,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.cox.build'
@@ -3025,6 +3153,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog.build'
@@ -3048,6 +3177,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog_global.build'
@@ -3071,6 +3201,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.hanwha.build'
@@ -3094,6 +3225,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ipera.build'
@@ -3117,6 +3249,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ionetworks.build'
@@ -3140,6 +3273,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.nutech.build'
@@ -3163,6 +3297,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ras.build'
@@ -3186,6 +3321,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.senturian.build'
@@ -3209,6 +3345,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.systemk.build'
@@ -3232,6 +3369,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.tricom.build'
@@ -3255,6 +3393,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ust.build'
@@ -3278,6 +3417,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vista.build'
@@ -3301,6 +3441,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoblue.build'
@@ -3324,6 +3465,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoorange.build'
@@ -3347,6 +3489,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.metavms.build'
@@ -3370,6 +3513,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.xccelo.build'
@@ -3393,6 +3537,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default.build-and-ut'
@@ -3417,6 +3562,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_cn.build'
@@ -3440,6 +3586,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_zh_CN.build'
@@ -3463,6 +3610,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.cox.build'
@@ -3486,6 +3634,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog.build'
@@ -3509,6 +3658,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog_global.build'
@@ -3532,6 +3682,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.hanwha.build'
@@ -3555,6 +3706,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ipera.build'
@@ -3578,6 +3730,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ionetworks.build'
@@ -3601,6 +3754,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.nutech.build'
@@ -3624,6 +3778,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ras.build'
@@ -3647,6 +3802,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.senturian.build'
@@ -3670,6 +3826,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.systemk.build'
@@ -3693,6 +3850,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.tricom.build'
@@ -3716,6 +3874,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ust.build'
@@ -3739,6 +3898,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vista.build'
@@ -3762,6 +3922,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoblue.build'
@@ -3785,6 +3946,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoorange.build'
@@ -3808,6 +3970,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.build-and-ut'
@@ -3832,6 +3995,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xccelo.build'
@@ -3855,6 +4019,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.build'
@@ -3878,6 +4043,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_cn.build'
@@ -3901,6 +4067,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_zh_CN.build'
@@ -3924,6 +4091,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.cox.build'
@@ -3947,6 +4115,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog.build'
@@ -3970,6 +4139,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog_global.build'
@@ -3993,6 +4163,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.hanwha.build'
@@ -4016,6 +4187,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ipera.build'
@@ -4039,6 +4211,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ionetworks.build'
@@ -4062,6 +4235,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.nutech.build'
@@ -4085,6 +4259,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ras.build'
@@ -4108,6 +4283,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.senturian.build'
@@ -4131,6 +4307,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.systemk.build'
@@ -4154,6 +4331,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.tricom.build'
@@ -4177,6 +4355,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ust.build'
@@ -4200,6 +4379,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vista.build'
@@ -4223,6 +4403,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoblue.build'
@@ -4246,6 +4427,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoorange.build'
@@ -4269,6 +4451,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.metavms.build'
@@ -4292,6 +4475,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xccelo.build'
@@ -4315,6 +4499,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default.build-and-ut'
@@ -4339,6 +4524,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_cn.build'
@@ -4362,6 +4548,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_zh_CN.build'
@@ -4385,6 +4572,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.cox.build'
@@ -4408,6 +4596,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog.build'
@@ -4431,6 +4620,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog_global.build'
@@ -4454,6 +4644,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.hanwha.build'
@@ -4477,6 +4668,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ipera.build'
@@ -4500,6 +4692,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ionetworks.build'
@@ -4523,6 +4716,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.nutech.build'
@@ -4546,6 +4740,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ras.build'
@@ -4569,6 +4764,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.senturian.build'
@@ -4592,6 +4788,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.systemk.build'
@@ -4615,6 +4812,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.tricom.build'
@@ -4638,6 +4836,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ust.build'
@@ -4661,6 +4860,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vista.build'
@@ -4684,6 +4884,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoblue.build'
@@ -4707,6 +4908,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoorange.build'
@@ -4730,6 +4932,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.metavms.build'
@@ -4753,6 +4956,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.xccelo.build'
@@ -4776,6 +4980,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default.build'
@@ -4799,6 +5004,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_cn.build'
@@ -4822,6 +5028,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_zh_CN.build'
@@ -4845,6 +5052,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.cox.build'
@@ -4868,6 +5076,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog.build'
@@ -4891,6 +5100,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog_global.build'
@@ -4914,6 +5124,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.hanwha.build'
@@ -4937,6 +5148,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ipera.build'
@@ -4960,6 +5172,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ionetworks.build'
@@ -4983,6 +5196,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.nutech.build'
@@ -5006,6 +5220,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ras.build'
@@ -5029,6 +5244,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.senturian.build'
@@ -5052,6 +5268,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.systemk.build'
@@ -5075,6 +5292,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.tricom.build'
@@ -5098,6 +5316,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ust.build'
@@ -5121,6 +5340,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vista.build'
@@ -5144,6 +5364,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoblue.build'
@@ -5167,6 +5388,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoorange.build'
@@ -5190,6 +5412,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.metavms.build'
@@ -5213,6 +5436,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.xccelo.build'
@@ -5236,6 +5460,7 @@
             BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+            RUN_KIND=$RUN_KIND
 
 
     - multijob:
@@ -5262,6 +5487,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
         - name: '{pipeline}.{version}.{project}.distribution.default.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5281,6 +5507,8 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
             RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER
+            RUN_KIND=$RUN_KIND
+
 
         - name: '{pipeline}.{version}.{project}.distribution.default.scalability-test'
           condition: COMPLETED # allow unstable
@@ -5298,6 +5526,7 @@
             ST_SCENARIOS=$ST_SCENARIOS
             CLEAN_WORKSPACE=true
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
 
 
@@ -5339,3 +5568,4 @@
         allow-empty: 'false'
         fingerprint: true
     # - completed-email(group)
+

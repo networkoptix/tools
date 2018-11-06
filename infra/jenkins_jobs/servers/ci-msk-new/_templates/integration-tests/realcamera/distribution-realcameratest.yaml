@@ -46,6 +46,8 @@
         default: 'default'
     - p_PLATFORM(hidden):
         default: all
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -261,6 +263,9 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RCT_COMPONENT={workdir}
+                RUNNER_URL=$BUILD_URL
+                NX_TEST_FRAMEWORK_COMMIT=$NX_TEST_FRAMEWORK_COMMIT
+                RUN_KIND=$RUN_KIND
 
     - failure-email:
         email-recipients: '{build_watchers}'

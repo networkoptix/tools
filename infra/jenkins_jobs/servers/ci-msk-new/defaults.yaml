@@ -29,3 +29,4 @@
     realcameratest_node: realcameratest
 
     devtools_revision: default
+    default_run_kind: 'voting_for_build'
