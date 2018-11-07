@@ -25,7 +25,7 @@ services:
 
   junk_shop_db:
     container_name: junk_shop_db
-    image: postgres
+    image: postgres:10.3
     ports:
       - '5432:5432'
     environment:
