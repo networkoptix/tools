@@ -1,9 +1,6 @@
 - project:
     name: maintenance
     jobs:
-    - check-hardware-signing:
-        node: build-installer-windows-hw-sign
-        recipients: iremizov@networkoptix.com
     - mirror-sync
     - deploy-junk-shop-web:
         junk_shop_db_dir: '/junk_shop_db/db'
