@@ -39,7 +39,7 @@
         default: test
     - p_BETA:
         default: ''
-    - p_HARDWARE_SIGNING:
+    - p_CODE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
         default: 'OFF'
@@ -85,7 +85,7 @@
             RUNNER_URL=$RUNNER_URL
             CLOUD_GROUP=$CLOUD_GROUP
             BETA=$BETA
-            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            CODE_SIGNING=$CODE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
             RUN_KIND=$RUN_KIND
 

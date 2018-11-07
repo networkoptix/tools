@@ -113,7 +113,7 @@ print '''#
         default: ''
     - p_BETA:
         default: ''
-    - p_HARDWARE_SIGNING:
+    - p_CODE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
         default: 'OFF'
@@ -248,7 +248,7 @@ for platform in PLATFORMS_LIST:
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             BETA=$BETA
-            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            CODE_SIGNING=$CODE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
             RUN_KIND=$RUN_KIND
 '''
@@ -273,7 +273,7 @@ for platform in PLATFORMS_LIST:
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             BETA=$BETA
-            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            CODE_SIGNING=$CODE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
             RUN_KIND=$RUN_KIND
 '''

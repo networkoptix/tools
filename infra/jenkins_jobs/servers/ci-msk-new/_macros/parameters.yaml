@@ -381,16 +381,16 @@
         default: '{default}'
 
 - parameter:
-    name: p_HARDWARE_SIGNING
+    name: p_CODE_SIGNING
     parameters:
     - on-off-option:
-        name: HARDWARE_SIGNING
+        name: CODE_SIGNING
         default: '{default}'
 - parameter:
-    name: p_HARDWARE_SIGNING(hidden)
+    name: p_CODE_SIGNING(hidden)
     parameters:
     - hidden:
-        name: HARDWARE_SIGNING
+        name: CODE_SIGNING
         default: '{default}'
 
 - parameter:

@@ -65,7 +65,7 @@
         default: test
     - p_BETA:
         default: !j2: '{{ beta | default("ON") }}'
-    - p_HARDWARE_SIGNING:
+    - p_CODE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
         default: 'OFF'
@@ -224,7 +224,7 @@
         default: test
     - p_BETA:
         default: !j2: '{{ beta | default("ON") }}'
-    - p_HARDWARE_SIGNING:
+    - p_CODE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
         default: 'OFF'
@@ -315,7 +315,7 @@
         default: test
     - p_BETA(hidden):
         default: !j2: '{{ beta | default("ON") }}'
-    - p_HARDWARE_SIGNING(hidden):
+    - p_CODE_SIGNING(hidden):
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING(hidden):
         default: 'OFF'

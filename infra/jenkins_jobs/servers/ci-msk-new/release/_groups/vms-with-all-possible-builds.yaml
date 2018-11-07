@@ -107,7 +107,7 @@
     - ust
     - vista:
         build_paxton: 'YES'
-        cmake_configure_hardware_signing: $HARDWARE_SIGNING
+        cmake_configure_code_signing: $CODE_SIGNING
         cmake_configure_trusted_timestamping: $TRUSTED_TIMESTAMPING
     - vmsdemoblue
     - vmsdemoorange

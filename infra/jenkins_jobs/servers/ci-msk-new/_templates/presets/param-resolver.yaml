@@ -21,7 +21,7 @@
     - string: { name: CUSTOMIZATIONS                 }
     - string: { name: CLOUD_GROUP                    }
     - string: { name: BETA                           }
-    - string: { name: HARDWARE_SIGNING               }
+    - string: { name: CODE_SIGNING                   }
     - string: { name: TRUSTED_TIMESTAMPING           }
     - string: { name: CUSTOM_CMAKE_PARAMETERS        }
 
@@ -153,7 +153,7 @@
     # - CUSTOMIZATIONS
     # - CLOUD_GROUP
     # - BETA
-    # - HARDWARE_SIGNING
+    # - CODE_SIGNING
     # - TRUSTED_TIMESTAMPING
     # - CUSTOM_CMAKE_PARAMETERS
 
@@ -163,7 +163,7 @@
         echo "CUSTOMIZATIONS=$CUSTOMIZATIONS" >> RUNNER_ARGS.envvars
         echo "CLOUD_GROUP=$CLOUD_GROUP" >> RUNNER_ARGS.envvars
         echo "BETA=$BETA" >> RUNNER_ARGS.envvars
-        echo "HARDWARE_SIGNING=$HARDWARE_SIGNING" >> RUNNER_ARGS.envvars
+        echo "CODE_SIGNING=$CODE_SIGNING" >> RUNNER_ARGS.envvars
         echo "TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING" >> RUNNER_ARGS.envvars
         echo "CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS" >> RUNNER_ARGS.envvars
 
