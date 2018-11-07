@@ -171,7 +171,7 @@
         file-name: test-config.yaml
         file-content: |
           tests:
-            scalability_test:
+            test_scalability:
               merge_timeout: 1h
               host_list:
                 - name: kappa
@@ -269,17 +269,17 @@
               -v \
               --tests-config-file="$WORKSPACE/test-config.yaml" \
               --test-parameters="\
-        scalability_test.use_lightweight_servers=$USE_LIGHTWEIGHT_SERVERS,\
-        scalability_test.server_count=$SERVER_COUNT,\
-        scalability_test.storages_per_server=$STORAGES_PER_SERVER,\
-        scalability_test.cameras_per_server=$CAMERAS_PER_SERVER,\
-        scalability_test.users_per_server=$USERS_PER_SERVER,\
-        scalability_test.properties_per_camera=$PROPERTIES_PER_CAMERA,\
-        scalability_test.transactions_per_server_rate=$TRANSACTIONS_PER_SERVER_RATE,\
-        scalability_test.merge_timeout=$MERGE_TIMEOUT,\
-        scalability_test.message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
-        scalability_test.transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
-              tests/scalability_test.py
+        test_scalability.use_lightweight_servers=$USE_LIGHTWEIGHT_SERVERS,\
+        test_scalability.server_count=$SERVER_COUNT,\
+        test_scalability.storages_per_server=$STORAGES_PER_SERVER,\
+        test_scalability.cameras_per_server=$CAMERAS_PER_SERVER,\
+        test_scalability.users_per_server=$USERS_PER_SERVER,\
+        test_scalability.properties_per_camera=$PROPERTIES_PER_CAMERA,\
+        test_scalability.transactions_per_server_rate=$TRANSACTIONS_PER_SERVER_RATE,\
+        test_scalability.merge_timeout=$MERGE_TIMEOUT,\
+        test_scalability.message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
+        test_scalability.transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
+              scalability/test_scalability.py
 
             pytest_status="X$?"
           popd
