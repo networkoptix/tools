@@ -561,7 +561,7 @@
     parameters:
     - string:
         name: RCT_CAMERA_FILTER
-        default:  !j2: '{{ rct_camera_filter | default("*") }}'
+        default:  !j2: '{{ default | default("*") }}'
         description:
 
 - parameter:
@@ -569,7 +569,7 @@
     parameters:
     - hidden:
         name: RCT_CAMERA_FILTER
-        default:  !j2: '{{ rct_camera_filter | default("*") }}'
+        default:  !j2: '{{ default | default("*") }}'
 
 - parameter:
     name: p_ST_COMMIT_CHOICE_w_OPTION(hidden)

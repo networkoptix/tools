@@ -1,0 +1,31 @@
+- job-template:
+    name: '__test'
+
+    scm:
+    - git:
+        url: ssh://jenkins@gerrit:29418/migration/devtools
+        branches:
+        - 'origin/master'
+        basedir: 'devtools'
+        credentials-id: 'gerrit-key'
+
+    triggers:
+    - gerrit:
+        trigger-on:
+        - patchset-created-event
+        - comment-added-contains-event:
+            comment-contains-value: 'ci: recheck'
+        server-name: gerrit
+        projects:
+        - project-compare-type: 'REG_EXP'
+          project-pattern: 'migration/devtools'
+          branches:
+          - branch-compare-type: 'PLAIN'
+            branch-pattern: 'master'
+        custom-url: '* $JOB_NAME $BUILD_URL'
+        silent: false
+        silent-start: false
+
+    builders:
+    - shell: |
+        ls .
