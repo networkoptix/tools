@@ -10,6 +10,11 @@ from .artifact import decode_artifact_data
 log = logging.getLogger(__name__)
 
 
+BUILD_STAGE = 'build'
+UNIT_TEST_STAGE = 'unit'
+SCALABILITY_STAGE = 'scalability'
+
+
 # drop starting unit/ or functional/ part
 def make_test_name(run):
     if run.test:
@@ -42,7 +47,7 @@ class TestRun(object):
 
     def _pick_output_artifacts(self, run):
         return {
-            artifact.short_name : artifact.id for artifact in
+            artifact.short_name: artifact.id for artifact in
             run.artifacts.filter(lambda artifact: artifact.type.name == 'output')}
 
 
@@ -71,7 +76,7 @@ class TestsStage(Stage):
         self.passed_count = 0
         self._visited_run_set = {}  # models.Run -> TestRun, runs we have already added
         self.run_list = []  # TestRun list
-        if self.stage_name == 'scalability':
+        if self.stage_name == SCALABILITY_STAGE:
             self.run_parameters = {p.run_parameter.name: p.value for p in root_run.run_parameters}
         else:
             self.run_parameters = {}
@@ -114,7 +119,7 @@ class BuildInfo(namedtuple('BuildInfo', [
     'failed_build_platform_list',
     'failed_tests_platform_list',
     'failed_test_list',
-    ])):
+])):
 
     @property
     def has_failed_builds(self):
@@ -131,7 +136,7 @@ class BuildInfo(namedtuple('BuildInfo', [
     @property
     def changeset_email_list(self):
         return set('{} <{}>'.format(changeset.user, changeset.email)
-                       for changeset in self.changeset_list)
+                   for changeset in self.changeset_list)
 
 
 PlatformBuildInfo = namedtuple('PlatformBuildInfo', [
@@ -147,9 +152,9 @@ class BuildInfoLoader(object):
     @classmethod
     def from_project_branch_num(cls, project_name, branch_name, build_num):
         build = models.Build.get(lambda build:
-            build.project.name == project_name and
-            build.branch.name == branch_name and
-            build.build_num == build_num)
+                                 build.project.name == project_name and
+                                 build.branch.name == branch_name and
+                                 build.build_num == build_num)
         return cls(build)
 
     @classmethod
@@ -160,10 +165,17 @@ class BuildInfoLoader(object):
     def for_build_customzation_platform(cls, build, customization, platform):
         return cls(build, customization, platform, is_full_build_mode=False)
 
-    def __init__(self, build, customization=None, platform=None, is_full_build_mode=True):
+    @classmethod
+    def for_stage_list(cls, build, customization, platform, stage):
+        return cls(build, customization, platform, stage, is_full_build_mode=False)
+
+    def __init__(
+            self, build, customization=None,
+            platform=None, stage=None, is_full_build_mode=True):
         self.build = build
         self.customization = customization
         self.platform = platform
+        self.stage = stage
         self.is_full_build_mode = is_full_build_mode
         self.platform_map = {}  # models.Platform -> Platform
         self.stage_map = {}  # models.Run (root run) -> Stage
@@ -193,7 +205,8 @@ class BuildInfoLoader(object):
         stage = self.stage_map.get(root_run)
         if not stage:
             stage = stage_cls(root_run)
-            platform.stage_list.append(stage)
+            if root_run.name == (self.stage or root_run.name):
+                platform.stage_list.append(stage)
             self.stage_map[root_run] = stage
         return stage
 
@@ -211,9 +224,11 @@ class BuildInfoLoader(object):
                 root_run.build is self.build and
                 run.test.is_leaf and
                 run.outcome == 'passed'):
-            if not self._is_run_wanted(root_run): continue
+            if not self._is_run_wanted(root_run):
+                continue
             stage = self._produce_stage(root_run, TestsStage)
-            if not stage: continue
+            if not stage:
+                continue
             stage.passed_count = run_count
         # load 'interesting' leaf test runs
         for run, test, root_run in select(
@@ -224,9 +239,11 @@ class BuildInfoLoader(object):
                 root_run.build is self.build and
                 run.test.is_leaf and
                 (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
-            if not self._is_run_wanted(root_run): continue
+            if not self._is_run_wanted(root_run):
+                continue
             stage = self._produce_stage(root_run, TestsStage)
-            if not stage: continue
+            if not stage:
+                continue
             stage.add_run(run)
             if run.outcome == 'failed':
                 self.failed_tests_platform_set.add(root_run.platform.name)
@@ -245,7 +262,8 @@ class BuildInfoLoader(object):
                                child.path.startswith(run.path) and
                                child is not run and
                                child.outcome == 'failed')).order_by(1):
-            if not self._is_run_wanted(root_run): continue
+            if not self._is_run_wanted(root_run):
+                continue
             stage = self._produce_stage(root_run, TestsStage)
             stage.add_run(run)
             self.failed_tests_platform_set.add(root_run.platform.name)
@@ -263,7 +281,8 @@ class BuildInfoLoader(object):
                                child.path.startswith(run.path) and
                                child is not run and
                                child.outcome == 'failed')).order_by(1):
-            if not self._is_run_wanted(run): continue
+            if not self._is_run_wanted(run):
+                continue
             stage = self._produce_stage(run, TestsStage)
             stage.add_run(run)
             self.failed_tests_platform_set.add(run.platform.name)
@@ -275,8 +294,9 @@ class BuildInfoLoader(object):
                 for run in models.Run
                 for artifact in run.artifacts
                 if run.build is self.build and
-                run.name == 'build'):
-            if not self._is_run_wanted(run): continue
+                run.name == BUILD_STAGE):
+            if not self._is_run_wanted(run):
+                continue
             self._update_started_at(run)
             platform = self._produce_platform(run.platform)
             platform.build_run = run
@@ -300,9 +320,10 @@ class BuildInfoLoader(object):
                 for root_run in models.Run
                 for artifact in root_run.artifacts
                 if root_run.build is self.build and
-                root_run.name != 'build' and
+                root_run.name != BUILD_STAGE and
                 artifact.short_name == 'errors'):
-            if not self._is_run_wanted(root_run): continue
+            if not self._is_run_wanted(root_run):
+                continue
             stage = self._produce_stage(root_run, Stage)
             stage.error_list = self._artifact_as_lines(artifact)
             self.failed_tests_platform_set.add(root_run.platform.name)
@@ -316,9 +337,10 @@ class BuildInfoLoader(object):
                 for artifact in run.artifacts
                 if root_run.build is self.build and
                 run.root_run is root_run and
-                root_run.test.path == 'unit' and
+                root_run.test.path == UNIT_TEST_STAGE and
                 artifact.type.name == 'traceback'):
-            if not self._is_run_wanted(root_run): continue
+            if not self._is_run_wanted(root_run):
+                continue
             stage = self._produce_stage(root_run, TestsStage)
             tr = stage.add_run(run)
             if tr:
@@ -329,14 +351,17 @@ class BuildInfoLoader(object):
         self._create_leaf_test_runs()
         self._create_non_leaf_failed_test_runs()
         self._create_root_failed_test_runs()
-        self._load_build_artifacts()
+        if (self.stage or BUILD_STAGE) == BUILD_STAGE:
+            self._load_build_artifacts()
         self._load_test_stage_errors()
-    
+
     def load_build_platform_list(self):
         self._load_build_data()
 
         changeset_list = list(self.build.changesets.order_by(desc(1)))
-        platform_list = [value for key, value in sorted(self.platform_map.items(), key=lambda (key, value): value.order_num)]
+        platform_list = [value for key, value in sorted(
+            self.platform_map.items(),
+            key=lambda (key, value): value.order_num)]
 
         return BuildInfo(
             build=self.build,

@@ -26,7 +26,8 @@
 	font-size: 110%;
 	color: #404040;
 }
-.run-info .value {
+
+.run-info .value, .run-info .title {
 	font-weight: bold;
 }
 
@@ -39,7 +40,6 @@ hr {
 }
 
 .platform-build-blocks {
-	display: flex;
 	flex-wrap: wrap;
 	width: 100%;
 }

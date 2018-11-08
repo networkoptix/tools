@@ -41,7 +41,10 @@ def render_release_build(build):
         cell = row.platform2cell.setdefault(platform, MatrixCell())
         cell.add_run(run)
     customization_list = sorted(customization2row.values(), key=lambda row: row.customization.order_num)
-    platform_list = list(select(run.platform for run in models.Run if run.build is build).order_by(models.Platform.order_num))
+    platform_list = list(
+        select(
+            run.platform for run in models.Run
+            if run.build is build).order_by(models.Platform.order_num))
     changeset_list = list(build.changesets.order_by(desc(1)))
     return render_template(
         'release_build.html',
@@ -131,3 +134,33 @@ def platform_build(project_name, branch_name, build_num, customization_name, pla
     return render_platform_build(
         build, customization, platform,
         paginator=paginator_from_list(build_num, build_list))
+
+
+@app.route('/project/<project_name>/<branch_name>/<int:build_num>/<customization_name>/<platform_name>/<stage_name>')
+@db_session
+def platform_stage(project_name, branch_name, build_num, customization_name, platform_name, stage_name):
+    '''Show platform runs filtered by run(stage) name'''
+    build = models.Build.get(
+        lambda build:
+            build.project.name == project_name and
+            build.branch.name == branch_name and
+            build.build_num == build_num)
+    platform = models.Platform.get(name=platform_name)
+    if not build or not platform:
+        abort(404)
+    if customization_name == 'none':
+        customization = None
+    else:
+        customization = models.Customization.get(name=customization_name)
+        if not customization:
+            abort(404)
+
+    loader = BuildInfoLoader.for_stage_list(build, customization, platform, stage_name)
+    build_platform_info = loader.load_build_platform()
+    if not build_platform_info:
+        abort(404)
+
+    return render_template(
+        'platform_test.html',
+        stage_name=stage_name,
+        **build_platform_info._asdict())

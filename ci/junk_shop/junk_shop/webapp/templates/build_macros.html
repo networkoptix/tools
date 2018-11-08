@@ -71,13 +71,25 @@
         </div>
       {% endif %}
     {% endif %}
-    {% for stage in platform.stage_list|sort %}
+
+  </div>
+  {{ platform_stage_list(platform.stage_list) }}
+{% endmacro %}
+
+{% macro platform_stage_list(stage_list) %}
+{% for stage in stage_list|sort %}
       <div class="build-block block">
         <h3>
           <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
             {{ stage.root_run.test.description|default(stage.stage_name, true) }}
           </a>
         </h3>
+        <div class="test-counts">
+          <span class="passed">{{ stage.passed_count }}</span>
+          {% if stage.failed_count %}
+            / <span class="failed">{{ stage.failed_count }}</span>
+          {% endif %}
+        </div>
         {{ run_info_block(stage.root_run) }}
         {%- if stage.stage_name == 'scalability' -%}
           <br/>
@@ -89,12 +101,6 @@
           {%- endif %}
           servers
         {%- endif -%}
-        <div class="test-counts">
-          <span class="passed">{{ stage.passed_count }}</span>
-          {% if stage.failed_count %}
-            / <span class="failed">{{ stage.failed_count }}</span>
-          {% endif %}
-        </div>
         {% if stage.error_list %}
           <div class="run-errors">
             {% for error in stage.error_list %}
@@ -123,9 +129,8 @@
         {% endif %}
       </div>
     {% endfor %}
-  </div>
-
 {% endmacro %}
+
 
 {% macro build_platform_list(build, platform_list, scalability_platform_set={}) %}
 
