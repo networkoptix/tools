@@ -21,8 +21,8 @@
   {% if form.project.data and form.branch.data %}
   {{ common_macros.breadcrumbs([
        ('Projects',  url_for('project_list')),
-       (form.project.data + ' / ' + form.branch.data,
-        url_for('branch', project_name=form.project.data, branch_name=form.branch.data))
+       (form.project.data, url_for('project', project_name=form.project.data)),
+       (form.branch.data, url_for('branch', project_name=form.project.data, branch_name=form.branch.data)),
   ]) }}
   {% else %}
   {{ common_macros.breadcrumbs([

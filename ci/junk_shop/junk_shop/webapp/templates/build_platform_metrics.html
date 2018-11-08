@@ -46,7 +46,8 @@
 
   {{ common_macros.breadcrumbs([
        ('Projects',  url_for('project_list')),
-       (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
+       (project_name, url_for('project', project_name=project_name)),
+       (branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
        (build_num, url_for('build', project_name=project_name, branch_name=branch_name, build_num=build_num)),
   ]) }}
 

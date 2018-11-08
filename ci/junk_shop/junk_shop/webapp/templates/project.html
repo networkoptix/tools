@@ -1,0 +1,69 @@
+{% import "common_macros.html" as common_macros %}
+{% import "matrix_macros.html" as matrix_macros %}
+
+{% extends "layout.html" %}
+{% block title %}{{project.name}}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='matrix.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='project-matrix.css') }}">
+{% endblock head %}
+
+
+{% block contents %}
+
+  {{ common_macros.breadcrumbs([
+    ('Projects',  url_for('project_list')),
+  ]) }}
+
+  <h2>{{project.name}}</h2>
+  <hr>
+
+  {% if not project_branch_list %}
+
+    <p>No runs executed yet</p>
+
+  {% else %}
+
+    <table class="project-list {{ matrix_macros.platform_width_class(project_branch_list) }}">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Last build</th>
+          {% for platform in platform_list %}
+            <th class="axiz">
+              {{ platform.name }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for branch in project_branch_list %}
+        {% set build = branch_map[branch] %}
+        <tr>
+          <td class="axiz">
+            <a class="link"
+               href="{{ url_for('branch', project_name=project.name, branch_name=branch.name) }}">
+              {{ branch.name }}
+            </a>
+          </td>
+          <td class="version">
+            <a class="link"
+               href="{{ url_for('build', project_name=project.name, branch_name=branch.name, build_num=build.build_num) }}">
+              {{ build.build_num }}
+            </a>
+          </td>
+          {% for platform in platform_list %}
+          <td>
+            {{ matrix_macros.platform_box(platform_map.get((branch, platform)), stages) }}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% endif %}
+
+{% endblock contents %}

@@ -11,38 +11,53 @@ from .matrix_cell import MatrixCell
 @app.route('/project/')
 @db_session
 def project_list():
+    project_list = models.Project.select().order_by(models.Project.order_num)
+    return render_template(
+        'project_list.html',
+        project_list=project_list)
+
+
+@app.route('/project/<project_name>')
+@db_session
+def project(project_name):
+    project = models.Project.get(name=project_name)
+    if not project:
+        abort(404)
     latest_build_map = {  # (project, branch) -> last build
-        (rec[0], rec[1]): rec[2] for rec in
-        select((build.project, build.branch, max(build.build_num))
+        rec[0]: rec[1] for rec in
+        select((build.branch, max(build.build_num))
                for build in models.Build
                if exists(build.runs)
+               and build.project.name == project_name
                and build.branch.is_active)}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
-    project_map = {}  # project -> branch set
+    project_branches = set()
+    project_platforms = set()
     branch_map = {}  # (project, branch) -> build
     platform_map = {}  # (project, branch, platform) -> MatrixCell
     for build, run in select(
             (run.build, run) for run in models.Run
             if run.build.branch.is_active and
             run.build.build_num in build_num_set and
+            run.build.project.name == project_name and
             run.test.path in STAGE_NAMES).order_by(2):
-        if latest_build_map.get((build.project, build.branch)) != build.build_num:
+        if latest_build_map.get(build.branch) != build.build_num:
             continue
-        project_map.setdefault(build.project, set()).add(build.branch)
-        branch_map[(build.project, build.branch)] = build
-        cell = platform_map.setdefault((build.project, build.branch, run.platform), MatrixCell())
+        project_branches.add(build.branch)
+        project_platforms.add(run.platform)
+        branch_map[build.branch] = build
+        cell = platform_map.setdefault((build.branch, run.platform), MatrixCell())
         cell.add_run(run)
-    platform_list = models.Platform.select().order_by(models.Platform.order_num)
-    ordered_project_list = models.Project.select().order_by(models.Project.order_num)
+    platform_list = [
+        platform for platform in models.Platform.select().order_by(models.Platform.order_num)
+        if platform in project_platforms]
     ordered_branch_list = models.Branch.select().order_by(models.Branch.order_num)
-    project_list = [project for project in ordered_project_list if project in project_map]
-    project_branch_list = {
-        project: [branch for branch in ordered_branch_list if branch in project_map[project]]
-        for project in project_list}
+    project_branch_list = [branch for branch in ordered_branch_list if branch in project_branches]
+
     return render_template(
-        'project_list.html',
+        'project.html',
         platform_list=platform_list,
-        project_list=project_list,
+        project=project,
         project_branch_list=project_branch_list,
         branch_map=branch_map,
         platform_map=platform_map,
@@ -79,7 +94,9 @@ def branch(project_name, branch_name):
         run.test.path.startswith('functional/scalability_test.py') and
         run.test.is_leaf and exists(run.metrics)))
 
-    platform_list = list(select(run.platform for run in models.Run if run.build in build_list).order_by(models.Platform.order_num))
+    platform_list = list(
+        select(run.platform for run in models.Run
+               if run.build in build_list).order_by(models.Platform.order_num))
     return render_template(
         'branch.html',
         paginator=paginator(page, rec_count, page_size),
