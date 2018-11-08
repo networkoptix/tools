@@ -446,12 +446,26 @@
           test "{{ build_paxton | default("") }}" == 'YES'
         steps:
 
-        # dotnet-4.0
+        # developers move paxton_plugin in 4.0 and ask us to support both paxton project paths
+        # https://networkoptix.atlassian.net/browse/CI-287
+        - shell: |
+            #!bash
+            set -ex
+            PAXTON_PLUGIN_REPO_PATH=paxton_plugin
+            if [ ! -d nx_vms/$PAXTON_PLUGIN_REPO_PATH ]; then
+              PAXTON_PLUGIN_REPO_PATH=client/paxton_plugin
+            fi
 
+            echo "PAXTON_PLUGIN_REPO_PATH=$PAXTON_PLUGIN_REPO_PATH" > PAXTON_PLUGIN_REPO_PATH.envvar
+
+        - inject:
+            properties-file: PAXTON_PLUGIN_REPO_PATH.envvar
+
+        # dotnet-4.0
         - vms/cmake-configure:
             subject: paxton-4.0
             __debug__: !j2: '{{ __debug__ }}'
-            cmake_configure_project_root: 'client/paxton_plugin'
+            cmake_configure_project_root: $PAXTON_PLUGIN_REPO_PATH
             # FIXME: Will fail on develop builds
             cmake_configure_command: !j2: >-
               {%- set _cmake_configure_customization         = cmake_configure_customization         | default("") -%}
@@ -477,7 +491,7 @@
         - vms/cmake-configure:
             subject: paxton-4.6.2
             __debug__: !j2: '{{ __debug__ }}'
-            cmake_configure_project_root: 'client/paxton_plugin'
+            cmake_configure_project_root: $PAXTON_PLUGIN_REPO_PATH
             # FIXME: Will fail on develop builds
             cmake_configure_command: !j2: >-
               {%- set _cmake_configure_customization         = cmake_configure_customization         | default("") -%}
