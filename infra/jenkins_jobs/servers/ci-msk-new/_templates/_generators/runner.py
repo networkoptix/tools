@@ -68,6 +68,7 @@ print '''#
     max_concurrent_runners: 5 # default
 
     properties:
+    - authorization-{pipeline}-system
     - throttle:
         max-total: '{max_concurrent_runners}'
         option: project
