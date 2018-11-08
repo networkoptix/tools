@@ -88,7 +88,7 @@
             rct_enabled: 'ON'
             rct_commit_choice_default: RCT_BY_COMMIT
             rct_commit_choice_option_default: 'vms_rct'
-            rct_camera_filter: 'Hanwha_SNP-6321,Arecont-2245PM,IqEye_A32N.Acti_E924,Dlink_DCS-3716'
+            rct_camera_filter: 'Hanwha_SNP-6321,Arecont-2245PM,IqEye_A32N,Acti_E924,Dlink_DCS-3716'
 
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
