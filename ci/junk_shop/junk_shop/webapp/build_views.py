@@ -161,6 +161,6 @@ def platform_stage(project_name, branch_name, build_num, customization_name, pla
         abort(404)
 
     return render_template(
-        'platform_test.html',
+        'platform_stage.html',
         stage_name=stage_name,
         **build_platform_info._asdict())
