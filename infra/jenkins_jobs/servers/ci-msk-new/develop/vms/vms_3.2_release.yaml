@@ -48,8 +48,8 @@
             auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms_3.2_release'
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
 
             ut_enabled: 'ON'
 
@@ -76,8 +76,8 @@
             auth_kind: system
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: 'vms_3.2_release'
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
 
             ut_enabled: 'ON'
 
@@ -104,8 +104,8 @@
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: 'vms_3.2_release'
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
 
             ut_enabled: 'OFF'
 
@@ -126,8 +126,8 @@
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: ''
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
 
             ut_enabled: 'OFF'
 

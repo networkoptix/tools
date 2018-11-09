@@ -8,7 +8,7 @@
     pipeline: debug
     pipeline_priority: 1
 
-    devtools_revision: 'new_junk_shop_params'
+    devtools_revision: 'default'
     jobs:
 
     # HELPERS - syncronize and publish different stuff

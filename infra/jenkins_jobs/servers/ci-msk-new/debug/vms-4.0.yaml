@@ -60,8 +60,8 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
         - on-push-vms:
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
             vms_build_choice_option_default: ''
@@ -75,8 +75,8 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: linux-x64,windows-x64,mac,bpi
-            default_customizations: default
+            allowed_platforms: linux-x64,windows-x64,mac,bpi
+            allowed_customizations: default
         - on-push-ft:
             run_kind: voting_for_test
             vms_build_choice_default: VMS_EXISTING_BUILD_FROM_STABLE_PUSH  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
@@ -91,8 +91,8 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: ''
-            default_customizations: default
+            allowed_platforms: ''
+            allowed_customizations: default
             test_list: self_tests
             test_select_expr: 'not windows and not smb'
         - on-push-rct:
@@ -108,8 +108,8 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: ''
-            default_customizations: default
+            allowed_platforms: ''
+            allowed_customizations: default
         - vms-nightly:
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
             vms_build_choice_option_default: 'vms'
@@ -123,8 +123,8 @@
             st_enabled: 'ON'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: linux-x64
-            default_customizations: default
+            allowed_platforms: linux-x64
+            allowed_customizations: default
         # - nightly:
         #     vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
         #     vms_build_choice_option_default: ''
@@ -132,8 +132,8 @@
         #     ft_commit_choice_option_default: ''
         #     rct_commit_choice_default: FT_STABLE_PUSH
         #     rct_commit_choice_option_default: ''
-        #     default_platforms: bpi
-        #     default_customizations: default
+        #     allowed_platforms: bpi
+        #     allowed_customizations: default
         # - nightly:
         #     vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
         #     vms_build_choice_option_default: ''
@@ -141,5 +141,5 @@
         #     ft_commit_choice_option_default: ''
         #     rct_commit_choice_default: FT_STABLE_PUSH
         #     rct_commit_choice_option_default: ''
-        #     default_platforms: bpi
-        #     default_customizations: default
+        #     allowed_platforms: bpi
+        #     allowed_customizations: default

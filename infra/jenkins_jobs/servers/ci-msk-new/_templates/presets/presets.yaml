@@ -53,12 +53,11 @@
     #     - [ custom,  "Custom - feature testing" ]
     #     - [ release, "Release - builds intended to be published" ]
     #     default: '{pipeline}'
-    # TODO: Separate allowed_choices and default on project level
     - p_PLATFORMS:
-        allowed_choices: !j2: '{{ default_platforms | default("") }}'
+        allowed_choices: !j2: '{{ allowed_platforms | default("") }}'
         default: !j2: '{{ default_platforms | default("") }}'
     - p_CUSTOMIZATIONS:
-        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        allowed_choices: !j2: '{{ allowed_customizations | default("") }}'
         default: !j2: '{{ default_customizations | default("") }}'
 
     - p_CLOUD_GROUP:
@@ -214,10 +213,10 @@
         default: '{vms_build_choice_default}'
         option_default: '{vms_build_choice_option_default}'
     - p_PLATFORMS:
-        allowed_choices: !j2: '{{ default_platforms | default("") }}'
+        allowed_choices: !j2: '{{ allowed_platforms | default("") }}'
         default: !j2: '{{ default_platforms | default("") }}'
     - p_CUSTOMIZATIONS:
-        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        allowed_choices: !j2: '{{ allowed_customizations | default("") }}'
         default: !j2: '{{ default_customizations | default("") }}'
 
     - p_CLOUD_GROUP:
@@ -305,10 +304,10 @@
         default: '{vms_build_choice_default}'
         option_default: '{vms_build_choice_option_default}'
     - p_PLATFORMS(hidden):
-        allowed_choices: !j2: '{{ default_platforms | default("") }}'
+        allowed_choices: !j2: '{{ allowed_platforms | default("") }}'
         default: !j2: '{{ default_platforms | default("") }}'
     - p_CUSTOMIZATIONS(hidden):
-        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        allowed_choices: !j2: '{{ allowed_customizations | default("") }}'
         default: !j2: '{{ default_customizations | default("") }}'
 
     - p_CLOUD_GROUP(hidden):

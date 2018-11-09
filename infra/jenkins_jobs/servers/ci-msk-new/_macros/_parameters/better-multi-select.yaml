@@ -21,6 +21,6 @@
         type: 'multi-select'
         value: !include-jinja2: './_includes/choices-to-values.j2'
         value-description: !include-jinja2: './_includes/choices-to-value-descriptions.j2'
-        default-value: !j2: '{{ default | default("") }}'
+        default-value: !include-jinja2: './_includes/choices-to-default-values.j2'
         description: '{description}'
         visible-items: !j2: '{{ visible_items | default(10) }}'

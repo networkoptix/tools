@@ -37,8 +37,8 @@
             auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'mobile_release'
-            default_platforms: android-arm,ios
-            default_customizations: default
+            allowed_platforms: android-arm,ios
+            allowed_customizations: default
 
             ut_enabled: 'ON'
 
