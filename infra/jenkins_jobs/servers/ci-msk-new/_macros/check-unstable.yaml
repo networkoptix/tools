@@ -1,5 +1,0 @@
-- publisher:
-    name: set-unstable-if-marked
-    publishers:
-    - groovy-postbuild:
-        script: !include-raw: ./_scripts/set_unstable_if_marked.groovy

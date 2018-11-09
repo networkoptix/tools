@@ -1,6 +1,0 @@
-- builder:
-    name: decorators/set-custom-build-description
-    builders:
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
