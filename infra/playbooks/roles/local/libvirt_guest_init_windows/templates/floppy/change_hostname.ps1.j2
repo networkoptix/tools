@@ -1,5 +1,0 @@
-# Change windows hostname
-if ($env:computername -ne "{{ libvirt_guest__hostname }}") {
-  Rename-Computer -NewName "{{ libvirt_guest__hostname }}" -Restart -Force
-  Restart-Computer -Force
-}

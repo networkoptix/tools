@@ -1,5 +1,0 @@
-vagrant_version: 1.9.1
-vagrant_user: jenkins
-vagrant_registry_url: https://vagrantcloud.com
-vagrant_boxes:
-- ubuntu/trusty64

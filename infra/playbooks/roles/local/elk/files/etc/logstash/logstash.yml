@@ -1,4 +1,0 @@
-path.logs: /var/log/logstash
-path.data: /var/lib/logstash
-xpack.monitoring.enabled: true
-

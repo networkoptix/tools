@@ -1,5 +1,0 @@
-syntax: glob
-
-*.retry
-.venv/
-secrets.yml

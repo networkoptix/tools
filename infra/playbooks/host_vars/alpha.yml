@@ -1,3 +1,0 @@
-# will build win2018base image locally
-# TODO: don't build on every host, build once and store on NAS
-build_win2018_server: true

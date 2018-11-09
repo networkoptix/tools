@@ -1,3 +1,0 @@
-ansible_ssh_user: jenkins
-ansible_pipelining: False
-ansible_ssh_pipelining: False
