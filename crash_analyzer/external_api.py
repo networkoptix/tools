@@ -66,7 +66,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     """
     try:
         full_list = api(**options).list_all(extension=extension)
-    except (CrashServerError, json.decoder.JSONDecodeError) as error:
+    except (CrashServerError, json.decoder.JSONDecodeError, IOError, OSError) as error:
         logger.warning(utils.format_error(error))
         return []
 
@@ -94,8 +94,8 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     for name, result in zip(to_download, utils.run_concurrent(
             _fetch_crash, to_download, directory=directory, thread_count=thread_count,
             api=api, max_size=max_size, **options)):
-        if isinstance(result, CrashServerError):
-            logger.debug(utils.format_error(result))
+        if isinstance(result, (CrashServerError, IOError, OSError)):
+            logger.warning(utils.format_error(result))
         elif isinstance(result, Exception):
             logger.error(utils.format_error(result))
         else:
@@ -171,7 +171,7 @@ class Jira:
         try:
             issue = self._jira.issue(key)
         except jira.exceptions.JIRAError as error:
-            logger.debug(utils.format_error(error))
+            logger.warning(utils.format_error(error))
             raise JiraError('Unable to update issue {}: {}'.format(key, error.text))
 
         fix_build = issue.fields.customfield_11120

@@ -3,7 +3,11 @@
 import argparse
 import logging
 import time
+import timeit
+from datetime import timedelta
 from typing import Tuple, List
+
+from pytimeparse.timeparse import timeparse
 
 import crash_info
 import external_api
@@ -23,6 +27,7 @@ class Options:
                  reports_size_limit: str = '10G',
                  dump_tool_size_limit: str = '10G',
                  cdb_cache_size_limit: str = '10G',
+                 minimal_upload_interval: str = '1d',
                  **extra):
         self.directory = utils.Directory(directory)
         self.records_file = self.directory.file('records.json')
@@ -37,6 +42,7 @@ class Options:
         self.reports_each_run = 1000
         self.stand_by_sleep_s = 60
         self.keep_uploaded_reports = True
+        self.minimal_upload_interval = timeparse(minimal_upload_interval)
         for key, value in extra.items():
             assert isinstance(value, type(getattr(self, key)))
             setattr(self, key, value)
@@ -63,29 +69,30 @@ class Monitor:
             logger.warning('Enable debug exceptions')
 
         logger.info('Starting service...')
+        last_upload_time = timeit.default_timer()
         while True:
             try:
-                try:
-                    self.analyze()
-                    self.upload()
-                    while not self.fetch():
-                        time.sleep(self._options.stand_by_sleep_s)
+                upload_interval = timeit.default_timer() - last_upload_time
+                if upload_interval > self._options.minimal_upload_interval:
+                    self._log_critical_error('No JIRA uploads within last {}'.format(
+                        timedelta(seconds=(upload_interval))))
 
-                except Exception as error:
-                    error_message = utils.format_error(error, include_stack=True)
-                    try:
-                        logger.critical(error_message)
-                    except Exception as log_error:
-                        print(utils.format_error(log_error, include_stack=True))
-                        print(error_message)
-                        
+                self.analyze()
+                if self.upload():
+                    last_upload_time = timeit.default_timer()
+                while not self.fetch():
                     time.sleep(self._options.stand_by_sleep_s)
-                    if debug_exceptions:
-                        raise
 
             except (KeyboardInterrupt, utils.KeyboardInterruptError):
                 logger.info('Service has stopped')
                 return
+
+            except Exception as error:
+                if debug_exceptions:
+                    raise
+
+                self._log_critical_error(utils.format_error(error, include_stack=True))
+                time.sleep(self._options.stand_by_sleep_s)
 
     def cleanup_jira_issues(self):
         try:
@@ -203,11 +210,16 @@ class Monitor:
                     crashes_to_push.append((data['issue'], data['reports']))
 
         logger.info('Create or update {} JIRA issue(s) with new report(s)'.format(len(crashes_to_push)))
-        for result in utils.run_concurrent(self._jira_sync, crashes_to_push,
-                                           directory=self._options.reports_directory, **self._upload):
-            if isinstance(result, Exception):
+        uploads_count = 0
+        for result in utils.run_concurrent(
+                self._jira_sync, crashes_to_push,
+                directory=self._options.reports_directory, **self._upload):
+            if isinstance(result, external_api.JiraError):
+                logger.warning(utils.format_error(result))
+            elif isinstance(result, Exception):
                 logger.error(utils.format_error(result))
             else:
+                uploads_count += 1
                 issue, reports = result
                 logger.debug('JIRA issue {} updated with {} new report(s)'.format(issue, len(reports)))
                 for r in reports:
@@ -217,6 +229,7 @@ class Monitor:
 
         if crashes_to_push:
             self.flush_records()
+        return uploads_count
 
     @staticmethod
     def _jira_sync(crash_tuple: Tuple[str, List[crash_info.Report]], directory: utils.Directory,
@@ -259,6 +272,15 @@ class Monitor:
             cls._cleanup_cache(directory, size_limit, lambda x: False, is_forced_on_failure=False)
         else:
             logger.error('Cleanup failed for ' + directory_message())
+
+    @staticmethod
+    def _log_critical_error(message: str):
+        try:
+            logger.critical(message)
+
+        except Exception as log_error:
+            print(utils.format_error(log_error, include_stack=True))
+            print(message)
 
 
 def main():

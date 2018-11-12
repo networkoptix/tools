@@ -343,7 +343,8 @@ def analyze_reports_concurrent(reports: List[Report], problem_builds: list = [],
     known_problem_reports = ProblemReports(problem_builds)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
-        if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError)):
+        if isinstance(result, (
+                Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError, OSError)):
             if known_problem_reports.is_known(report):
                 logger.debug(utils.format_error(result))
             else:
