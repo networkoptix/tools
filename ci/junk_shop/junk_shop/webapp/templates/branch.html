@@ -13,7 +13,11 @@
 
 {% block contents %}
 
-  {{ common_macros.breadcrumbs([('Projects',  url_for('project_list'))]) }}
+  {{
+    common_macros.breadcrumbs([
+      ('Projects',  url_for('project_list')),
+      (project_name, url_for('project', project_name=project_name)),
+  ]) }}
 
   <h2>{{ self.title() }}</h2>
   <hr>
