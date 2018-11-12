@@ -238,7 +238,8 @@ class BuildInfoLoader(object):
                 run.root_run is root_run and
                 root_run.build is self.build and
                 run.test.is_leaf and
-                (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
+                (run.outcome == 'failed' or
+                 run.prev_outcome == 'failed')).order_by(desc(1)):
             if not self._is_run_wanted(root_run):
                 continue
             stage = self._produce_stage(root_run, TestsStage)
@@ -261,7 +262,7 @@ class BuildInfoLoader(object):
                 not exists(child for child in root_run.children if
                                child.path.startswith(run.path) and
                                child is not run and
-                               child.outcome == 'failed')).order_by(1):
+                               child.outcome == 'failed')).order_by(desc(1)):
             if not self._is_run_wanted(root_run):
                 continue
             stage = self._produce_stage(root_run, TestsStage)
@@ -280,7 +281,7 @@ class BuildInfoLoader(object):
                 not exists(child for child in run.children if
                                child.path.startswith(run.path) and
                                child is not run and
-                               child.outcome == 'failed')).order_by(1):
+                               child.outcome == 'failed')).order_by(desc(1)):
             if not self._is_run_wanted(run):
                 continue
             stage = self._produce_stage(run, TestsStage)

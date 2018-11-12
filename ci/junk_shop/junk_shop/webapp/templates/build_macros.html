@@ -48,6 +48,7 @@
               Build errors
             </a>
           </h3>
+          {{ run_info_block(platform.build_run) }}
           {% if platform.error_list %}
             <div class="run-errors">
               {% for error in platform.error_list %}
@@ -68,6 +69,7 @@
               Build succeeded
             </a>
           </h3>
+          {{ run_info_block(platform.build_run) }}
         </div>
       {% endif %}
     {% endif %}
@@ -77,7 +79,7 @@
 {% endmacro %}
 
 {% macro platform_stage_list(stage_list) %}
-{% for stage in stage_list|sort %}
+{% for stage in stage_list|sort(reverse=True) %}
       <div class="build-block block">
         <h3>
           <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
