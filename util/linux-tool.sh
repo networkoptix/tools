@@ -10,6 +10,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
+: ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$RDEP_PACKAGES_DIR"}
 : ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.1"}
@@ -87,6 +88,7 @@ Here <command> can be one of the following:
  cmake [gen-args] # Perform cmake generation, then build via "cmake --build".
  distrib # Build distribution.
  test-distrib [checksum] [no-build] orig/archives/dir [cmake-gen-args] # Test if built matches orig.
+ bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
 
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
@@ -678,13 +680,13 @@ do_kit() # "$@"
 
 log_build_vars()
 {
-    local MESSAGE=""
-    [[ $TARGET != windows ]] && MESSAGE+="TARGET=$TARGET "
-    MESSAGE+="CONFIG=$CONFIG "
-    [[ $DISTRIB = 1 ]] && MESSAGE+="DISTRIB=$DISTRIB "
-    [[ ! -z $CUSTOMIZATION ]] && MESSAGE+="CUSTOMIZATION=$CUSTOMIZATION "
+    local MESSAGE=()
+    [[ $TARGET != windows ]] && MESSAGE+=( "TARGET=$TARGET" )
+    MESSAGE+=( "CONFIG=$CONFIG" )
+    [[ $DISTRIB = 1 ]] && MESSAGE+=( "DISTRIB=$DISTRIB" )
+    [[ ! -z $CUSTOMIZATION ]] && MESSAGE+=( "CUSTOMIZATION=$CUSTOMIZATION" )
 
-    nx_log_command "$MESSAGE"
+    nx_log_command "${MESSAGE[@]}"
 }
 
 do_cmake() # "$@"
@@ -1133,6 +1135,32 @@ do_list() # [checksum] dir|archive.tar.gz [listing.txt]
     fi
 }
 
+do_bak() # [target-dir]
+{
+    if (($# >= 1))
+    then
+        local -r TARGET_DIR="$1"
+    else
+        local -r TARGET_DIR=$(basename "$VMS_DIR")
+    fi
+    
+    local -r DIR="$BACKUP_DIR/$TARGET_DIR"
+    if [ -e "$DIR" ]
+    then
+        local OLD_DIR="${DIR}_OLD"
+        while [ -e "$OLD_DIR" ]
+        do
+            OLD_DIR+="_OLD"
+        done
+        nx_echo "WARNING: Dir already exists; moved to $OLD_DIR"
+        mv "$DIR" "$OLD_DIR" || return $?
+    fi
+    
+    mkdir "$DIR"
+    cp -r "$VMS_DIR"/* "$DIR" || return $?
+    echo "Backed up to $DIR"
+}
+
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.
 # [out] REPO_TO_BRANCH: map<repo_dir, branch> Names of current branches.
 # [out] REPO_TO_EXTRA: map<repo_dir, extra_info_if_any> Extra info to be printed to the user.
@@ -1339,7 +1367,7 @@ main()
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
         apidoc|kit|meta|start-s|start-c|run-ut|testcamera| \
-        share|gen|cd|build|cmake|distrib|test-distrib| \
+        share|gen|cd|build|cmake|distrib|test-distrib|bak| \
         print-dirs|rsync)
             setup_vars
             ;;
@@ -1504,6 +1532,9 @@ main()
         test-distrib)
             log_build_vars
             do_test_distrib "$@"
+            ;;
+        bak)
+            do_bak "$@"
             ;;
         list)
             do_list "$@"
