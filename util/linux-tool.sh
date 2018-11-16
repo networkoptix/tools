@@ -70,7 +70,6 @@ Here <command> can be one of the following:
  meta # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
- go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
  rsync # Rsync current vms source dir to vega.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
@@ -1403,9 +1402,6 @@ main()
         #..........................................................................................
         go)
             nx_go "$@"
-            ;;
-        go-verbose)
-            nx_go_verbose "$@"
             ;;
         rsync)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
