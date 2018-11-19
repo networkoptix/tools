@@ -70,6 +70,7 @@ Here <command> can be one of the following:
  meta # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
+ p [args] # Execute linux-tool at vega via ssh, changing dir to match the current dir.
  rsync # Rsync current vms source dir to vega.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
@@ -1395,13 +1396,23 @@ main()
             ;;
         meta)
             nx_verbose rm -rf "$BUILD_DIR/distrib"/*analytics_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/nx_analytics_sdk"
+            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_analytics_sdk"
             DISTRIB=1 do_gen "$@"
             do_build --target nx_analytics_sdk
             ;;
         #..........................................................................................
         go)
             nx_go "$@"
+            ;;
+        p)
+            local -r CURRENT_DIR=$(pwd)
+            if [[ $CURRENT_DIR/ != $HOME/* ]]
+            then
+                nx_fail "Current dir is not inside the home dir."
+            fi
+            local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"}
+            local -r VEGA_LINUX_TOOL="$VEGA_DEVELOP_DIR/devtools/util/linux-tool.sh"
+            nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" "[&&]" "$VEGA_LINUX_TOOL" "$@"
             ;;
         rsync)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
