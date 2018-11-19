@@ -8,6 +8,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty on Linux, VMS_DIR name is analyzed.
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
+: ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distributions.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -67,7 +68,7 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
 
- meta # Rebuild nx_analytics_sdk.
+ sdk # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
  p [args] # Execute linux-tool at vega via ssh, changing dir to match the current dir.
@@ -326,8 +327,6 @@ do_share() # target_path [branch]
 
 do_gen() # [cache] "$@"
 {
-    nx_cd "$VMS_DIR"
-
     case "$CONFIG" in
         Release) local -r CONFIG_ARG="-DCMAKE_BUILD_TYPE=$CONFIG";;
         Debug) local -r CONFIG_ARG="";;
@@ -352,9 +351,9 @@ do_gen() # [cache] "$@"
             fi
         fi
     fi
-    mkdir -p "$BUILD_DIR"
+    mkdir -p "$BUILD_DIR" || return $?
 
-    nx_cd "$BUILD_DIR"
+    nx_cd "$BUILD_DIR" || return $?
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
@@ -371,9 +370,17 @@ do_gen() # [cache] "$@"
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
-    local DISTRIB_ARG=""
-    [[ $DISTRIB = 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
-    [[ $TARGET = windows ]] && DISTRIB_ARG+=" -DwithMiniLauncher=ON"
+    local DISTRIB_ARG=()
+    if [[ $DISTRIB = 1 ]]
+    then
+        DISTRIB_ARG=( "-DwithDistributions=ON" )
+    else
+        if [[ $SDK = 1 ]]
+        then
+            DISTRIB_ARG=( "-DwithAnalyticsSdk=ON" )
+        fi
+    fi
+    [[ $TARGET = windows ]] && DISTRIB_ARG+=( "-DwithMiniLauncher=ON" )
 
     local DEV_ARG=""
     [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
@@ -381,7 +388,7 @@ do_gen() # [cache] "$@"
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
-        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG $DEV_ARG "$@"
+        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG "${DISTRIB_ARG[@]}" $DEV_ARG "$@"
 }
 
 do_build()
@@ -1366,7 +1373,7 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|meta|start-s|start-c|run-ut|testcamera| \
+        apidoc|kit|sdk|start-s|start-c|run-ut|testcamera| \
         share|gen|cd|build|cmake|distrib|test-distrib|bak| \
         print-dirs|rsync)
             setup_vars
@@ -1394,10 +1401,10 @@ main()
         kit)
             do_kit "$@"
             ;;
-        meta)
+        sdk)
             nx_verbose rm -rf "$BUILD_DIR/distrib"/*analytics_sdk*.zip
             nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_analytics_sdk"
-            DISTRIB=1 do_gen "$@"
+            SDK=1 do_gen "$@"
             do_build --target nx_analytics_sdk
             ;;
         #..........................................................................................
