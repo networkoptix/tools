@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import subprocess
 import tempfile
 import yaml
 
@@ -99,7 +100,12 @@ async def sign_handler(request):
             target_file=target_file_name)
         content = open(target_file_name, 'rb')
         return web.Response(body=content)
+    except FileNotFoundError as e:
+        return web.Response(status=418, text=str(e))
+    except subprocess.CalledProcessError as e:
+        return web.Response(status=418, text="{}\n{}".format(e, e.output))
     except Exception as e:
+        print(repr(e))
         return web.Response(status=418, text=str(e))
 
 
