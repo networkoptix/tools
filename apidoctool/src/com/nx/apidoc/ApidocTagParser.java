@@ -275,7 +275,6 @@ public final class ApidocTagParser
         return values[0];
     }
 
-
     public static List<String> getPrecedingComment(SourceCode sourceCode, int startLine)
         throws Error
     {
