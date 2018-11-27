@@ -364,9 +364,15 @@ nx_restore_cursor_pos()
 
 nx_absolute_path() # path
 {
-    # readlink -f does not work in MacOS, so an alternative impl is needed.
-    #readlink -f -- "$1"
-    (cd "$(dirname "$1")" && echo "$(pwd -P)/$(basename "$1")")
+    local -r DIR="$1"
+    
+    # "readlink -f" does not work in MacOS, hence an alternative impl via "pwd -P".
+    if [ -d "$DIR" ]
+    then
+        (cd "$DIR" && pwd -P)
+    else
+        (cd "$(dirname "$DIR")" && echo "$(pwd -P)/$(basename "$DIR")")
+    fi
 }
 
 # Print file extension(s) without the trailing period, or nothing if there is no extension.

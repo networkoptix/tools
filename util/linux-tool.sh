@@ -71,8 +71,8 @@ Here <command> can be one of the following:
  sdk # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
- p [args] # Execute linux-tool at vega via ssh, changing dir to match the current dir.
- rsync # Rsync current vms source dir to vega.
+ go-cd [command args] # Execute a command at vega via ssh, changing dir to match the current dir.
+ rsync [command] # Rsync current vms source dir to vega, run command in the respective current dir.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
@@ -97,6 +97,7 @@ Here <command> can be one of the following:
  repos # List all hg repos in DEVELOP_DIR with their branches.
  mount-repo win-repo [mnt-point] # Mount Windows repo via "mount --bind" to mnt-point.
  print-dirs # Print VMS_DIR and BUILD_DIR for the target, on separate lines.
+ print-vars # Print the names and values of all basic variables used in this script.
  tunnel ip1 [ip2]... # Create two-way ssh tunnel to Burbank for the specified Burbank IP addresses.
  tunnel-s ip1 [port]... # Create ssh tunnel to Burbank for the specified port (default is 7001).
 EOF
@@ -135,7 +136,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         fi
     fi
 
-    # If the target is already defined, use its value.
+    # If TARGET is already defined, use its value.
 
     local DEFAULT_CUSTOMIZATION=""
 
@@ -153,6 +154,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         meta) DEFAULT_CUSTOMIZATION="metavms";;
     esac
 
+    # If CUSTOMIZATION is already defined, use its value; otherwise, use the computed value.
     [[ -z $CUSTOMIZATION ]] && CUSTOMIZATION="$DEFAULT_CUSTOMIZATION"
 
     # Assertion: target "windows" is supported only in cygwin.
@@ -207,9 +209,9 @@ get_BUILD_DIR()
 canonicalize_VMS_DIR()
 {
     # NOTE: In Cygwin, path in CMakeCache.txt is like "C:/develop/...".
-    local -r VMS_DIR_ABSOLUTE=$(nx_absolute_path "$(nx_unix_path "$VMS_DIR")")
+    local -r UNIX_VMS_DIR=$(nx_unix_path "$VMS_DIR")
+    local -r VMS_DIR_ABSOLUTE=$(nx_absolute_path "$UNIX_VMS_DIR")
     local -r DEVELOP_DIR_ABSOLUTE=$(nx_absolute_path "$DEVELOP_DIR")
-
     if [[ $VMS_DIR_ABSOLUTE =~ ^$DEVELOP_DIR_ABSOLUTE ]]
     then
         VMS_DIR="$DEVELOP_DIR${VMS_DIR_ABSOLUTE#$DEVELOP_DIR_ABSOLUTE}"
@@ -239,10 +241,12 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 
 # Determine value of common variables, including current repository directory: scan from the
 # current dir upwards to find root repository dir (e.g. develop/nx_vms).
-# [in][out] VMS_DIR
+# [in,out] CUSTOMIZATION
+# [in,out] VMS_DIR
 # [in] DEVELOP_DIR
-# [out] TARGET
 # [out] BUILD_DIR
+# [out] TARGET
+# [out] QT_DIR
 setup_vars()
 {
     local -r HELP="Run this script from any dir inside nx_vms repo dir or its cmake build dir."
@@ -333,7 +337,7 @@ do_gen() # [cache] "$@"
     esac
 
     local -i CACHE_ARG=0
-    if [[ $# -ge 1 && $1 = "cache" ]]
+    if (($# >= 1)) && [[ $1 = "cache" ]]
     then
         shift
         CACHE_ARG=1
@@ -1118,10 +1122,10 @@ do_list() # [checksum] dir|archive.tar.gz [listing.txt]
         local -r -i CHECKSUM=0
     fi
 
-    [[ $# == 0 ]] && nx_fail "Specify a directory or a .tar.gz to make the listing for."
+    (($# == 0)) && nx_fail "Specify a directory or a .tar.gz to make the listing for."
     local -r DIR_OR_FILE=$1 && shift
 
-    if [[ $# != 0 ]]
+    if (($# != 0 ))
     then
         local -r LISTING=$1 && shift
     else
@@ -1365,6 +1369,14 @@ doMountRepo() # win-repo [mnt-point]
     ls --color=always "$MNT"
 }
 
+doGoCd() # "$@"
+{
+    local -r CURRENT_DIR=$(pwd)
+    [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
+    local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
+    nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -1375,7 +1387,7 @@ main()
     case "$COMMAND" in
         apidoc|kit|sdk|start-s|start-c|run-ut|testcamera| \
         share|gen|cd|build|cmake|distrib|test-distrib|bak| \
-        print-dirs|rsync)
+        print-dirs|print-vars|rsync)
             setup_vars
             ;;
     esac
@@ -1411,22 +1423,17 @@ main()
         go)
             nx_go "$@"
             ;;
-        p)
-            local -r CURRENT_DIR=$(pwd)
-            if [[ $CURRENT_DIR/ != $HOME/* ]]
-            then
-                nx_fail "Current dir is not inside the home dir."
-            fi
-            local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"}
-            local -r VEGA_LINUX_TOOL="$VEGA_DEVELOP_DIR/devtools/util/linux-tool.sh"
-            nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" "[&&]" "$VEGA_LINUX_TOOL" "$@"
+        go-cd)
+            doGoCd "$@"
             ;;
         rsync)
-            # ATTENTION: Trailing slashes are essential for rsync to work properly.
             local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
-            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" "$VMS_DIR/" "$VEGA_DIR"
+            # ATTENTION: Trailing slashes are essential for rsync to work properly.
+            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
+                "$VMS_DIR/" "$VEGA_DIR"
+            (($# > 0)) && doGoCd "$@"
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
@@ -1568,6 +1575,18 @@ main()
             echo "$VMS_DIR"
             echo "$BUILD_DIR"
             ;;
+        print-vars)
+            nx_echo_var VMS_DIR
+            nx_echo_var BUILD_DIR
+            nx_echo_var TARGET
+            nx_echo_var CUSTOMIZATION
+            nx_echo_var CONFIG
+            nx_echo_var DISTRIB
+            nx_echo_var SDK
+            nx_echo_var DEV
+            nx_echo_var QT_DIR
+            nx_echo_var DEVELOP_DIR
+            ;;
         tunnel) # ip1 [ip2]...
             local SELF_IP
             nx_get_SELF_IP "$TUNNEL_SELF_IP_SUBNET_PREFIX"
@@ -1607,12 +1626,12 @@ main()
             nx_pop_title
             ;;
         tunnel-s) # ip1 [port]
-            if [[ $# != 1 && $# != 2 ]]
+            if (($# != 1 && $# != 2))
             then
                 nx_fail "Invalid command args."
             fi
             local -r IP="$1"
-            if [[ $# = 1 ]]
+            if (($# == 1))
             then
                 local -r -i FWD_PORT="$TUNNEL_S_DEFAULT_PORT"
             else
