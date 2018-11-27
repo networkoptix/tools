@@ -25,6 +25,7 @@ exceptions = [
     'system presets',
     'system performance',
     'operating system',
+    'no internet access',
     'a. u. b.',
     '<b>']
 
