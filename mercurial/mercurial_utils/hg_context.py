@@ -77,9 +77,27 @@ class HgContext:
     def push(self, rev=None, force=False, new_branch=False):
         command = ("push",)
         if rev:
-            command += ("--rev", rev,)
+            command += ("--rev", rev)
         if force:
             command += ("--force",)
         if new_branch:
             command += ("--new-branch",)
+        self.execute_interactive(*command)
+
+    def pull(self, rev=None, branch=None, update=False, force=False):
+        command = ("pull",)
+        if rev:
+            command += ("--rev", rev)
+        if branch:
+            command += ("--branch", branch)
+        if force:
+            command += ("--update",)
+        if force:
+            command += ("--force",)
+        self.execute_interactive(*command)
+
+    def merge(self, rev=None):
+        command = ("merge",)
+        if rev:
+            command += ("--rev", rev,)
         self.execute_interactive(*command)

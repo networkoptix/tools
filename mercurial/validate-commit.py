@@ -11,6 +11,7 @@ import time
 from builtins import input
 from distutils.util import strtobool
 from mercurial_utils import HgContext
+from merge_commit import merge_commit
 
 BUILD_KEY = 'Auto-validate:'
 BUILD_PLATFORMS = ['bpi', 'linux-x64', 'mac', 'windows-x64']
@@ -158,6 +159,7 @@ def wait_until_rev_checked(rev):
         junkshop_status = check_junkshop_status(rev)
         logging.debug("Current status is {}".format(junkshop_status))
     print("Job finished, status: {}".format(junkshop_status))
+    return junkshop_status
 
 
 def get_build_url(server, id):
@@ -169,7 +171,17 @@ def get_build_url(server, id):
         return None
 
 
-def validate_commit(rev=None):
+def merge_to_target(rev, target):
+    hg = HgContext()
+    hg.update(target)
+    hg.pull(branch=target, update=True)
+    hg.merge(rev)
+    merge_commit()
+    new_rev = hg.execute("id", "-i")
+    hg.push(rev=new_rev)
+
+
+def validate_commit(rev=None, target=None):
     hg = HgContext()
     if not rev:
         rev = hg.execute("id", "-i")
@@ -187,12 +199,14 @@ def validate_commit(rev=None):
         elif not jenkins_status.running:
             confirm("Build on jenkins is aborted. Launch new build?")
             start_jenkins_build(rev)
-    wait_until_rev_checked(rev)
-    print("Success!")
+    junkshop_status = wait_until_rev_checked(rev)
+    if target and junkshop_status.build_ok and junkshop_status.tests_ok:
+        merge_to_target(rev, target)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--target', help="Target branch")
     parser.add_argument('-r', '--rev', help="Revision to check")
     parser.add_argument('-v', '--verbose', help="Verbose output", action='store_true')
     args = parser.parse_args()
@@ -200,4 +214,4 @@ if __name__ == "__main__":
     log_level = logging.DEBUG if args.verbose else logging.WARNING
     logging.basicConfig(level=log_level)
 
-    validate_commit(args.rev)
+    validate_commit(args.rev, args.target)
