@@ -3,6 +3,7 @@ subinclude:rdep/.hgignore
 subinclude:infra/playbooks/.hgignore
 subinclude:infra/jenkins_jobs/.hgignore
 subinclude:api_examples/.hgignore
+subinclude:sign_over_http/.hgignore
 
 syntax: glob
 *.pyc
