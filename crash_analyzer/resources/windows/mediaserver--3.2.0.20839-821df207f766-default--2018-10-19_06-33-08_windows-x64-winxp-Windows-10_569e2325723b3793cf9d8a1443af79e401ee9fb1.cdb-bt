@@ -1,0 +1,567 @@
+ExceptionAddress: 00007ffe9670b715 (nx_utils!abortHandler+0x0000000000000005)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000001
+   Parameter[1]: 0000000000000000
+Attempt to write to address 0000000000000000
+
+rax=00007ffe9670b710 rbx=0000000000000016 rcx=0000000000000016
+rdx=00007ffeaadf4a60 rsi=0000000000000000 rdi=00007ffe991b4901
+rip=00007ffe9670b715 rsp=00000021d70fdcf8 rbp=00000021d70fde59
+ r8=00007ffeaae63798  r9=00000021d70fdda0 r10=feaab071373d9527
+r11=00004a0eb73d9558 r12=0000000000000910 r13=0000000000000000
+r14=00007ffe9670b710 r15=00007ffeaae96750
+iopl=0         nv up ei pl zr na po nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010246
+nx_utils!abortHandler+0x5:
+00007ffe`9670b715 c704250000000007000000 mov dword ptr [0],7 ds:00000000`00000000=????????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+nx_utils!abortHandler
+ucrtbase
+nx_network!nx::network::cloud::kHttpRequestTimeout
+ucrtbase
+0x0
+ntdll
+
+
+   0  Id: 1654.1ea0 Suspend: 0 Teb: 00000021`d6608000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+mediaserver!QnVideoService::executeApplication
+mediaserver!QtServiceBasePrivate::start
+mediaserver!QtServiceBase::exec
+mediaserver!MediaServerProcess::main
+mediaserver!invoke_main
+mediaserver!__scrt_common_main_seh
+kernel32
+
+   1  Id: 1654.185c Suspend: 0 Teb: 00000021`d6610000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+ucrtbase
+0x0
+0x0
+0x0
+Qt5Core!QWaitCondition::~QWaitCondition
+
+   2  Id: 1654.231c Suspend: 0 Teb: 00000021`d6612000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+
+   3  Id: 1654.142c Suspend: 0 Teb: 00000021`d6616000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+0x0
+0x0
+0x0
+
+#  4  Id: 1654.570 Suspend: 0 Teb: 00000021`d6618000 Unfrozen
+Call Site
+ntdll
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   5  Id: 1654.1f78 Suspend: 0 Teb: 00000021`d661a000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+0x0
+0x0
+0x0
+
+   6  Id: 1654.1a58 Suspend: 0 Teb: 00000021`d661c000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   7  Id: 1654.1a48 Suspend: 0 Teb: 00000021`d661e000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   8  Id: 1654.164c Suspend: 0 Teb: 00000021`d6620000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+
+   9  Id: 1654.254 Suspend: 0 Teb: 00000021`d6622000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+ntdll
+0x0
+mediaserver!nx::mediaserver_core::recorder::RemoteArchiveWorkerPool::scheduleTaskGrabbing
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase
+0x0
+0x0
+0x0
+
+  10  Id: 1654.1a5c Suspend: 0 Teb: 00000021`d6624000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+mswsock
+0x0
+0x0
+0x0
+
+  11  Id: 1654.16c8 Suspend: 0 Teb: 00000021`d6626000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+0x0
+0x0
+0x0
+0x0
+mswsock
+0x0
+0x0
+
+  12  Id: 1654.2120 Suspend: 0 Teb: 00000021`d6628000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  13  Id: 1654.e94 Suspend: 0 Teb: 00000021`d662a000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  14  Id: 1654.1cc0 Suspend: 0 Teb: 00000021`d662c000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+nx_utils!std::_Default_allocate_traits::_Allocate
+nx_utils!std::_Allocate
+nx_utils!std::allocator<std::_Tree_node<std::pair<unsigned __int64 const ,__int64>,void *> >::allocate
+nx_utils!std::_Tree_comp_alloc<std::_Tmap_traits<unsigned __int64,__int64,std::less<unsigned __int64>,std::allocator<std::pair<unsigned __int64 const ,__int64> >,0> >::_Buynode0
+
+  15  Id: 1654.2ac Suspend: 0 Teb: 00000021`d662e000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QWaitCondition::~QWaitCondition
+
+  16  Id: 1654.1804 Suspend: 0 Teb: 00000021`d6630000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+nx_utils!std::_Default_allocate_traits::_Allocate
+nx_utils!std::_Allocate
+nx_utils!std::allocator<std::_Tree_node<std::pair<unsigned __int64 const ,__int64>,void *> >::allocate
+nx_utils!std::_Tree_comp_alloc<std::_Tmap_traits<unsigned __int64,__int64,std::less<unsigned __int64>,std::allocator<std::pair<unsigned __int64 const ,__int64> >,0> >::_Buynode0
+
+  17  Id: 1654.1f84 Suspend: 0 Teb: 00000021`d6632000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+ucrtbase
+0x0
+0x0
+0x0
+Qt5Core!QWaitCondition::~QWaitCondition
+
+  18  Id: 1654.1fb0 Suspend: 0 Teb: 00000021`d6634000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  19  Id: 1654.d48 Suspend: 0 Teb: 00000021`d6636000 Unfrozen
+Call Site
+ntdll
+winmm
+SharedUserData
+
+  20  Id: 1654.898 Suspend: 0 Teb: 00000021`d663e000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  21  Id: 1654.14d0 Suspend: 0 Teb: 00000021`d6640000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  22  Id: 1654.1640 Suspend: 0 Teb: 00000021`d6644000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+mediaserver!holder
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  23  Id: 1654.1430 Suspend: 0 Teb: 00000021`d6646000 Unfrozen
+Call Site
+ntdll
+mswsock
+
+  24  Id: 1654.7b4 Suspend: 0 Teb: 00000021`d664e000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+
+  25  Id: 1654.8e8 Suspend: 0 Teb: 00000021`d6650000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  26  Id: 1654.2140 Suspend: 0 Teb: 00000021`d6652000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  27  Id: 1654.1410 Suspend: 0 Teb: 00000021`d6654000 Unfrozen
+Call Site
+win32u
+user32
+0x0
+0x0
+
+  28  Id: 1654.308 Suspend: 0 Teb: 00000021`d6656000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  29  Id: 1654.1340 Suspend: 0 Teb: 00000021`d6658000 Unfrozen
+Call Site
+ntdll
+ntdll
+
+  30  Id: 1654.1ca8 Suspend: 0 Teb: 00000021`d665a000 Unfrozen
+Call Site
+ntdll
+ntdll
+0x0
+0x0
+
+  31  Id: 1654.2088 Suspend: 0 Teb: 00000021`d665e000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+Qt5Core!QElapsedTimer::elapsed
+
+  32  Id: 1654.1528 Suspend: 0 Teb: 00000021`d6662000 Unfrozen
+Call Site
+ntdll
+mswsock
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  33  Id: 1654.237c Suspend: 0 Teb: 00000021`d667e000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QWaitCondition::~QWaitCondition
+
+  34  Id: 1654.b94 Suspend: 0 Teb: 00000021`d6680000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+
+  35  Id: 1654.7ac Suspend: 0 Teb: 00000021`d66bc000 Unfrozen
+Call Site
+ntdll
+ntdll
+0x0
+0x0
+0x0
+0x0
+
+  36  Id: 1654.13cc Suspend: 0 Teb: 00000021`d66c0000 Unfrozen
+Call Site
+ntdll
+ntdll
+0x0
+0x0
+0x0
+0x0
+
+  37  Id: 1654.18a4 Suspend: 0 Teb: 00000021`d66d0000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+ws2_32
+0x0
+0x0
+0x0
+0x0
+
+  38  Id: 1654.1728 Suspend: 0 Teb: 00000021`d66d4000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+ws2_32
+0x0
+0x0
+0x0
+0x0
+
+  39  Id: 1654.1610 Suspend: 0 Teb: 00000021`d66d8000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+
+  40  Id: 1654.f08 Suspend: 0 Teb: 00000021`d66da000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+ws2_32
+0x0
+0x0
+0x0
+0x0
+
+  41  Id: 1654.35c Suspend: 0 Teb: 00000021`d66dc000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  42  Id: 1654.214c Suspend: 0 Teb: 00000021`d66f2000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+ws2_32
+0x0
+0x0
+0x0
+0x0
+
+  43  Id: 1654.f28 Suspend: 0 Teb: 00000021`d66f4000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+ws2_32
+0x0
+0x0
+0x0
+0x0
+
+  44  Id: 1654.19f0 Suspend: 0 Teb: 00000021`d66fa000 Unfrozen
+Call Site
+win32u
+user32
+
+  45  Id: 1654.1918 Suspend: 0 Teb: 00000021`d6706000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+
+  46  Id: 1654.1794 Suspend: 0 Teb: 00000021`d6708000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+
+  47  Id: 1654.127c Suspend: 0 Teb: 00000021`d670a000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+
+  48  Id: 1654.21f0 Suspend: 0 Teb: 00000021`d6670000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+
+  49  Id: 1654.1b94 Suspend: 0 Teb: 00000021`d6672000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  50  Id: 1654.17e8 Suspend: 0 Teb: 00000021`d6674000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+
+  51  Id: 1654.fa0 Suspend: 0 Teb: 00000021`d6676000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+
+  52  Id: 1654.1a80 Suspend: 0 Teb: 00000021`d6678000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  53  Id: 1654.1274 Suspend: 0 Teb: 00000021`d667a000 Unfrozen
+Call Site
+ntdll
+KERNELBASE
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  54  Id: 1654.6e4 Suspend: 0 Teb: 00000021`d66b0000 Unfrozen
+Call Site
+ntdll
+ntdll
+
+  55  Id: 1654.1140 Suspend: 0 Teb: 00000021`d66e2000 Unfrozen
+Call Site
+ntdll
+ntdll
+
+  56  Id: 1654.226c Suspend: 0 Teb: 00000021`d6744000 Unfrozen
+Call Site
+ntdll
+ntdll
+0x0

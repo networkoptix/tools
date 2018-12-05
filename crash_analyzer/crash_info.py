@@ -42,6 +42,7 @@ CXX_OWN_MODULE_PREFIXES = [
     'xvbadecoder',  # < Legacy VMS server plugins.
 ]
 
+
 class Error(Exception):
     pass
 
@@ -308,6 +309,10 @@ def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
             # Keep only resolved symbols.
             module, *name = line.split(CXX_MODULE_SEPARATOR, 1)
             if not name:
+                if module in ['ntdll', 'KERNELBASE']:
+                    # This is very likely, that later stack frames resolution will be screwed up.
+                    raise AnalyzeError('Unresolved system module {!r} in stack from: {}'.format(
+                        module, report.name))
                 return None
 
             # Replace lambdas from different builds with the same token.
