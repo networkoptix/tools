@@ -10,7 +10,7 @@ import rdep_config
 OS_IS_WINDOWS = sys.platform.startswith("win32") or sys.platform.startswith("cygwin")
 REPOSITORY_PATH = os.getenv("RDEP_PACKAGES_DIR")
 if not REPOSITORY_PATH:
-    # TODO: This block is for backward compatibility. Remove it when CI is re-configured.
+    # TODO: This block is for backwards compatibility. Remove it when CI is re-configured.
     REPOSITORY_PATH = os.getenv("environment")
     if REPOSITORY_PATH:
         REPOSITORY_PATH = os.path.join(REPOSITORY_PATH, "packages")
@@ -57,8 +57,8 @@ def configure(print_summary = False):
     if print_summary:
         print("Rdep repository is ready.")
         print("  Path =", REPOSITORY_PATH)
-        print("  Sync URL =", SYNC_URL)
-        print("  Push URL =", PUSH_URL)
+        print("  Sync URL =", config.get_url())
+        print("  Push URL =", config.get_push_url())
         print("  Rsync =", rsync)
 
     return True
