@@ -20,6 +20,9 @@ JENKINS_URL = 'http://jenkins2.enk.me'
 JENKINS_USER = 'custom-build-trigger-script'
 JENKINS_PASSWORD = 'password-for-custom-build-trigger-script'
 JENKINS_JOB_NAME = 'custom.any.preset.full'
+JENKINS_CHECK_FREQUENCY_SECONDS = 5
+JENKINS_SEARCH_DEPTH = 20
+JUNKSHOP_CHECK_FREQUENCY_SECONDS = 60
 
 
 class JunkshopStatus:
@@ -118,7 +121,7 @@ def check_jenkins_status(rev):
     job_info = server.get_job_info(JENKINS_JOB_NAME)
 
     result = JenkinsStatus()
-    for build in job_info['builds']:
+    for build in job_info['builds'][:JENKINS_SEARCH_DEPTH]:
         build_number = build['number']
         build_info = server.get_build_info(JENKINS_JOB_NAME, build_number)
         description = build_info['description']
@@ -146,7 +149,7 @@ def start_jenkins_build(rev):
         id = server.build_job(JENKINS_JOB_NAME, build_parameters)
         url = get_build_url(server, id)
         while not url:
-            time.sleep(5)
+            time.sleep(JENKINS_CHECK_FREQUENCY_SECONDS)
             url = get_build_url(server, id)
         print(url)
     except jenkins.JenkinsException as e:
@@ -157,10 +160,9 @@ def wait_until_rev_checked(rev):
     print("Waiting for build to complete")
     junkshop_status = check_junkshop_status(rev)
     while not junkshop_status.completed:
-        time.sleep(5)
+        time.sleep(JUNKSHOP_CHECK_FREQUENCY_SECONDS)
         junkshop_status = check_junkshop_status(rev)
         logging.debug("Current status is {}".format(junkshop_status))
-    print("Job finished, status: {}".format(junkshop_status))
     return junkshop_status
 
 
@@ -202,7 +204,9 @@ def validate_commit(rev=None, target=None):
             confirm("Build on jenkins is finished with result '{}'. Launch new build?".format(
                 jenkins_status.result))
             start_jenkins_build(rev)
-    junkshop_status = wait_until_rev_checked(rev)
+    if not junkshop_status.completed:
+        junkshop_status = wait_until_rev_checked(rev)
+    print("Job finished, status: {}".format(junkshop_status))
     if target and junkshop_status.build_ok and junkshop_status.tests_ok:
         merge_to_target(rev, target)
 
