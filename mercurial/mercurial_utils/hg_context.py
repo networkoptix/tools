@@ -59,7 +59,7 @@ class HgContext:
             command += ("--clean",)
         self.execute_interactive(*command)
 
-    def branch(self, rev=".", *args):
+    def branch(self, rev="."):
         return self.log(rev=rev, template="{branch}")[0]
 
     def commit(self, message=None, edit=False, amend=False, user=None):

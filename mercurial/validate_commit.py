@@ -67,7 +67,9 @@ def ensure_revision_is_public(hg, rev):
 
 
 def make_build_id(rev):
-    return ' '.join([BUILD_KEY, rev])
+    hg = HgContext()
+    branch = hg.branch(rev)
+    return '{} {} [{}]'.format(BUILD_KEY, rev, branch)
 
 
 def check_junkshop_status(rev):
@@ -115,13 +117,13 @@ def check_junkshop_status(rev):
     return result
 
 
-def check_jenkins_status(rev):
+def check_jenkins_status(rev, depth=JENKINS_SEARCH_DEPTH):
     build_id = make_build_id(rev)
     server = jenkins.Jenkins(JENKINS_URL, username=JENKINS_USER, password=JENKINS_PASSWORD)
     job_info = server.get_job_info(JENKINS_JOB_NAME)
 
     result = JenkinsStatus()
-    for build in job_info['builds'][:JENKINS_SEARCH_DEPTH]:
+    for build in job_info['builds'][:depth]:
         build_number = build['number']
         build_info = server.get_build_info(JENKINS_JOB_NAME, build_number)
         description = build_info['description']
@@ -132,6 +134,21 @@ def check_jenkins_status(rev):
             result.result = build_info['result']
             return result
     return result
+
+
+def list_jenkins_builds(print_all=False, depth=JENKINS_SEARCH_DEPTH):
+    server = jenkins.Jenkins(JENKINS_URL, username=JENKINS_USER, password=JENKINS_PASSWORD)
+    job_info = server.get_job_info(JENKINS_JOB_NAME)
+    print("Running builds:")
+    for build in job_info['builds'][:depth]:
+        build_number = build['number']
+        build_info = server.get_build_info(JENKINS_JOB_NAME, build_number)
+        description = build_info['description'].split('\n')[:1]
+        is_running = build_info['building']
+        url = build_info['url']
+        if print_all or is_running:
+            print("Build {}: {}".format(build_number, description))
+            print(url)
 
 
 def start_jenkins_build(rev):
@@ -185,18 +202,22 @@ def merge_to_target(rev, target):
     hg.push(rev=new_rev)
 
 
-def validate_commit(rev=None, target=None):
+def validate_commit(rev=None, target=None, depth=None, force=False):
     hg = HgContext()
     if not rev:
         rev = hg.execute("id", "-i")
-    logging.debug("Validating revision {}".format(rev))
+    branch = hg.branch(rev)
+    print("Validating revision {} [{}]".format(rev, branch))
 
     ensure_revision_is_public(hg, rev)
+
+    if force:
+        start_jenkins_build(rev)
 
     junkshop_status = check_junkshop_status(rev)
     if not junkshop_status.present:
         print("Build was not found on junkshop, looking up on jenkins")
-        jenkins_status = check_jenkins_status(rev)
+        jenkins_status = check_jenkins_status(rev, depth)
         if not jenkins_status.present:
             confirm("Build was not found on jenkins. Launch new build?")
             start_jenkins_build(rev)
@@ -211,14 +232,55 @@ def validate_commit(rev=None, target=None):
         merge_to_target(rev, target)
 
 
+def validate_command(args):
+    validate_commit(args.rev, args.target, args.depth, args.force)
+
+
+def list_command(args):
+    list_jenkins_builds(args.all, args.depth)
+
+
+def cancel_command(args):
+    cancel_build(args.rev, args.id, args.depth)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--target', help="Target branch")
-    parser.add_argument('-r', '--rev', help="Revision to check")
+    parser.add_argument(
+        '-d',
+        '--depth',
+        help="Jenkins search depth",
+        type=int,
+        default=JENKINS_SEARCH_DEPTH)
     parser.add_argument('-v', '--verbose', help="Verbose output", action='store_true')
-    args = parser.parse_args()
 
+    subparsers = parser.add_subparsers(title="actions", dest='cmd')
+
+    parser_validate = subparsers.add_parser('validate', help='Validate given revision')
+    parser_validate.add_argument('-r', '--rev', help="Revision to check")
+    parser_validate.add_argument('-t', '--target', help="Target branch to merge if validated")
+    parser_validate.add_argument('-f', '--force', help="Force start build", action='store_true')
+    parser_validate.set_defaults(func=validate_command)
+
+    parser_list = subparsers.add_parser('list', help='List running builds')
+    parser_list.add_argument(
+        '-a',
+        '--all',
+        help="List all builds including completed",
+        action='store_true')
+    parser_list.set_defaults(func=list_command)
+
+    parser_cancel = subparsers.add_parser('cancel', help='Cancel running build')
+    cancel_target_group = parser_cancel.add_mutually_exclusive_group()
+    cancel_target_group.add_argument('-r', '--rev', help="Revision to cancel")
+    cancel_target_group.add_argument('-i', '--id', help="Build id", type=int)
+    parser_cancel.set_defaults(func=cancel_command)
+
+    args = parser.parse_args()
     log_level = logging.DEBUG if args.verbose else logging.WARNING
     logging.basicConfig(level=log_level)
 
-    validate_commit(args.rev, args.target)
+    if not args.cmd:
+        validate_commit(depth=args.depth)
+    else:
+        args.func(args)
