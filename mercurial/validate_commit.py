@@ -40,6 +40,7 @@ class JenkinsStatus:
     def __init__(self):
         self.present = False
         self.running = False
+        self.result = None
 
 
 def ask_question(question):
@@ -125,6 +126,7 @@ def check_jenkins_status(rev):
             print("Build was found on jenkins, see {}".format(build_info['url']))
             result.present = True
             result.running = build_info['building']
+            result.result = build_info['result']
             return result
     return result
 
@@ -197,7 +199,8 @@ def validate_commit(rev=None, target=None):
             confirm("Build was not found on jenkins. Launch new build?")
             start_jenkins_build(rev)
         elif not jenkins_status.running:
-            confirm("Build on jenkins is aborted. Launch new build?")
+            confirm("Build on jenkins is finished with result '{}'. Launch new build?".format(
+                jenkins_status.result))
             start_jenkins_build(rev)
     junkshop_status = wait_until_rev_checked(rev)
     if target and junkshop_status.build_ok and junkshop_status.tests_ok:
