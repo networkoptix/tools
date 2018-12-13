@@ -31,7 +31,7 @@ class JenkinsBuildStatus:
             self.runner)
 
     def __repr__(self):
-        return 'JenkinsBuildStatus ({})'.format(self.__str__)
+        return 'JenkinsBuildStatus ({})'.format(self)
 
 
 class JenkinsContext:
