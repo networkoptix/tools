@@ -127,6 +127,7 @@ def start_jenkins_build(rev):
     build_parameters = [
         ('BRANCH', 'validate_custom_build'),  # Actually that's only a junkshop id
         ('VMS_BUILD_CHOICE_OPTION', rev),
+        ('VMS_BUILD_CHOICE', 'VMS_NEW_BUILD_BY_COMMIT'),
         ('BUILD_DESCRIPTION', make_build_id(rev))
     ]
     for platform in BUILD_PLATFORMS:
