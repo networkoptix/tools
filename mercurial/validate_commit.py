@@ -139,7 +139,7 @@ def start_jenkins_build(rev):
 def wait_until_rev_checked(rev):
     print("Waiting for build to complete")
     junkshop_status = check_junkshop_status(rev)
-    while not junkshop_status.completed:
+    while not junkshop_status or not junkshop_status.completed:
         time.sleep(JUNKSHOP_CHECK_FREQUENCY_SECONDS)
         junkshop_status = check_junkshop_status(rev)
         logging.debug("Current status is {}".format(junkshop_status))
