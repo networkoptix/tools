@@ -238,9 +238,16 @@ class Monitor:
         issue, reports = crash_tuple
         if not issue:
             report = reports[0]  # < Any will do.
-            reason = crash_info.analyze_report(
-                report, directory, cache_directory=None)  # < Newer use dump tool.
-            issue = jira.create_issue(report, reason)
+            try:
+                reason = crash_info.analyze_report(
+                    report, directory, cache_directory=None)  # < Newer use dump tool.
+            except crash_info.AnalyzeError as error:
+                # This may happen when stack is considered to be useless after a logic change.
+                logger.warning(utils.format_error(error, include_stack=True))
+                logger.error('Skip creating issue for reports with useless stack')
+                return 'USELESS_STACK', reports
+            else:
+                issue = jira.create_issue(report, reason)
 
         jira.update_issue(issue, reports, directory=directory)
         return issue, reports
