@@ -13,10 +13,7 @@ ci/gdb-bt
 ci/links-gdb-bt
 *.pyo
 *.py~
-*.taskbot~
-boxes.rb
-networkoptix-mediaserver.deb
-.vagrant
+*\__pycache__\*
 sample.mkv
 *test-tmp.cfg
 *.*.*.*_*.*.log
