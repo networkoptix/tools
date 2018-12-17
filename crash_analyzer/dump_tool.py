@@ -404,8 +404,8 @@ class DumpAnalyzer:
                     time.sleep(1)
                     run(command, retry_code, retry_count - 1)
                 else:
-                    raise
-            except (IOError, WindowsError, subprocess.CalledProcessError) as error:
+                    raise DistError(str(error))
+            except (IOError, WindowsError) as error:
                 raise DistError(error)
 
         if path.endswith('.exe'):
