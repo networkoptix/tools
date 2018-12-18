@@ -71,7 +71,7 @@ Here <command> can be one of the following:
  sdk # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
- go-cd [command args] # Execute a command at vega via ssh, changing dir to match the current dir.
+ go-cd command [args] # Execute a command at vega via ssh, changing dir to match the current dir.
  rsync [command] # Rsync current vms source dir to vega, run command in the respective current dir.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
@@ -1374,6 +1374,10 @@ doGoCd() # "$@"
     local -r CURRENT_DIR=$(pwd)
     [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
     local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
+    
+    # TODO: Find a way to start an interactive session after `cd`.
+    (($# > 0)) || nx_fail "Command to execute remotely not specified."
+    
     nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
 }
 
@@ -1432,8 +1436,11 @@ main()
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
             nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
-                "$VMS_DIR/" "$VEGA_DIR"
-            (($# > 0)) && doGoCd "$@"
+                "$VMS_DIR/" "$VEGA_DIR" || exit $?
+            if (($# > 0))
+            then
+                doGoCd "$@"
+            fi
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
