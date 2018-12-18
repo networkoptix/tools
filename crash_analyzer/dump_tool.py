@@ -67,6 +67,7 @@ CUSTOMIZATIONS = (
     'vista',
     'vmsdemoblue',
     'vmsdemoorange',
+    'metavms',
 )
 
 CUSTOMIZATION_ALIASES = {
