@@ -3,7 +3,7 @@ import requests
 import json
 import copy
 
-
+#todo: redo everything using map and filter functions
 """StatServerList class downloads full list of devices from the Nx Stat Server
 Its attributes represent lists of the unique multisensor cameras, encoders,
 regular cameras and list of lists of original models intersections
@@ -93,7 +93,7 @@ class ResourceDataJson:
         self.encoders = (encoders_list)
 
 """fix_encoding function cuts off weirdly encoded characters in the strings
-and converts it from unicode to python string
+and converts them from unicode to python lowercase strings
 """
 
 
@@ -101,12 +101,14 @@ def fix_encoding(input_list):
     for device in input_list:
         try:
             unicode(device[0], errors='strict')
+            device[0].lower()
         except TypeError:
-            device[0] = device[0].encode('ascii', 'ignore')
+            device[0] = device[0].encode('ascii', 'ignore').lower()
         try:
             unicode(device[1], errors='ignore')
+            device[1].lower()
         except TypeError:
-            device[1] = device[1].encode('ascii', 'ignore')
+            device[1] = device[1].encode('ascii', 'ignore').lower()
 
 """compare_lists function compares two lists, removes matched elements from
 the initial lists and returns intersections for both input lists
@@ -133,11 +135,46 @@ file with output_file_name
 
 def write_list_to_file(input_list, output_file_name):
     with open(output_file_name, 'w') as _file:
+        _file.write('Vendor|Model:\n')
         for item in input_list:
-            _file.write('Vendor: %s\t' % item[0])
-            _file.write('Model: %s\n' % item[1])
+            _file.write(item[0]+'|'+item[1]+'\n')
     _file.close()
 
+"""function filter_exceptions takes list of lists as
+an input and  filters out badly named devices
+"""
+def filter_exceptions(input_list):
+    result = []
+    exception_list = [
+        'onvif',
+        'networkcamera',
+        'network camera',
+        'network_camera',
+        'h264',
+        'ipc-model',
+        'ip camera',
+        'ipcamera',
+        'ip_camera',
+        'network video recorder',
+        'embedded net dvr',
+        'embedded_net_dvr',
+        'group',
+        'private',
+        'general',
+        'onvif_encoder'
+        ]
+    for device_name in reversed(input_list):
+        isFiltered = 0
+        for item in device_name:
+            if not item:
+                input_list.remove(device_name)
+                continue
+            for filter_str in exception_list:
+                if filter_str == item:
+                    isFiltered += 1
+        if isFiltered == 2:
+            print device_name
+            input_list.remove(device_name)
 
 def main():
     resource_data = ResourceDataJson()
@@ -167,6 +204,8 @@ def main():
         return stat_lists
 
     result = check_db_with_stat(resource_data_lists, stat_data_lists)
+    for data_list in result:
+        filter_exceptions(data_list)
     write_list_to_file(result[0], 'encoders_diff.txt')
     write_list_to_file(result[1], 'multisensors_diff.txt')
     write_list_to_file(stat_data.intersections, 'manual_check.txt')
