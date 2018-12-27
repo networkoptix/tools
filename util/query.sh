@@ -31,12 +31,12 @@ case "$QUERY" in
         QUERY="api/moduleInformation"
         ;;
     "c")
-        QUERY="ec2/getCameras"
-        if [ "$2" ]; then QUERY+="Ex?id=$2"; shift; fi
+        QUERY="ec2/getCameras$E"
+        if [ "$1" ]; then QUERY+="?id=$1"; shift; fi
         ;;
     "s")
-        QUERY="ec2/getMediaServers"
-        if [ "$2" ]; then QUERY+="Ex?id=$2"; shift; fi
+        QUERY="ec2/getMediaServers$E"
+        if [ "$1" ]; then QUERY+="?id=$1"; shift; fi
         ;;
 esac
 
