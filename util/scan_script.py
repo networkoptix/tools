@@ -46,8 +46,8 @@ class StatServerData:
         self.intersections = list(set(tuple(i) for i
             in full_intresections_list))
         self.multisensors = multisensors
-        self.encoders = (encoders)
-        self.regulars = (regulars)
+        self.encoders = encoders
+        self.regulars = regulars
 
 
 """ResourceDataJsonList class downloads Nx json file with advanced options.
@@ -73,14 +73,13 @@ class ResourceDataJson:
                     if model not in encoders_list_draft:
                         encoders_list_draft.append(model)
         for name in multisensors_list_draft:
-            if not (name.startswith('Hanwha') or name.startswith('Samsung')):
-                for i in range(len(name)):
-                    if name[i] == '|':
-                        multisensors_list.append([name[:i], name[i+1:]])
+            name = name.split('|')
+            if not (name[0].startswith('Hanwha') or
+                    name[0].startswith('Samsung')):
+                multisensors_list.append([name[0],name[1]])
         for name in encoders_list_draft:
-            for i in range(len(name)):
-                if name[i] == '|':
-                    encoders_list.append([name[:i], name[i+1:]])
+            name = name.split('|')
+            encoders_list.append([name[0], name[1]])
         fix_encoding(multisensors_list)
         fix_encoding(encoders_list)
         for _list in (encoders_list, multisensors_list):
@@ -146,7 +145,6 @@ an input and  filters out badly named devices
 
 
 def filter_exceptions(input_list):
-    result = []
     exception_list = [
         'onvif',
         'networkcamera',
@@ -175,7 +173,7 @@ def filter_exceptions(input_list):
                 if filter_str == item:
                     isFiltered += 1
         if isFiltered == 2:
-            print device_name
+            print "too generic model is filtered: " + str(device_name)
             input_list.remove(device_name)
 
 
