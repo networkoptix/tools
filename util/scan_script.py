@@ -3,7 +3,7 @@ import requests
 import json
 import copy
 
-#todo: redo everything using map and filter functions
+# todo: redo everything using map, split and filter functions
 """StatServerList class downloads full list of devices from the Nx Stat Server
 Its attributes represent lists of the unique multisensor cameras, encoders,
 regular cameras and list of lists of original models intersections
@@ -20,8 +20,8 @@ class StatServerData:
         for data in full_json:
             vendor = data['origVendor']
             model = data['origModel']
-            if (data['isMultiSensor'] and 
-                    not (vendor.startswith('Hanwha') 
+            if (data['isMultiSensor'] and
+                    not (vendor.startswith('Hanwha')
                     or vendor.startswith('Samsung')
                     or vendor.startswith('ArecontVision')
                     or vendor.startswith('PelcoOptera')
@@ -41,13 +41,14 @@ class StatServerData:
         encoders_regulars = compare_lists(encoders, regulars)
         encoders_multisensors = compare_lists(encoders_copy, multisensors)
         multisensors_regulars = compare_lists(multisensors, regulars)
-        full_intesections_list = (encoders_regulars + encoders_multisensors +
+        full_intresections_list = (encoders_regulars + encoders_multisensors +
             multisensors_regulars)
         self.intersections = list(set(tuple(i) for i
-            in full_intesections_list))
-        self.multisensors = (multisensors)
+            in full_intresections_list))
+        self.multisensors = multisensors
         self.encoders = (encoders)
         self.regulars = (regulars)
+
 
 """ResourceDataJsonList class downloads Nx json file with advanced options.
 Its attributes represent lists of multisensor cameras and analog encoders.
@@ -62,8 +63,6 @@ class ResourceDataJson:
         encoders_list_draft = []
         encoders_list = []
         full_json = requests.get(url).json()
-#       with open('test_data.json') as json_data:
-#           full_json = json.load(json_data)
         for data in full_json['data']:
             if 'canShareLicenseGroup' in data:
                 for model in data['keys']:
@@ -92,6 +91,7 @@ class ResourceDataJson:
         self.multisensors = (multisensors_list)
         self.encoders = (encoders_list)
 
+
 """fix_encoding function cuts off weirdly encoded characters in the strings
 and converts them from unicode to python lowercase strings
 """
@@ -110,6 +110,7 @@ def fix_encoding(input_list):
         except TypeError:
             device[1] = device[1].encode('ascii', 'ignore').lower()
 
+
 """compare_lists function compares two lists, removes matched elements from
 the initial lists and returns intersections for both input lists
 """
@@ -118,7 +119,7 @@ the initial lists and returns intersections for both input lists
 def compare_lists(input_list_1, input_list_2):
     bad_list = []
     check_list_1 = copy.deepcopy(input_list_1)
-    check_list_2 = copy.deepcopy(input_list_2)    
+    check_list_2 = copy.deepcopy(input_list_2)
     for x in check_list_1:
         for y in check_list_2:
             if (((x[0] == y[0]) and (x[1] == y[1])) or
@@ -128,7 +129,7 @@ def compare_lists(input_list_1, input_list_2):
                 input_list_2.remove(y)
     return bad_list
 
-"""write_list_to_file function writes nested lists to the 
+"""write_list_to_file function writes nested lists to the
 file with output_file_name
 """
 
@@ -138,11 +139,12 @@ def write_list_to_file(input_list, output_file_name):
         _file.write('Vendor|Model:\n')
         for item in input_list:
             _file.write(item[0]+'|'+item[1]+'\n')
-    _file.close()
 
 """function filter_exceptions takes list of lists as
 an input and  filters out badly named devices
 """
+
+
 def filter_exceptions(input_list):
     result = []
     exception_list = [
@@ -176,6 +178,7 @@ def filter_exceptions(input_list):
             print device_name
             input_list.remove(device_name)
 
+
 def main():
     resource_data = ResourceDataJson()
     stat_data = StatServerData()
@@ -187,6 +190,7 @@ def main():
         resource_data.encoders,
         resource_data.multisensors
     ]
+
     def check_db_with_stat(resource_lists_input, stat_lists_input):
         result = [[], []]
         resource_lists = copy.deepcopy(resource_lists_input)
