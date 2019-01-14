@@ -153,6 +153,7 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-l', '--language', default="en_US")
+    parser.add_argument('-p', '--project')
     args = parser.parse_args()
     global verbose
     verbose = args.verbose
@@ -171,7 +172,7 @@ def main():
     from translatable_projects import get_translatable_projects
     sys.path.pop(0)
 
-    projects = get_translatable_projects()
+    projects = get_translatable_projects(args.project)
     if not projects:
         err("Projects list could not be read")
     threads = []
