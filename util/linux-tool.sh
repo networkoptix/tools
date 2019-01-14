@@ -90,6 +90,7 @@ Here <command> can be one of the following:
  distrib # Build distribution.
  test-distrib [checksum] [no-build] orig/archives/dir [cmake-gen-args] # Test if built matches orig.
  bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
+ vs [args] # Open the VMS project in Visual Studio (Windows-only).
 
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
@@ -151,7 +152,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 
     # Assign DEFAULT_CUSTOMIZATION for certain branches.
     case "$(cat "$VMS_DIR/.hg/branch")" in
-        meta) DEFAULT_CUSTOMIZATION="metavms";;
+        meta*) DEFAULT_CUSTOMIZATION="metavms";;
     esac
 
     # If CUSTOMIZATION is already defined, use its value; otherwise, use the computed value.
@@ -1390,7 +1391,7 @@ main()
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
         apidoc|kit|sdk|start-s|start-c|run-ut|testcamera| \
-        share|gen|cd|build|cmake|distrib|test-distrib|bak| \
+        share|gen|cd|build|cmake|distrib|test-distrib|bak|vs| \
         print-dirs|print-vars|rsync)
             setup_vars
             ;;
@@ -1563,6 +1564,15 @@ main()
             ;;
         bak)
             do_bak "$@"
+            ;;
+        vs)
+            nx_is_cygwin || nx_fail "This is a Windows-only command."
+            local -r SLN=$(nx_path "$BUILD_DIR\vms.sln")
+            [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
+            local -r VS_EXE="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/devenv.exe"
+            [ ! -f "$VS_EXE" ] && nx_fail "Cannot find VS executable: $VS_EXE"
+            nx_log_command "$VS_EXE" "$SLN" "$@"
+            cmd /c start "$VS_EXE" "$SLN" "$@"
             ;;
         list)
             do_list "$@"
