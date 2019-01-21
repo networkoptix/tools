@@ -84,10 +84,13 @@ def calculateEntries(prefix, dir, language):
         if not path.endswith(suffix):
             continue
 
-        if (not entry.startswith(prefix)):
+        if not entry.startswith(prefix):
             continue
 
         entries.append(path)
+
+    if len(entries) == 0:
+        err("No {}*{} files were found in {}".format(prefix, suffix, dir))
     return entries
 
 
@@ -172,7 +175,7 @@ def main():
     from translatable_projects import get_translatable_projects
     sys.path.pop(0)
 
-    projects = get_translatable_projects(args.project)
+    projects = list(get_translatable_projects(args.project))
     if not projects:
         err("Projects list could not be read")
     threads = []
@@ -181,8 +184,12 @@ def main():
             info("Updating project " + str(project))
         threads.append(updateThreaded(project, args.language, update))
 
+    if verbose:
+        info("Waiting for {} threads".format(len(threads)))
     for thread in threads:
         thread.join()
+    if verbose:
+        info("{} projects processed".format(len(projects)))
 
     for project in projects:
         if verbose:
