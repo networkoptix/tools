@@ -145,6 +145,14 @@ class Rdep:
 
         return command
 
+    def _fix_permissions(self, path):
+        if not OS_IS_WINDOWS:
+            return
+
+        command = ["icacls", path, "/reset", "/t"]
+        self._verbose_message("Fixing permissions with: {}".format(" ".join(command)))
+        subprocess.call(command)
+
     def load_timestamps_for_fast_check(self):
         self._timestamps = {}
         try:
@@ -200,6 +208,8 @@ class Rdep:
             if subprocess.call(command, stderr = fnull) != 0:
                 return self.SYNC_NOT_FOUND
 
+        self._fix_permissions(config_file)
+
         newtime = PackageConfig(config_file).get_timestamp()
         if newtime == None:
             os.remove(config_file)
@@ -223,6 +233,8 @@ class Rdep:
         if subprocess.call(command) != 0:
             os.remove(config_file)
             return self.SYNC_FAILED
+
+        self._fix_permissions(dst)
 
         dst_config_file = os.path.join(dst, PackageConfig.FILE_NAME)
         self._verbose_message("Moving {0} to {1}".format(
@@ -301,6 +313,8 @@ class Rdep:
         self._verbose_rsync(command)
         with open(os.devnull, "w") as fnull:
             if subprocess.call(command, stderr = fnull) == 0:
+                self._fix_permissions(config_file)
+
                 newtime = PackageConfig(config_file).get_timestamp()
                 os.remove(config_file)
                 time = PackageConfig(local).get_timestamp()
@@ -322,9 +336,6 @@ class Rdep:
             remote,
             additional_args=ADDITIONAL_UPLOAD_ARGS + ["--exclude", PackageConfig.FILE_NAME]
         )
-
-        if OS_IS_WINDOWS:
-            command.append("--chmod=ugo=rwX")
 
         self._verbose_rsync(command)
 
@@ -404,9 +415,11 @@ class Rdep:
         url = posixpath.join(url, TIMESTAMPS_FILE)
 
         command = [self._config.get_rsync("rsync"), url, _cygwin_path(self.root)]
+        command += ADDITIONAL_SYNC_ARGS
         self._verbose_rsync(command)
         try:
             output = subprocess.check_output(command)
+            self._fix_permissions(os.path.join(self.root, TIMESTAMPS_FILE))
         except:
             print "Could not sync timestamps file."
             return False
