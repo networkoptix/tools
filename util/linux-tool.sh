@@ -14,8 +14,8 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$RDEP_PACKAGES_DIR"}
-: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.1"}
-: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.1"}
+: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.3"}
+: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.3"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
@@ -375,17 +375,17 @@ do_gen() # [cache] "$@"
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
-    local DISTRIB_ARG=()
+    local COMPOSITION_ARG=( "-DwithTests=ON" )
     if [[ $DISTRIB = 1 ]]
     then
-        DISTRIB_ARG=( "-DwithDistributions=ON" )
+        COMPOSITION_ARG+=( "-DwithDistributions=ON" "-DwithUnitTestsArchive=ON" )
     else
         if [[ $SDK = 1 ]]
         then
-            DISTRIB_ARG=( "-DwithAnalyticsSdk=ON" )
+            COMPOSITION_ARG+=( "-DwithAnalyticsSdk=ON" )
         fi
     fi
-    [[ $TARGET = windows ]] && DISTRIB_ARG+=( "-DwithMiniLauncher=ON" )
+    [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
 
     local DEV_ARG=""
     [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
@@ -393,7 +393,7 @@ do_gen() # [cache] "$@"
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
-        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG "${DISTRIB_ARG[@]}" $DEV_ARG "$@"
+        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@"
 }
 
 do_build()
@@ -1155,22 +1155,40 @@ do_bak() # [target-dir]
     else
         local -r TARGET_DIR=$(basename "$VMS_DIR")
     fi
-    
-    local -r DIR="$BACKUP_DIR/$TARGET_DIR"
-    if [ -e "$DIR" ]
+
+    local -r TAR="$BACKUP_DIR/$TARGET_DIR.tar"
+    if [ -f "$TAR" ]
     then
-        local OLD_DIR="${DIR}_OLD"
-        while [ -e "$OLD_DIR" ]
+        local OLD_TAR="${TAR%.tar}_OLD.tar"
+        while [ -f "$OLD_TAR" ]
         do
-            OLD_DIR+="_OLD"
+            OLD_TAR="${OLD_TAR%.tar}_OLD.tar"
         done
-        nx_echo "WARNING: Dir already exists; moved to $OLD_DIR"
-        mv "$DIR" "$OLD_DIR" || return $?
+        nx_echo "WARNING: Tar already exists; moved to $OLD_TAR"
+        mv "$TAR" "$OLD_TAR" || return $?
     fi
     
-    mkdir "$DIR"
-    cp -r "$VMS_DIR"/* "$DIR" || return $?
-    echo "Backed up to $DIR"
+    (cd "$VMS_DIR" || return $?
+        tar cf "$TAR" * || return $?
+    ) || return $?
+    echo "Backed up to $TAR"
+
+# Unpacking the created .tar commented out.
+#    local -r DIR="$BACKUP_DIR/$TARGET_DIR"
+#    if [ -e "$DIR" ]
+#    then
+#        local OLD_DIR="${DIR}_OLD"
+#        while [ -e "$OLD_DIR" ]
+#        do
+#            OLD_DIR+="_OLD"
+#        done
+#        nx_echo "WARNING: Dir already exists; moved to $OLD_DIR"
+#        mv "$DIR" "$OLD_DIR" || return $?
+#    fi
+#
+#    mkdir "$DIR" || return $?
+#    tar xf "$TAR" -C "$DIR" || return $?
+#    echo "Unpacked up to $DIR"
 }
 
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.
@@ -1467,8 +1485,8 @@ main()
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
-                    local -r QT_PATH="$QT_DIR/bin"
-                    nx_append_path "$QT_PATH"
+                    local -r EXTRA_PATH="$QT_DIR/bin:$PACKAGES_DIR\windows-x64\icu-60.2\bin"
+                    nx_append_path "$EXTRA_PATH"
                     nx_verbose "bin/Nx MetaVMS.exe" "$@"
                     ;;
                 linux)
@@ -1497,7 +1515,7 @@ main()
 
             if nx_is_cygwin
             then
-                PATH="$QT_DIR/bin:$BUILD_DIR/bin:$PATH"
+                nx_append_path "$QT_DIR/bin:$BUILD_DIR/bin"
             fi
 
             if [ $SHOW_HELP = 1 ]
