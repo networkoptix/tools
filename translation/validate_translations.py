@@ -19,7 +19,8 @@ sys.path.pop(0)
 if os.path.isfile('current_config.py'):
     sys.path.insert(0, os.getcwd())
     from current_config import PROJECT_SOURCE_DIR
-    os.chdir(PROJECT_SOURCE_DIR)
+    if '$' not in PROJECT_SOURCE_DIR:
+        os.chdir(PROJECT_SOURCE_DIR)
     sys.path.pop(0)
 
 projectDir = os.path.join(os.getcwd(), 'build_utils/validation')

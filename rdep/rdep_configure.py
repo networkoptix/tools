@@ -57,8 +57,8 @@ def configure(print_summary = False):
     if print_summary:
         print("Rdep repository is ready.")
         print("  Path =", REPOSITORY_PATH)
-        print("  Sync URL =", SYNC_URL)
-        print("  Push URL =", PUSH_URL)
+        print("  Sync URL =", config.get_url())
+        print("  Push URL =", config.get_push_url())
         print("  Rsync =", rsync)
 
     return True

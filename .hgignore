@@ -3,6 +3,7 @@ subinclude:rdep/.hgignore
 subinclude:infra/playbooks/.hgignore
 subinclude:infra/jenkins_jobs/.hgignore
 subinclude:api_examples/.hgignore
+subinclude:sign_over_http/.hgignore
 
 syntax: glob
 *.pyc
@@ -12,10 +13,7 @@ ci/gdb-bt
 ci/links-gdb-bt
 *.pyo
 *.py~
-*.taskbot~
-boxes.rb
-networkoptix-mediaserver.deb
-.vagrant
+*\__pycache__\*
 sample.mkv
 *test-tmp.cfg
 *.*.*.*_*.*.log

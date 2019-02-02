@@ -8,12 +8,14 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty on Linux, VMS_DIR name is analyzed.
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
+: ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distributions.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
+: ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$RDEP_PACKAGES_DIR"}
-: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.1"}
-: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.1"}
+: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.3"}
+: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.3"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
@@ -66,11 +68,11 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
 
- meta # Rebuild nx_analytics_sdk.
+ sdk # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
- go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
- rsync # Rsync current vms source dir to vega.
+ go-cd command [args] # Execute a command at vega via ssh, changing dir to match the current dir.
+ rsync [command] # Rsync current vms source dir to vega, run command in the respective current dir.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
@@ -87,6 +89,8 @@ Here <command> can be one of the following:
  cmake [gen-args] # Perform cmake generation, then build via "cmake --build".
  distrib # Build distribution.
  test-distrib [checksum] [no-build] orig/archives/dir [cmake-gen-args] # Test if built matches orig.
+ bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
+ vs [args] # Open the VMS project in Visual Studio (Windows-only).
 
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
@@ -94,6 +98,7 @@ Here <command> can be one of the following:
  repos # List all hg repos in DEVELOP_DIR with their branches.
  mount-repo win-repo [mnt-point] # Mount Windows repo via "mount --bind" to mnt-point.
  print-dirs # Print VMS_DIR and BUILD_DIR for the target, on separate lines.
+ print-vars # Print the names and values of all basic variables used in this script.
  tunnel ip1 [ip2]... # Create two-way ssh tunnel to Burbank for the specified Burbank IP addresses.
  tunnel-s ip1 [port]... # Create ssh tunnel to Burbank for the specified port (default is 7001).
 EOF
@@ -132,7 +137,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         fi
     fi
 
-    # If the target is already defined, use its value.
+    # If TARGET is already defined, use its value.
 
     local DEFAULT_CUSTOMIZATION=""
 
@@ -147,9 +152,10 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 
     # Assign DEFAULT_CUSTOMIZATION for certain branches.
     case "$(cat "$VMS_DIR/.hg/branch")" in
-        meta) DEFAULT_CUSTOMIZATION="metavms";;
+        meta*) DEFAULT_CUSTOMIZATION="metavms";;
     esac
 
+    # If CUSTOMIZATION is already defined, use its value; otherwise, use the computed value.
     [[ -z $CUSTOMIZATION ]] && CUSTOMIZATION="$DEFAULT_CUSTOMIZATION"
 
     # Assertion: target "windows" is supported only in cygwin.
@@ -204,9 +210,9 @@ get_BUILD_DIR()
 canonicalize_VMS_DIR()
 {
     # NOTE: In Cygwin, path in CMakeCache.txt is like "C:/develop/...".
-    local -r VMS_DIR_ABSOLUTE=$(nx_absolute_path "$(nx_unix_path "$VMS_DIR")")
+    local -r UNIX_VMS_DIR=$(nx_unix_path "$VMS_DIR")
+    local -r VMS_DIR_ABSOLUTE=$(nx_absolute_path "$UNIX_VMS_DIR")
     local -r DEVELOP_DIR_ABSOLUTE=$(nx_absolute_path "$DEVELOP_DIR")
-
     if [[ $VMS_DIR_ABSOLUTE =~ ^$DEVELOP_DIR_ABSOLUTE ]]
     then
         VMS_DIR="$DEVELOP_DIR${VMS_DIR_ABSOLUTE#$DEVELOP_DIR_ABSOLUTE}"
@@ -236,10 +242,12 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 
 # Determine value of common variables, including current repository directory: scan from the
 # current dir upwards to find root repository dir (e.g. develop/nx_vms).
-# [in][out] VMS_DIR
+# [in,out] CUSTOMIZATION
+# [in,out] VMS_DIR
 # [in] DEVELOP_DIR
-# [out] TARGET
 # [out] BUILD_DIR
+# [out] TARGET
+# [out] QT_DIR
 setup_vars()
 {
     local -r HELP="Run this script from any dir inside nx_vms repo dir or its cmake build dir."
@@ -324,15 +332,13 @@ do_share() # target_path [branch]
 
 do_gen() # [cache] "$@"
 {
-    nx_cd "$VMS_DIR"
-
     case "$CONFIG" in
         Release) local -r CONFIG_ARG="-DCMAKE_BUILD_TYPE=$CONFIG";;
         Debug) local -r CONFIG_ARG="";;
     esac
 
     local -i CACHE_ARG=0
-    if [[ $# -ge 1 && $1 = "cache" ]]
+    if (($# >= 1)) && [[ $1 = "cache" ]]
     then
         shift
         CACHE_ARG=1
@@ -350,9 +356,9 @@ do_gen() # [cache] "$@"
             fi
         fi
     fi
-    mkdir -p "$BUILD_DIR"
+    mkdir -p "$BUILD_DIR" || return $?
 
-    nx_cd "$BUILD_DIR"
+    nx_cd "$BUILD_DIR" || return $?
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
@@ -369,9 +375,17 @@ do_gen() # [cache] "$@"
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
-    local DISTRIB_ARG=""
-    [[ $DISTRIB = 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
-    [[ $TARGET = windows ]] && DISTRIB_ARG+=" -DwithMiniLauncher=ON"
+    local COMPOSITION_ARG=( "-DwithTests=ON" )
+    if [[ $DISTRIB = 1 ]]
+    then
+        COMPOSITION_ARG+=( "-DwithDistributions=ON" "-DwithUnitTestsArchive=ON" )
+    else
+        if [[ $SDK = 1 ]]
+        then
+            COMPOSITION_ARG+=( "-DwithAnalyticsSdk=ON" )
+        fi
+    fi
+    [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
 
     local DEV_ARG=""
     [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
@@ -379,7 +393,7 @@ do_gen() # [cache] "$@"
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
-        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG $DEV_ARG "$@"
+        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@"
 }
 
 do_build()
@@ -678,13 +692,13 @@ do_kit() # "$@"
 
 log_build_vars()
 {
-    local MESSAGE=""
-    [[ $TARGET != windows ]] && MESSAGE+="TARGET=$TARGET "
-    MESSAGE+="CONFIG=$CONFIG "
-    [[ $DISTRIB = 1 ]] && MESSAGE+="DISTRIB=$DISTRIB "
-    [[ ! -z $CUSTOMIZATION ]] && MESSAGE+="CUSTOMIZATION=$CUSTOMIZATION "
+    local MESSAGE=()
+    [[ $TARGET != windows ]] && MESSAGE+=( "TARGET=$TARGET" )
+    MESSAGE+=( "CONFIG=$CONFIG" )
+    [[ $DISTRIB = 1 ]] && MESSAGE+=( "DISTRIB=$DISTRIB" )
+    [[ ! -z $CUSTOMIZATION ]] && MESSAGE+=( "CUSTOMIZATION=$CUSTOMIZATION" )
 
-    nx_log_command "$MESSAGE"
+    nx_log_command "${MESSAGE[@]}"
 }
 
 do_cmake() # "$@"
@@ -1109,10 +1123,10 @@ do_list() # [checksum] dir|archive.tar.gz [listing.txt]
         local -r -i CHECKSUM=0
     fi
 
-    [[ $# == 0 ]] && nx_fail "Specify a directory or a .tar.gz to make the listing for."
+    (($# == 0)) && nx_fail "Specify a directory or a .tar.gz to make the listing for."
     local -r DIR_OR_FILE=$1 && shift
 
-    if [[ $# != 0 ]]
+    if (($# != 0 ))
     then
         local -r LISTING=$1 && shift
     else
@@ -1131,6 +1145,50 @@ do_list() # [checksum] dir|archive.tar.gz [listing.txt]
     else
         list_tar_gz $CHECKSUM "$PATH" "$LISTING"
     fi
+}
+
+do_bak() # [target-dir]
+{
+    if (($# >= 1))
+    then
+        local -r TARGET_DIR="$1"
+    else
+        local -r TARGET_DIR=$(basename "$VMS_DIR")
+    fi
+
+    local -r TAR="$BACKUP_DIR/$TARGET_DIR.tar"
+    if [ -f "$TAR" ]
+    then
+        local OLD_TAR="${TAR%.tar}_OLD.tar"
+        while [ -f "$OLD_TAR" ]
+        do
+            OLD_TAR="${OLD_TAR%.tar}_OLD.tar"
+        done
+        nx_echo "WARNING: Tar already exists; moved to $OLD_TAR"
+        mv "$TAR" "$OLD_TAR" || return $?
+    fi
+    
+    (cd "$VMS_DIR" || return $?
+        tar cf "$TAR" * || return $?
+    ) || return $?
+    echo "Backed up to $TAR"
+
+# Unpacking the created .tar commented out.
+#    local -r DIR="$BACKUP_DIR/$TARGET_DIR"
+#    if [ -e "$DIR" ]
+#    then
+#        local OLD_DIR="${DIR}_OLD"
+#        while [ -e "$OLD_DIR" ]
+#        do
+#            OLD_DIR+="_OLD"
+#        done
+#        nx_echo "WARNING: Dir already exists; moved to $OLD_DIR"
+#        mv "$DIR" "$OLD_DIR" || return $?
+#    fi
+#
+#    mkdir "$DIR" || return $?
+#    tar xf "$TAR" -C "$DIR" || return $?
+#    echo "Unpacked up to $DIR"
 }
 
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.
@@ -1330,6 +1388,18 @@ doMountRepo() # win-repo [mnt-point]
     ls --color=always "$MNT"
 }
 
+doGoCd() # "$@"
+{
+    local -r CURRENT_DIR=$(pwd)
+    [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
+    local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
+    
+    # TODO: Find a way to start an interactive session after `cd`.
+    (($# > 0)) || nx_fail "Command to execute remotely not specified."
+    
+    nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -1338,9 +1408,9 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|meta|start-s|start-c|run-ut|testcamera| \
-        share|gen|cd|build|cmake|distrib|test-distrib| \
-        print-dirs|rsync)
+        apidoc|kit|sdk|start-s|start-c|run-ut|testcamera| \
+        share|gen|cd|build|cmake|distrib|test-distrib|bak|vs| \
+        print-dirs|print-vars|rsync)
             setup_vars
             ;;
     esac
@@ -1366,25 +1436,30 @@ main()
         kit)
             do_kit "$@"
             ;;
-        meta)
+        sdk)
             nx_verbose rm -rf "$BUILD_DIR/distrib"/*analytics_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/nx_analytics_sdk"
-            DISTRIB=1 do_gen "$@"
+            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_analytics_sdk"
+            SDK=1 do_gen "$@"
             do_build --target nx_analytics_sdk
             ;;
         #..........................................................................................
         go)
             nx_go "$@"
             ;;
-        go-verbose)
-            nx_go_verbose "$@"
+        go-cd)
+            doGoCd "$@"
             ;;
         rsync)
-            # ATTENTION: Trailing slashes are essential for rsync to work properly.
             local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
-            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" "$VMS_DIR/" "$VEGA_DIR"
+            # ATTENTION: Trailing slashes are essential for rsync to work properly.
+            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
+                "$VMS_DIR/" "$VEGA_DIR" || exit $?
+            if (($# > 0))
+            then
+                doGoCd "$@"
+            fi
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
@@ -1410,8 +1485,8 @@ main()
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
-                    local -r QT_PATH="$QT_DIR/bin"
-                    nx_append_path "$QT_PATH"
+                    local -r EXTRA_PATH="$QT_DIR/bin:$PACKAGES_DIR\windows-x64\icu-60.2\bin"
+                    nx_append_path "$EXTRA_PATH"
                     nx_verbose "bin/Nx MetaVMS.exe" "$@"
                     ;;
                 linux)
@@ -1440,7 +1515,7 @@ main()
 
             if nx_is_cygwin
             then
-                PATH="$QT_DIR/bin:$BUILD_DIR/bin:$PATH"
+                nx_append_path "$QT_DIR/bin:$BUILD_DIR/bin"
             fi
 
             if [ $SHOW_HELP = 1 ]
@@ -1505,6 +1580,18 @@ main()
             log_build_vars
             do_test_distrib "$@"
             ;;
+        bak)
+            do_bak "$@"
+            ;;
+        vs)
+            nx_is_cygwin || nx_fail "This is a Windows-only command."
+            local -r SLN=$(nx_path "$BUILD_DIR\vms.sln")
+            [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
+            local -r VS_EXE="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/devenv.exe"
+            [ ! -f "$VS_EXE" ] && nx_fail "Cannot find VS executable: $VS_EXE"
+            nx_log_command "$VS_EXE" "$SLN" "$@"
+            cmd /c start "$VS_EXE" "$SLN" "$@"
+            ;;
         list)
             do_list "$@"
             ;;
@@ -1522,6 +1609,18 @@ main()
             fi
             echo "$VMS_DIR"
             echo "$BUILD_DIR"
+            ;;
+        print-vars)
+            nx_echo_var VMS_DIR
+            nx_echo_var BUILD_DIR
+            nx_echo_var TARGET
+            nx_echo_var CUSTOMIZATION
+            nx_echo_var CONFIG
+            nx_echo_var DISTRIB
+            nx_echo_var SDK
+            nx_echo_var DEV
+            nx_echo_var QT_DIR
+            nx_echo_var DEVELOP_DIR
             ;;
         tunnel) # ip1 [ip2]...
             local SELF_IP
@@ -1562,12 +1661,12 @@ main()
             nx_pop_title
             ;;
         tunnel-s) # ip1 [port]
-            if [[ $# != 1 && $# != 2 ]]
+            if (($# != 1 && $# != 2))
             then
                 nx_fail "Invalid command args."
             fi
             local -r IP="$1"
-            if [[ $# = 1 ]]
+            if (($# == 1))
             then
                 local -r -i FWD_PORT="$TUNNEL_S_DEFAULT_PORT"
             else

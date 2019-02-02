@@ -4,7 +4,8 @@ import hashlib
 import logging
 import os
 import re
-from typing import List, Tuple
+from abc import ABC, abstractmethod
+from typing import List, Tuple, Optional
 
 import dump_tool
 import utils
@@ -41,6 +42,7 @@ CXX_OWN_MODULE_PREFIXES = [
     'image_library_plugin', 'it930x_plugin', 'mjpg_link', 'NxControl', 'quicksyncdecoder', 'rpi_cam',
     'xvbadecoder',  # < Legacy VMS server plugins.
 ]
+
 
 class Error(Exception):
     pass
@@ -156,29 +158,54 @@ def is_cxx_name_prefixed(line, *prefixes):
     return False
 
 
-def analyze_bt(report: Report, content: str, describer: object) -> Reason:
-    """Extracts error code and call stack by rules in describer.
-    """
-    logger.debug('Analyzing {} by {}'.format(report, describer.__name__))
-    content = content.replace('\r', '')
+class ReportContent(ABC):
+    def __init__(self, content: str):
+        self._content = content.replace('\r', '')
 
-    def cut(begin, end, is_header=False):
+    @property
+    @abstractmethod
+    def allow_not_own_stacks(self) -> bool:
+        pass
+
+    @abstractmethod
+    def code(self) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def stack(self) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def is_new_line(self, line: str) -> bool:
+        pass
+
+    @abstractmethod
+    def transform(self, line: str) -> Optional[str]:
+        pass
+
+    def _cut(self, begin: int, end: int, start=0, is_header=False) -> Optional[str]:
         try:
-            start = content.index(begin) + len(begin)
+            start = self._content.index(begin, start) + len(begin)
             if is_header:
-                start = content.index('\n', start) + 1
+                start = self._content.index('\n', start) + 1
 
-            stop = content.index(end or '\n', start)
-            return content[start:stop]
+            stop = self._content.index(end or '\n', start)
+            return self._content[start:stop]
 
         except (ValueError, IndexError):
             return None
 
-    code = cut(describer.code_begin, describer.code_end)
+
+def analyze_bt(report: Report, content: ReportContent) -> Reason:
+    """Extracts error code and call stack by rules in describer.
+    """
+    logger.debug('Analyzing {} by {}'.format(report, content))
+
+    code = content.code()
     if not code:
         raise AnalyzeError('Unable to get Error Code from: ' + report.name)
 
-    stack_content = cut(describer.stack_begin, describer.stack_end, True)
+    stack_content = content.stack()
     if not stack_content:
         raise AnalyzeError('Unable to get Call Stack from: ' + report.name)
 
@@ -186,14 +213,14 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     for line in stack_content.splitlines():
         line = line.strip()
         if line:
-            if describer.is_new_line(line):
+            if content.is_new_line(line):
                 original_stack.append(line)
             else:
                 original_stack[-1] += ' ' + line
 
     transformed_stack = []
     for line in original_stack:
-        transformed = describer.transform(line)
+        transformed = content.transform(line)
         if transformed:
             transformed_stack.append(transformed)
 
@@ -203,7 +230,7 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     is_own_values = [is_cxx_name_prefixed(x, report.component, *CXX_OWN_MODULE_PREFIXES)
                      for x in transformed_stack]
 
-    if not any(is_own_values) and not describer.allow_not_own_stacks:
+    if not any(is_own_values) and not content.allow_not_own_stacks:
         raise AnalyzeError('Entirely external stack in: ' + report.name)
 
     if is_own_values.count(True) < CXX_ONW_MODULES_MIN_COUNT:
@@ -228,26 +255,25 @@ def analyze_linux_gdb_bt(report: Report, content: str, **options) -> Reason:
     """Extracts error code and call stack by rules from linux gdb bt output.
     """
 
-    class GdbDescriber:
-        code_begin = 'Program terminated with signal '
-        code_end = '.'
-
-        stack_begin = 'Thread 1 '
-        stack_end = '\n(gdb)'
-
-        # On some platforms only short function names are available, so we can not understand if function is own.
+    class GdbContent(ReportContent):
+        # On some platforms only short function names are available,
+        # so we can not understand if function is our own.
         allow_not_own_stacks = True
 
-        @staticmethod
-        def is_new_line(line):
+        def code(self) -> Optional[str]:
+            return self._cut('Program terminated with signal ', '.')
+
+        def stack(self) -> Optional[str]:
+            return self._cut('Thread 1 ', '\n(gdb)', is_header=True)
+
+        def is_new_line(self, line: str) -> bool:
             return any(line.startswith(p) for p in (
                 '#',  # < Stack frame.
                 'Backtrace stopped',  # < Error during unwind.
                 '(More stack',  # < Truncation.
             ))
 
-        @staticmethod
-        def transform(line):
+        def transform(self, line: str) -> Optional[str]:
             transformed = remove_cxx_template_arguments(line)
             module_match = CXX_LINUX_MODULE_RE.match(line)
             module_prefix = module_match.group('name') + CXX_MODULE_SEPARATOR if module_match else ''
@@ -281,22 +307,29 @@ def analyze_linux_gdb_bt(report: Report, content: str, **options) -> Reason:
 
             return module_prefix + transformed
 
-    return analyze_bt(report, content, GdbDescriber)
+    return analyze_bt(report, GdbContent(content))
 
 
 def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
     """Extracts error code and call stack by rules from windows cdb bt output.
     """
 
-    class CdbDescriber:
-        code_begin = 'ExceptionCode: '
-        code_end = '\n'
-
-        stack_begin = 'Call Site'
-        stack_end = '\n\n'
-
+    class CdbContent(ReportContent):
         # If there are no our modules there is a good chance they are not able to be resolved.
         allow_not_own_stacks = False
+
+        def code(self) -> Optional[str]:
+            return self._cut('ExceptionCode: ', '\n')
+
+        def stack(self) -> Optional[str]:
+            try:
+                # In case of pure virtual call windows shows breakpoint in main thread,
+                # so we try to find required thread manually.
+                start = self._content.rindex('Call Site', 0, self._content.index('_purecall'))
+            except ValueError:
+                start = 0
+
+            return self._cut('Call Site', '\n\n', start, is_header=True)
 
         @staticmethod
         def is_new_line(line):
@@ -308,6 +341,10 @@ def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
             # Keep only resolved symbols.
             module, *name = line.split(CXX_MODULE_SEPARATOR, 1)
             if not name:
+                if module in ['ntdll', 'KERNELBASE']:
+                    # This is very likely, that later stack frames resolution will be screwed up.
+                    raise AnalyzeError('Unresolved system module {!r} in stack from: {}'.format(
+                        module, report.name))
                 return None
 
             # Replace lambdas from different builds with the same token.
@@ -320,7 +357,7 @@ def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
 
             return CXX_MODULE_SEPARATOR.join([module, remove_cxx_template_arguments(name)])
 
-    return analyze_bt(report, content, CdbDescriber, **options)
+    return analyze_bt(report, CdbContent(content), **options)
 
 
 class ProblemReports:
@@ -343,7 +380,8 @@ def analyze_reports_concurrent(reports: List[Report], problem_builds: list = [],
     known_problem_reports = ProblemReports(problem_builds)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
-        if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError)):
+        if isinstance(result, (
+                Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError, OSError)):
             if known_problem_reports.is_known(report):
                 logger.debug(utils.format_error(result))
             else:

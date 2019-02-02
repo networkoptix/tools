@@ -1,6 +1,0 @@
-jenkins_admin_user: admin
-jenkins_admin_password: admin
-jenkins_url: http://localhost:8080
-
-jenkins_user_password_credentials: []
-jenkins_user_direct_ssh_pks: []

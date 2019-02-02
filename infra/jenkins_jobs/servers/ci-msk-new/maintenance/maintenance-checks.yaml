@@ -1,7 +1,0 @@
-- project:
-    name: maintenance-checks
-    jobs:
-    - check-hardware-signing:
-        node: build-installer-windows-hw-sign
-        recipients: iremizov@networkoptix.com
-

@@ -1,5 +1,0 @@
----
-- name: Restart elk
-  service:
-    name: '{{ elk_systemd_service }}'
-    state: 'restarted'

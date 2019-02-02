@@ -107,12 +107,18 @@ nx_rsync() # rsync_args...
     rsync -r --links --perms --times --human-readable --progress "$@"
 }
 
-# Log the args as if it were a command to be executed, using nx_echo, prefixed with "+", and in
-# color.
-# ATTENTION: Arguments with spaces are shown as is, without being enquoted.
-nx_log_command() # $@
+# Log the args as if it were a command to be executed, collapsing the home dir to `~`, prefixed
+# with `+`, , and in color.
+nx_log_command() # "$@"
 {
-    nx_echo $(nx_dgreen)"+ $*"$(nx_nocolor)
+    { set +x; } 2>/dev/null
+
+    local ARGS=""
+    nx_concat_ARGS "$@"
+
+    echo $(nx_dgreen)"+ $@"$(nx_nocolor) |sed "s#$HOME/#~/#g"
+    
+    [ $NX_VERBOSE = 1 ] && set -x
 }
 
 # Log the args if in verbose mode, otherwise, do nothing.
@@ -122,7 +128,7 @@ nx_log() # ...
     # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
     # will be logged by "set -x".)
     {
-        set +x;
+        set +x
         [ $NX_VERBOSE = 1 ] && set -x
     } 2>/dev/null
 }
@@ -134,7 +140,7 @@ nx_log_var() # VAR_NAME
     # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
     # will be logged by "set -x".)
     {
-        set +x;
+        set +x
 
         if [ $NX_VERBOSE = 1 ]
         then
@@ -154,7 +160,7 @@ nx_log_array() # ARRAY_NAME
     # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
     # will be logged by "set -x".)
     {
-        set +x;
+        set +x
 
         if [ $NX_VERBOSE = 1 ]
         then
@@ -181,7 +187,7 @@ nx_log_map() # ARRAY_NAME
     # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
     # will be logged by "set -x".)
     {
-        set +x;
+        set +x
 
         if [ $NX_VERBOSE = 1 ]
         then
@@ -213,7 +219,7 @@ nx_log_file_contents() # filename
 {
     # Args already echoed if called under "set -x", thus, do nothing but suppress unneeded logging.
     {
-        set +x;
+        set +x
         local FILE="$1"
         if [ $NX_VERBOSE = 1 ]; then
             echo "<<EOF"
@@ -224,29 +230,22 @@ nx_log_file_contents() # filename
     } 2>/dev/null
 }
 
-# Execute the command specified in the args, logging the call with "set -x", unless "set -x" mode
-# is already on - in this case, the call of this function with all its args is already logged.
+# Execute the command specified in the args, logging the call with nx_log_command(), unless the 
+# "set -x" mode is already on - in this case, the call of this function with all its args is
+# already logged.
 nx_verbose() # "$@"
 {
     {
-        if [ $NX_VERBOSE = 0 ]; then
-            set -x
-        else
-            set +x
-        fi
+        nx_log_command "$@"
+        set +x #< Disable logging, even when nx_log_command() restores its state.
     } 2>/dev/null
-
+    
+     # Execute the specified command.
     "$@"
 
-    {
-        local RESULT=$?
-        if [ $NX_VERBOSE = 0 ]; then
-            set +x
-        else
-            set -x
-        fi
-        return $RESULT
-    } 2>/dev/null
+    local -i RESULT=$?
+    [ $NX_VERBOSE == 1 ] && set -x
+    return $RESULT
 }
 
 nx_echo_var() # VAR_NAME
@@ -365,9 +364,15 @@ nx_restore_cursor_pos()
 
 nx_absolute_path() # path
 {
-    # readlink -f does not work in MacOS, so an alternative impl is needed.
-    #readlink -f -- "$1"
-    (cd "$(dirname "$1")" && echo "$(pwd -P)/$(basename "$1")")
+    local -r DIR="$1"
+    
+    # "readlink -f" does not work in MacOS, hence an alternative impl via "pwd -P".
+    if [ -d "$DIR" ]
+    then
+        (cd "$DIR" && pwd -P)
+    else
+        (cd "$(dirname "$DIR")" && echo "$(pwd -P)/$(basename "$DIR")")
+    fi
 }
 
 # Print file extension(s) without the trailing period, or nothing if there is no extension.
@@ -380,6 +385,7 @@ nx_file_ext() # any-filename
 nx_append_path() # new-path-components-via-colon
 {
     local -r NEW_COMPONENTS="$1" && shift
+    # Do not print the old PATH literally - replace it with `$PATH`.
     nx_log_command "PATH=$NEW_COMPONENTS:\$PATH"
     PATH=$NEW_COMPONENTS:$PATH
 }
@@ -391,8 +397,7 @@ nx_cd() # dir
     local -r DIR="$1"
     if [ "$(nx_absolute_path "$(pwd)")" != "$(nx_absolute_path "$DIR")" ]
     then
-        nx_log_command "cd $DIR"
-        cd "$DIR"
+        nx_verbose cd "$DIR"
     fi
 }
 
@@ -472,8 +477,6 @@ nx_fail_on_invalid_arguments()
 # Also checks that the last 2 arguments (if exist) do not refer to the same file.
 nx_diff()
 {
-    nx_log_command "diff" "$@"
-
     # Check that the last two args (if exist) do not refer to the same file.
     if [[ $# -ge 2 ]]
     then
@@ -492,7 +495,7 @@ nx_diff()
         local -r COMMAND=diff
     fi
 
-    $COMMAND "$@"
+    nx_verbose "$COMMAND" "$@"
 }
 
 # Silently unpack archive of auto-detected type. If directory is not specified, it will be

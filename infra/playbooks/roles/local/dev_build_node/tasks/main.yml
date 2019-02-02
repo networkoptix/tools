@@ -1,7 +1,0 @@
-- name: Add to sudo group
-  user:
-    name: '{{ item }}'
-    groups: 'sudo'
-    append: True
-  with_items:
-  - "{{ jenkins_user }}"

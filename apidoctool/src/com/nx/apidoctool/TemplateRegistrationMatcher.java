@@ -77,7 +77,7 @@ public final class TemplateRegistrationMatcher implements RegistrationMatcher
 
     private static final Pattern groupRegexForUpdateFunc = Pattern.compile(
         "\\s*reg\\w*Update\\w*\\s*<\\s*" +
-        "([a-zA-Z_0-9:]+)" +
+        "([a-zA-Z_0-9:]+)[, a-zA-Z_0-9:]*" +
         "\\s*>.+ApiCommand\\s*::\\s*(\\w+).*");
 
     private static final Pattern firstLineRegexForFunctor = Pattern.compile(

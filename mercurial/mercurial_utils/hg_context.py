@@ -31,7 +31,7 @@ class HgContext:
             output = output.split(split_by)
         return output
 
-    def phase(self, rev):
+    def phase(self, rev='.'):
         return self.log(rev=rev, template="{phase}")[0]
 
     def heads(self, branch=None):
@@ -59,7 +59,7 @@ class HgContext:
             command += ("--clean",)
         self.execute_interactive(*command)
 
-    def branch(self, rev=".", *args):
+    def branch(self, rev="."):
         return self.log(rev=rev, template="{branch}")[0]
 
     def commit(self, message=None, edit=False, amend=False, user=None):
@@ -72,4 +72,32 @@ class HgContext:
             command += ("--user", user)
         if message:
             command += ("--message", message)
+        self.execute_interactive(*command)
+
+    def push(self, rev=None, force=False, new_branch=False):
+        command = ("push",)
+        if rev:
+            command += ("--rev", rev)
+        if force:
+            command += ("--force",)
+        if new_branch:
+            command += ("--new-branch",)
+        self.execute_interactive(*command)
+
+    def pull(self, rev=None, branch=None, update=False, force=False):
+        command = ("pull",)
+        if rev:
+            command += ("--rev", rev)
+        if branch:
+            command += ("--branch", branch)
+        if force:
+            command += ("--update",)
+        if force:
+            command += ("--force",)
+        self.execute_interactive(*command)
+
+    def merge(self, rev=None):
+        command = ("merge",)
+        if rev:
+            command += ("--rev", rev,)
         self.execute_interactive(*command)

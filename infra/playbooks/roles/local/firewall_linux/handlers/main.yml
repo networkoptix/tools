@@ -1,4 +1,0 @@
-- name: Save iptables rules
-  command: iptables-save
-  become: true
-  listen: save ip tables

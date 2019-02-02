@@ -1,7 +1,0 @@
-# file: generic-users/defaults/main.yml
-
-genericusers_groups: []
-genericusers_users: []
-
-genericusers_groups_removed: []
-genericusers_users_removed: []

@@ -1,4 +1,0 @@
-ansible==2.5.0
-Ansible-Lint>=3.0.1
-pywinrm>=0.2.2
-jmespath>=0.9.3 # required by cloudalchemy.prometheus role

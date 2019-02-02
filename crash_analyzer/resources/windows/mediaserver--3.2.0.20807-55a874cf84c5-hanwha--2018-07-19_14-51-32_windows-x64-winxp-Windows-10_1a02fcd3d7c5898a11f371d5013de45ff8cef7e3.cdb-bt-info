@@ -1,0 +1,6 @@
+80000003 (Break instruction exception)
+
+nx_utils!dumpCrtError
+...
+Server!QnAbstractStreamDataProvider::dataCanBeAccepted
+Server!CLServerPushStreamReader::run

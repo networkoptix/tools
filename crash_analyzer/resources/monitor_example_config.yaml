@@ -23,6 +23,8 @@ options:
     cdb_cache_size_limit: 10G #< Maximum internal CDB cache size.
     stand_by_sleep_s: 300 #< Sleep 5 minutes on empty run or failure.
     min_report_count: 2 #< Dump count to create new issue for crash.
+    keep_uploaded_reports: true #< Do not keep reports uploaded to JIRA.
+    minimal_upload_interval: 1d #< Warn if there is no uploads within last day.
 
 fetch:
     url: http://stats.networkoptix.com/crashserver/api/

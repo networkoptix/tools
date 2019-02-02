@@ -32,7 +32,7 @@ email:
 
 build:
   # if any file matching this regexp patterns is added or removed since previous build, do full rebuild:
-  cmake_version: 3.10.2
+  cmake_version: 3.12.3
   rebuild_cause_file_patterns:
     - ^ci/
     - ^build_utils/

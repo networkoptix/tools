@@ -13,7 +13,7 @@ fi
 
 set -e -x
 
-LL=${LL-DEBUG2}
+LL=${LL:-DEBUG2}
 ARGS="--log-level=$LL --http-log-level=$LL --ec2-tran-log-level=$LL"
 
 : ${BINARY:=$(find -name client*bin -type f)}

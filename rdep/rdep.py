@@ -22,9 +22,8 @@ if OS_IS_WINDOWS:
     ADDITIONAL_SYNC_ARGS = ["--chmod=ugo=rwx"]
     ADDITIONAL_UPLOAD_ARGS = ["--chmod=ugo=rwX"]
 
-# Workaround against rsync bug:
-# all paths with semicolon are counted as remote,
-# so 'rsync rsync://server/path c:\test\path' won't work on windows
+# Workaround against rsync bug: all paths with colon are counted as remote, so
+# 'rsync rsync://server/path c:\test\path' won't work on windows.
 def _cygwin_path(path):
     if len(path) > 1 and path[1] == ':':
         drive_letter = path[0].lower()
@@ -146,6 +145,14 @@ class Rdep:
 
         return command
 
+    def _fix_permissions(self, path):
+        if not OS_IS_WINDOWS:
+            return
+
+        command = ["icacls", path, "/reset", "/t"]
+        self._verbose_message("Fixing permissions with: {}".format(" ".join(command)))
+        subprocess.call(command)
+
     def load_timestamps_for_fast_check(self):
         self._timestamps = {}
         try:
@@ -201,6 +208,8 @@ class Rdep:
             if subprocess.call(command, stderr = fnull) != 0:
                 return self.SYNC_NOT_FOUND
 
+        self._fix_permissions(config_file)
+
         newtime = PackageConfig(config_file).get_timestamp()
         if newtime == None:
             os.remove(config_file)
@@ -225,10 +234,13 @@ class Rdep:
             os.remove(config_file)
             return self.SYNC_FAILED
 
+        self._fix_permissions(dst)
+
         dst_config_file = os.path.join(dst, PackageConfig.FILE_NAME)
         self._verbose_message("Moving {0} to {1}".format(
                 config_file, dst_config_file))
-        shutil.move(config_file, dst_config_file)
+        shutil.copy(config_file, dst_config_file)
+        os.remove(config_file)
 
         return self.SYNC_SUCCESS
 
@@ -287,7 +299,7 @@ class Rdep:
 
         print "Uploading {0}...".format(package)
 
-        url = self._repo_config.get_push_url() or self._repo_config.get_url()
+        url = self._repo_config.get_url()
         remote = posixpath.join(url, target, package)
         local = os.path.join(self.root, target, package)
 
@@ -301,6 +313,8 @@ class Rdep:
         self._verbose_rsync(command)
         with open(os.devnull, "w") as fnull:
             if subprocess.call(command, stderr = fnull) == 0:
+                self._fix_permissions(config_file)
+
                 newtime = PackageConfig(config_file).get_timestamp()
                 os.remove(config_file)
                 time = PackageConfig(local).get_timestamp()
@@ -310,9 +324,11 @@ class Rdep:
                         print >> sys.stderr, "Please make sure you are updating the latest version of the package."
                         return False
 
+        url = self._repo_config.get_push_url(url)
         remote = posixpath.join(url, target, package)
 
         config = PackageConfig(local)
+        config.update_timestamp()
         config.set_uploader(uploader_name)
 
         command = self._get_rsync_command(
@@ -321,22 +337,15 @@ class Rdep:
             additional_args=ADDITIONAL_UPLOAD_ARGS + ["--exclude", PackageConfig.FILE_NAME]
         )
 
-        if OS_IS_WINDOWS:
-            command.append("--chmod=ugo=rwX")
-
         self._verbose_rsync(command)
 
         if subprocess.call(command) != 0:
             print >> sys.stderr, "Could not upload {0}".format(package)
             return False
 
-        local_config = os.path.join(local, PackageConfig.FILE_NAME)
-        shutil.copy(local_config, config_file)
-        PackageConfig(config_file).update_timestamp()
-
         command = self._get_rsync_command(
-            _cygwin_path(config_file),
-            posixpath.join(remote, PackageConfig.FILE_NAME),
+            _cygwin_path(os.path.join(local, PackageConfig.FILE_NAME)),
+            remote,
             show_progress=False,
             additional_args=ADDITIONAL_UPLOAD_ARGS
         )
@@ -344,11 +353,8 @@ class Rdep:
         self._verbose_rsync(command)
 
         if subprocess.call(command) != 0:
-            os.remove(config_file)
             print "Could not upload {0}".format(package)
             return False
-
-        shutil.move(config_file, local_config)
 
         print "Done {0}".format(package)
         return True
@@ -409,9 +415,11 @@ class Rdep:
         url = posixpath.join(url, TIMESTAMPS_FILE)
 
         command = [self._config.get_rsync("rsync"), url, _cygwin_path(self.root)]
+        command += ADDITIONAL_SYNC_ARGS
         self._verbose_rsync(command)
         try:
             output = subprocess.check_output(command)
+            self._fix_permissions(os.path.join(self.root, TIMESTAMPS_FILE))
         except:
             print "Could not sync timestamps file."
             return False

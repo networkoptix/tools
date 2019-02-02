@@ -1,7 +1,0 @@
-- name: "Get images (may take a lot of time)"
-  include_tasks: ./download_image.yml
-  with_items: '{{ images }}'
-
-- name: "Build win 2018 server image"
-  include_tasks: ./build_win2018_server.yml
-  when: 'build_win2018_server is defined and build_win2018_server==True'

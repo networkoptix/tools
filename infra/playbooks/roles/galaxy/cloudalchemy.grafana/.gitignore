@@ -1,7 +1,0 @@
-*.swp
-*.swo
-*.idea
-.molecule
-.cache
-*.kate-swp
-__pycache__/
