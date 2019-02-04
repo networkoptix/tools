@@ -404,21 +404,16 @@ do_build()
         nx_fail "Dir $BUILD_DIR does not exist, run cmake generation first."
     fi
 
-    if [ "$TARGET" = "windows" ]
+    local CONFIG_ARG=()
+    if [ "$TARGET" = "windows" ] && [ "$CONFIG" = "Release" ]
     then
-        case "$CONFIG" in
-            Release) local -r -a CONFIG_ARG=( --config "$CONFIG" );;
-            Debug) local -r -a CONFIG_ARG=();;
-        esac
-    else
-        local -r CONFIG_ARG=""
+        CONFIG_ARG=( --config "$CONFIG" )
     fi
 
+    local STOP_ON_BUILD_ERRORS_ARG=()
     if [ "$STOP_ON_BUILD_ERRORS" = "0" ]
     then
-        local -r -a STOP_ON_BUILD_ERRORS_ARG=( -- -k10000 )
-    else
-        local -r -a STOP_ON_BUILD_ERRORS_ARG=()
+        STOP_ON_BUILD_ERRORS_ARG=( -- -k1000 )
     fi
     
     nx_cd "$VMS_DIR"
