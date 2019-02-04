@@ -8,7 +8,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty on Linux, VMS_DIR name is analyzed.
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
-: ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distributions.
+: ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distribs.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -19,7 +19,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
-: ${STOP_ON_BUILD_ERRORS=1} #< Whether to stop build on the first compile or link error.
+: ${STOP_ON_BUILD_ERRORS=1} #< (Except Windows) Whether to stop build at first compile/link error.
 : ${VEGA_USER="$USER"}
 : ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
