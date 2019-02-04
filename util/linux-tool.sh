@@ -411,7 +411,7 @@ do_build()
     fi
 
     local STOP_ON_BUILD_ERRORS_ARG=()
-    if [ "$STOP_ON_BUILD_ERRORS" = "0" ]
+    if [ "$TARGET" != "windows" ] && [ "$STOP_ON_BUILD_ERRORS" = "0" ]
     then
         STOP_ON_BUILD_ERRORS_ARG=( -- -k1000 )
     fi
