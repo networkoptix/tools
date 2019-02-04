@@ -19,6 +19,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
+: ${STOP_ON_BUILD_ERRORS=1} #< Whether to stop build on the first compile or link error.
 : ${VEGA_USER="$USER"}
 : ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
@@ -406,15 +407,23 @@ do_build()
     if [ "$TARGET" = "windows" ]
     then
         case "$CONFIG" in
-            Release) local -r CONFIG_ARG="--config $CONFIG";;
-            Debug) local -r CONFIG_ARG="";;
+            Release) local -r -a CONFIG_ARG=( --config "$CONFIG" );;
+            Debug) local -r -a CONFIG_ARG=();;
         esac
     else
         local -r CONFIG_ARG=""
     fi
 
+    if [ "$STOP_ON_BUILD_ERRORS" = "0" ]
+    then
+        local -r -a STOP_ON_BUILD_ERRORS_ARG=( -- -k10000 )
+    else
+        local -r -a STOP_ON_BUILD_ERRORS_ARG=()
+    fi
+    
     nx_cd "$VMS_DIR"
-    time nx_verbose cmake --build "$(nx_path "$BUILD_DIR")" $CONFIG_ARG "$@"
+    time nx_verbose cmake --build "$(nx_path "$BUILD_DIR")" \
+        "${CONFIG_ARG[@]}" "$@" "${STOP_ON_BUILD_ERRORS_ARG[@]}"
 }
 
 do_run_ut() # all|TestName "$@"
