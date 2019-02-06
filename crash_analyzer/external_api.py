@@ -223,7 +223,6 @@ class Jira:
     @staticmethod
     def _update_field_names(issue: jira.Issue, name: str, values: list, skip_on: str = ''):
         current_values = set(v.name for v in getattr(issue.fields, name))
-        logger.debug('---- {} = {}'.format(name, current_values))
         if skip_on and skip_on in current_values:
             logger.debug('JIRA issue {} update for {} is skipped on: {}'.format(
                 issue.key, name, skip_on))
