@@ -264,7 +264,7 @@ Call Site
 ntdll!NtWaitForSingleObject
 mswsock!SockWaitForSingleObject
 mswsock!MSAFD_WSPPoll
-mswsock!guard_dispatch_icall_nop
+mswsock!WSPIoctl
 ws2_32!WSAIoctl
 ws2_32!WSAPoll
 nx_network!nx::network::acceptWithTimeout

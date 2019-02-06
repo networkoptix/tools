@@ -14,7 +14,7 @@ def _dict_get(name):
     return TEST_DICT[name]
 
 
-@pytest.mark.parametrize("request, effect", [
+@pytest.mark.parametrize('request, effect', [
     ('s1.v1=abc', "['s1']['v1'] = 'abc'"),
     ('s2.s3.v2=3', "['s2']['s3']['v2'] = 3"),
     ('v3=[1,2,3]', "['v3'] = [1, 2, 3]"),
@@ -36,7 +36,7 @@ def test_update_dict(request, effect):
     ([[1, 2, 3, 4, 5], [6, 7, 8]], [1, 6, 2, 7, 3, 8, 4, 5], dict(limit=100)),
     ([[1, 2, 3], [11, 12], [21, 22, 23, 24]], [1, 11, 21, 2, 12, 22, 3, 23, 24], {}),
     ([[1, 2, 3], [11, 12], [21, 22, 23, 24]], [1, 11, 21, 2, 12], dict(limit=5)),
-])
+], ids=repr)
 def test_update_dict(original, expected_result, options):
     assert expected_result == utils.mixed_merge(copy.deepcopy(original), **options)
 
@@ -107,7 +107,7 @@ def test_file_rw(spec: str, data: Any):
     ['just', 'a', 'list', 'of', 1, 'items'],
     dict(just='a', simple='dict'),
     dict(more=['complex', 2, 'data', True], structure=3.4),
-])
+], ids=repr)
 def test_file_parse(extension: str, data: List[str]):
     with utils.TemporaryDirectory() as directory:
         f = directory.file('file.' + extension)

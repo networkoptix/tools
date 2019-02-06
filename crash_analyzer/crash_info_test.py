@@ -34,7 +34,8 @@ def map_files(action: Callable, directory: str, extension: str):
 @pytest.mark.parametrize(
     'action, report',
     map_files(crash_info.analyze_linux_gdb_bt, 'linux', 'gdb-bt') +
-    map_files(crash_info.analyze_windows_cdb_bt, 'windows', 'cdb-bt')
+    map_files(crash_info.analyze_windows_cdb_bt, 'windows', 'cdb-bt'),
+    ids=lambda a: getattr(a, 'name', None) or a.__name__
 )
 def test_analyze_bt(action: Callable, report: str):
     name = crash_info.Report(os.path.basename(report.path))
@@ -74,7 +75,8 @@ def test_problem_builds(name, expected_result):
 
 @pytest.mark.parametrize(
     'directory, extension',
-    ((utils.Resource('linux'), 'gdb-bt'), (utils.Resource('windows'), 'cdb-bt'))
+    ((utils.Resource('linux'), 'gdb-bt'), (utils.Resource('windows'), 'cdb-bt')),
+    ids=lambda a: getattr(a, 'name', a)
 )
 def test_analyze_reports_concurrent(directory: utils.Directory, extension: str):
     reports = [crash_info.Report(r.name) for r in directory.glob('*.' + extension)]

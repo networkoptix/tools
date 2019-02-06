@@ -10,7 +10,7 @@ import utils
 
 
 @pytest.mark.skipif('sys.platform != "win32"')
-@pytest.mark.parametrize('report',  utils.Resource('dmp', '*.dmp').glob())
+@pytest.mark.parametrize('report',  utils.Resource('dmp', '*.dmp').glob(), ids=lambda r: r.name)
 def test_analyze(report):
     _test_analyze_with_tmp_directory([report])
 

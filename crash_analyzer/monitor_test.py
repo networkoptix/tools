@@ -92,7 +92,7 @@ def monitor_fixture():
     "extension", ['-bt', 'gdb-bt', 'cdb-bt']
 )
 @pytest.mark.parametrize(
-    "restart_after_each_stage", [True, False]
+    "restart_after_each_stage", [True, False], ids=lambda c: 'restart' if c else 'simple'
 )
 @pytest.mark.parametrize(
     "reports_each_run", [10, 1000]

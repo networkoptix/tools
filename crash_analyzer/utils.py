@@ -457,7 +457,8 @@ class MultiDirectory:
 
 class TemporaryDirectory(Directory):
     def __init__(self):
-        super().__init__('./_tmp_directory_' + '{0:0>5}'.format(random.randint(0, 99999)))
+        name = 'ca_test_{0:0>5}'.format(random.randint(0, 99999))
+        super().__init__(os.path.join(os.environ['TMP'], name))
 
     def __enter__(self):
         logging.info('+++ New temporary directory: ' + self.path)
