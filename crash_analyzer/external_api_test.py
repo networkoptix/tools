@@ -112,54 +112,66 @@ def _test_jira():
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a'} == jira.attachments()
         
-        logger.debug('Suppose case is rejected by developer')
+        logger.info('Suppose case is rejected by developer')
         jira.api._transition(jira.issue.key, 'Reject', resolution={'name': 'Rejected'})
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-        logger.debug('No reopen by any version')
+        logger.info('No reopen by any version')
         jira.update_issue(['server--3.2.0.321-tricom-default--linux-x86--c.gdb-bt'])
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-        logger.debug('Suppose case is fixed by developer')
+        logger.info('Suppose case is fixed by developer')
         jira.api._transition(jira.issue.key, 'Reopen')
         assert 'Open' == jira.api._jira.issue(jira.issue.key).fields.status.name
         jira.api._transition(jira.issue.key, 'Start Development', 'Ready to Review', 'Done')
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-        logger.debug('No reopen for the same version')
+        logger.info('No reopen for the same version')
         jira.update_issue(['server--3.1.0.312-abc-default--arm-bpi--b.gdb-bt'])
         assert 'Closed' == jira.issue.fields.status.name
         assert {'a'} == jira.attachments()
 
-        logger.debug('Reopen is for new version')
+        logger.info('Reopen is for new version')
         jira.update_issue(['server--3.2.0.321-uvi-tricom--linux-x86--c.gdb-bt'])
         assert 'Open' == jira.issue.fields.status.name
         assert {'3.1', '3.2'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a', 'c'} == jira.attachments()
 
-        logger.debug('Suppose case is closed by developer with fix version')
+        logger.info('Suppose case is closed by developer with fix version')
         jira.api._transition(jira.issue.key, 'Reject')
         jira.issue.update(fields=dict(customfield_11120=323))
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-        logger.debug('No reopen should happen for report on changeset before fix')
+        logger.info('No reopen should happen for report on changeset before fix')
         jira.update_issue(['server--3.2.0.322-uvi-tricom--arm-rpi--d.gdb-bt'])
         assert 'Closed' == jira.issue.fields.status.name
         assert {'a', 'c'} == jira.attachments()
 
-        logger.debug('Reopen is for new changeset')
+        logger.info('Reopen is for new changeset')
         jira.update_issue(['server--3.2.0.323-xyz-default--arm-rpi--e.gdb-bt'])
         assert 'Open' == jira.issue.fields.status.name
         assert {'3.1', '3.2'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a', 'c', 'e'} == jira.attachments()
 
-        logging.debug('Attachments rotation')
-        jira.update_issue([
-            'server--3.2.0.324-xyz-default--arm-rpi--f.gdb-bt',
-            'server--4.0.0.412-abc-default--linux-x86--g.gdb-bt',
-        ])
+        logger.info('Suppose developer suppose developer set fix version future')
+        jira.api._update_field_names(jira.issue, 'fixVersions', ['Future'])
+        jira.issue.update(fields={'fixVersions': [{'name': 'Future'}]})
+        assert {'Future'} == jira.field_set('fixVersions')
+
+        logging.info('Attachments rotation without fix version update')
+        jira.update_issue(['server--3.2.0.324-xyz-default--arm-rpi--f.gdb-bt'])
+        assert {'3.1', '3.2'} == jira.field_set('versions')
+        assert {'Future'} == jira.field_set('fixVersions')
+        assert {'c', 'e', 'f'} == jira.attachments()
+
+        logger.info('Suppose issue is marked as duplicate')
+        jira.api._transition(jira.issue.key, 'Reject', resolution={'name': 'Duplicate'})
+        assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
+
+        logging.info('Attachments rotation still happens')
+        jira.update_issue(['server--4.0.0.412-abc-default--linux-x86--g.gdb-bt'])
         assert {'3.1', '3.2', '4.0'} == jira.field_set('versions')
-        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        assert {'Future'} == jira.field_set('fixVersions')
         assert {'e', 'f', 'g'} == jira.attachments()

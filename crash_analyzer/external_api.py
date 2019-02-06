@@ -191,9 +191,10 @@ class Jira:
                 if min_fix_version >= max_report_version:
                     return logger.debug('JIRA issue {} is already fixed'.format(key))
 
-            self._transition(issue, 'Reopen')
-            logger.info('Reopen JIRA issue {} for reports from {}'.format(
-                key, ', '.join(r.full_version for r in reports)))
+            if issue.fields.resolution.name != 'Duplicate':
+                self._transition(issue, 'Reopen')
+                logger.info('Reopen JIRA issue {} for reports from {}'.format(
+                    key, ', '.join(r.full_version for r in reports)))
                 
         versions = set()
         fix_versions = set()
@@ -206,7 +207,7 @@ class Jira:
             self._attach_files(key, files)
             
         self._update_field_names(issue, 'versions', versions)
-        self._update_field_names(issue, 'fixVersions', fix_versions)
+        self._update_field_names(issue, 'fixVersions', fix_versions, skip_on='Future')
 
     def all_issues(self):
         issues = []
@@ -220,8 +221,14 @@ class Jira:
         return set(v for v in self._fix_versions if v >= version)
         
     @staticmethod
-    def _update_field_names(issue: jira.Issue, name: str, values: list):
+    def _update_field_names(issue: jira.Issue, name: str, values: list, skip_on: str = ''):
         current_values = set(v.name for v in getattr(issue.fields, name))
+        logger.debug('---- {} = {}'.format(name, current_values))
+        if skip_on and skip_on in current_values:
+            logger.debug('JIRA issue {} update for {} is skipped on: {}'.format(
+                issue.key, name, skip_on))
+            return
+
         new_values = current_values | set(values)
         if current_values != new_values:
             issue.update(fields={name: [{'name': v} for v in new_values]})
