@@ -335,7 +335,7 @@ do_gen() # [cache] "$@"
 {
     case "$CONFIG" in
         Release) local -r CONFIG_ARG="-DCMAKE_BUILD_TYPE=$CONFIG";;
-        Debug) local -r CONFIG_ARG="";;
+        Debug) local -r CONFIG_ARG="";; #< Debug is cmake's default.
     esac
 
     local -i CACHE_ARG=0
@@ -436,12 +436,12 @@ do_run_ut() # all|TestName "$@"
 
     if [ "$TARGET" = "windows" ]
     then
-        local -r CONFIG_ARG="-C $CONFIG"
+        local -r CONFIG_ARGS=( -C "$CONFIG" )
     else
-        local -r CONFIG_ARG=""
+        local -r CONFIG_ARGS=()
     fi
 
-    nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
+    nx_verbose ctest "${CONFIG_ARGS[@]}" $TEST_ARG "$@"
     local -i -r RESULT=$?
     if [[ $RESULT = 0 ]]
     then
@@ -616,18 +616,23 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
     local -r SRC="$1" && shift
 
+    local GENERATION_ARGS=()
+    local BUILD_ARGS=()
+
     if [[ $MSVC = 1 ]]
     then
-        local -r GENERATION_ARGS=( -Ax64 -Thost=x64 )
-        local -r BUILD_ARGS=( --config Release )
+        BUILD_ARGS+=( --config "$CONFIG" )
+        GENERATION_ARGS+=( -Ax64 -Thost=x64 ) #< No need to specify Debug/Release for MSVC here.
     else
-        local -r BUILD_ARGS=()
-        local GENERATION_ARGS=( -DCMAKE_BUILD_TYPE=Release )
-        if nx_is_cygwin
+        GENERATION_ARGS+=( -DCMAKE_BUILD_TYPE="$CONFIG" )
+
+        # Use Ninja if it is on PATH, but not on Cygwin where Ninja often does not work.
+        if which ninja >/dev/null && ! nx_is_cygwin
         then
-            GENERATION_ARGS+=( -DCMAKE_C_COMPILER=gcc -G "Unix Makefiles" )
+            GENERATION_ARGS+=( -GNinja )
         else
-            GENERATION_ARGS+=( -G Ninja )
+            BUILD_ARGS+=( -- -j ) #< Use all CPU cores.
+            GENERATION_ARGS+=( -DCMAKE_C_COMPILER=gcc -G "Unix Makefiles" )
         fi
     fi
 
@@ -640,7 +645,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     if nx_is_cygwin
     then
         local -r UT_EXE_PATTERN="nx_kit_*.exe"
-        nx_append_path "Release"
+        nx_append_path "$CONFIG"
     else
         local -r UT_EXE_PATTERN="nx_kit_*"
     fi
@@ -655,7 +660,7 @@ do_kit() # "$@"
         shift
         if ! nx_is_cygwin
         then
-            nx_fail "ERROR: 'cygwin' option is supported only on cygwin."
+            nx_fail "'cygwin' option is supported only on cygwin."
         fi
         local -r -i MSVC=0
     else
@@ -1438,6 +1443,7 @@ main()
             ;;
         #..........................................................................................
         kit)
+            log_build_vars
             do_kit "$@"
             ;;
         sdk)
