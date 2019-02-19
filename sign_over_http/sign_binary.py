@@ -40,6 +40,7 @@ def sign_binary(
     try:
         r = session.post(url, params=params, files=files, timeout=timeout)
         if r.status_code != 200:
+            print('ERROR: Status code {}'.format(r.status_code))
             print('ERROR: {}'.format(r.text))
             return r.status_code
 

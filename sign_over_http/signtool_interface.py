@@ -129,7 +129,7 @@ def sign_software(
     sign_password,
     timestamp_server
 ):
-    execute_command(_sign_software_command(
+    return execute_command(_sign_software_command(
         signtool_directory=signtool_directory,
         target_file=target_file,
         certificate=certificate,
@@ -142,7 +142,7 @@ def sign_hardware(
     target_file,
     timestamp_server
 ):
-    execute_command(_sign_hardware_command(
+    return execute_command(_sign_hardware_command(
         signtool_directory=signtool_directory,
         target_file=target_file,
         timestamp_server=timestamp_server))

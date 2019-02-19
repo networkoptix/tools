@@ -9,6 +9,7 @@ import yaml
 from aiohttp import web
 from datetime import datetime
 from signtool_interface import sign_software, sign_hardware
+from environment import execute_command
 
 certs_directory = os.getcwd()
 signtool_directory = os.getcwd()
@@ -28,6 +29,30 @@ In case of hardware signing, file is not needed.
 
 def log(line):
     print('{}: {}'.format(str(datetime.now()), line))
+
+
+def prerare_diagnostics(process_result):
+    text = process_result.stdout
+    if process_result.stderr:
+        text += '\n' + process_result.stderr
+    text = text.replace('\n\n', '\n')
+    return text
+
+
+def print_certificate_info(certificate, password):
+    if not os.path.exists(certificate):
+        log('File {} was not found'.format(certificate))
+        return
+
+    command = ['certutil', '-dump', '-p', password, certificate]
+    try:
+        result = execute_command(command)
+        log(result.stdout)
+        log(result.stderr)
+    except subprocess.SubprocessError as e:
+        log(e)
+    except FileNotFoundError as e:
+        log(e)
 
 
 def sign_binary(customization, trusted_timestamping, target_file):
@@ -54,7 +79,8 @@ def sign_binary(customization, trusted_timestamping, target_file):
         certificate = os.path.join(signing_path, config.get('file'))
         sign_password = config.get('password')
         log('Using certificate {0}'.format(certificate))
-        sign_software(
+        print_certificate_info(certificate, sign_password)
+        return sign_software(
             signtool_directory=signtool_directory,
             target_file=target_file,
             certificate=certificate,
@@ -62,7 +88,7 @@ def sign_binary(customization, trusted_timestamping, target_file):
             timestamp_server=timestamp_server)
     else:
         log('Using hardware key')
-        sign_hardware(
+        return sign_hardware(
             signtool_directory=signtool_directory,
             target_file=target_file,
             timestamp_server=timestamp_server)
@@ -94,18 +120,28 @@ async def sign_handler(request):
         '(trusted)' if trusted_timestamping else '(no timestamp)'))
 
     try:
-        sign_binary(
+        result = sign_binary(
             customization=customization,
             trusted_timestamping=trusted_timestamping,
             target_file=target_file_name)
+        if result.returncode != 0:
+            diagnostics = prerare_diagnostics(result)
+            log('Signing failed!\n{}'.format(diagnostics))
+            return web.Response(status=418, text=diagnostics)
+
+        log('Signing complete')
+        log('================')
         content = open(target_file_name, 'rb')
         return web.Response(body=content)
     except FileNotFoundError as e:
+        log('================')
         return web.Response(status=418, text=str(e))
-    except subprocess.CalledProcessError as e:
+    except subprocess.SubprocessError as e:
+        log('================')
         return web.Response(status=418, text="{}\n{}".format(e, e.output))
     except Exception as e:
         print(repr(e))
+        log('================')
         return web.Response(status=418, text=str(e))
 
 

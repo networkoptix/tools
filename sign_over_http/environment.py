@@ -9,7 +9,7 @@ def execute_command(command, verbose=False):
     if verbose:
         print_command(command)
     try:
-        subprocess.check_output(command, stderr=subprocess.STDOUT)
+        return subprocess.run(command, capture_output=True, text=True)
     except Exception as e:
         if not verbose:
             print_command(command)
