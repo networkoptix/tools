@@ -1559,8 +1559,14 @@ main()
 
             # TODO: Support customizations other than 'default' and 'meta'.
             case "$CUSTOMIZATION" in
-                metavms) local -r LINUX_SUFFIX="-metavms";;
-                default) local -r LINUX_SUFFIX="";;
+                ""|default)
+                    local -r LINUX_SUFFIX=""
+                    local -r WINDOWS_DIR="Network Optix\\Network Optix Media Server"
+                    ;;
+                metavms)
+                    local -r LINUX_SUFFIX="-metavms"
+                    local -r WINDOWS_DIR="Network Optix\\Network Optix MetaVMS Media Server"
+                    ;;
                 *) nx_fail "Customizations other than 'metavms' and 'default' not supported yet."
             esac
             
@@ -1572,7 +1578,7 @@ main()
                     else
                         local BASE_DIR="C:\\Users\\$USER"
                     fi
-                    BASE_DIR+="\\AppData\\Local\\Network Optix"
+                    BASE_DIR+="\\AppData\\Local\\$WINDOWS_DIR"
                     ;;
                 linux)
                     local -r BASE_DIR="/opt/networkoptix$LINUX_SUFFIX"
