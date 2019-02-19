@@ -116,7 +116,7 @@ nx_log_command() # "$@"
     local ARGS=""
     nx_concat_ARGS "$@"
 
-    echo $(nx_dgreen)"+ $@"$(nx_nocolor) |sed "s#$HOME/#~/#g"
+    echo $(nx_dgreen)"+ $ARGS"$(nx_nocolor) |sed "s#$HOME/#~/#g"
     
     [ $NX_VERBOSE = 1 ] && set -x
 }
@@ -423,7 +423,7 @@ nx_concat_ARGS() # "$@"
         for ARG in "$@"; do
             case "$ARG" in
                 "["*"]") # Anything in square brackets.
-                    ARGS+="${ARG:1:-1} " #< Trim surrounding braces.
+                    ARGS+="${ARG:1:-1} " #< Trim surrounding brackets.
                     ;;
                 *)
                     local ARG_ESCAPED

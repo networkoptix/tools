@@ -80,6 +80,7 @@ Here <command> can be one of the following:
  stop-c # Stop client-bin.
  run-ut all|test_name [args] # Run all or the specified unit test via ctest.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
+ log-s [installed] [find] # Tail or find server main log file for the developed or installed VMS.
 
  dmp file.dmp [args] # Cygwin-only: Analyze .dmp with crash_analyzer. Requires win-python3.
 
@@ -92,7 +93,8 @@ Here <command> can be one of the following:
  test-distrib [checksum] [no-build] orig/archives/dir [cmake-gen-args] # Test if built matches orig.
  bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
  vs [args] # Open the VMS project in Visual Studio (Windows-only).
-
+ thg [args] # Open Tortoise HG for the VMS project dir; if no args, "log" command is issued.
+ 
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
 
@@ -1417,8 +1419,8 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|sdk|start-s|start-c|run-ut|testcamera| \
-        share|gen|cd|build|cmake|distrib|test-distrib|bak|vs| \
+        apidoc|kit|sdk|start-s|start-c|run-ut|testcamera|log-s| \
+        share|gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
         print-dirs|print-vars|rsync)
             setup_vars
             ;;
@@ -1538,6 +1540,55 @@ main()
                     "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
             fi
             ;;
+        log-s)
+            if (($# >= 1)) && [[ $1 == "installed" ]]
+            then
+                shift
+                local -r -i INSTALLED=1
+            else
+                local -r -i INSTALLED=0
+            fi
+            
+            if (($# >= 1)) && [[ $1 == "find" ]]
+            then
+                shift
+                local -r -i FIND=1
+            else
+                local -r -i FIND=0
+            fi
+
+            # TODO: Support customizations other than 'default' and 'meta'.
+            case "$CUSTOMIZATION" in
+                metavms) local -r LINUX_SUFFIX="-metavms";;
+                default) local -r LINUX_SUFFIX="";;
+                *) nx_fail "Customizations other than 'metavms' and 'default' not supported yet."
+            esac
+            
+            case "$TARGET" in
+                windows)
+                    if [[ $INSTALLED == 1 ]]
+                    then
+                        local BASE_DIR="C:\\Windows\\System32\\config\\systemprofile"
+                    else
+                        local BASE_DIR="C:\\Users\\$USER"
+                    fi
+                    BASE_DIR+="\\AppData\\Local\\Network Optix"
+                    ;;
+                linux)
+                    local -r BASE_DIR="/opt/networkoptix$LINUX_SUFFIX"
+                    ;;
+                *) nx_fail "Target [$TARGET] not supported yet.";;
+            esac
+            
+            local LOG_FILE
+            nx_find_file LOG_FILE "main log file" "$BASE_DIR" -name "log_file.log"
+            if [[ $FIND == 1 ]]
+            then
+                echo "$LOG_FILE"
+            else
+                nx_verbose tail -F "$LOG_FILE"
+            fi
+            ;;
         #..........................................................................................
         dmp)
             if ! nx_is_cygwin
@@ -1599,8 +1650,19 @@ main()
             [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
             local -r VS_EXE="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/devenv.exe"
             [ ! -f "$VS_EXE" ] && nx_fail "Cannot find VS executable: $VS_EXE"
-            nx_log_command "$VS_EXE" "$SLN" "$@"
             cmd /c start "$VS_EXE" "$SLN" "$@"
+            ;;
+        thg)
+            nx_is_cygwin || nx_fail "Linux support not implemented yet."
+            if (($# >= 1))
+            then
+                local -r CMD=( thg "$@" )
+            else
+                local -r CMD=( thg log )
+            fi
+            (cd "$VMS_DIR"
+                cmd /c start "${CMD[@]}"
+            )
             ;;
         list)
             do_list "$@"
