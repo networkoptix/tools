@@ -11,22 +11,7 @@ sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
 
-ignored = [
-    # QT files
-    '/qstringbuilder.h',
-    '/qstring.h',
-    '/qmatrix.h',
-    '/qaction.h',
-    '/qnetworkcookiejar.h',
-    '/qboxlayout.h',
-    '/qgridlayout.h',
-
-    # 3rd-party libraries
-    '/boost', '/libavutil', '/openssl', '/directx', '/festival',
-
-    # Project files
-    '.prf', '.pro(1)', 'Project MESSAGE:'
-]
+ignored = []
 
 errors = [
     # Module lacks Q_OBJECT macro
