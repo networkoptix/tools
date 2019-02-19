@@ -1,4 +1,4 @@
 software: True
-file: '../dev_key.p12'
+file: '../certificate.p12'
 password: 'qweasd123'
 timestamp_server: 'http://timestamp.comodoca.com/rfc3161'
