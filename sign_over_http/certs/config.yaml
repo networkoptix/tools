@@ -1,4 +1,16 @@
 software: True
 file: '../certificate.p12'
 password: 'qweasd123'
-timestamp_server: 'http://timestamp.comodoca.com/rfc3161'
+timestamp_server_list_url: 'https://gist.github.com/Manouchehri/fd754e402d98430243455713efada710'
+timestamp_servers:
+  - 'http://sha256timestamp.ws.symantec.com/sha256/timestamp'
+  - 'http://sha256timestamp.ws.symantec.com/sha256/timestamp'
+  - 'http://timestamp.globalsign.com/scripts/timstamp.dll'
+  - 'http://timestamp.comodoca.com/rfc3161'
+  - 'http://timestamp.wosign.com'
+  - 'http://tsa.startssl.com/rfc3161'
+  - 'http://time.certum.pl'
+  - 'http://timestamp.digicert.com'
+  - 'http://zeitstempel.dfn.de'
+  - 'http://timestamp.apple.com/ts01'
+  - 'http://tsa.wotrus.com'

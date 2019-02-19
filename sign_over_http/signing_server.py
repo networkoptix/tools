@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import random
 import subprocess
 import tempfile
 import yaml
@@ -72,7 +73,8 @@ def sign_binary(customization, trusted_timestamping, target_file):
 
     timestamp_server = None
     if trusted_timestamping:
-        timestamp_server = config.get('timestamp_server')
+        timestamp_servers = config.get('timestamp_servers')
+        timestamp_server = random.choice(timestamp_servers)
         log('Using trusted timestamping server {0}'.format(timestamp_server))
 
     if config.get('software'):
@@ -120,10 +122,16 @@ async def sign_handler(request):
         '(trusted)' if trusted_timestamping else '(no timestamp)'))
 
     try:
-        result = sign_binary(
-            customization=customization,
-            trusted_timestamping=trusted_timestamping,
-            target_file=target_file_name)
+        # Try several trusted timestamping servers in case of problems
+        retries = 5 if trusted_timestamping else 1
+        for try_sign in range(retries):
+            result = sign_binary(
+                customization=customization,
+                trusted_timestamping=trusted_timestamping,
+                target_file=target_file_name)
+            if result.returncode == 0:
+                break
+
         if result.returncode != 0:
             diagnostics = prerare_diagnostics(result)
             log('Signing failed!\n{}'.format(diagnostics))
