@@ -14,6 +14,7 @@ from environment import execute_command
 
 certs_directory = os.getcwd()
 signtool_directory = os.getcwd()
+log_file = None
 CONFIG_NAME = 'config.yaml'
 
 '''
@@ -29,7 +30,11 @@ In case of hardware signing, file is not needed.
 
 
 def log(line):
-    print('{}: {}'.format(str(datetime.now()), line))
+    message = '{}: {}'.format(str(datetime.now()), line)
+    print(message)
+    if log_file:
+        with open(log_file, 'a+') as f:
+            f.write(message + '\n')
 
 
 def prerare_diagnostics(process_result):
@@ -159,7 +164,14 @@ def main():
     parser.add_argument('-s', '--signtool', help='Signtool directory')
     parser.add_argument('-n', '--host', help='Host to listen')
     parser.add_argument('-p', '--port', help='Port to listen')
+    parser.add_argument('-l', '--log', help='Additional log file')
     args = parser.parse_args()
+
+    if args.log:
+        global log_file
+        log_file = args.log
+
+    log('------------------------------ Process started ------------------------------')
 
     if args.signtool:
         global signtool_directory
