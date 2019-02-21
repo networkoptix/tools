@@ -17,6 +17,8 @@ signtool_directory = os.getcwd()
 log_file = None
 CONFIG_NAME = 'config.yaml'
 
+printed_certificates = set()
+
 '''
 Sample config may look like:
 
@@ -46,6 +48,11 @@ def prerare_diagnostics(process_result):
 
 
 def print_certificate_info(certificate, password):
+    global printed_certificates
+    if certificate in printed_certificates:
+        return
+    printed_certificates.add(certificate)
+
     if not os.path.exists(certificate):
         log('File {} was not found'.format(certificate))
         return
