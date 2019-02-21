@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import aiofiles
 import os
 import random
 import subprocess
@@ -119,11 +120,14 @@ async def sign_handler(request):
 
     with tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False) as target_file:
         target_file_name = target_file.name
+
+    async with aiofiles.open(target_file_name, 'w+b') as target_file:
         while True:
             chunk = await field.read_chunk()  # 8192 bytes by default.
             if not chunk:
                 break
-            target_file.write(chunk)
+            await target_file.write(chunk)
+        await target_file.flush()
 
     params = request.query
     customization = params['customization']
@@ -165,6 +169,12 @@ async def sign_handler(request):
         return web.Response(status=418, text=str(e))
 
 
+async def create_application():
+    app = web.Application()
+    app.add_routes([web.post('/', sign_handler)])
+    return app
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--certs', help='Certificates directory')
@@ -191,8 +201,7 @@ def main():
     log('Using {} as a certificates directory'.format(certs_directory))
     log('Using {} as a temporary directory'.format(tempfile.gettempdir()))
 
-    app = web.Application()
-    app.add_routes([web.post('/', sign_handler)])
+    app = create_application()
     web.run_app(app, host=args.host, port=args.port)
 
 
