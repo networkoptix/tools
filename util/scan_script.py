@@ -97,6 +97,11 @@ and converts them from unicode to python lowercase strings
 
 
 def fix_encoding(input_list):
+    escape_list = [
+        '\r',
+        '\t',
+        '\n'
+    ]
     for device in input_list:
         try:
             unicode(device[0], errors='strict')
@@ -108,7 +113,11 @@ def fix_encoding(input_list):
             device[1].lower()
         except TypeError:
             device[1] = device[1].encode('ascii', 'ignore').lower()
-
+    for updated_device in input_list:
+        for string in updated_device:
+            for escape_char in escape_list:
+                if escape_char in string:
+                    string = string.replace(escape_char, '')
 
 """compare_lists function compares two lists, removes matched elements from
 the initial lists and returns intersections for both input lists
@@ -137,7 +146,7 @@ def write_list_to_file(input_list, output_file_name):
     with open(output_file_name, 'w') as _file:
         _file.write('Vendor|Model:\n')
         for item in input_list:
-            _file.write(item[0]+'|'+item[1]+'\n')
+            _file.write('"' + item[0]+'|'+item[1]+'",\n')
 
 """function filter_exceptions takes list of lists as
 an input and  filters out badly named devices
@@ -161,7 +170,8 @@ def filter_exceptions(input_list):
         'group',
         'private',
         'general',
-        'onvif_encoder'
+        'onvif_encoder',
+        'n/a'
         ]
     for device_name in reversed(input_list):
         isFiltered = 0
@@ -196,8 +206,8 @@ def main():
         for i in range(0, 2):
             for stat_list in stat_lists[i]:
                 for resource_list in resource_lists[i]:
-                    if (stat_list[0].startswith(resource_list[0]) and
-                            stat_list[1].startswith(resource_list[1])):
+                    if (not (not stat_list[0].startswith(resource_list[0]) or not stat_list[1].startswith(
+                            resource_list[1]))):
                         result[i].append(stat_list)
         for i in range(0, 2):
             for x in result[i]:
