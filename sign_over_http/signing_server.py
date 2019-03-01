@@ -116,8 +116,9 @@ async def sign_handler(request):
     source_filename = field.filename
     source_path, filename = os.path.split(source_filename)
     log('======== Signing {} ========'.format(filename))
+    extension = filename[-4:]
 
-    with tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False) as target_file:
+    with tempfile.NamedTemporaryFile(prefix=filename, suffix=extension, delete=False) as target_file:
         target_file_name = target_file.name
         while True:
             chunk = await field.read_chunk()  # 8192 bytes by default.
