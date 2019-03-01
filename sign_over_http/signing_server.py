@@ -182,12 +182,12 @@ def main():
 
     if args.signtool:
         global signtool_directory
-        signtool_directory = args.signtool
+        signtool_directory = os.path.abspath(args.signtool)
     log('Using {} as a signtool folder'.format(signtool_directory))
 
     if args.certs:
         global certs_directory
-        certs_directory = args.certs
+        certs_directory = os.path.abspath(args.certs)
     log('Using {} as a certificates directory'.format(certs_directory))
     log('Using {} as a temporary directory'.format(tempfile.gettempdir()))
 

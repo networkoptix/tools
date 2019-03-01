@@ -10,6 +10,8 @@ def execute_command(command, verbose=False):
         print_command(command)
     try:
         return subprocess.run(command, capture_output=True, text=True)
+    except FileNotFoundError as e:
+        print("File {} was not found".format(command[0]))
     except Exception as e:
         if not verbose:
             print_command(command)
