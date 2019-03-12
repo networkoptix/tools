@@ -5,7 +5,7 @@ source "$(dirname "$0")/utils.sh"
 
 nx_load_config "${RC=".linux-toolrc"}"
 : ${VMS_DIR=""} #< nx_vms repo.
-: ${TARGET=""} #< Target; "linux" for desktop Linux. If empty on Linux, VMS_DIR name is analyzed.
+: ${TARGET=""} #< Target; "linux" for desktop Linux. If empty, detect "linux"/"windows".
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
 : ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distribs.
@@ -127,27 +127,16 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         then
             TARGET="windows"
         else
-            # Trying auto-detect from VMS_DIR being "*-target".
             TARGET="linux"
-            if [[ $VMS_DIR =~ ^.+-([^-]+)$ ]]
-            then
-                local -r SUFFIX="${BASH_REMATCH[1]}"
-                case "$SUFFIX" in
-                    windows|linux|tx1|bpi|rpi|bananapi|android-arm|edge1) TARGET="$SUFFIX";;
-                    *) `# Suffix is not a recognized target, ignore it. #`;;
-                esac
-            fi
         fi
     fi
-
-    # If TARGET is already defined, use its value.
 
     local DEFAULT_CUSTOMIZATION=""
 
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
         linux) QT_DIR="$LINUX_QT_DIR";;
-        tx1|bpi|rpi|bananapi|android-arm|macosx) `# Do nothing #`;;
+        arm64|bpi|rpi|bananapi|android-arm|macosx) `# Do nothing #`;;
         edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
@@ -366,6 +355,7 @@ do_gen() # [cache] "$@"
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
         macosx) local -r TARGET_ARG="";;
+        arm64) local -r TARGET_ARG="-DtargetDevice=linux-arm64";;
         *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
     esac
 
@@ -638,7 +628,10 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
         fi
     fi
 
-    nx_verbose cmake "$SRC" "${GENERATION_ARGS[@]}" "$@" || return $?
+    nx_verbose cmake "$SRC" \
+        -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
+        "${GENERATION_ARGS[@]}" "$@" \
+        || return $?
     nx_echo
     time nx_verbose cmake --build . "${BUILD_ARGS[@]}" || return $?
     nx_echo
@@ -969,24 +962,6 @@ test_distrib_archives()
     return $RESULT
 }
 
-# Test .tgz-based distribution.
-#
-# [in] CHECKSUM 0|1
-# [in] ORIGINAL_DIR
-#
-test_distrib_tgz()
-{
-    local -r TGZ_MASK="*.tgz"
-
-    local BUILT_TGZ
-    nx_find_file BUILT_TGZ "distribution .tgz" "$BUILD_DIR" -name "$TGZ_MASK"
-
-    local -r ORIGINAL_TGZ="$ORIGINAL_DIR"/$(basename "$BUILT_TGZ")
-
-    nx_echo
-    compare_distrib_tar_gz "distribution .tgz" $CHECKSUM "$ORIGINAL_TGZ" "$BUILT_TGZ"
-}
-
 # [out] FILE
 # [in] ORIGINAL_DIR
 # [in] BUILD_DIR
@@ -1099,14 +1074,11 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
     local -i RESULT=0
     case "$TARGET" in
-        linux)
+        arm64|linux)
             test_distrib_debs || RESULT=$?
             ;;
         bpi|rpi|bananapi|edge1)
             test_distrib_archives || RESULT=$?
-            ;;
-        tx1)
-            test_distrib_tgz || RESULT=$?
             ;;
         *)
             nx_fail "Target \"$TARGET\" is not supported by this command."
