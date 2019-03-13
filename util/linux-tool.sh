@@ -19,7 +19,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
-: ${STOP_ON_BUILD_ERRORS=1} #< (Except Windows) Whether to stop build at first compile/link error.
+: ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
 : ${VEGA_USER="$USER"}
 : ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
@@ -403,7 +403,7 @@ do_build()
     fi
 
     local STOP_ON_BUILD_ERRORS_ARG=()
-    if [ "$TARGET" != "windows" ] && [ "$STOP_ON_BUILD_ERRORS" = "0" ]
+    if [ "$TARGET" != "windows" ] && [ "$STOP_ON_ERROR" = "0" ]
     then
         STOP_ON_BUILD_ERRORS_ARG=( -- -k1000 )
     fi
