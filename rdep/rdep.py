@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import argparse
 import os
 import sys
@@ -8,7 +9,10 @@ import subprocess
 import tempfile
 import posixpath
 import platform
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 from rdep_config import RdepConfig, RepositoryConfig, PackageConfig
 
@@ -70,8 +74,8 @@ class Rdep:
             print >> sys.stderr, "Could not init repository at {0}".format(path)
             return False
 
-        print "Initialized repository at {0}".format(path)
-        print "The repository will use URL = {0}".format(url)
+        print("Initialized repository at {0}".format(path))
+        print("The repository will use URL = {0}".format(url))
 
         return True
 
@@ -87,7 +91,7 @@ class Rdep:
 
     def _verbose_message(self, message):
         if self.verbose:
-            print message
+            print(message)
 
     def _verbose_rsync(self, command):
         self._verbose_message("Executing rsync:\n{0}".format(" ".join(command)))
@@ -156,7 +160,7 @@ class Rdep:
     def load_timestamps_for_fast_check(self):
         self._timestamps = {}
         try:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.optionxform = str
             config.read(os.path.join(self.root, TIMESTAMPS_FILE))
 
@@ -188,7 +192,7 @@ class Rdep:
                     "Treat package {0}/{1} as not found due to fast check".format(target, package))
                 return self.SYNC_NOT_FOUND
 
-            if not package_ts is None and not ts is None and ts <= package_ts:
+            if package_ts is not None and ts is not None and ts <= package_ts:
                 self._verbose_message(
                     "Skipping package {0}/{1} due to fast check".format(target, package))
                 return self.SYNC_SUCCESS
@@ -205,13 +209,13 @@ class Rdep:
             additional_args=ADDITIONAL_SYNC_ARGS)
         self._verbose_rsync(command)
         with open(os.devnull, "w") as fnull:
-            if subprocess.call(command, stderr = fnull) != 0:
+            if subprocess.call(command, stderr=fnull) != 0:
                 return self.SYNC_NOT_FOUND
 
         self._fix_permissions(config_file)
 
         newtime = PackageConfig(config_file).get_timestamp()
-        if newtime == None:
+        if newtime is None:
             os.remove(config_file)
             return self.SYNC_NOT_FOUND
 
@@ -245,7 +249,7 @@ class Rdep:
         return self.SYNC_SUCCESS
 
     def sync_package(self, package):
-        print "Synching {0}...".format(package)
+        print("Synching {0}...".format(package))
 
         to_remove = []
 
@@ -266,10 +270,10 @@ class Rdep:
             return False
 
         for path in to_remove:
-            print "Removing local {0}".format(path)
+            print("Removing local {0}".format(path))
             shutil.rmtree(path)
 
-        print "Package {0} downloaded for target {1}".format(package, target)
+        print("Package {0} downloaded for target {1}".format(package, target))
         return True
 
     def sync_packages(self, packages):
@@ -297,7 +301,7 @@ class Rdep:
             print >> sys.stderr, "Add \"name = Nx User <nxuser@networkoptix.com>\" to the section [General]."
             return False
 
-        print "Uploading {0}...".format(package)
+        print("Uploading {0}...".format(package))
 
         url = self._repo_config.get_url()
         remote = posixpath.join(url, target, package)
@@ -353,10 +357,10 @@ class Rdep:
         self._verbose_rsync(command)
 
         if subprocess.call(command) != 0:
-            print "Could not upload {0}".format(package)
+            print("Could not upload {0}".format(package))
             return False
 
-        print "Done {0}".format(package)
+        print("Done {0}".format(package))
         return True
 
     def upload_packages(self, packages):
@@ -386,21 +390,22 @@ class Rdep:
         url = self._repo_config.get_url()
         url = posixpath.join(url, target) + "/"
 
-        command = [ self._config.get_rsync("rsync"), "--list-only", url ]
+        command = [self._config.get_rsync("rsync"), "--list-only", url]
         self._verbose_rsync(command)
         try:
             output = subprocess.check_output(command)
         except:
-            print "Could not list packages for {0}".format(target)
+            print("Could not list packages for {0}".format(target))
             return False
 
+        print(output is str)
         for line in output.split('\n'):
             pos = line.rfind(' ')
             if pos >= 0:
                 line = line[pos + 1:]
 
             if line and line != ".":
-                print line
+                print(line)
 
         return True
 
@@ -408,7 +413,7 @@ class Rdep:
         path = self.locate_package(package)
         if not path:
             print >> sys.stderr, "Package {0} not found.".format(package)
-        print path
+        print(path)
 
     def sync_timestamps(self):
         url = self._repo_config.get_url()
@@ -418,11 +423,12 @@ class Rdep:
         command += ADDITIONAL_SYNC_ARGS
         self._verbose_rsync(command)
         try:
-            output = subprocess.check_output(command)
+            subprocess.check_output(command)
             self._fix_permissions(os.path.join(self.root, TIMESTAMPS_FILE))
         except:
-            print "Could not sync timestamps file."
+            print("Could not sync timestamps file.")
             return False
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -463,15 +469,15 @@ def main():
         return rdep.sync_timestamps()
 
     if args.target:
-        rdep.targets = [ args.target ]
+        rdep.targets = [args.target]
 
     packages = args.packages
     if root and (not rdep.targets or not packages):
         detected_target, package = rdep.detect_package_and_target(os.getcwd())
         if detected_target and not rdep.targets:
-            rdep.targets = [ detected_target ]
+            rdep.targets = [detected_target]
         if package and not packages:
-            packages = [ package ]
+            packages = [package]
 
     if not rdep.targets:
         print >> sys.stderr, "Please specify target."
@@ -490,6 +496,7 @@ def main():
         return rdep.upload_packages(packages)
     else:
         return rdep.sync_packages(packages)
+
 
 if __name__ == "__main__":
     if not main():

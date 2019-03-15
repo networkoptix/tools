@@ -1,6 +1,10 @@
 import os
-import ConfigParser
 import time
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 
 class ConfigHelper:
@@ -11,7 +15,7 @@ class ConfigHelper:
             self.__file_name = os.path.join(path, self.FILE_NAME)
         else:
             self.__file_name = path
-        self.__config = ConfigParser.ConfigParser()
+        self.__config = configparser.ConfigParser()
         try:
             self.__config.read(self.__file_name)
         except:
