@@ -153,7 +153,12 @@ async def sign_handler(request):
         log('Signing complete')
         log('================')
         content = open(target_file_name, 'rb')
-        return web.Response(body=content)
+        response = web.Response(body=content)
+        await response.prepare(request)
+        await response.write_eof()
+        os.remove(target_file_name)
+        return response
+
     except FileNotFoundError as e:
         log('================')
         return web.Response(status=418, text=str(e))
