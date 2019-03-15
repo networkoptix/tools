@@ -40,13 +40,13 @@ DIST_URLS = [
 ]
 
 DIST_SUFFIXES = [
-    """x64[a-z-_]+%s(-only)?\.(msi|exe)""",
-    """%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)""",
+    r'x64[a-z-_]+%s(-only)?\.(msi|exe)',
+    r'%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)',
 ]
 
 PDB_SUFFIXES = [
-    """x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip""",
-    """(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip""",
+    r'x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip',
+    r'(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip',
 ]
 
 CUSTOMIZATIONS = (
@@ -136,6 +136,8 @@ class CdbSession:
         self.shell = ['cdb', '-z', dump]
         if exe_dir:
             self.shell += ['-i', exe_dir]
+            if not pdb_dir:
+                pdb_dir = exe_dir
 
         if pdb_dir:
             self.shell += ['-y', 'srv*;symsrv*;' + pdb_dir]
@@ -323,7 +325,7 @@ class DumpAnalyzer:
             logger.debug('Search for dist on {}'.format(url))
             try:
                 out = self.fetch_url_data(
-                    url, [""">(%s\-%s[^<]*)<""" % (self.build, re.escape(self.branch))])
+                    url, [r'>(%s\-%s[^<]*)<' % (self.build, re.escape(self.branch))])
                 if len(out) > 0:
                     dist_url = url
                     break
@@ -340,7 +342,7 @@ class DumpAnalyzer:
                    list(s % {'module': self.dist} for s in PDB_SUFFIXES)
 
         out = self.fetch_url_data(
-            build_url, (""">([a-zA-Z0-9-_\.]+%s)<""" % r for r in suffixes),
+            build_url, (r'>([a-zA-Z0-9-_\.]+%s)<' % r for r in suffixes),
             os.path.join(dist_url, update_path))
 
         if not out:
@@ -423,7 +425,7 @@ class DumpAnalyzer:
                 ['msiexec', '-a', os.path.abspath(p), '/qb', 'TARGETDIR=' + os.path.abspath(d)],
                 retry_code=1618, retry_count=self.subprocess_timeout_s * 2)
 
-        if path.endswith('.msi') or path.endswith('.zip'):
+        if path.endswith('.zip'):
             return run(['7z', 'x', path, '-o' + self.module_dir(), '-y', '-aos'])
 
         raise DistError('Can not extract: %s' % path)
@@ -436,39 +438,60 @@ class DumpAnalyzer:
         except (http.client.HTTPException, urllib.error.URLError) as e:
             raise DistError(str(e))
 
+        self.build_path = os.path.join(self.build_path, self.dist)
+        self.target_path = os.path.join(self.build_path, 'target')
         try:
             os.makedirs(self.build_path)
         except FileExistsError:
             pass
 
-        lock_path = os.path.join(self.build_path, self.dist + '-lock')
-        self.build_path = os.path.join(self.build_path, self.dist)
-        self.target_path = os.path.join(self.build_path, 'target')
-        with FileLock(lock_path, self.subprocess_timeout_s * len(urls)) as lock:
-            try:
-                logger.debug('Skip download of existing build: ' + self.module_dir())
-                return
-            except DistError:
-                pass
+        with FileLock(
+            os.path.join(self.build_path, self.dist + '-lock'), 
+            self.subprocess_timeout_s * len(urls)
+        ) as lock:
+            self.download_dist_urls(urls)
+            self.prepare_dist_for_debug()
 
-            if not os.path.isdir(self.target_path):
-                os.makedirs(self.target_path)
 
-            try:
-                for url in urls:
-                    path = self.download_url_data(url, self.build_path)
-                    self.extract_dist(path)
+    def download_dist_urls(self, urls):
+        try:
+            logger.debug('Skip download of existing build: ' + self.module_dir())
+            return
+        except DistError:
+            pass
 
-            except Exception:
-                logger.debug('Unable to get build "{}": {}'.format(
-                    self.build_path, traceback.format_exc()))
-                if not self.debug_mode:
-                    try:
-                        logger.debug('Clean up download directory: ' + self.build_path)
-                        shutil.rmtree(self.build_path)
-                    except Exception:
-                        logger.error('Unable to cleanup: {}'.format(traceback.format_exc()))
-                raise
+        if not os.path.isdir(self.target_path):
+            os.makedirs(self.target_path)
+
+        try:
+            for url in urls:
+                path = self.download_url_data(url, self.build_path)
+                self.extract_dist(path)
+
+        except Exception:
+            logger.debug('Unable to get build "{}": {}'.format(
+                self.build_path, traceback.format_exc()))
+            if not self.debug_mode:
+                try:
+                    logger.debug('Clean up download directory: ' + self.build_path)
+                    shutil.rmtree(self.build_path)
+                except Exception:
+                    logger.error('Unable to cleanup: {}'.format(traceback.format_exc()))
+            raise
+
+
+    def prepare_dist_for_debug(self):
+        """Move all PDBs into the root so CDB and VS can use them.
+        """
+        moved = []
+        for item in self.find_files_iter(lambda n: n.lower().split('.')[-1] in ['dll', 'pdb']):
+            if not os.path.isfile(os.path.join(self.module_dir(), os.path.basename(item))):
+                shutil.move(item, self.module_dir())
+                moved.append(item[len(self.module_dir()):])
+                
+        if moved:
+            logger.debug('Move files to module: ' + ', '.join(moved))
+        
 
     def run_visual_studio(self):
         """Open dump in visual studio.
@@ -486,10 +509,7 @@ class DumpAnalyzer:
         """Generates report using cdb with debug information.
         """
         logger.info('Loading debug information from: ' + self.module_dir())
-        pdb_dirs = ';'.join(set(os.path.dirname(f) for f in
-                                self.find_files_iter(lambda n: n.lower().endswith(".pdb"))))
-
-        with CdbSession(self.dump_path, self.module_dir(), pdb_dirs) as cdb:
+        with CdbSession(self.dump_path, self.module_dir()) as cdb:
             logger.debug('Generating report: ' + report_path)
             report = cdb.report()
             with open(report_path, 'w') as report_file:
@@ -532,6 +552,7 @@ if __name__ == '__main__':
                         help='generate report instead of launching Visual Studio')
     parser.add_argument('-d', '--cache-directory', default='./dump_tool_cache')
     parser.add_argument('-b', '--branch', default='')
+    parser.add_argument('-V', '--version', default='')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable all logs')
     parser.add_argument('-D', '--debug-mode', action='store_true', default=False,
