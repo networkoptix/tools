@@ -20,7 +20,7 @@ JUNKSHOP_CHECK_FREQUENCY_SECONDS = 60
 JENKINS_SEARCH_DEPTH = 20
 
 jenkins = JenkinsContext(
-    url='http://jenkins2.enk.me',
+    url='http://jenkins2',
     username='custom-build-trigger-script',
     password='password-for-custom-build-trigger-script',
     job_name='custom.any.preset.full',
@@ -69,7 +69,7 @@ def check_junkshop_status(rev):
     '''
     Validate if build passed on all platforms. Unit tests are ignored for now.
     '''
-    url = 'http://junkshop.enk.me/check_revision/{}'.format(rev)
+    url = 'http://junkshop/check_revision/{}'.format(rev)
     logging.debug("Junkshop request url: {}".format(url))
     response = requests.get(url)
     json = response.json()
