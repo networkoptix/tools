@@ -8,7 +8,6 @@ import shutil
 import subprocess
 import tempfile
 import posixpath
-import platform
 try:
     import configparser
 except ImportError:
@@ -26,6 +25,7 @@ if OS_IS_WINDOWS:
     ADDITIONAL_SYNC_ARGS = ["--chmod=ugo=rwx"]
     ADDITIONAL_UPLOAD_ARGS = ["--chmod=ugo=rwX"]
 
+
 # Workaround against rsync bug: all paths with colon are counted as remote, so
 # 'rsync rsync://server/path c:\test\path' won't work on windows.
 def _cygwin_path(path):
@@ -34,14 +34,18 @@ def _cygwin_path(path):
         return "/cygdrive/{0}{1}".format(drive_letter, path[2:].replace("\\", "/"))
     return path
 
+
 def _is_remote_url(url):
     return ':' in url
+
 
 def _is_rsync_url(url):
     return url.startswith("rsync://")
 
+
 def _is_ssh_url(url):
     return _is_remote_url(url) and not _is_rsync_url(url)
+
 
 def _find_root(path, file_name):
     while not os.path.isfile(os.path.join(path, file_name)):
@@ -52,6 +56,14 @@ def _find_root(path, file_name):
             path = nextpath
 
     return path
+
+
+def _check_output(command):
+    try:
+        return subprocess.check_output(command, encoding='UTF-8')
+    except TypeError:
+        return subprocess.check_output(command)
+
 
 class Rdep:
     SYNC_NOT_FOUND = 0
@@ -70,7 +82,7 @@ class Rdep:
         try:
             config = RepositoryConfig(os.path.join(path, ROOT_CONFIG_NAME))
             config.set_url(url)
-        except:
+        except Exception:
             print >> sys.stderr, "Could not init repository at {0}".format(path)
             return False
 
@@ -167,15 +179,15 @@ class Rdep:
             for package, timestamp in config.items('Timestamps'):
                 try:
                     self._timestamps[package] = int(timestamp)
-                except:
+                except Exception:
                     pass
-        except:
+        except Exception:
             pass
 
     def _stored_timestamp(self, target, package):
         try:
             return self._timestamps[posixpath.join(target, package)]
-        except:
+        except Exception:
             return None
 
     def _try_sync(self, target, package):
@@ -198,8 +210,8 @@ class Rdep:
                 return self.SYNC_SUCCESS
 
         self._verbose_message(
-            "root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}"
-                .format(self.root, url, target, package, src, dst))
+            "root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}".format(
+                self.root, url, target, package, src, dst))
 
         config_file = tempfile.mktemp()
         command = self._get_rsync_command(
@@ -242,7 +254,7 @@ class Rdep:
 
         dst_config_file = os.path.join(dst, PackageConfig.FILE_NAME)
         self._verbose_message("Moving {0} to {1}".format(
-                config_file, dst_config_file))
+            config_file, dst_config_file))
         shutil.copy(config_file, dst_config_file)
         os.remove(config_file)
 
@@ -316,7 +328,7 @@ class Rdep:
 
         self._verbose_rsync(command)
         with open(os.devnull, "w") as fnull:
-            if subprocess.call(command, stderr = fnull) == 0:
+            if subprocess.call(command, stderr=fnull) == 0:
                 self._fix_permissions(config_file)
 
                 newtime = PackageConfig(config_file).get_timestamp()
@@ -393,12 +405,11 @@ class Rdep:
         command = [self._config.get_rsync("rsync"), "--list-only", url]
         self._verbose_rsync(command)
         try:
-            output = subprocess.check_output(command)
-        except:
+            output = _check_output(command)
+        except Exception:
             print("Could not list packages for {0}".format(target))
             return False
 
-        print(output is str)
         for line in output.split('\n'):
             pos = line.rfind(' ')
             if pos >= 0:
@@ -425,7 +436,7 @@ class Rdep:
         try:
             subprocess.check_output(command)
             self._fix_permissions(os.path.join(self.root, TIMESTAMPS_FILE))
-        except:
+        except Exception:
             print("Could not sync timestamps file.")
             return False
 

@@ -18,7 +18,7 @@ class ConfigHelper:
         self.__config = configparser.ConfigParser()
         try:
             self.__config.read(self.__file_name)
-        except:
+        except Exception:
             pass
 
     def get_file_name(self):
@@ -112,7 +112,7 @@ class PackageConfig(ConfigHelper):
         return int(timestamp) if timestamp else None
 
     def update_timestamp(self):
-        self.set_value("General", "time", int(time.time()))
+        self.set_value("General", "time", str(int(time.time())))
 
     def get_uploader(self):
         return self.get_value("General", "uploader")
