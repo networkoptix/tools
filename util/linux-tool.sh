@@ -133,6 +133,11 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 
     local DEFAULT_CUSTOMIZATION=""
 
+    # Assign DEFAULT_CUSTOMIZATION for certain branches.
+    case "$(cat "$VMS_DIR/.hg/branch")" in
+        meta*) local DEFAULT_CUSTOMIZATION="metavms";;
+    esac
+
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
         linux) QT_DIR="$LINUX_QT_DIR";;
@@ -140,11 +145,6 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
-    esac
-
-    # Assign DEFAULT_CUSTOMIZATION for certain branches.
-    case "$(cat "$VMS_DIR/.hg/branch")" in
-        meta*) DEFAULT_CUSTOMIZATION="metavms";;
     esac
 
     # If CUSTOMIZATION is already defined, use its value; otherwise, use the computed value.
