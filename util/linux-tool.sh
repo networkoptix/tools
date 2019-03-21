@@ -368,10 +368,16 @@ do_gen() # [cache] "$@"
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
-    local COMPOSITION_ARG=( "-DwithTests=ON" )
+    local COMPOSITION_ARG=()
+
+    case "$TARGET" in
+        edge1) `# Currently, unit tests cannot compile without camera vendor plugins. #`;;
+        *) COMPOSITION_ARG+=( "-DwithTests=ON" "-DwithUnitTestsArchive=ON" )
+    esac
+
     if [[ $DISTRIB = 1 ]]
     then
-        COMPOSITION_ARG+=( "-DwithDistributions=ON" "-DwithUnitTestsArchive=ON" )
+        COMPOSITION_ARG+=( "-DwithDistributions=ON" )
     else
         if [[ $SDK = 1 ]]
         then
