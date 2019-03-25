@@ -300,7 +300,7 @@ class DumpAnalyzer:
         """
         try:
             page = urllib.request.urlopen(url).read().decode().replace('\r\n', '').replace('\n', '')
-        except urllib.error.HTTPError as error:
+        except (urllib.error.HTTPError, http.client.IncompleteRead, urllib.error.URLError) as error:
             raise DistError('%s, url: %s' % (error, url))
 
         results, failures = [], []
@@ -329,11 +329,12 @@ class DumpAnalyzer:
                 if len(out) > 0:
                     dist_url = url
                     break
-            except http.client.IncompleteRead as e:
+            except DistError as e:
                 logger.debug(e)
 
         if not dist_url:
-            raise DistError("No distributive found for build %s, analysis is impossible" % self.build)
+            raise DistError("No distributive directory is found for build %s on %r" % (
+                self.build, DIST_URLS))
 
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
@@ -346,7 +347,8 @@ class DumpAnalyzer:
             os.path.join(dist_url, update_path))
 
         if not out:
-            raise DistError('There are no distributive URLs available')
+            raise DistError("No distributive files are found for build %s on %r" % (
+                self.build, DIST_URLS))
 
         self.build_path = os.path.join(self.cache_directory, build_path)
         return list(os.path.join(*url) for url in out)
