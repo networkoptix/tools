@@ -32,6 +32,7 @@ CDB_CACHE_DIRECTORIES = [
 CDB_KNOWN_ERRORS = [
     'Minidump does not have system info',
     'invalid file format',
+    'Catastrophic failure',
 ]
 
 DIST_URLS = [
@@ -170,18 +171,17 @@ class CdbSession:
             self.cdb.stdin.flush()
 
         out = ''
-        while not out.endswith('\n0:'):
+        while not (out.endswith('\n0:') or out.endswith('\n?:')):
             # TODO: Implement read timeout, so we are sure it newer blocks forever.
             c = self.cdb.stdout.read(1)
             if not c:
-                logger.debug('Cdb command: %s' % command)
                 logger.debug('Unexpected EOF: %s' % out)
-                for error in CDB_KNOWN_ERRORS:
-                    if error in out:
-                        raise CdbError('{} -> {}'.format(shell_line(self.shell), error))
                 raise CdbError('{} ->\n{}'.format(shell_line(self.shell), out))
 
             out += c.decode()
+            for error in CDB_KNOWN_ERRORS:
+                if error in out:
+                    raise CdbError('{} -> {}'.format(shell_line(self.shell), error))
 
         while self.cdb.stdout.read(1) != b'>':
             pass
