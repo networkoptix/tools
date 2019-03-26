@@ -155,7 +155,7 @@ def _test_jira():
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a', 'c', 'e'} == jira.attachments()
 
-        logger.info('Suppose developer suppose developer set fix version future')
+        logger.info('Suppose developer set fix version future')
         jira.api._update_field_names(jira.issue, 'fixVersions', ['Future'])
         jira.issue.update(fields={'fixVersions': [{'name': 'Future'}]})
         assert {'Future'} == jira.field_set('fixVersions')
