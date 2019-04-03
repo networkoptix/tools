@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
+import logging.config
 import os
 import random
 import subprocess
@@ -8,7 +10,6 @@ import tempfile
 import yaml
 
 from aiohttp import web
-from datetime import datetime
 from signtool_interface import sign_software, sign_hardware
 from environment import execute_command
 
@@ -31,14 +32,6 @@ In case of hardware signing, file is not needed.
 '''
 
 
-def log(line):
-    message = '{}: {}'.format(str(datetime.now()), line)
-    print(message)
-    if log_file:
-        with open(log_file, 'a+') as f:
-            f.write(message + '\n')
-
-
 def prerare_diagnostics(process_result):
     text = process_result.stdout
     if process_result.stderr:
@@ -54,18 +47,18 @@ def print_certificate_info(certificate, password):
     printed_certificates.add(certificate)
 
     if not os.path.exists(certificate):
-        log('File {} was not found'.format(certificate))
+        logging.warning('File {} was not found'.format(certificate))
         return
 
     command = ['certutil', '-dump', '-p', password, certificate]
     try:
         result = execute_command(command)
-        log(result.stdout)
-        log(result.stderr)
+        logging.info(result.stdout)
+        logging.warning(result.stderr)
     except subprocess.SubprocessError as e:
-        log(e)
+        logging.warning(e)
     except FileNotFoundError as e:
-        log(e)
+        logging.warning(e)
 
 
 def sign_binary(customization, trusted_timestamping, target_file):
@@ -87,12 +80,12 @@ def sign_binary(customization, trusted_timestamping, target_file):
     if trusted_timestamping:
         timestamp_servers = config.get('timestamp_servers')
         timestamp_server = random.choice(timestamp_servers)
-        log('Using trusted timestamping server {0}'.format(timestamp_server))
+        logging.info('Using trusted timestamping server {0}'.format(timestamp_server))
 
     if config.get('software'):
         certificate = os.path.join(signing_path, config.get('file'))
         sign_password = config.get('password')
-        log('Using certificate {0}'.format(certificate))
+        logging.info('Using certificate {0}'.format(certificate))
         print_certificate_info(certificate, sign_password)
         return sign_software(
             signtool_directory=signtool_directory,
@@ -101,7 +94,7 @@ def sign_binary(customization, trusted_timestamping, target_file):
             sign_password=sign_password,
             timestamp_server=timestamp_server)
     else:
-        log('Using hardware key')
+        logging.info('Using hardware key')
         return sign_hardware(
             signtool_directory=signtool_directory,
             target_file=target_file,
@@ -115,10 +108,12 @@ async def sign_handler(request):
     assert field.name == 'file'
     source_filename = field.filename
     source_path, filename = os.path.split(source_filename)
-    log('======== Signing {} ========'.format(filename))
+    logging.info('======== Signing {} ========'.format(filename))
     extension = filename[-4:]
 
-    with tempfile.NamedTemporaryFile(prefix=filename, suffix=extension, delete=False) as target_file:
+    with tempfile.NamedTemporaryFile(prefix=filename,
+                                     suffix=extension,
+                                     delete=False) as target_file:
         target_file_name = target_file.name
         while True:
             chunk = await field.read_chunk()  # 8192 bytes by default.
@@ -129,10 +124,16 @@ async def sign_handler(request):
     params = request.query
     customization = params['customization']
     trusted_timestamping = (params['trusted_timestamping'].lower() == 'true')
-    log('Signing {0} with customization {1} {2}'.format(
+    logging.info('Signing {0} with customization {1} {2}'.format(
         target_file_name,
         customization,
         '(trusted)' if trusted_timestamping else '(no timestamp)'))
+
+    async def complete_response(response):
+        await response.prepare(request)
+        await response.write_eof()
+        os.remove(target_file_name)
+        return response
 
     try:
         # Try several trusted timestamping servers in case of problems
@@ -143,35 +144,32 @@ async def sign_handler(request):
                 trusted_timestamping=trusted_timestamping,
                 target_file=target_file_name)
             if result.returncode == 0:
-                break
+                logging.info('Signing complete')
+                logging.info('================')
+                content = open(target_file_name, 'rb')
+                return await complete_response(web.Response(body=content))
 
-        if result.returncode != 0:
-            diagnostics = prerare_diagnostics(result)
-            log('Signing failed!\n{}'.format(diagnostics))
-            return web.Response(status=418, text=diagnostics)
-
-        log('Signing complete')
-        log('================')
-        content = open(target_file_name, 'rb')
-        response = web.Response(body=content)
-        await response.prepare(request)
-        await response.write_eof()
-        os.remove(target_file_name)
-        return response
+            text = prerare_diagnostics(result)
 
     except FileNotFoundError as e:
-        log('================')
-        return web.Response(status=418, text=str(e))
+        text = str(e)
+
     except subprocess.SubprocessError as e:
-        log('================')
-        return web.Response(status=418, text="{}\n{}".format(e, e.output))
+        text = "{}\n{}".format(e, e.output)
+
     except Exception as e:
-        print(repr(e))
-        log('================')
-        return web.Response(status=418, text=str(e))
+        text = "{}\n{}".format(repr(e), str(e))
+
+    logging.warning('Signing failed: {}'.format(text))
+    logging.warning('================')
+    return await complete_response(web.Response(status=418, text=text))
 
 
 def main():
+    with open('server_log.yaml', 'r') as f:
+        log_config = yaml.load(f)
+        logging.config.dictConfig(log_config)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--certs', help='Certificates directory')
     parser.add_argument('-s', '--signtool', help='Signtool directory')
@@ -184,18 +182,18 @@ def main():
         global log_file
         log_file = args.log
 
-    log('------------------------------ Process started ------------------------------')
+    logging.info('------------------------------ Process started ------------------------------')
 
     if args.signtool:
         global signtool_directory
         signtool_directory = os.path.abspath(args.signtool)
-    log('Using {} as a signtool folder'.format(signtool_directory))
+    logging.info('Using {} as a signtool folder'.format(signtool_directory))
 
     if args.certs:
         global certs_directory
         certs_directory = os.path.abspath(args.certs)
-    log('Using {} as a certificates directory'.format(certs_directory))
-    log('Using {} as a temporary directory'.format(tempfile.gettempdir()))
+    logging.info('Using {} as a certificates directory'.format(certs_directory))
+    logging.info('Using {} as a temporary directory'.format(tempfile.gettempdir()))
 
     app = web.Application()
     app.add_routes([web.post('/', sign_handler)])
