@@ -13,7 +13,10 @@ exceptions = [
     'QnCameraRecordingPolicy',
     'QnLicenseManagerWidget',
     'QnVideowallScreenWidget',
-    'QnWorkbenchWearableHandler'
+    'QnWorkbenchWearableHandler',
+    'CameraLicensePanelWidget',
+    'CameraSettingsLicenseWatcher',
+    'TileInteractionHandler'
 ]
 
 template = '%n'
@@ -42,7 +45,7 @@ class NumerusFormRule(ValidationRule):
 
         source = message.find('source')
         if template not in source.text:
-            self.lastErrorText = u"Missing template in numerus text {0}".format(source.text)
+            self.lastErrorText = u"Missing template in the numerus source"
             return False
 
         return True
@@ -58,8 +61,9 @@ class NumerusFormRule(ValidationRule):
         isFirst = True
         for numerusform in translation.iter('numerusform'):
             if not numerusform.text:
-                self.lastErrorText = u"Missing numerus form in {0}".format(source.text)
+                self.lastErrorText = u"Numerus text is not translated"
                 return False
+
             if not ignoreTemplate and not isFirst and template not in numerusform.text:
                 self.lastErrorText = u"""Missing template in numerus form {0}
  found in:\n\"{1}\"""".format(numerusform.text, source.text)

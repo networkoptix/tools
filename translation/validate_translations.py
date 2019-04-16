@@ -36,6 +36,7 @@ def print_leveled(text, level):
         warn(text)
     else:
         info(text)
+    print('')
 
 
 def validate_xml(root, filename, lowest_level):
