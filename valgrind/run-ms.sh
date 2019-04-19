@@ -32,7 +32,7 @@ elif [[ "$WHAT_TO_TEST" == "mediaserver" ]]; then
         cat $BIN_ORIGINAL > $BIN_VALGRIND
         chmod 755 $BIN_VALGRIND
     else
-        BIN_ORIGINAL=$MS_PATH/bin/mediaserver
+        BIN_VALGRIND=$MS_PATH/bin/mediaserver
     fi
 fi
 
