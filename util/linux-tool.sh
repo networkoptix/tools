@@ -26,7 +26,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${VEGA_BACKGROUND_RRGGBB="300000"}
 if nx_is_cygwin
 then
-    : ${CMAKE_GEN=""}
+    : ${CMAKE_GEN="Visual Studio 15 2017"}
 else
     : ${CMAKE_GEN="Ninja"}
 fi
