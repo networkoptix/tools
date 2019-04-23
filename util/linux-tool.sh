@@ -141,7 +141,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
         linux) QT_DIR="$LINUX_QT_DIR";;
-        arm64|bpi|rpi|bananapi|android-arm|macosx) `# Do nothing #`;;
+        linux_arm32|linux_arm64|bpi|android-arm|macosx) `# Do nothing #`;;
         edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
@@ -354,8 +354,7 @@ do_gen() # [cache] "$@"
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
-        macosx) local -r TARGET_ARG="";;
-        arm64) local -r TARGET_ARG="-DtargetDevice=linux-arm64";;
+        macos) local -r TARGET_ARG="";;
         *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
     esac
 
@@ -1080,10 +1079,10 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
     local -i RESULT=0
     case "$TARGET" in
-        arm64|linux)
+        arm32|arm64|linux)
             test_distrib_debs || RESULT=$?
             ;;
-        bpi|rpi|bananapi|edge1)
+        bpi|edge1)
             test_distrib_archives || RESULT=$?
             ;;
         *)
