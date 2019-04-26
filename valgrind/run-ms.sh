@@ -13,19 +13,17 @@ if [[ "$WHAT_TO_TEST" == "client" ]]; then
     echo Client path: $CL_PATH
     export LD_LIBRARY_PATH=$CL_PATH/*/lib
     export DISPLAY=:0
-    if [[ "$(uname -p)" == x86* ]]; then
-        BIN_ORIGINAL=$CL_PATH/*/bin/client-bin
-        BIN_VALGRIND=$BIN_ORIGINAL
+    if [[ "$(uname -m)" == x86* || "$(uname -m)" == armv7* ]]; then
+        BIN_VALGRIND=$CL_PATH/*/bin/client-bin
     else
-        BIN_ORIGINAL=$CL_PATH/*/bin/client
-        BIN_VALGRIND=$BIN_ORIGINAL
+        BIN_VALGRIND=$CL_PATH/*/bin/client
     fi
 elif [[ "$WHAT_TO_TEST" == "mediaserver" ]]; then
     LOG_FILE=valgrind-ms.${TOOL}.$(date +%s)
     MS_PATH=$(find /opt -type d -name mediaserver | grep /$CUSTOMIZATION | head -1)
     echo Mediaserver path: $MS_PATH
     export LD_LIBRARY_PATH=$MS_PATH/lib
-    if [[ "$(uname -p)" == x86* ]]; then
+    if [[ "$(uname -m)" == x86* || "$(uname -m)" == armv7* ]]; then
         BIN_ORIGINAL=$MS_PATH/bin/mediaserver-bin
         # Get rid of capabilities.
         BIN_VALGRIND=$MS_PATH/bin/mediaserver-valgrind
