@@ -36,6 +36,7 @@ import os
 import argparse
 import re
 
+verbose = False
 project_keys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE',
     'META', 'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
@@ -43,6 +44,15 @@ def execute_command(command, extra_args=[]):
     if verbose:
         print(">> '" + command + " ".join(extra_args) + "'")
     return subprocess.check_output(command.split() + extra_args, stderr=subprocess.STDOUT, universal_newlines=True)
+
+def is_inside_git():
+    if os.path.isdir('.git'):
+        return True
+
+    try:
+        return "true" == execute_command("git rev-parse --is-inside-work-tree")
+    except subprocess.CalledProcessError as e:
+        return False
 
 def get_header(merged, current):
     return "Merge: {} -> {}\n".format(merged, current)
@@ -89,6 +99,9 @@ def main():
     global verbose
     verbose = args.verbose
 
+    print("NOTE: This script is completely useless for git and is written only for backward compatibility "
+        "with miserable and feature-lacking mercurial. Consider using git commands instead.\n")
+
     current_branch = get_current_branch()
 
     global target_branch
@@ -110,6 +123,7 @@ def main():
     execute_command("git checkout " + target_branch)
     execute_command("git merge --no-ff -m ", [changelog, revision])
     execute_command("git checkout " + current_branch)
+    
     return 0
 
 if __name__ == "__main__":

@@ -15,12 +15,13 @@ merge_dev.py -r prod_2.5       //merge prod_2.5 to the current branch
 merge_dev.py -t prod_2.5       //merge current branch to prod_2.5 ()
 """
 
-
 import subprocess
 import sys
 import os
 import argparse
 import re
+
+import merge_dev_git
 
 targetBranch = '.';
 mergeCommit = 'merge'
@@ -40,6 +41,15 @@ def execute_command(command, verbose = False):
             print_command(command)
         print("Error: {0}".format(e.output))
         raise
+
+def is_inside_mercurial():
+    if os.path.isdir('.hg'):
+        return True
+
+    try:
+        return "true" == merge_dev_git.execute_command("hg id")
+    except subprocess.CalledProcessError as e:
+        return False
 
 def getHeader(merged, current):
     return "Merge: {0} -> {1}".format(merged, current)
@@ -122,9 +132,18 @@ def main():
     execute_command(['hg', 'up', currentBranch], verbose)
     sys.exit(0)
 
+def choose_vcs_function():
+    if merge_dev_git.is_inside_git():
+        return merge_dev_git.main
+    elif is_inside_mercurial():
+        return main
+    else:
+        raise RuntimeError("No version control system found!")
+
 if __name__ == "__main__":
     try:
-        main()
+        merge = choose_vcs_function()
+        merge()
     except subprocess.CalledProcessError as e:
         print("Command {0} execution failed with return code {1}".format(e.cmd, e.returncode))
         print("Command's output:")
