@@ -1,15 +1,19 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
-#Options:
-#   -P preview (do not merge)
-#   -t {target_branch} Merge current branch to target
-#   -r {source_branch} Merge from source_branch to the current one
+"""
+NOTE: This script will be deleted when migration from 
+mercurial will be finished.
 
-#Example:
-#merge_dev.py -r prod_2.5 -P    //prod_2.5 to current branch merge preview
-#merge_dev.py -r prod_2.5       //merge prod_2.5 to the current branch
-#merge_dev.py -t prod_2.5       //merge current branch to prod_2.5 ()
+Options:
+   -P preview (do not merge)
+   -t {target_branch} Merge current branch to target
+   -r {source_branch} Merge from source_branch to the current one
+
+Example:
+merge_dev.py -r prod_2.5 -P    //prod_2.5 to current branch merge preview
+merge_dev.py -r prod_2.5       //merge prod_2.5 to the current branch
+merge_dev.py -t prod_2.5       //merge current branch to prod_2.5 ()
+"""
 
 
 import subprocess
@@ -24,7 +28,7 @@ projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 
     'META', 'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
 def print_command(command):
-    print '>> {0}'.format(subprocess.list2cmdline(command))
+    print('>> {0}'.format(subprocess.list2cmdline(command)))
 
 def execute_command(command, verbose = False):
     if verbose:
@@ -34,14 +38,14 @@ def execute_command(command, verbose = False):
     except Exception as e:
         if not verbose:
             print_command(command)
-        print "Error: {0}".format(e.output)
+        print("Error: {0}".format(e.output))
         raise
 
 def getHeader(merged, current):
     return "Merge: {0} -> {1}".format(merged, current)
 
 def getCurrentBranch():
-    return subprocess.check_output(['hg', 'branch']).strip('\n')
+    return subprocess.check_output(['hg', 'branch'], universal_newlines=True).strip('\n')
 
 def commandLine(command):
     return '>> ' + ' '.join(command).replace('\n', '\\n')
@@ -61,14 +65,10 @@ def getChangelog(revision, multiline, verbose, all_commits):
         command += ['{desc|firstline}\n\n']
     command += ['-r', "(::{0} - ::{1})".format(revision, targetBranch)]
     if verbose:
-        print commandLine(command)
-    try:
-        changelog = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, e:
-        print "Command {0} execution failed with return code {1}".format(e.cmd, e.returncode)
-        print "Command's output:"
-        print e.output
-        return ''
+        print(commandLine(command))
+
+    changelog = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
+
     changes = sorted(set(changelog.split('\n\n')))
     changes = [x.strip('\n').replace('"', '\'') for x in changes
         if x and (includeCommit(x, all_commits))]
@@ -113,7 +113,7 @@ def main():
     changelog = getChangelog(revision, args.multiline, args.verbose, args.all_commits)
 
     if args.preview:
-        print changelog
+        print(changelog)
         sys.exit(0)
 
     execute_command(['hg', 'up', targetBranch], verbose)
@@ -123,4 +123,10 @@ def main():
     sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except subprocess.CalledProcessError as e:
+        print("Command {0} execution failed with return code {1}".format(e.cmd, e.returncode))
+        print("Command's output:")
+        print(e.output)
+        sys.exit(1)
