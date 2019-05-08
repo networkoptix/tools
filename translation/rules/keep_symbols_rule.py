@@ -1,4 +1,5 @@
-from validation_rule import ValidationRule, Levels
+from validation_rule import Levels, ValidationRule
+
 
 symbols = [
     '\n',

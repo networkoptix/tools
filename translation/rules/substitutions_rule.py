@@ -1,4 +1,5 @@
-from validation_rule import ValidationRule, Levels
+from validation_rule import Levels, ValidationRule
+
 
 substitutions = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 

@@ -1,4 +1,4 @@
-from validation_rule import ValidationRule, Levels
+from validation_rule import Levels, ValidationRule
 
 
 class AtLeastOneAlphaRule(ValidationRule):
@@ -16,4 +16,3 @@ class AtLeastOneAlphaRule(ValidationRule):
         if not valid:
             self.lastErrorText = u"No alphabet characters found in:\n\"{0}\"".format(text)
         return valid
-

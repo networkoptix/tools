@@ -1,18 +1,19 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#/bin/python
 
-import os
-import sys
 import argparse
+import os
 import string
+import sys
 import xml.etree.ElementTree as ET
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
-from common_module import init_color,info,green,warn,err,separator
+from common_module import init_color, info, warn, err
 sys.path.pop(0)
 
 from vms_projects import getTranslatableProjectsList
+
 
 allowedSrcExtensions = ['.cpp', '.h', '.ui', '.qml']
 ignoredFiles = ['translation_manager.cpp']
@@ -21,7 +22,7 @@ ignoredContexts = ['Language']
 verbose = False
 
 
-class ReplaceItemStruct():
+class ReplaceItemStruct:
     def __init__(self, initContext, initSource, initTarget):
         self.context = initContext
         self.source = initSource
@@ -141,13 +142,13 @@ def validateProject(project, translationDir, srcDir):
     for entry in os.listdir(translationDir):
         translationPath = os.path.join(translationDir, entry)
 
-        if (os.path.isdir(translationPath)):
+        if os.path.isdir(translationPath):
             continue
 
-        if ((not translationPath[-2:] == 'ts') or ('en_US' not in translationPath)):
+        if (not translationPath[-2:] == 'ts') or ('en_US' not in translationPath):
             continue
 
-        if (not entry.startswith(project)):
+        if not entry.startswith(project):
             continue
 
         entries.append(translationPath)

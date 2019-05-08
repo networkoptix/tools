@@ -1,15 +1,16 @@
-#!/bin/python2
+#!/usr/bin/env python
 
-import sys
-import os
 import argparse
-import threading
+import os
 import subprocess
+import sys
+import threading
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
-from common_module import init_color,info,green,warn,err,separator
+from common_module import init_color, info, warn, err, separator
 sys.path.pop(0)
+
 
 ignored = []
 
@@ -27,7 +28,7 @@ warnings = [
 ]
 
 verbose = False
-results = dict()
+results = {}
 lupdate = None
 
 
@@ -63,7 +64,7 @@ def calculateEntries(prefix, dir, language):
     for entry in os.listdir(dir):
         path = os.path.join(dir, entry)
 
-        if (os.path.isdir(path)):
+        if os.path.isdir(path):
             continue
 
         if not path.endswith(suffix):

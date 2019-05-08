@@ -1,7 +1,8 @@
-from validation_rule import ValidationRule, Levels
+from validation_rule import Levels, ValidationRule
+
 
 leading = [' ', '<', '&lt;']
-trailing = [' ']    # Colons, dots will possibly be here.
+trailing = [' ']  # Colons, dots will possibly be here.
 
 
 class LeadingTrailingSymbolsRule(ValidationRule):

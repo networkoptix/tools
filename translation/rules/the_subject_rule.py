@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from validation_rule import Levels, ValidationRule
 
-from validation_rule import ValidationRule, Levels
 
 the = "the"
 exceptions = ['I/O', 'Internet', 'App', 'Latest', 'USB']

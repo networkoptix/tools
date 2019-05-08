@@ -1,11 +1,12 @@
-#!/bin/python
+#!/usr/bin/env python
 
 import argparse
 import logging
+
 from utils import translation
 
 
-class MigrationResult():
+class MigrationResult:
     migrated = 0
     total = 0
 

@@ -24,7 +24,7 @@ class Message():
         return self.type != 'unfinished'
 
     def update_from(self, other):
-        assert(self.is_numerus == other.is_numerus)
+        assert self.is_numerus == other.is_numerus
 
         if self.is_numerus:
             self.texts = other.texts

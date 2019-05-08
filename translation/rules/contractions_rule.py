@@ -1,4 +1,4 @@
-from validation_rule import ValidationRule, Levels
+from validation_rule import Levels, ValidationRule
 
 
 class ContractionsRule(ValidationRule):

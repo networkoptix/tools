@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+from validation_rule import Levels, ValidationRule
 
-from validation_rule import ValidationRule, Levels
 
 forbidden = [
-    '  ',   # Double space.
+    '  ',  # Double space.
     '&apos;',
     'href',
     '\t',

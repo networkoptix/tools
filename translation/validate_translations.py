@@ -1,13 +1,13 @@
-#!/bin/python2
+#!/usr/bin/env python
 
-import sys
-import os
 import argparse
+import os
+import sys
 import xml.etree.ElementTree as ET
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
-from common_module import init_color, info, green, warn, err
+from common_module import init_color, info, warn, err
 sys.path.pop(0)
 
 rulesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rules')
@@ -19,6 +19,7 @@ sys.path.pop(0)
 if os.path.isfile('current_config.py'):
     sys.path.insert(0, os.getcwd())
     from current_config import PROJECT_SOURCE_DIR
+
     if '$' not in PROJECT_SOURCE_DIR:
         os.chdir(PROJECT_SOURCE_DIR)
     sys.path.pop(0)
@@ -73,17 +74,17 @@ def calculate_files(project, translations_dir, language):
     for entry in os.listdir(translations_dir):
         path = os.path.join(translations_dir, entry)
 
-        if (os.path.isdir(path)):
+        if os.path.isdir(path):
             continue
 
         suffix = '.ts'
         if language:
             suffix = '_{0}{1}'.format(language, suffix)
 
-        if (not path.endswith(suffix)):
+        if not path.endswith(suffix):
             continue
 
-        if (not entry.startswith(project)):
+        if not entry.startswith(project):
             continue
 
         yield path

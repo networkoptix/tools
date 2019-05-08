@@ -1,15 +1,15 @@
-#!/bin/python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-import os
 import argparse
 import difflib
+import os
+import sys
 import xml.etree.ElementTree as ET
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
-from common_module import init_color,info,green,warn,err,separator
+from common_module import init_color, info, warn, err
 sys.path.pop(0)
 
 projectDir = os.path.join(os.getcwd(), 'build_utils/python')
@@ -17,13 +17,14 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
+
 verbose = False
 similarityLevel = 100
 
 ignored = ['Ctrl+', 'Shift+', 'Alt+']
 
 
-class MigrationResult():
+class MigrationResult:
     migrated = 0
     total = 0
 
@@ -68,7 +69,6 @@ def existingTranslations(context):
 
 
 def migrateXml(root, sourceRoot):
-
     result = MigrationResult()
     for context in root:
         contextName = context.find('name').text
@@ -138,20 +138,20 @@ def migrateProject(project, translationDir, sourceTranslationDir):
     for entry in os.listdir(translationDir):
         path = os.path.join(translationDir, entry)
 
-        if (os.path.isdir(path)):
+        if os.path.isdir(path):
             continue
 
-        if (not path[-2:] == 'ts'):
+        if not path[-2:] == 'ts':
             continue
 
-        if (not entry.startswith(project)):
+        if not entry.startswith(project):
             continue
 
         if 'en_US' in entry:
             continue
 
         sourcePath = os.path.join(sourceTranslationDir, entry)
-        if (not os.path.isfile(sourcePath)):
+        if not os.path.isfile(sourcePath):
             err("{0} not found in the source dir {1}".format(entry, sourceTranslationDir))
             continue
 
