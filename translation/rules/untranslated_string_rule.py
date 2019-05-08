@@ -12,6 +12,7 @@ class UntranslatedStringRule(ValidationRule):
         return Levels.INFO
 
     def valid_message(self, contextName, message):
+        del contextName
         source = ValidationRule.translation_source(message)
         for text in ValidationRule.translation_texts(message):
             if text == source:

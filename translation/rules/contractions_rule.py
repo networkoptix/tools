@@ -23,4 +23,5 @@ class ContractionsRule(ValidationRule):
         return True
 
     def valid_translations(self, contextName, message):
+        del contextName, message
         return True

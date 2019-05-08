@@ -25,6 +25,7 @@ class SubstitutionsRule(ValidationRule):
         return True
 
     def valid_message(self, contextName, message):
+        del contextName
         source = ValidationRule.translation_source(message)
         if not self.correct_order(source):
             self.lastErrorText = (u"Invalid substitution order found in:\n\"{0}\""

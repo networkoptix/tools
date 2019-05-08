@@ -15,6 +15,7 @@ class EnUsCorrectionRule(ValidationRule):
         return Levels.CRITICAL
 
     def valid_message(self, contextName, message):
+        del contextName
         valid = (ValidationRule.is_numerus(message) or
                  ValidationRule.translation_source(message) in exceptions or
                  len(list(ValidationRule.translation_texts(message))) == 0)
@@ -24,4 +25,5 @@ class EnUsCorrectionRule(ValidationRule):
         return valid
 
     def valid_translations(self, contextName, message):
+        del contextName, message
         return True

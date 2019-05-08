@@ -28,6 +28,7 @@ class KeepSymbolsRule(ValidationRule):
         return Levels.WARNING
 
     def valid_message(self, contextName, message):
+        del contextName
         source = ValidationRule.translation_source(message)
         for symbol in symbols:
             occurences = source.count(symbol)

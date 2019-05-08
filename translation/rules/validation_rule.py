@@ -15,13 +15,16 @@ class ValidationRule:
         return self.lastErrorText
 
     def valid_text(self, text):
+        del text
         return True
 
     def valid_source(self, contextName, message):
+        del contextName
         source = message.find('source')
         return self.valid_text(source.text)
 
     def valid_translations(self, contextName, message):
+        del contextName
         return all(self.valid_text(text) for text in ValidationRule.translation_texts(message))
 
     def valid_message(self, contextName, message):
