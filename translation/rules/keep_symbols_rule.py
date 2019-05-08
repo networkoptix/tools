@@ -11,10 +11,9 @@ symbols = [
 ]
 
 
-def symbolText(symbol):
-    if symbol == '\n':
-        return '\\n'
-    return symbol
+SYMBOL_TEXT = {
+    '\n': '\\n',
+}
 
 
 class KeepSymbolsRule(ValidationRule):
@@ -36,7 +35,7 @@ class KeepSymbolsRule(ValidationRule):
                 if not text.count(symbol) == occurences:
                     self.lastErrorText = (
                         u'''Invalid symbol {0} count found in:\n\"{1}\"\nSource is:\n\"{2}\"'''
-                        .format(symbolText(symbol), text, source))
+                        .format(SYMBOL_TEXT.get(symbol, symbol), text, source))
                     return False
 
         return True

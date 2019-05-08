@@ -13,14 +13,11 @@ forbidden = [
 ]
 
 
-def symbolText(symbol):
-    if symbol == '\t':
-        return '\\t'
-    if symbol == '\n':
-        return '\\n'
-    if symbol == '  ':
-        return '<Double space>'
-    return symbol
+SYMBOL_TEXT = {
+    '\t': '\\t',
+    '\n': '\\n',
+    '  ': '<Double space>',
+}
 
 
 class ForbiddenSymbolsRule(ValidationRule):
@@ -37,6 +34,6 @@ class ForbiddenSymbolsRule(ValidationRule):
         for substring in forbidden:
             if substring in text:
                 self.lastErrorText = (u"Invalid substring {0} found in:\n\"{1}\""
-                                      .format(symbolText(substring), text))
+                                      .format(SYMBOL_TEXT.get(substring, substring), text))
                 return False
         return True
