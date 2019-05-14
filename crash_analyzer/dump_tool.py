@@ -261,6 +261,7 @@ class DumpAnalyzer:
         self.subprocess_timeout_s = subprocess_timeout_s
         self.module = None
         self.dist = None
+        self.base_build_path = None
         self.build_path = None
         self.target_path = None
 
@@ -350,7 +351,7 @@ class DumpAnalyzer:
             raise DistError("No distributive files are found for build %s on %r" % (
                 self.build, DIST_URLS))
 
-        self.build_path = os.path.join(self.cache_directory, build_path)
+        self.base_build_path = os.path.join(self.cache_directory, build_path)
         return list(os.path.join(*url) for url in out)
 
     @staticmethod
@@ -440,7 +441,7 @@ class DumpAnalyzer:
         except (http.client.HTTPException, urllib.error.URLError) as e:
             raise DistError(str(e))
 
-        self.build_path = os.path.join(self.build_path, self.dist)
+        self.build_path = os.path.join(self.base_build_path, self.dist)
         self.target_path = os.path.join(self.build_path, 'target')
         try:
             os.makedirs(self.build_path)
@@ -448,7 +449,7 @@ class DumpAnalyzer:
             pass
 
         with FileLock(
-            os.path.join(self.build_path, self.dist + '-lock'), 
+            os.path.join(self.base_build_path, self.dist + '-lock'), 
             self.subprocess_timeout_s * len(urls)
         ) as lock:
             self.download_dist_urls(urls)
