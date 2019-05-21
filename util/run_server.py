@@ -11,7 +11,7 @@ WINDOWS = sys.platform in ("win32", "cygwin")
 SERVER_EXECUTABLE = "mediaserver.exe" if WINDOWS else "./mediaserver"
 
 config_path = os.path.expandvars(
-    "%LOCALAPPDATA%\\nx_server" if WINDOWS else "~/.config/nx_server")
+    "%LOCALAPPDATA%\\nx_server" if WINDOWS else "$HOME/.config/nx_server")
 config_extension = ".conf"
 runtime_config_suffix = "-runtime"
 
