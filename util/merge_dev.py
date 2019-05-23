@@ -47,7 +47,8 @@ def is_inside_mercurial():
         return True
 
     try:
-        return "true" == merge_dev_git.execute_command("hg id")
+        merge_dev_git.execute_command("hg id")
+        return True
     except subprocess.CalledProcessError as e:
         return False
 
