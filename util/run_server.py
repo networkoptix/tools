@@ -65,8 +65,9 @@ def run_server(config, verbose):
     if verbose:
         print(" ".join(command))
 
-    kwargs = subprocess.CREATE_NEW_CONSOLE if WINDOWS else {}
+    kwargs = {"creationflags": subprocess.CREATE_NEW_CONSOLE} if WINDOWS else {}
     subprocess.run(command, **kwargs)
+    subprocess.run
 
 
 def main():
