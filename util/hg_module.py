@@ -51,7 +51,7 @@ def get_branches(detailed=True):
     for row in output.split('\n'):
         if ':' in row:
             key, hash = row.split(':')
-            name, rev = key.split()
+            name, rev = key.rsplit(' ', 1)
             if name == 'default':
                 continue
             branch = Branch(name, rev, hash, True)
