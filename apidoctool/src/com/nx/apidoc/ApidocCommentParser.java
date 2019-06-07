@@ -44,13 +44,15 @@ public final class ApidocCommentParser
         if (tags == null)
             return null;
 
-        ApidocCommentParser parser = new ApidocCommentParser();
-        ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
+        final ApidocCommentParser parser = new ApidocCommentParser();
+        final ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         if (tagIterator.hasNext())
         {
             final ApidocTagParser.Item item = tagIterator.next();
+
             final Apidoc.Param result =
                 parser.parseParam(item, tagIterator, paramDirection, paramMode);
+
             if (tagIterator.hasNext())
             {
                 final ApidocTagParser.Item unexpectedItem = tagIterator.next();
@@ -59,7 +61,7 @@ public final class ApidocCommentParser
             }
             return result;
         }
-        return null;
+        return null; //< No tags found.
     }
 
     /**
@@ -79,6 +81,7 @@ public final class ApidocCommentParser
     }
 
     //---------------------------------------------------------------------------------------------
+
     /**
      * @return Null if the comment should not convert to an XML function.
      */
@@ -181,7 +184,7 @@ public final class ApidocCommentParser
         return result;
     }
 
-    public Apidoc.Param parseParam(
+    private Apidoc.Param parseParam(
         ApidocTagParser.Item item,
         ListIterator<ApidocTagParser.Item> tagIterator,
         ParamDirection paramDirection,
