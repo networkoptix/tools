@@ -867,7 +867,7 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
     local FILE_PATH="$HOME/$FILE"
     if [ -f "$FILE_PATH" ]; then
         # To enable overriding variables from the config file, transform config file to perform 
-	# assignment only if the variable is unset.
+        # assignment only if the variable is unset.
         source <(cat "$FILE_PATH" |sed \
             -e '/^[[:space:]]*$/d' `#< Delete empty lines. #` \
 	    -e '/^[[:space:]]*#/d' `#< Delete comment lines (starting with '#'). #` \
