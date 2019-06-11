@@ -66,6 +66,76 @@ continue description</description>
                         <type>string</type>
                     </result>
                 </function>
+                <function>
+                    <name>testFunction3</name>
+                    <description/>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>outputParam</name>
+                            <type>integer</type>
+                            <description>Param description overridden</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>regularValue</name>
+                                    <description>Appears in xml.</description>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>enumParam</name>
+                            <type>enum</type>
+                            <description>Enum description</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>value1</name>
+                                    <description>value1 description</description>
+                                </value>
+                                <value>
+                                    <name>value2</name>
+                                    <description>value2 description</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>some result description</caption>
+                        <params>
+                            <param>
+                                <name>outputParam</name>
+                                <type>integer</type>
+                                <description>outputParam Param description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>enumParam</name>
+                                <type>enum</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

@@ -206,13 +206,18 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
+        TypeMananger typeMananger = new TypeMananger(/*verbose*/ true);
+        List<File> files = new ArrayList<File>();
+        files.add(handlerFunctionsCppFile);
+        typeMananger.processFiles(files);
+
         System.out.println("test: parsing apidoc in \"handler\" functions C++");
         System.out.println("    Sample: " + expectedHandlerFunctionsXmlFile);
         System.out.println("    Input: " + handlerFunctionsCppFile);
         final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
-                apidoc, new HandlerRegistrationMatcher(), null);
+                apidoc, new HandlerRegistrationMatcher(), typeMananger);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));

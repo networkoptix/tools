@@ -23,3 +23,32 @@
  * %return: string some result description
  */
 reg("urlPrefix/testFunction2", new onTestFunction2());
+
+
+/**%apidoc Enum description*/
+enum class Enum
+{
+    value1, /**<%apidoc value1 description*/
+    /**%apidoc value2 description*/
+    value2,
+};
+
+/**%apidoc Output description*/
+struct SomeStruct
+{
+    /**%apidoc outputParam Param description
+     * %value 1 one
+     * %value 2 two
+     */
+    int outputParam;
+    Enum enumParam;
+};
+
+/**%apidoc GET /urlPrefix/testFunction3
+ * %struct SomeStruct
+ * %param outputParam Param description overridden
+ *     %value regularValue Appears in xml.
+ * %return some result description
+ *     %struct SomeStruct
+ */
+reg("urlPrefix/testFunction3", new onTestFunction3());

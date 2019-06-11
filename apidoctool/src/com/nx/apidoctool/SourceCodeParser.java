@@ -74,8 +74,16 @@ public final class SourceCodeParser
                         checkFunctionProperties(match, description.function);
                         if (typeManager != null)
                         {
+                            String inputStructName = match.inputDataType;
+                            if (inputStructName == null)
+                                inputStructName = description.inputStructName;
+
+                            String outputStructName = match.outputDataType;
+                            if (outputStructName == null)
+                                outputStructName = description.outputStructName;
+
                             typeManager.mergeDescription(
-                                match.inputDataType, match.outputDataType, description.function);
+                                inputStructName, outputStructName, description.function);
                         }
 
                         if (!ApidocUtils.checkFunctionDuplicate(group, description.function))

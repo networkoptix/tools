@@ -28,6 +28,8 @@ public final class ApidocCommentParser
     public static class FunctionDescription 
     {
         public String urlPrefix;
+        public String inputStructName;
+        public String outputStructName;
         public Apidoc.Function function;
     }
 
@@ -80,6 +82,12 @@ public final class ApidocCommentParser
         return functions;
     }
 
+    final private class Result
+    {
+        Apidoc.Result result;
+        String outputStructName;
+    }
+
     //---------------------------------------------------------------------------------------------
 
     /**
@@ -115,6 +123,10 @@ public final class ApidocCommentParser
                 tagIterator.previous(); //< Return previous tag for future parsing.
                 break;
             }
+            else if (TAG_STRUCT.equals(item.getTag()))
+            {
+                description.inputStructName = item.getFullText(indentLevel);
+            }
             else if (TAG_CAPTION.equals(item.getTag()))
             {
                 captionParsed = checkTagOnce(item, captionParsed, TAG_CAPTION);
@@ -140,7 +152,9 @@ public final class ApidocCommentParser
             else if (TAG_RETURN.equals(item.getTag()))
             {
                 returnParsed = checkTagOnce(item, returnParsed, TAG_RETURN);
-                description.function.result = parseFunctionResult(item, tagIterator);
+                Result resultDescription = parseFunctionResult(item, tagIterator);
+                description.function.result = resultDescription.result;
+                description.outputStructName = resultDescription.outputStructName;
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -320,18 +334,19 @@ public final class ApidocCommentParser
         return value;
     }
 
-    private Apidoc.Result parseFunctionResult(
+    private Result parseFunctionResult(
         ApidocTagParser.Item item, ListIterator<ApidocTagParser.Item> tagIterator)
         throws Error
     {
         assert TAG_RETURN.equals(item.getTag());
         indentLevel++;
         checkNoAttribute(item);
-        Apidoc.Result result = new Apidoc.Result();
-        result.caption = item.getFullText(indentLevel);
+        Result resultDescription = new Result();
+        resultDescription.result = new Apidoc.Result();
+        resultDescription.result.caption = item.getFullText(indentLevel);
         try
         {
-            result.type = Apidoc.Type.fromString(item.getLabel());
+            resultDescription.result.type = Apidoc.Type.fromString(item.getLabel());
         }
         catch (Exception e)
         {
@@ -343,23 +358,27 @@ public final class ApidocCommentParser
         while (tagIterator.hasNext())
         {
             item = tagIterator.next();
-            if (TAG_PARAM.equals(item.getTag()))
+            if (TAG_STRUCT.equals(item.getTag()))
+            {
+                resultDescription.outputStructName = item.getFullText(indentLevel);
+            }
+            else if (TAG_PARAM.equals(item.getTag()))
             {
                 Apidoc.Param param = parseParam(
                     item, tagIterator, ParamDirection.Output, ParamMode.WithToken);
 
-                checkDuplicateParam(item, result.params, param.name);
+                checkDuplicateParam(item, resultDescription.result.params, param.name);
                 if (param.unused)
-                    result.unusedParams.add(param);
+                    resultDescription.result.unusedParams.add(param);
                 else
-                    result.params.add(param);
+                    resultDescription.result.params.add(param);
             }
             else if ("%attribute".equals(item.getTag()))
             {
                 // Support for old deprecated Apidoc Comment format which has
                 // "%attribute" tags following "%result" instead of "%param".
                 deprecatedAttributeTagFound = true;
-                parseFunctionResultAttributeDeprecated(item, result);
+                parseFunctionResultAttributeDeprecated(item, resultDescription.result);
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -375,7 +394,7 @@ public final class ApidocCommentParser
                     " instead of \"" + TAG_PARAM + "\".");
         }
         indentLevel--;
-        return result;
+        return resultDescription;
     }
 
     private void parseFunctionResultAttributeDeprecated(

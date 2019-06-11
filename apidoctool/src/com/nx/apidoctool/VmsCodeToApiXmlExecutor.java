@@ -53,7 +53,7 @@ public final class VmsCodeToApiXmlExecutor
         processedFunctionsCount += processCppFile(
             params.handlerRegistrationCpp(),
             new HandlerRegistrationMatcher(),
-            /*typeManager*/ null);
+            typeMananger);
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");
