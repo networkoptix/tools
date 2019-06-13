@@ -71,6 +71,8 @@ Here <command> can be one of the following:
 
  sdk # Rebuild nx_analytics_sdk.
 
+ copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
+
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
  go-cd command [args] # Execute a command at vega via ssh, changing dir to match the current dir.
  rsync [command] # Rsync current vms source dir to vega, run command in the respective current dir.
@@ -94,7 +96,7 @@ Here <command> can be one of the following:
  bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
  vs [args] # Open the VMS project in Visual Studio (Windows-only).
  thg [args] # Open Tortoise HG for the VMS project dir; if no args, "log" command is issued.
- 
+
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
 
@@ -412,7 +414,7 @@ do_build()
     then
         STOP_ON_BUILD_ERRORS_ARG=( -- -k1000 )
     fi
-    
+
     nx_cd "$VMS_DIR"
     time nx_verbose cmake --build "$(nx_path "$BUILD_DIR")" \
         "${CONFIG_ARG[@]}" "$@" "${STOP_ON_BUILD_ERRORS_ARG[@]}"
@@ -696,6 +698,137 @@ do_kit() # "$@"
     else
         nx_echo
         nx_echo "ATTENTION: Built at $KIT_BUILD_DIR"
+    fi
+}
+
+insert_copyright_notice() # <file> <notice-line> <shebang-line>
+{
+    local -r FILE="$1"; shift
+    local -r NOTICE_LINE="$1"; shift
+    local -r SHEBANG_LINE="$1"; shift
+
+    local -r BAK="$FILE.bak"
+    mv "$FILE" "$BAK" || return $?
+    if [[ -z $SHEBANG_LINE ]]
+    then #< No shebang - insert copyright notice as the first line.
+        echo "$NOTICE_LINE" >>"$FILE"
+        echo "" >>"$FILE"
+        cat "$BAK" >>"$FILE"
+    else #< Shebang - insert copyright notice as the second line, and add "x" permission.
+        echo "$SHEBANG_LINE" >>"$FILE"
+        echo "$NOTICE_LINE" >>"$FILE"
+        echo "" >>"$FILE"
+        tail -n +2 "$BAK" >>"$FILE"
+        chmod +x "$FILE"
+    fi
+
+    nx_echo
+    nx_echo "Added copyright notice to $FILE"
+    nx_echo "BEGIN"
+    head -n 4 "$FILE"
+    nx_echo "END"
+    nx_echo
+}
+
+check_for_incorrect_copyright_notice() # <file> <actual-notice-line>
+{
+    local -r FILE="$1"; shift
+    local -r ACTUAL_NOTICE_LINE="$1"; shift
+
+    local -r L=${ACTUAL_NOTICE_LINE,,} #< Convert to lower case.
+    if [[ $L == *copyright* || $L == *license* || $L == *mpl* || $L == *gpl* ]]
+    then
+        nx_echo
+        nx_echo "ATTENTION: Unexpected copyright notice in $FILE"
+        nx_echo "$ACTUAL_NOTICE_LINE"
+        nx_echo
+        return 1
+    fi
+    
+    if grep -i "copyright.*optix" "$FILE" >/dev/null
+    then
+        nx_echo "ATTENTION: Suspicious copyright-related content in $FILE"
+        return 1
+    fi
+    
+    return 0
+}
+
+do_copyright_file() # <file> <prefix> [add]
+{
+    local -r FILE="$1"; shift
+    local -r PREFIX="$1"; shift
+    if (( $# > 0 )) && [[ $1 == "add" ]]
+    then
+        local -r -i ADD=1
+        shift
+    elif (( $# > 0 ))
+    then
+        nx_fail "Invalid arguments."
+    else
+        local -r -i ADD=0
+    fi
+
+    local -r NOTICE\
+="Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/"
+
+    local -r CPP_PREFIX="// "
+    local -r SH_PREFIX="## "
+    local -r BAT_PREFIX=":: "
+
+    local SHEBANG_LINE=""
+    local FIRST_LINE=$(head -n 1 "$FILE")
+    if [[ $FIRST_LINE == '#!'* ]] #< Shell shebang - the copyright notice should come next.
+    then
+        SHEBANG_LINE="$FIRST_LINE"
+        FIRST_LINE=$(head -n 2 "$FILE" |tail -n 1)
+    fi
+
+    if [[ $FIRST_LINE == $PREFIX$NOTICE ]] #< Copyright notice is in place and is correct.
+    then
+        return 0
+    fi
+
+    check_for_incorrect_copyright_notice "$FILE" "$FIRST_LINE" || return $?
+
+    # The file has missing copyright notice.
+    if [[ $ADD == 1 ]]
+    then
+        insert_copyright_notice "$FILE" "$PREFIX$NOTICE" "$SHEBANG_LINE"
+    else
+        nx_echo "Missing copyright notice in $FILE"
+    fi
+}
+
+do_copyright() # "$@"
+{
+    local FILES=()
+    nx_find_files FILES -type f
+
+    nx_log_array FILES
+
+    local SKIPPED_FILES=()
+    local FILE
+    for FILE in "${FILES[@]}"
+    do
+        case "$(basename "$FILE")" in
+            CMakeLists.txt|*.cmake) `# should come first #` do_copyright_file "$FILE" "## " "$@";;
+            *.h|*.cpp|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
+            *.sh|*.py|Doxyfile) do_copyright_file "$FILE" "## " "$@";;
+            *.bat) do_copyright_file "$FILE" ":: " "$@";;
+            .hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
+            *) SKIPPED_FILES+=( "$FILE" );;
+        esac
+    done
+
+    if (( ${#SKIPPED_FILES[@]} != 0 ))
+    then
+        nx_echo
+        nx_echo "ATTENTION: The following files were skipped - unknown extension:"
+        for FILE in "${SKIPPED_FILES[@]}"
+        do
+            nx_echo "[$FILE]"
+        done
     fi
 }
 
@@ -1155,7 +1288,7 @@ do_bak() # [target-dir]
         nx_echo "WARNING: Tar already exists; moved to $OLD_TAR"
         mv "$TAR" "$OLD_TAR" || return $?
     fi
-    
+
     (cd "$VMS_DIR" || return $?
         tar cf "$TAR" * || return $?
     ) || return $?
@@ -1381,10 +1514,10 @@ doGoCd() # "$@"
     local -r CURRENT_DIR=$(pwd)
     [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
     local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
-    
+
     # TODO: Find a way to start an interactive session after `cd`.
     (($# > 0)) || nx_fail "Command to execute remotely not specified."
-    
+
     nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
 }
 
@@ -1430,6 +1563,9 @@ main()
             nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_analytics_sdk"
             SDK=1 do_gen "$@"
             do_build --target nx_analytics_sdk
+            ;;
+        copyright)
+            do_copyright "$@"
             ;;
         #..........................................................................................
         go)
@@ -1525,7 +1661,7 @@ main()
             else
                 local -r -i INSTALLED=0
             fi
-            
+
             if (($# >= 1)) && [[ $1 == "find" ]]
             then
                 shift
@@ -1546,7 +1682,7 @@ main()
                     ;;
                 *) nx_fail "Customizations other than 'metavms' and 'default' not supported yet."
             esac
-            
+
             case "$TARGET" in
                 windows)
                     if [[ $INSTALLED == 1 ]]
@@ -1562,7 +1698,7 @@ main()
                     ;;
                 *) nx_fail "Target [$TARGET] not supported yet.";;
             esac
-            
+
             local LOG_FILE
             nx_find_file LOG_FILE "main log file" "$BASE_DIR" -name "log_file.log"
             if [[ $FIND == 1 ]]
