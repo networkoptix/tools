@@ -870,8 +870,8 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
         # assignment only if the variable is unset.
         source <(cat "$FILE_PATH" |sed \
             -e '/^[[:space:]]*$/d' `#< Delete empty lines. #` \
-	    -e '/^[[:space:]]*#/d' `#< Delete comment lines (starting with '#'). #` \
-	    -e 's/^\(.*\)$/: ${\1}/' `#< Transform to ': ${VAR=val}' - assign only if unset. #`)
+            -e '/^[[:space:]]*#/d' `#< Delete comment lines (starting with '#'). #` \
+            -e 's/^\(.*\)$/: ${\1}/' `#< Transform to ': ${VAR=val}' - assign only if unset. #`)
     else
         return 1
     fi
