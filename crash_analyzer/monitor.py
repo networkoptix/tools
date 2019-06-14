@@ -20,6 +20,7 @@ NAME = 'Crash Monitor and Analyzer'
 VERSION = '2.0'
 RETRY_CRASH_ID = 'RETRY'
 FAILED_CRASH_ID = 'FAILED'
+USELESS_STACK_KEY = 'USELESS_STACK'
 
 
 class Options:
@@ -199,7 +200,8 @@ class Monitor:
             if crash_id and crash_id != FAILED_CRASH_ID and crash_id != RETRY_CRASH_ID:
                 crash_data = crashes_by_id.setdefault(crash_id, {'issue': None, 'reports': []})
                 if issue:
-                    crash_data['issue'] = issue
+                    if issue != USELESS_STACK_KEY:
+                        crash_data['issue'] = issue
                 else:
                     crash_data['reports'].append(crash_info.Report(name))
 
@@ -245,7 +247,7 @@ class Monitor:
                 # This may happen when stack is considered to be useless after a logic change.
                 logger.warning(utils.format_error(error, include_stack=True))
                 logger.error('Skip creating issue for reports with useless stack')
-                return 'USELESS_STACK', reports
+                return USELESS_STACK_KEY, reports
             else:
                 issue = jira.create_issue(report, reason)
 
