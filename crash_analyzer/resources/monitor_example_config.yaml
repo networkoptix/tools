@@ -46,7 +46,7 @@ analyze:
 upload:
     url: https://networkoptix.atlassian.net/
     login: service@networkoptix.com
-    password: kbnUk06boqBkwU
+    password: jira_token_goes_here
     file_limit: 20 #< Maximum attachments count.
     thread_count: 10 #< Communication connections count.
     epic_link: VMS-2022 #< Epic name to link newly created issues.

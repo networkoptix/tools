@@ -13,6 +13,10 @@ import utils
 logger = logging.getLogger(__name__)
 
 
+# This is required to minimize log cluttering. Set to False for more detailed debug.
+CLEANUP_JIRA_EXCEPTIONS = True
+
+
 class Error(Exception):
     pass
 
@@ -22,7 +26,12 @@ class CrashServerError(Error):
 
 
 class JiraError(Error):
-    pass
+    def __init__(self, message: str, jira_error: jira.exceptions.JIRAError = None):
+        if jira_error and CLEANUP_JIRA_EXCEPTIONS:
+            jira_error.text = None
+            jira_error.request = None
+            jira_error.response = None
+        super().__init__(message + ': ' + str(jira_error))
 
 
 class CrashServer:
@@ -119,7 +128,11 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 class Jira:
     def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list, 
                  epic_link: str = '', prefix: str = ''):
-        self._jira = jira.JIRA(server=url, basic_auth=(login, password))
+        try:
+            self._jira = jira.JIRA(server=url, basic_auth=(login, password))
+        except jira.exceptions.JIRAError as error:
+            raise JiraError('Unable to connect to {} with [{}:{}]'.format(url, login, password), error)
+
         self._file_limit = file_limit
         self._fix_versions = fix_versions
         self._epic_link = epic_link
@@ -155,8 +168,7 @@ class Jira:
                 customfield_10009=self._epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
         except jira.exceptions.JIRAError as error:
-            logger.debug(utils.format_error(error))
-            raise JiraError('Unable to create issue for "{}": {}'.format(report.name, error.text))
+            raise JiraError('Unable to create issue for "{}"'.format(report.name), error)
 
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
@@ -171,8 +183,7 @@ class Jira:
         try:
             issue = self._jira.issue(key)
         except jira.exceptions.JIRAError as error:
-            logger.warning(utils.format_error(error))
-            raise JiraError('Unable to update issue {}: {}'.format(key, error.text))
+            raise JiraError('Unable to update issue {}'.format(key), error)
 
         fix_build = issue.fields.customfield_11120
         if fix_build:
@@ -211,10 +222,15 @@ class Jira:
 
     def all_issues(self):
         issues = []
-        for issue in self._jira.search_issues('summary ~ "has crashed on"', maxResults=1000):
-            summary = issue.fields.summary
-            if summary.startswith(self._prefix) and 'has crashed on' in summary:
-                issues.append(issue)
+        try:
+            for issue in self._jira.search_issues('summary ~ "has crashed on"', maxResults=1000):
+                summary = issue.fields.summary
+                if summary.startswith(self._prefix) and 'has crashed on' in summary:
+                    issues.append(issue)
+
+        except jira.exceptions.JIRAError as error:
+            raise JiraError('Unable to get all issues', error)
+
         return issues
     
     def _fix_versions_for(self, version):
@@ -241,13 +257,13 @@ class Jira:
             try:
                 self._jira.add_attachment(key, attachment=report.path, filename=report.name)
 
-            except jira.exceptions.JIRAError as error:
-                message = 'Unable to attach "{}" file to JIRA issue {}: {}'.format(
-                    report.name, key, error.text)
-                if error.status_code == 413: #< HTTP Code: Payload Too Large.
-                    logger.warning(message)
+            except jira.exceptions.JIRAError as jira_error:
+                error = JiraError(
+                    'Unable to attach "{}" file to issue {}'.format(report.name, key), jira_error)
+                if jira_error.status_code == 413: #< HTTP Code: Payload Too Large.
+                    logger.warning(utils.format_error(error))
                 else:
-                    raise JiraError(message)
+                    raise error
             else:
                 logger.debug('JIRA issue {} new attachment {}'.format(key, report.name))
 
@@ -260,12 +276,16 @@ class Jira:
                 logger.debug('JIRA issue {} removed attachment {}'.format(key, first.filename))
 
         except jira.exceptions.JIRAError as error:
-            logger.debug(utils.format_error(error))
-            raise JiraError('Unable to cleanup attachments at issue {}: {}'.format(key, error.text))
+            raise JiraError('Unable to cleanup attachments at issue {}'.format(key), error)
 
     def _transition(self, issue: jira.Issue, *transition_names: List[str], **kwargs: dict):
         for name in transition_names:
-            for transition in self._jira.transitions(issue):
-                if transition['name'].startswith(name):
-                    self._jira.transition_issue(issue, transition['id'], **kwargs)
-                    continue
+            try:
+                for transition in self._jira.transitions(issue):
+                    if transition['name'].startswith(name):
+                        self._jira.transition_issue(issue, transition['id'], **kwargs)
+                        continue
+
+            except jira.exceptions.JIRAError as error:
+                raise JiraError('Unable to transition issue {} to {}'.format(issue.key, name), error)
+

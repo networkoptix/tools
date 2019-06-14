@@ -113,7 +113,7 @@ def _test_jira():
         assert {'a'} == jira.attachments()
         
         logger.info('Suppose case is rejected by developer')
-        jira.api._transition(jira.issue.key, 'Reject', resolution={'name': 'Rejected'})
+        jira.api._transition(jira.issue.key, 'Close', resolution={'name': 'Rejected'})
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.info('No reopen by any version')
@@ -123,7 +123,7 @@ def _test_jira():
         logger.info('Suppose case is fixed by developer')
         jira.api._transition(jira.issue.key, 'Reopen')
         assert 'Open' == jira.api._jira.issue(jira.issue.key).fields.status.name
-        jira.api._transition(jira.issue.key, 'Start Development', 'Ready to Review', 'Done')
+        jira.api._transition(jira.issue.key, 'Start Development', 'Review', 'Close') 
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.info('No reopen for the same version')
@@ -139,7 +139,7 @@ def _test_jira():
         assert {'a', 'c'} == jira.attachments()
 
         logger.info('Suppose case is closed by developer with fix version')
-        jira.api._transition(jira.issue.key, 'Reject')
+        jira.api._transition(jira.issue.key, 'Close')
         jira.issue.update(fields=dict(customfield_11120=323))
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
@@ -167,7 +167,7 @@ def _test_jira():
         assert {'c', 'e', 'f'} == jira.attachments()
 
         logger.info('Suppose issue is marked as duplicate')
-        jira.api._transition(jira.issue.key, 'Reject', resolution={'name': 'Duplicate'})
+        jira.api._transition(jira.issue.key, 'Close', resolution={'name': 'Duplicate'})
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logging.info('Attachments rotation still happens')
