@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public final class TypeMananger
+public final class TypeManager
 {
     public class Error
         extends Exception
@@ -14,7 +14,7 @@ public final class TypeMananger
         public Error(String message) { super(message); }
     }
 
-    public TypeMananger(boolean verbose)
+    public TypeManager(boolean verbose)
     {
         this.verbose = verbose;
     }
@@ -74,6 +74,25 @@ public final class TypeMananger
                 function.unusedParams,
                 ApidocCommentParser.ParamDirection.Input);
         }
+    }
+
+    public List<Apidoc.Param> getStructParams(
+        String structName, String prefix, ApidocCommentParser.ParamDirection paramDirection)
+        throws Error
+    {
+        StructParser.StructInfo structInfo = structs.get(structName);
+        if (structInfo == null)
+        {
+            if (verbose)
+            {
+                System.out.println(
+                    "            WARNING: Struct \"" + structName + "\" not found");
+            }
+            return null;
+        }
+        final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
+        structToParams(structParams, prefix, structInfo, paramDirection);
+        return structParams;
     }
 
     private List<Apidoc.Param> mergeStructParams(

@@ -74,6 +74,8 @@ public final class Apidoc extends Serializable
 
     public static final class Param extends Serializable
     {
+        public boolean isGeneratedFromStruct = false;
+        public String structName;
         protected boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
 
         public boolean unused = false; ///< Internal field, omit param from apidoc.

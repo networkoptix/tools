@@ -2,7 +2,7 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocUtils;
-import com.nx.apidoc.TypeMananger;
+import com.nx.apidoc.TypeManager;
 import com.nx.util.*;
 
 import java.io.File;
@@ -37,23 +37,23 @@ public final class VmsCodeToApiXmlExecutor
                 + e.getMessage());
         }
 
-        TypeMananger typeMananger = null;
+        TypeManager typeManager = null;
         if (!params.typeHeaderPaths().isEmpty())
         {
             List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
-            typeMananger = new TypeMananger(verbose);
-            typeMananger.processFiles(typeHeaders);
+            typeManager = new TypeManager(verbose);
+            typeManager.processFiles(typeHeaders);
         }
 
         int processedFunctionsCount = 0;
         processedFunctionsCount += processCppFile(
             params.templateRegistrationCpp(),
             new TemplateRegistrationMatcher(),
-            typeMananger);
+            typeManager);
         processedFunctionsCount += processCppFile(
             params.handlerRegistrationCpp(),
             new HandlerRegistrationMatcher(),
-            typeMananger);
+            typeManager);
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");
@@ -79,7 +79,7 @@ public final class VmsCodeToApiXmlExecutor
     }
 
     private int processCppFile(
-        String sourceCppFilename, RegistrationMatcher matcher, TypeMananger typeManager)
+        String sourceCppFilename, RegistrationMatcher matcher, TypeManager typeManager)
         throws Exception
     {
         final File sourceCppFile = new File(vmsPath, sourceCppFilename);

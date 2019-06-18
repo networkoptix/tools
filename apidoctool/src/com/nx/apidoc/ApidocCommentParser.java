@@ -70,22 +70,30 @@ public final class ApidocCommentParser
      * @return Empty list if the comment should not convert to an XML function.
      */
     public List<FunctionDescription> createFunctionsFromTags(
-        List<ApidocTagParser.Item> tags)
-        throws Error
+        List<ApidocTagParser.Item> tags, TypeManager typeManager)
+        throws Error,
+        TypeManager.Error
+
     {
         final List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
 
         ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         while (tagIterator.hasNext())
-            functions.add(createFunctionFromTags(tagIterator));
+            functions.add(createFunctionFromTags(tagIterator, typeManager));
 
         return functions;
     }
 
-    final private class Result
+    private final class Result
     {
         Apidoc.Result result;
         String outputStructName;
+    }
+
+    private final class Param
+    {
+        List<Apidoc.Value> values;
+        String structName;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -94,8 +102,9 @@ public final class ApidocCommentParser
      * @return Null if the comment should not convert to an XML function.
      */
     private FunctionDescription createFunctionFromTags(
-        ListIterator<ApidocTagParser.Item> tagIterator)
-        throws Error
+        ListIterator<ApidocTagParser.Item> tagIterator, TypeManager typeManager)
+        throws Error,
+        TypeManager.Error
     {
         ApidocTagParser.Item item = tagIterator.next();
 
@@ -140,7 +149,7 @@ public final class ApidocCommentParser
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {
-                Apidoc.Param param = parseParam(
+                final Apidoc.Param param = parseParam(
                     item, tagIterator, ParamDirection.Input, ParamMode.WithToken);
 
                 checkDuplicateParam(item, description.function.params, param.name);
@@ -148,11 +157,19 @@ public final class ApidocCommentParser
                     description.function.unusedParams.add(param);
                 else
                     description.function.params.add(param);
+
+                addStructParams(
+                    description.function.params,
+                    description.function.unusedParams,
+                    param,
+                    typeManager,
+                    ParamDirection.Input);
             }
             else if (TAG_RETURN.equals(item.getTag()))
             {
                 returnParsed = checkTagOnce(item, returnParsed, TAG_RETURN);
-                Result resultDescription = parseFunctionResult(item, tagIterator);
+                final Result resultDescription = parseFunctionResult(
+                    item, tagIterator, typeManager);
                 description.function.result = resultDescription.result;
                 description.outputStructName = resultDescription.outputStructName;
             }
@@ -163,6 +180,37 @@ public final class ApidocCommentParser
         }
 
         return description;
+    }
+
+    private void addStructParams(
+        List<Apidoc.Param> params,
+        List<Apidoc.Param> unusedParams,
+        Apidoc.Param param,
+        TypeManager typeManager,
+        ParamDirection direction)
+        throws TypeManager.Error
+    {
+        if (typeManager != null && param.structName != null)
+        {
+            String prefix = param.name;
+            if (param.type == Apidoc.Type.ARRAY)
+                prefix += "[].";
+            else
+                prefix += ".";
+            List<Apidoc.Param> structParams = typeManager.getStructParams(
+                param.structName, prefix, direction);
+            if (structParams != null)
+            {
+                for (Apidoc.Param structParam: structParams)
+                {
+                    structParam.isGeneratedFromStruct = true;
+                    if (structParam.unused)
+                        unusedParams.add(structParam);
+                    else
+                        params.add(structParam);
+                }
+            }
+        }
     }
 
     /**
@@ -228,7 +276,9 @@ public final class ApidocCommentParser
             throw new Error(item.getErrorPrefix() + "Invalid param type \"" + item.getLabel()
                 + "\" found.");
         }
-        param.values.addAll(parseParamValues(tagIterator));
+        Param paramDescription = parseParamTags(tagIterator);
+        param.values.addAll(paramDescription.values);
+        param.structName = paramDescription.structName;
 
         if (paramDirection == ParamDirection.Output)
             parseFunctionResultParamAttr(item, param);
@@ -272,12 +322,13 @@ public final class ApidocCommentParser
         }
     }
 
-    private List<Apidoc.Value> parseParamValues(
+    private Param parseParamTags(
         ListIterator<ApidocTagParser.Item> tagIterator)
         throws Error
     {
         indentLevel++;
-        List<Apidoc.Value> values = new ArrayList<Apidoc.Value>();
+        final Param paramDescription = new Param();
+        paramDescription.values = new ArrayList<Apidoc.Value>();
         while (tagIterator.hasNext())
         {
             final ApidocTagParser.Item tag = tagIterator.next();
@@ -291,7 +342,11 @@ public final class ApidocCommentParser
                 Apidoc.Value value = new Apidoc.Value();
                 value.name = getInitialToken(tag, ParamMode.WithToken);
                 value.description = tag.getTextAfterInitialToken(indentLevel);
-                values.add(value);
+                paramDescription.values.add(value);
+            }
+            else if (TAG_STRUCT.equals(tag.getTag()))
+            {
+                paramDescription.structName = tag.getFullText(indentLevel);
             }
             else if (!tag.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -300,7 +355,7 @@ public final class ApidocCommentParser
             }
         }
         indentLevel--;
-        return values;
+        return paramDescription;
     }
 
     private void fillDefaultFormatParam(ApidocTagParser.Item item, Apidoc.Param param)
@@ -335,8 +390,11 @@ public final class ApidocCommentParser
     }
 
     private Result parseFunctionResult(
-        ApidocTagParser.Item item, ListIterator<ApidocTagParser.Item> tagIterator)
-        throws Error
+        ApidocTagParser.Item item,
+        ListIterator<ApidocTagParser.Item> tagIterator,
+        TypeManager typeManager)
+        throws Error,
+        TypeManager.Error
     {
         assert TAG_RETURN.equals(item.getTag());
         indentLevel++;
@@ -372,6 +430,13 @@ public final class ApidocCommentParser
                     resultDescription.result.unusedParams.add(param);
                 else
                     resultDescription.result.params.add(param);
+
+                addStructParams(
+                    resultDescription.result.params,
+                    resultDescription.result.unusedParams,
+                    param,
+                    typeManager,
+                    ParamDirection.Output);
             }
             else if ("%attribute".equals(item.getTag()))
             {
@@ -472,6 +537,13 @@ public final class ApidocCommentParser
         ApidocTagParser.Item item, List<Apidoc.Param> params, String paramName)
         throws Error
     {
+        // Overwrite param that generated by %struct tag
+        Iterator<Apidoc.Param> iterator = params.iterator();
+        while (iterator.hasNext()) {
+            Apidoc.Param existingParam = iterator.next();
+            if (existingParam.isGeneratedFromStruct && existingParam.name.equals(paramName))
+                iterator.remove();
+        }
         for (Apidoc.Param existingParam: params)
         {
             if (existingParam.name.equals(paramName))
@@ -479,6 +551,7 @@ public final class ApidocCommentParser
                 throw new Error(item.getErrorPrefix() + "Duplicate param \"" + paramName
                     + "\" found.");
             }
+
         }
     }
 

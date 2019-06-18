@@ -52,3 +52,13 @@ struct SomeStruct
  *     %struct SomeStruct
  */
 reg("urlPrefix/testFunction3", new onTestFunction3());
+
+
+/**%apidoc GET /urlPrefix/testFunction4
+ * %param outputParam Param description
+ * %return some result description
+ *     %param:object someParam description
+ *     %struct SomeStruct
+ *     %param:integer someParam.outputParam overridden description
+ */
+reg("urlPrefix/testFunction4", new onTestFunction4());

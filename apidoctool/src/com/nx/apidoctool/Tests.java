@@ -172,10 +172,10 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeMananger typeMananger = new TypeMananger(/*verbose*/ true);
+        TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(templateFunctionsCppFile);
-        typeMananger.processFiles(files);
+        typeManager.processFiles(files);
 
         System.out.println("test: parsing apidoc in \"template\" functions C++");
         System.out.println("    Sample: " + expectedTemplateFunctionsXmlFile);
@@ -184,7 +184,7 @@ public final class Tests extends TestBase
         final SourceCode reader = new SourceCode(templateFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
-            apidoc, new TemplateRegistrationMatcher(), typeMananger);
+            apidoc, new TemplateRegistrationMatcher(), typeManager);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
@@ -206,10 +206,10 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeMananger typeMananger = new TypeMananger(/*verbose*/ true);
+        TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(handlerFunctionsCppFile);
-        typeMananger.processFiles(files);
+        typeManager.processFiles(files);
 
         System.out.println("test: parsing apidoc in \"handler\" functions C++");
         System.out.println("    Sample: " + expectedHandlerFunctionsXmlFile);
@@ -217,7 +217,7 @@ public final class Tests extends TestBase
         final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
-                apidoc, new HandlerRegistrationMatcher(), typeMananger);
+                apidoc, new HandlerRegistrationMatcher(), typeManager);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));

@@ -36,13 +36,13 @@ public final class SourceCodeParser
      * @return Number of API functions processed.
      */
     public int parseApidocComments(
-        Apidoc apidoc, RegistrationMatcher matcher, TypeMananger typeManager)
+        Apidoc apidoc, RegistrationMatcher matcher, TypeManager typeManager)
         throws Error,
         ApidocUtils.Error,
         SourceCode.Error,
         ApidocTagParser.Error,
         ApidocCommentParser.Error,
-        TypeMananger.Error
+        TypeManager.Error
     {
         if (verbose)
             System.out.println("        Processed API functions:");
@@ -55,7 +55,7 @@ public final class SourceCodeParser
             if (match != null)
             {
                 final List<ApidocCommentParser.FunctionDescription> functions =
-                    createFunctionsFromComment();
+                    createFunctionsFromComment(typeManager);
                 if (functions != null && !functions.isEmpty())
                 {
                     final String urlPrefix = functions.get(0).urlPrefix;
@@ -111,8 +111,9 @@ public final class SourceCodeParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment()
-        throws ApidocCommentParser.Error, ApidocTagParser.Error
+    private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment(
+        TypeManager typeManager)
+        throws ApidocCommentParser.Error, ApidocTagParser.Error, TypeManager.Error
     {
         final List<String> commentLines =
             ApidocTagParser.getPrecedingComment(sourceCode, mainLine - 1);
@@ -125,7 +126,8 @@ public final class SourceCodeParser
         final ApidocCommentParser parser = new ApidocCommentParser();
         functions = parser.createFunctionsFromTags(
             ApidocTagParser.getItems(
-                commentLines, sourceCode.getFilename(), commentStartLine, verbose));
+                commentLines, sourceCode.getFilename(), commentStartLine, verbose),
+            typeManager);
 
         return functions;
     }

@@ -136,6 +136,48 @@ continue description</description>
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testFunction4</name>
+                    <description/>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>outputParam</name>
+                            <description>Param description</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>some result description</caption>
+                        <params>
+                            <param>
+                                <name>someParam</name>
+                                <type>object</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>someParam.enumParam</name>
+                                <type>enum</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>someParam.outputParam</name>
+                                <type>integer</type>
+                                <description>overridden description</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>
