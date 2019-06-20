@@ -58,7 +58,7 @@ buildOgg()
     nxPrepareSources "$TARGET_ARTIFACT_DEV/src/libogg-1.3.3"
 
     local -r AUTOCONF_OPTIONS=(
-        --host="${GCC_PREFIX%-}"
+        --host="${GCC_PREFIX%-}" #< Make host from gcc prefix by stripping trailing hyphen.
         --prefix=/usr
         --disable-shared
         --with-pic
