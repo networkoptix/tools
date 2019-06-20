@@ -58,6 +58,11 @@ public abstract class ApidocComment
 // object arrays are documented with inner "%value" tags. Then follows the "%return" tag which may
 // describe a JSON object or object array with inner "%param" and "%value" tags as well.
 //
+// If an API function's input, result, or a certain param is an object or an object array, and the
+// C++ struct for such object has apidoc comments, these comments can be embedded by specifying the
+// "%struct StructName" tag instead of or additionally to "%param" tags for the object fields; if
+// "%param" tags are specified additionally, they override comments coming from the struct.
+//
 // Each API method documentation is always multiline, and may contain multiple sections (each
 // starting with "%apidoc"), when a single C++ method registration line yields multiple functions.
 //

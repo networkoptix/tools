@@ -29,7 +29,6 @@ public final class ApidocCommentParser
     {
         public String urlPrefix;
         public String inputStructName;
-        public String outputStructName;
         public Apidoc.Function function;
     }
 
@@ -84,13 +83,7 @@ public final class ApidocCommentParser
         return functions;
     }
 
-    private final class Result
-    {
-        Apidoc.Result result;
-        String outputStructName;
-    }
-
-    private final class Param
+    private static final class Param
     {
         List<Apidoc.Value> values;
         String structName;
@@ -168,10 +161,9 @@ public final class ApidocCommentParser
             else if (TAG_RETURN.equals(item.getTag()))
             {
                 returnParsed = checkTagOnce(item, returnParsed, TAG_RETURN);
-                final Result resultDescription = parseFunctionResult(
+                final Apidoc.Result result = parseFunctionResult(
                     item, tagIterator, typeManager);
-                description.function.result = resultDescription.result;
-                description.outputStructName = resultDescription.outputStructName;
+                description.function.result = result;
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -188,10 +180,17 @@ public final class ApidocCommentParser
         Apidoc.Param param,
         TypeManager typeManager,
         ParamDirection direction)
-        throws TypeManager.Error
+        throws TypeManager.Error,
+        Error
     {
         if (typeManager != null && param.structName != null)
         {
+            if (param.type != Apidoc.Type.ARRAY && param.type != Apidoc.Type.OBJECT &&
+                param.type != Apidoc.Type.UNKNOWN)
+            {
+                throw new Error("Param '" + param.name + "' has '%struct' tag, but param type is '" +
+                    param.type + "'" + ". To use '%struct' tag type should be 'object' or 'array'");
+            }
             String prefix = param.name;
             if (param.type == Apidoc.Type.ARRAY)
                 prefix += "[].";
@@ -389,7 +388,7 @@ public final class ApidocCommentParser
         return value;
     }
 
-    private Result parseFunctionResult(
+    private Apidoc.Result parseFunctionResult(
         ApidocTagParser.Item item,
         ListIterator<ApidocTagParser.Item> tagIterator,
         TypeManager typeManager)
@@ -399,12 +398,11 @@ public final class ApidocCommentParser
         assert TAG_RETURN.equals(item.getTag());
         indentLevel++;
         checkNoAttribute(item);
-        Result resultDescription = new Result();
-        resultDescription.result = new Apidoc.Result();
-        resultDescription.result.caption = item.getFullText(indentLevel);
+        Apidoc.Result result = new Apidoc.Result();
+        result.caption = item.getFullText(indentLevel);
         try
         {
-            resultDescription.result.type = Apidoc.Type.fromString(item.getLabel());
+            result.type = Apidoc.Type.fromString(item.getLabel());
         }
         catch (Exception e)
         {
@@ -418,22 +416,22 @@ public final class ApidocCommentParser
             item = tagIterator.next();
             if (TAG_STRUCT.equals(item.getTag()))
             {
-                resultDescription.outputStructName = item.getFullText(indentLevel);
+                result.outputStructName = item.getFullText(indentLevel);
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {
                 Apidoc.Param param = parseParam(
                     item, tagIterator, ParamDirection.Output, ParamMode.WithToken);
 
-                checkDuplicateParam(item, resultDescription.result.params, param.name);
+                checkDuplicateParam(item, result.params, param.name);
                 if (param.unused)
-                    resultDescription.result.unusedParams.add(param);
+                    result.unusedParams.add(param);
                 else
-                    resultDescription.result.params.add(param);
+                    result.params.add(param);
 
                 addStructParams(
-                    resultDescription.result.params,
-                    resultDescription.result.unusedParams,
+                    result.params,
+                    result.unusedParams,
                     param,
                     typeManager,
                     ParamDirection.Output);
@@ -443,7 +441,7 @@ public final class ApidocCommentParser
                 // Support for old deprecated Apidoc Comment format which has
                 // "%attribute" tags following "%result" instead of "%param".
                 deprecatedAttributeTagFound = true;
-                parseFunctionResultAttributeDeprecated(item, resultDescription.result);
+                parseFunctionResultAttributeDeprecated(item, result);
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -459,7 +457,7 @@ public final class ApidocCommentParser
                     " instead of \"" + TAG_PARAM + "\".");
         }
         indentLevel--;
-        return resultDescription;
+        return result;
     }
 
     private void parseFunctionResultAttributeDeprecated(
@@ -537,10 +535,11 @@ public final class ApidocCommentParser
         ApidocTagParser.Item item, List<Apidoc.Param> params, String paramName)
         throws Error
     {
-        // Overwrite param that generated by %struct tag
+        // Overwrite param that was generated by %struct tag.
         Iterator<Apidoc.Param> iterator = params.iterator();
-        while (iterator.hasNext()) {
-            Apidoc.Param existingParam = iterator.next();
+        while (iterator.hasNext())
+        {
+            final Apidoc.Param existingParam = iterator.next();
             if (existingParam.isGeneratedFromStruct && existingParam.name.equals(paramName))
                 iterator.remove();
         }
@@ -551,7 +550,6 @@ public final class ApidocCommentParser
                 throw new Error(item.getErrorPrefix() + "Duplicate param \"" + paramName
                     + "\" found.");
             }
-
         }
     }
 

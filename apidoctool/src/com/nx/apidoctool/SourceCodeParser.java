@@ -74,13 +74,15 @@ public final class SourceCodeParser
                         checkFunctionProperties(match, description.function);
                         if (typeManager != null)
                         {
-                            String inputStructName = match.inputDataType;
+                            String inputStructName = description.inputStructName;
                             if (inputStructName == null)
-                                inputStructName = description.inputStructName;
+                                inputStructName = match.inputDataType;
 
-                            String outputStructName = match.outputDataType;
+                            String outputStructName = null;
+                            if (description.function.result != null)
+                                outputStructName = description.function.result.outputStructName;
                             if (outputStructName == null)
-                                outputStructName = description.outputStructName;
+                                outputStructName = match.outputDataType;
 
                             typeManager.mergeDescription(
                                 inputStructName, outputStructName, description.function);

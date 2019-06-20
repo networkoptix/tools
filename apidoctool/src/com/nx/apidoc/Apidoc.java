@@ -117,6 +117,7 @@ public final class Apidoc extends Serializable
 
     public static final class Result extends Serializable
     {
+        public String outputStructName;
         public List<Param> unusedParams; ///< Internal field.
 
         public String caption; ///< optional
