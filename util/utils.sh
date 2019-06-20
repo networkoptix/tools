@@ -118,7 +118,10 @@ nx_log_command() # "$@"
 
     echo $(nx_dgreen)"+ $ARGS"$(nx_nocolor) |sed "s#$HOME/#~/#g"
     
-    [ $NX_VERBOSE = 1 ] && set -x
+    if (( $NX_VERBOSE == 1 ))
+    then
+        set -x
+    fi
 }
 
 # Log the args if in verbose mode, otherwise, do nothing.
@@ -244,7 +247,12 @@ nx_verbose() # "$@"
     "$@"
 
     local -i RESULT=$?
-    [ $NX_VERBOSE == 1 ] && set -x
+
+    if (( $NX_VERBOSE == 1 ))
+    then
+        set -x
+    fi
+
     return $RESULT
 }
 

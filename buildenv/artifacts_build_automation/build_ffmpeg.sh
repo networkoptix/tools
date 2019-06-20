@@ -5,17 +5,12 @@ source "../../util/utils.sh"
 set -e #< Stop on error.
 set -u #< Forbid undefined variables.
 
-source "lib/src_dir.sh"
-source "lib/arch.sh"
-source "lib/gcc.sh"
-source "lib/make.sh"
-source "lib/autotools.sh"
-source "lib/cmake.sh"
+source "build_common.sh"
 
 declare -r SUPPORTED_TARGETS=( linux_arm32 linux_arm64 rpi )
 declare -r FFMPEG_VERSION="3.1.9"
-declare -r FFMPEG_DEV_ARTIFACT_TARGET="linux"
-declare -r FFMPEG_DEV_ARTIFACT="ffmpeg-dev-${FFMPEG_VERSION}"
+declare -r TARGET_ARTIFACT_DEV_ARTIFACT_TARGET="linux"
+declare -r TARGET_ARTIFACT_DEV_ARTIFACT="ffmpeg-dev-${FFMPEG_VERSION}"
 
 help_callback()
 {
@@ -34,22 +29,22 @@ EOF
 }
 
 # [in] GCC
-# [in] FFMPEG_DEV
+# [in] TARGET_ARTIFACT_DEV
 # [in] RDEP_PACKAGES_DIR
 downloadArtifacts()
 {
-    local -r FFMPEG_DEV_CHECKSUM="763e3c83819bc23f5c3fb24a43a12ac0 *files.md5"
+    local -r TARGET_ARTIFACT_DEV_CHECKSUM="90ab6287ac1ebe5b6ff517973fd319d7 *files.md5"
 
-    downloadGccArtifact
+    nxDownloadGccArtifact
 
-    rm -rf "$FFMPEG_DEV"
-    nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$FFMPEG_DEV_ARTIFACT_TARGET" "$FFMPEG_DEV_ARTIFACT"
+    rm -rf "$TARGET_ARTIFACT_DEV"
+    nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$TARGET_ARTIFACT_DEV_ARTIFACT_TARGET" "$TARGET_ARTIFACT_DEV_ARTIFACT"
 
-    nx_pushd "$RDEP_PACKAGES_DIR/linux/$FFMPEG_DEV_ARTIFACT"
+    nx_pushd "$RDEP_PACKAGES_DIR/linux/$TARGET_ARTIFACT_DEV_ARTIFACT"
 
-    if [[ $(./test_checksums.sh) != $FFMPEG_DEV_CHECKSUM ]]
+    if [[ $(./test_checksums.sh) != $TARGET_ARTIFACT_DEV_CHECKSUM ]]
     then
-        nx_fail "Unexpected checksum in $FFMPEG_DEV_ARTIFACT"
+        nx_fail "Unexpected checksum in $TARGET_ARTIFACT_DEV_ARTIFACT"
     fi
 
     nx_popd
@@ -60,7 +55,7 @@ buildOgg()
 {
     nx_echo "Building libogg..."
 
-    prepareSources "$FFMPEG_DEV/src/libogg-1.3.3"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/libogg-1.3.3"
 
     local -r AUTOCONF_OPTIONS=(
         --host="${GCC_PREFIX%-}"
@@ -69,7 +64,7 @@ buildOgg()
         --with-pic
     )
 
-    autotoolsBuild
+    nxAutotoolsBuild
 }
 
 # [in] GCC
@@ -77,7 +72,7 @@ buildVorbis()
 {
     nx_echo "Building libvorbis..."
 
-    prepareSources "$FFMPEG_DEV/src/vorbis-1.3.6"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/vorbis-1.3.6"
 
     local -r CMAKE_GEN_OPTIONS=(
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -89,7 +84,7 @@ buildVorbis()
         -DCMAKE_SYSTEM_PROCESSOR="${ARCH_BY_TARGET[$TARGET]}"
     )
 
-    cmakeBuild
+    nxCmakeBuild
 }
 
 # [in] GCC
@@ -97,7 +92,7 @@ buildLibVpx()
 {
     nx_echo "Building libvpx..."
 
-    prepareSources "$FFMPEG_DEV/src/libvpx-1.7.0"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/libvpx-1.7.0"
 
     local -r TOOLCHAIN_PREFIX="${GCC_PREFIX}"
 
@@ -116,14 +111,14 @@ buildLibVpx()
         --disable-docs
     )
     
-    autotoolsBuild
+    nxAutotoolsBuild
 }
 
 # [in] GCC
 buildLame()
 {
     nx_echo "Building lame..."
-    prepareSources "$FFMPEG_DEV/src/lame-3.99.5"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/lame-3.100"
 
     local -r AUTOCONF_OPTIONS=(
         --host="${GCC_PREFIX%-}"
@@ -133,7 +128,7 @@ buildLame()
         --enable-static
     )
 
-    autotoolsBuild
+    nxAutotoolsBuild
 }
 
 # [in] GCC
@@ -141,23 +136,23 @@ buildOpenH264()
 {
     nx_echo "Building openh264..."
 
-    prepareSources "$FFMPEG_DEV/src/openh264-1.7.0"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/openh264-1.7.0"
 
-    setToolchainMediatorVars "${GCC_PREFIX}"
+    nxExportToolchainMediatorVars "${GCC_PREFIX}"
 
     nxMake ARCH="${ARCH_BY_TARGET[$TARGET]}" PREFIX=/usr
     nxMake ARCH="${ARCH_BY_TARGET[$TARGET]}" PREFIX=/usr DESTDIR="$SYSROOT" install-static
 }
 
 # [in] GCC
-# [in] FFMPEG_DEV 
+# [in] TARGET_ARTIFACT_DEV 
 buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
 {
     nx_echo "Building ffmpeg..."
 
     local -r ABSOLUTE_DESTINATION_DIR="$1"
 
-    prepareSources "$FFMPEG_DEV/src/ffmpeg-$FFMPEG_VERSION"
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/ffmpeg-$FFMPEG_VERSION"
 
     local -r COMMON_OPTIONS=(
         --prefix=/
@@ -216,7 +211,7 @@ buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
         ;;
     esac
 
-    DESTDIR="$ABSOLUTE_DESTINATION_DIR" V=1 autotoolsBuild
+    DESTDIR="$ABSOLUTE_DESTINATION_DIR" V=1 nxAutotoolsBuild
 }
 
 # [in] TARGET
@@ -306,16 +301,16 @@ main()
 
     local -r JOB_COUNT=$(($(cat /proc/cpuinfo | grep "^processor" | wc -l)+1))
 
-    initToolchain
+    nxInitToolchain
 
-    local -r FFMPEG_DEV="$RDEP_PACKAGES_DIR/$FFMPEG_DEV_ARTIFACT_TARGET/$FFMPEG_DEV_ARTIFACT"
+    local -r TARGET_ARTIFACT_DEV="$RDEP_PACKAGES_DIR/$TARGET_ARTIFACT_DEV_ARTIFACT_TARGET/$TARGET_ARTIFACT_DEV_ARTIFACT"
 
     if (( $NO_RDEP == 0 ))
     then
         downloadArtifacts
     fi
 
-    cp -af "$FFMPEG_DEV/src/"sysroot/* "$SYSROOT/"
+    cp -af "$TARGET_ARTIFACT_DEV/src/"sysroot/* "$SYSROOT/"
 
     ( buildOpenH264 )
     ( buildOgg )
