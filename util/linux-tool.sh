@@ -701,24 +701,25 @@ do_kit() # "$@"
     fi
 }
 
-insert_copyright_notice() # <file> <notice-line> <shebang-line>
+insert_copyright_notice() # <file> <notice-line> <shebang-line> <newline-prefix>
 {
     local -r FILE="$1"; shift
     local -r NOTICE_LINE="$1"; shift
     local -r SHEBANG_LINE="$1"; shift
+    local -r NEWLINE_PREFIX="$1"; shift
 
     local -r BAK="$FILE.bak"
     mv "$FILE" "$BAK" || return $?
     if [[ -z $SHEBANG_LINE ]]
-    then #< No shebang - insert copyright notice as the first line.
-        echo "$NOTICE_LINE" >>"$FILE"
-        echo "" >>"$FILE"
+    then #< No shebang - insert the copyright notice as the first line.
+        echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
+        echo "$NEWLINE_PREFIX" `# Will be followed by '\n'. #` >>"$FILE" #< Add an empty line.
         cat "$BAK" >>"$FILE"
-    else #< Shebang - insert copyright notice as the second line, and add "x" permission.
+    else #< Shebang - insert the copyright notice as the second line, and add "x" permission.
         echo "$SHEBANG_LINE" >>"$FILE"
-        echo "$NOTICE_LINE" >>"$FILE"
-        echo "" >>"$FILE"
-        tail -n +2 "$BAK" >>"$FILE"
+        echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
+        # No need to add an empty line - assuming there already is an empty line after the shebang.
+        tail -n +2 "$BAK" >>"$FILE" #< Add original lines starting with the second line.
         chmod +x "$FILE"
     fi
 
@@ -730,22 +731,22 @@ insert_copyright_notice() # <file> <notice-line> <shebang-line>
     nx_echo
 }
 
-check_for_incorrect_copyright_notice() # <file> <actual-notice-line>
+check_for_copyright() # <file> <actual-notice-line>
 {
     local -r FILE="$1"; shift
     local -r ACTUAL_NOTICE_LINE="$1"; shift
 
     local -r L=${ACTUAL_NOTICE_LINE,,} #< Convert to lower case.
-    if [[ $L == *copyright* || $L == *license* || $L == *mpl* || $L == *gpl* ]]
+    if [[ $L == *copyright* || $L == *license* || $L == *gpl* ]]
     then
         nx_echo
-        nx_echo "ATTENTION: Unexpected copyright notice in $FILE"
+        nx_echo "ATTENTION: Unexpected copyright notice in the first line of $FILE"
         nx_echo "$ACTUAL_NOTICE_LINE"
         nx_echo
         return 1
     fi
     
-    if grep -i "copyright.*optix" "$FILE" >/dev/null
+    if grep -i "copyright" "$FILE" >/dev/null
     then
         nx_echo "ATTENTION: Suspicious copyright-related content in $FILE"
         return 1
@@ -778,6 +779,12 @@ do_copyright_file() # <file> <prefix> [add]
 
     local SHEBANG_LINE=""
     local FIRST_LINE=$(head -n 1 "$FILE")
+    local NEWLINE_PREFIX=""
+    if [[ ${FIRST_LINE:(-1)} == $'\r' ]] #< First line ends with '\r' - Windows newlines are used.
+    then
+        NEWLINE_PREFIX=$'\r'
+        FIRST_LINE=${FIRST_LINE: : (-1)} #< Trim the last char which is '\r'.
+    fi
     if [[ $FIRST_LINE == '#!'* ]] #< Shell shebang - the copyright notice should come next.
     then
         SHEBANG_LINE="$FIRST_LINE"
@@ -789,12 +796,12 @@ do_copyright_file() # <file> <prefix> [add]
         return 0
     fi
 
-    check_for_incorrect_copyright_notice "$FILE" "$FIRST_LINE" || return $?
+    check_for_copyright "$FILE" "$FIRST_LINE" || return $?
 
     # The file has missing copyright notice.
     if [[ $ADD == 1 ]]
     then
-        insert_copyright_notice "$FILE" "$PREFIX$NOTICE" "$SHEBANG_LINE"
+        insert_copyright_notice "$FILE" "$PREFIX$NOTICE" "$SHEBANG_LINE" "$NEWLINE_PREFIX"
     else
         nx_echo "Missing copyright notice in $FILE"
     fi
@@ -803,7 +810,7 @@ do_copyright_file() # <file> <prefix> [add]
 do_copyright() # "$@"
 {
     local FILES=()
-    nx_find_files FILES -type f
+    nx_find_files FILES -type f ! -path */docs/html/*
 
     nx_log_array FILES
 
