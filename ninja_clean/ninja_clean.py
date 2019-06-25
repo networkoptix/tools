@@ -75,7 +75,7 @@ def find_extra_files(build_dir, known_files):
     result = []
 
     for root, _, files in os.walk(build_dir):
-        if "CMakeFiles" in root or "_autogen/" in root:
+        if "CMakeFiles" in root or "_autogen/" in root or "customization/" in root:
             continue
 
         relative_dir = os.path.relpath(root, build_dir)
