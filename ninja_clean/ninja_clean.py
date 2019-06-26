@@ -6,6 +6,8 @@ import os
 import re
 import argparse
 
+from pathlib import Path
+
 
 def get_files_from_build_ninja(build_dir):
     regexes = [
@@ -72,10 +74,16 @@ def find_extra_files(build_dir, known_files):
         ".ninja_log"
     ])
 
+    exclusion_dirs = [
+        'CMakeFiles',
+        '_autogen'
+    ]
+
     result = []
 
     for root, _, files in os.walk(build_dir):
-        if "CMakeFiles" in root or "_autogen/" in root or "customization/" in root:
+        unix_path = Path(root)
+        if any(d in unix_path.parts for d in exclusion_dirs):
             continue
 
         relative_dir = os.path.relpath(root, build_dir)
@@ -86,7 +94,7 @@ def find_extra_files(build_dir, known_files):
 
             file_path = os.path.normpath(os.path.join(relative_dir, file))
 
-            if not file_path in known_files:
+            if file_path not in known_files:
                 result.append(os.path.join(root, file))
 
     return result
@@ -94,7 +102,10 @@ def find_extra_files(build_dir, known_files):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--build-dir", type=str, help="Ninja build directory.",
+    parser.add_argument(
+        "-d", "--build-dir",
+        type=str,
+        help="Ninja build directory.",
         default=os.getcwd())
     parser.add_argument("--list", action="store_true", help="List unknown files.")
     args = parser.parse_args()
