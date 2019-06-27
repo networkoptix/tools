@@ -20,9 +20,9 @@ JUNKSHOP_CHECK_FREQUENCY_SECONDS = 60
 JENKINS_SEARCH_DEPTH = 20
 
 jenkins = JenkinsContext(
-    url='http://jenkins2.lan.hdw.mx',
+    url='http://jenkins.lan.hdw.mx',
     username='custom-build-trigger-script',
-    password='password-for-custom-build-trigger-script',
+    password='11c2f31535f69907c429bf398f59658fb9',
     job_name='custom.any.preset.full',
     runner_name='custom.any.vms.runner')
 
