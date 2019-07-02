@@ -1,0 +1,2137 @@
+[
+    {
+        "product": "Nx Witness",
+        "type": "Vms",
+        "single_customization": true,
+        "can_preview": true,
+        "contexts": [
+            {
+                "name": "Description",
+                "label": "",
+                "description": "",
+                "file_path": "description.json",
+                "translatable": false,
+                "hidden": false,
+				"global": true,
+                "values": [
+                    {
+                        "label": "",
+                        "name": "%CUSTOMIZATION_NAME%",
+                        "value": "",
+                        "description": "Example: \"\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "VMS Name",
+                        "name": "%VMS_NAME%",
+                        "value": "VMS Demonstration",
+                        "description": "Name of the VMS customization. Must be short!",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+			            "label": "Skin",
+			            "name": "%SKIN%",
+						"value": "dark_blue",
+						"description": "Supported values: dark_blue, dark_orange, dark_green, gray_orange.",
+			            "advanced": true,
+                        "optional": false,
+			            "type": "select",
+                        "public": true,
+			            "meta": {
+			              "multi": false,
+			              "options": [
+			                "dark_blue",
+			                "dark_orange",
+			                "dark_green",
+			                "gray_orange"
+			              ]
+			            }
+                    },
+                    {
+                        "label": "",
+                        "name": "%uriProtocol%",
+                        "value": "",
+                        "description": "Example: \"nx-vms\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%installerName%",
+                        "value": "",
+                        "description": "Example: \"nxwitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "Cloud Name",
+                        "name": "%CLOUD_NAME%",
+                        "value": "VMS Demo Cloud",
+                        "description": "Name for cloud",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%support.companyUrl%",
+                        "value": "",
+                        "description": "Example: \"http://networkoptix.com\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%support.productUrl%",
+                        "value": "",
+                        "description": "Example: \"http://networkoptix.com/nxwitness-overview\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%support.supportUrl%",
+                        "value": "",
+                        "description": "Example: \"http://support.networkoptix.com\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%support.licenseEmail%",
+                        "value": "",
+                        "description": "Example: \"https://support.networkoptix.com/hc/en-us/requests/new?ticket_form_id=316807\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%desktop.internalName%",
+                        "value": "",
+                        "description": "Example: \"HD Witness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%desktop.appName%",
+                        "value": "",
+                        "description": "Example: \"hdwitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%desktop.supportsHanwha%",
+                        "value": true,
+                        "description": "",
+                        "type": "check_box",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%desktop.freeLicenseKey%",
+                        "value": "",
+                        "description": "Example: \"0000-0000-0000-0005\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%backgroundImage.enabled%",
+                        "value": true,
+                        "description": "",
+                        "type": "check_box",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%backgroundImage.name%",
+                        "value": "",
+                        "description": "Example: \":/skin/background.png\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%backgroundImage.mode%",
+                        "value": "",
+                        "description": "Example: \"Crop\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%defaultWebPages.Home Page%",
+                        "value": "",
+                        "description": "Example: \"http://networkoptix.com\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%defaultWebPages.Support%",
+                        "value": "",
+                        "description": "Example: \"http://support.networkoptix.com\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%windows.serverUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{ce572797-45bf-4f1c-a783-369ea79c597e}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%windows.serverBundleUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{4904f26d-6146-45f4-be37-80a31c15872d}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%windows.clientUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{6ae0699e-af9d-4cc1-85a3-9bf8819563af}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%windows.clientBundleUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%windows.fullBundleUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{2c83e785-23e4-4b70-be6c-ed49fa329bb5}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%linux.debCompanyName%",
+                        "value": "",
+                        "description": "Example: \"networkoptix\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%macos.bundleIdentifier%",
+                        "value": "",
+                        "description": "Example: \"com.networkoptix.HDWitness2\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%macos.protocolHandlerBundleIdentifier%",
+                        "value": "",
+                        "description": "Example: \"com.networkoptix.protocol_handler\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%macos.signIdentity%",
+                        "value": "",
+                        "description": "Example: \"Developer ID Application: Network Optix, Inc. (L6FE34GJWM)\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%mobile.displayName%",
+                        "value": "",
+                        "description": "Example: \"Nx Mobile\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%mobile.compatibleCustomizations%",
+                        "value": "",
+                        "description": "Example: [\n    \"default_cn\",\n    \"default_zh_CN\"\n]",
+                        "type": "array",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%android.packageName%",
+                        "value": "",
+                        "description": "Example: \"com.networkoptix.nxwitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%android.alias%",
+                        "value": "",
+                        "description": "Example: \"hdwitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%android.storepass%",
+                        "value": "",
+                        "description": "Example: \"hYCmvTDu\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%android.keypass%",
+                        "value": "",
+                        "description": "Example: \"31O2zNNy\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%android.compatibilityPackage%",
+                        "value": "",
+                        "description": "Example: \"com.networkoptix.hdwitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%ios.bundleName%",
+                        "value": "",
+                        "description": "Example: \"NxMobile\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%ios.bundleIdentifier%",
+                        "value": "",
+                        "description": "Example: \"com.networkoptix.NxMobile\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%ios.groupIdentifier%",
+                        "value": "",
+                        "description": "Example: \"group.com.networkoptix.NxMobile\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%ios.signIdentity%",
+                        "value": "",
+                        "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%ios.compatibilityPackage%",
+                        "value": "",
+                        "description": "Example: \"id648369716\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%paxton.libraryName%",
+                        "value": "",
+                        "description": "Example: \"NetworkOptix.NxWitness\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%paxton.productId%",
+                        "value": "",
+                        "description": "Example: \"{234bf98e-b18c-4798-9cb5-a0e90269ef9f}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%paxton.productUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{44777db8-96b1-4b09-9746-6d0390288c84}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%paxton.bundleUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{f72abad4-21ca-4c1f-845e-fe437f2859e4}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%nxtool.companyName%",
+                        "value": "",
+                        "description": "Example: \"Nx\"",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "%nxtool.productId%",
+                        "value": "",
+                        "description": "Example: \"{be19c0da-73f6-4ea7-9ad6-9dfd86d9e35e}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%nxtool.productUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{cc740987-5070-4750-b853-327417176031}\"",
+                        "type": "guid",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true
+                    },
+                    {
+                        "label": "",
+                        "name": "%nxtool.bundleUpgradeCode%",
+                        "value": "",
+                        "description": "Example: \"{222b19dc-f75f-4096-9cf2-807e309ce06b}\"",
+                        "type": "guid",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true
+                    }
+                ]
+            },
+            {
+                "name": "root",
+                "label": "",
+                "description": "",
+                "file_path": ".",
+                "translatable": false,
+                "hidden": false,
+                "values": [
+                    {
+                        "label": "",
+                        "name": "customization.cmake",
+                        "value": "",
+                        "description": "",
+                        "type": "File",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "cmake"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "main_icon.ico",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "ico"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "license.html",
+                "label": "License Agreement",
+                "description": "End User License Agreement",
+                "file_path": "license.html",
+                "translatable": false,
+                "hidden": false,
+                "values": [
+					{
+						"label": "EULA Text",
+						"name": "%CONTENT%",
+					    "value": " <p align='CENTER'><u><b>%LEGAL_COMPANY_NAME%</b></u></p>    <p align='CENTER'><u><b>END USER LICENSE AGREEMENT</b></u></p>    <p>        <u><b>IMPORTANT – PLEASE READ CAREFULLY</b></u><b>:</b> This End User License Agreement (the “Agreement”) is a legally enforceable contract between You (either an individual or an entity) and %LEGAL_COMPANY_NAME% (the “Company”) regarding the use of the Company’s software programs accompanying or provided under this Agreement together with the SDK made available by the Company, associated media, corresponding Documentation, technical configurations, and technical data (collectively, the “Software”). “Documentation” means the user’s guide and other documentation (including print and online), if any, provided to you with the Software.    </p>    <p>        BY CLICKING “I ACCEPT” BUTTON BELOW OR BY DOWNLOADING, INSTALLING OR OTHERWISE USING THE SOFTWARE, YOU CONSENT TO BE LEGALLY BOUND BY ALL THE TERMS AND CONDITIONS OF THE AGREEMENT. IF YOU ARE ENTERING INTO THE AGREEMENT ON BEHALF OF A COMPANY OR OTHER LEGAL ENTITY, YOU REPRESENT THAT YOU HAVE THE AUTHORITY TO BIND SUCH ENTITY AND ITS AFFILIATES TO THE AGREEMENT, IN WHICH CASE THE TERMS 'YOU' OR 'YOUR' SHALL REFER TO SUCH ENTITY AND ITS AFFILIATES. IF YOU DO NOT HAVE SUCH AUTHORITY, OR IF YOU DO NOT AGREE WITH ANY OF THE TERMS OF THE AGREEMENT, YOU MUST NOT ACCEPT THE AGREEMENT AND MAY NOT USE THE SOFTWARE.    </p>    <p>        In addition, certain third party programs or code set forth on <u>Schedule A</u> attached hereto (“Third Party Software”) are being provided to you under the terms and conditions of GNU Lesser General Public License v2.1 (“LGPL”), which is available for you to review at http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html. BY INSTALLING, COPYING OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT AS WELL AS THE TERMS OF THIRD PARTY LICENSES. IF YOU DO NOT AGREE TO ALL SUCH TERMS, DO NOT INSTALL OR USE THE SOFTWARE.    </p>    <p>        <b>1.License Grant.</b> Subject to the terms and conditions of this Agreement, the Company grants you a non-exclusive, non-transferable, non-sublicensable, limited license to install and use the Software, in object code version only, for your own use subject to the restrictions contained in this Agreement.    </p>    <p>        <b>2.Backup Copies.</b> You may make one backup copy of the Software, provided your backup copy is not installed or used on any computer and further provided that all such copies shall bear the original and unmodified copyright, patent and other intellectual property markings that appear on or in the Software. You may not transfer the rights to a backup copy unless you transfer all rights in the Software as provided in this Agreement.    </p>    <p>        <b>3.Ownership.</b> You acknowledge that the Software and any copies that you are authorized by the Company to make are the intellectual property of, and are owned by, the Company and its licensors. The structure, sequence and organization of the Software are the valuable trade secrets and confidential information of the Company and its licensors. The Software is protected by copyright, including without limitation by United States copyright law, international treaty provisions and applicable laws in the country in which it is used. You acknowledge that the Company, or its licensors, retain the ownership of all patents, copyrights, trade secrets, trademarks and other intellectual property rights pertaining to the Software. You will take no actions which adversely affect the Company’s intellectual property rights in the Software. This Agreement is a license and not an agreement for sale. No title to, or ownership of, the Software, or any intellectual property rights subsisting therein, is transferred to you.    </p>    <p>        <b>4.Restrictions.</b> The Software is licensed solely for your own use. The Company and its licensors reserve all rights not expressly granted to you in this Agreement. Without limiting the generality of the foregoing, you shall not nor shall you permit any other party to: (i) make copies of the Software except as expressly set forth in this Agreement, or (ii) disassemble, decompile or translate any part of the Software, or otherwise attempt to reconstruct or discover the source code of the Software, except and only to the extent that such activity is expressly permitted by applicable law notwithstanding this limitation, or (iii) modify or create derivative works based upon the Software, or (iv) externally distribute, sublicense, resell, encumber or otherwise transfer the Software, or (v) rent, lease, lend, or use the Software, or any part thereof, for timesharing or bureau use, or (vi) allow a third party to copy, access, or use the Software (except as expressly provided in this Agreement), or (vii) alter or remove any copyright, trademark or other proprietary notice which may appear on the Software, (viii) take any action that would cause the Software to be placed in the public domain or become subject to open source license agreement, or (ix) use the Software in any manner that violates any statute, law, rule, regulation, directive, guideline, bylaw whether presently in force or may be implemented by federal, state or local authorities.    </p>    <p>        <b>5.Paid Features.</b> The Software is made available to you at no charge or fees. However, the Company may offer certain premium features to you upon payment of a license fees determined by the Company in its sole discretion (“Paid Features”). In order to use Paid Features, you must agree to pay the license fees plus any applicable taxes through one of the payment methods accepted by the Company. Upon receipt of the license fees, the Company will either provide you a license key to activate the Paid Features or allow you to download the Software with the Paid Features. You expressly acknowledge and agree that this Agreement will govern your use of the Paid Features.    </p>    <p>        <b>6.Updates.</b> Except as otherwise expressly provided herein, this Agreement will govern any updates and upgrades to the Software that may be provided to you in accordance with the Company’s then-current maintenance and support policies, unless such updates and upgrades are provided under a separate license agreement. You may use such updates or upgrades only in conjunction with your then-existing the Software licensed under this Agreement. The Software and all updates and upgrades are licensed as a single product and such updates and upgrades may not be separated from the Software to exceed the scope of your original license. Any other software that may be provided with the Software that is associated with a separate end-user license agreement is licensed to you under the terms of that separate license agreement.    </p>    <p>        <b>7.No Support.</b> Except as expressly required by applicable law, nothing in this Agreement entitles you to any support, maintenance or new versions of the Software. You may contact the Company to determine the availability of support, maintenance, and new versions, and the fees terms and conditions that would apply.    </p>    <p>        <b>8.Disclaimer of Warranties.</b> THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OR REPRESENTATION OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE. NEITHER THE COMPANY NOR ITS LICENSORS REPRESENT OR WARRANT THAT THE SOFTWARE WILL SATISFY YOUR REQUIREMENTS OR THAT IT IS WITHOUT DEFECT OR ERROR OR THAT THE OPERATION THEREOF WILL BE UNINTERRUPTED OR ERROR FREE. The Company does not warrant that functions contained in the Software will meet your requirements or that the operation of the Software will be error-free or uninterrupted. The Company is not responsible for problems caused by changes in, or modifications to, the operating characteristics of any computer hardware or operating system for which the Software or any upgrade or update is procured, nor is the Company responsible for problems which occur as a result of the use of the Software in conjunction with software of third parties or with hardware, which does not meet the Company’s specific requirements. Some jurisdictions do not allow certain disclaimers or limitations of warranties, so some of these may not apply to you.    </p>    <p>        <b>9.Limitation Of Liability.</b> TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW EVEN IF A REMEDY FAILS ITS ESSENTIAL PURPOSE, IN NO EVENT SHALL THE COMPANY OR ITS LICENSORS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE OR THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES, EVEN IF THE COMPANY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, THE COMPANY’S ENTIRE LIABILITY TO YOU OR ANY OTHER PARTY FOR LOSS OR DAMAGE RESULTING FROM ANY CLAIMS, DEMANDS OR ACTIONS ARISING OUT OF THIS AGREEMENT SHALL NOT EXCEED THE FEE ACTUALLY PAID BY YOU TO THE COMPANY FOR THE SOFTWARE, IF ANY, NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. Because some states and jurisdictions do not allow the exclusion or limitation of liability, the above limitation may not apply to you. In such states and jurisdictions, the Company’s liability shall be limited to the greatest extent permitted by law.    </p>    <p>        <b>10.Sole Remedy and Allocation of Risk.</b> YOUR SOLE AND EXCLUSIVE REMEDY AND THE COMPANY’S SOLE AND EXCLUSIVE LIABILITY ARE SET FORTH IN THIS AGREEMENT. This Agreement defines a mutually agreed-upon allocation of risk.    </p>    <p>        <b>11.Third Party Licenses.</b> For the avoidance of doubt, Third Party Software included with the Software is free software licensed under the terms of the LGPL. You understand and agree that, although provided to you by the Company with the Software, your use of Third Party Software shall be and is governed by the LGPL. The ownership terms in Section 3 and restrictions in Section 4 do not apply to Third Party Software. You understand and acknowledge that under the LGPL, Third Party Software is being provided “AS IS” WITHOUT ANY WARRANTY, INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. If there is a conflict between this Agreement and LGPL with respect to Third Party Software, the provisions of the LGPL shall prevail.    </p>    <p>        <b>12.Export Restrictions.</b> You agree to comply with all export and re-export restrictions and regulations (“Export Restrictions”) imposed by the United States or any other country in which you conduct business. Without limiting the generality of the foregoing, and regardless of any disclosure made by you to the Company regarding an ultimate destination of the Software, you represent and warrant that you understand the U.S. law currently prohibits the export or re-export, directly or indirectly (including via remote access) of U.S. origin products and technology to certain proscribed countries (including Cuba, Iran, Sudan, North Korea and Syria and/or any other country that may become subject to an embargo by the United States), entities, organizations and individuals, without prior authorization from the U.S. Government. You will not commit any act or omission that will result in a breach of any such Export Restrictions. Your breach of this clause shall constitute cause for immediate termination of this Agreement.    </p>    <p>        <b>13.High Risk Activities.</b> The Software is not designed, manufactured or intended for use or resale as on-line control equipment in hazardous environments requiring fail-safe performance, such as in the operation of nuclear facilities, aircraft navigation or communication systems, air traffic control, direct life support machines, or weapons systems, in which the failure of the Software could lead directly to death, personal injury, or severe physical or environmental damage (“High Risk Activities”). The Company specifically disclaims any express or implied warranty of fitness for High Risk Activities.    </p>    <p>        <b>14.Termination.</b> The licenses granted herein shall automatically terminate without notice if you fail to comply with any material provision of this Agreement. In such event, you must immediately uninstall and return the Software, including all Documentation and original media, to the Company. This shall not limit or affect any remedy available to the Company for your breach of this Agreement.    </p>    <p>        <b>15.Miscellaneous.</b>    </p>    <p>        (a)If you are a unit or agency of the United States Government, the following applies: The Software is provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the Government is subject to restrictions as set forth in Subparagraphs (a) through (d) of the Commercial Computer-Restricted Rights clause at FAR 52.227-19 when applicable, or in Subparagraph 252.227-7013 (c)(1)(ii) of the Rights in Technical Data and Computer Software at DFARS, and in similar clauses in the NASA FAR Supplement. Contractor/manufacturer is %LEGAL_COMPANY_NAME%    </p>    <p>        (b)This Agreement shall be governed by the laws of the %LEGAL_COMPANY_JURISDICTION%, exclusive of its choice of law rules. Any dispute between you and the Company regarding this Agreement will be subject to the exclusive jurisdiction of the %LEGAL_COMPANY_COURT%. In any such action, the prevailing party will be entitled to costs and attorneys’ fees.    </p>    <p>        (c)You may not assign, sublicense, or transfer this Agreement, the Software, or any rights or obligations hereunder without prior written consent of the Company. Any such attempted assignment, sublicense, or transfer will be null and void. The Company may terminate this Agreement in the event of any such attempted assignment, sublicense, or transfer.    </p>    <p>        (d)This Agreement is in the English language only, and will only be provided in the English language, which language will be controlling in all respects, and all versions hereof in any other language will not be binding on the parties hereto. All communications and notices to be made or given pursuant to this Agreement must be in the English language.    </p>    <p>        (e)The Agreement constitutes the final and complete understanding between you and the Company with respect to the subject matter of this Agreement. Any modifications or waivers of this Agreement must be in writing and signed by both parties hereto.    </p>    <p>        (f)If any provision in this Agreement is invalid or unenforceable or contrary to applicable law, such provision shall be construed, limited, or altered, as necessary, to eliminate the invalidity or unenforceability or the conflict with applicable law, and all other provisions of this Agreement shall remain in effect.    </p>    <p>        (g)Failure or delay on the part of the Company to exercise any right, power, privilege, or remedy will not constitute a waiver of, or bar the later exercise of, that or any other right, power, privilege, or remedy of the Company.    </p>    <p>        (h)No rule of strict construction shall apply against or in favor of either party in the construction and interpretation of this Agreement.    </p>    <br/>    <p align='CENTER'>        <b>SCHEDULE A</b>    </p>    <p align='CENTER'>        <b>THIRD PARTY SOFTWARE</b>    </p>    <p>        The Software uses FFmpeg and Qt under the terms and conditions of the GNU Lesser General Public License v2.1.    </p>    <p>        You may obtain a complete copy of the source code for the above-mentioned free software, under the terms of the LGPL, from the Company, without charge, except for the cost of media, shipping, and handling, upon written request to the Company at the address set forth below:    </p>    <p align='CENTER'>        %LEGAL_COMPANY_NAME%<br/>        %LEGAL_COMPANY_ADDRESS%    </p>",
+					    "description": "End user licence agreement.",
+					    "type": "html",
+					    "advanced": true
+					},
+					{
+                        "label": "Legal Company Name",
+                        "name": "%LEGAL_COMPANY_NAME%",
+                        "value": "Network Optix, Inc.",
+                        "description": "Legal name of the company (for EULA)",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "regex": ""
+                        }
+                    },
+					{
+						"label": "Legal Company Jurisdiction",
+						"name": "%LEGAL_COMPANY_JURISDICTION%",
+						"value": "State of California",
+						"description": "Company's jurisdiction (for EULA)",
+						"type": "text"
+					},
+                    {
+                        "label": "Legal Company Court",
+                        "name": "%LEGAL_COMPANY_COURT%",
+                        "value": "state and federal courts located in Los Angeles County, California",
+                        "description": "Court to handle disputes (for EULA)",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "regex": ""
+                        }
+                    },
+                    {
+                        "label": "Legal Company Address",
+                        "name": "%LEGAL_COMPANY_ADDRESS%",
+                        "value": "",
+                        "description": "Company address",
+                        "type": "html",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "regex": ""
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "desktop",
+                "label": "",
+                "description": "",
+                "file_path": "desktop",
+                "translatable": false,
+                "hidden": false,
+                "values": [
+                    {
+                        "label": "",
+                        "name": "desktop/window_icon.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/macos/main_icon.icns",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "icns"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/macos/installer_config",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": ""
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/macos/installer_background.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 600,
+                            "height": 400,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/macos/installer_icon.icns",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "icns"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/webadmin_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/webadmin_config.js",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "js"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/email_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 173,
+                            "height": 53,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/intro.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 720,
+                            "height": 400,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/background.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 2160,
+                            "height": 2160,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/intro.mkv",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "mkv"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_128x128.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_32x32.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 32,
+                            "height": 32,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_22x22.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 22,
+                            "height": 22,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_24x24.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_48x48.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/linux/icon_16x16.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 16,
+                            "height": 16,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/videowall.ico",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "ico"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/installer_logo_64x64.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/installer_background.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 480,
+                            "height": 360,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/nxtool/icon.ico",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 256,
+                            "height": 256,
+                            "format": "ico"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/nxtool/installer_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/installer_icon.ico",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 256,
+                            "height": 256,
+                            "format": "ico"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/windows/installer_logo_102x102.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 102,
+                            "height": 102,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/welcome_page_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 120,
+                            "height": 120,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "desktop/welcome_page_logo@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 240,
+                            "height": 240,
+                            "format": "png"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "mobile",
+                "label": "",
+                "description": "",
+                "file_path": "mobile",
+                "translatable": false,
+                "hidden": true,
+                "values": [
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_80x80.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 80,
+                            "height": 80,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_20x20.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_167x167.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 167,
+                            "height": 167,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_76x76.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 76,
+                            "height": 76,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_29x29.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 29,
+                            "height": 29,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_58x58.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 58,
+                            "height": 58,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_60x60.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 60,
+                            "height": 60,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_appstore.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 1024,
+                            "height": 1024,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/Launch.xib",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "xib"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_152x152.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 152,
+                            "height": 152,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/logo@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 768,
+                            "height": 768,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 256,
+                            "height": 256,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/logo@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 512,
+                            "height": 512,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_180x180.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 180,
+                            "height": 180,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_87x87.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 87,
+                            "height": 87,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_120x120.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 120,
+                            "height": 120,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/ios/icon_40x40.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_hdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 384,
+                            "height": 384,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_ldpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 36,
+                            "height": 36,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_hdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_ldpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 192,
+                            "height": 192,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_xhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_xxxhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 192,
+                            "height": 192,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_xxhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 144,
+                            "height": 144,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_xxhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 768,
+                            "height": 768,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_xxxhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 1024,
+                            "height": 1024,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/launcher_mdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/key.store",
+                        "value": "",
+                        "description": "",
+                        "type": "file",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "format": "store"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_mdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 256,
+                            "height": 256,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "mobile/android/logo_xhdpi.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 512,
+                            "height": 512,
+                            "format": "png"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Custom cloud icons",
+                "label": "",
+                "description": "",
+                "file_path": "custom_cloud",
+                "translatable": false,
+                "hidden": true,
+                "values": [
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_selected.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_user_logo@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_offline_disabled.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_logo@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_user_logo.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 32,
+                            "height": 32,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_offline_disabled@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_accented@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_accented.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_disabled@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_selected@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 40,
+                            "height": 40,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/desktop/cloud_icon_disabled.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 20,
+                            "height": 20,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_not_logged_in@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_disabled@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_disabled@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_big@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 256,
+                            "height": 256,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_not_logged_in@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_big@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 192,
+                            "height": 192,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_disabled@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_logged_in.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_big@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 128,
+                            "height": 128,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_not_logged_in@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_unavailable@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_unavailable.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_logged_in@4x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 96,
+                            "height": 96,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_unavailable@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_not_logged_in.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_logged_in@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_logged_in@2x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 48,
+                            "height": 48,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_big.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 64,
+                            "height": 64,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_disabled.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 24,
+                            "height": 24,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "",
+                        "name": "custom_cloud/mobile/cloud_unavailable@3x.png",
+                        "value": "",
+                        "description": "",
+                        "type": "image",
+                        "advanced": false,
+                        "optional": false,
+                        "public": true,
+                        "meta": {
+                            "width": 72,
+                            "height": 72,
+                            "format": "png"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,86 @@
+{
+    "name": "default",
+    "skin": "dark_blue",
+    "uriProtocol": "nx-vms",
+    "displayName": "%VMS_NAME%",
+    "installerName": "nxwitness",
+    "cloudName": "%CLOUD_NAME%",
+
+    "support": {
+        "companyUrl": "http://networkoptix.com",
+        "productUrl": "http://networkoptix.com/nxwitness-overview",
+        "supportUrl": "http://support.networkoptix.com",
+        "licenseEmail": "https://support.networkoptix.com/hc/en-us/requests/new?ticket_form_id=316807"
+    },
+
+    "desktop": {
+        "internalName": "HD Witness",
+        "appName": "hdwitness",
+        "supportsHanwha": "true",
+        "freeLicenseKey": "0000-0000-0000-0005",
+
+        "backgroundImage": {
+            "enabled": true,
+            "name": ":/skin/background.png",
+            "mode": "Crop"
+        },
+
+        "defaultWebPages": {
+            "Home Page": "http://networkoptix.com",
+            "Support": "http://support.networkoptix.com"
+        },
+
+        "windows": {
+            "serverUpgradeCode": "{ce572797-45bf-4f1c-a783-369ea79c597e}",
+            "serverBundleUpgradeCode": "{4904f26d-6146-45f4-be37-80a31c15872d}",
+            "clientUpgradeCode": "{6ae0699e-af9d-4cc1-85a3-9bf8819563af}",
+            "clientBundleUpgradeCode": "{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}",
+            "fullBundleUpgradeCode": "{2c83e785-23e4-4b70-be6c-ed49fa329bb5}"
+        },
+
+        "linux": {
+            "debCompanyName": "networkoptix"
+        },
+
+        "macos": {
+            "bundleIdentifier": "com.networkoptix.HDWitness2",
+            "protocolHandlerBundleIdentifier": "com.networkoptix.protocol_handler",
+            "signIdentity": "Developer ID Application: Network Optix, Inc. (L6FE34GJWM)"
+        }
+    },
+
+    "mobile": {
+        "displayName": "Nx Mobile",
+        "compatibleCustomizations": ["default_cn", "default_zh_CN"],
+
+        "android": {
+            "packageName": "com.networkoptix.nxwitness",
+            "alias": "hdwitness",
+            "storepass": "hYCmvTDu",
+            "keypass": "31O2zNNy",
+            "compatibilityPackage": "com.networkoptix.hdwitness"
+        },
+
+        "ios": {
+            "bundleName": "NxMobile",
+            "bundleIdentifier": "com.networkoptix.NxMobile",
+            "groupIdentifier": "group.com.networkoptix.NxMobile",
+            "signIdentity": "iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)",
+            "compatibilityPackage": "id648369716"
+        }
+    },
+
+    "paxton": {
+        "libraryName": "NetworkOptix.NxWitness",
+        "productId": "{234bf98e-b18c-4798-9cb5-a0e90269ef9f}",
+        "productUpgradeCode": "{44777db8-96b1-4b09-9746-6d0390288c84}",
+        "bundleUpgradeCode": "{f72abad4-21ca-4c1f-845e-fe437f2859e4}"
+    },
+
+    "nxtool": {
+        "companyName": "Nx",
+        "productId": "{be19c0da-73f6-4ea7-9ad6-9dfd86d9e35e}",
+        "productUpgradeCode": "{cc740987-5070-4750-b853-327417176031}",
+        "bundleUpgradeCode": "222b19dc-f75f-4096-9cf2-807e309ce06b}"
+    }
+}
