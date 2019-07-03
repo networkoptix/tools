@@ -143,12 +143,6 @@ class Jira:
         Return issue key of created issue.
         """
 
-        def team(component: str) -> str:
-            try:
-                return {'Server': 'Server', 'Client': 'GUI'}[component]
-            except KeyError:
-                raise ('Unsupported JIRA component:' + component)
-
         def operation_system(extension: str) -> str:
             try:
                 return {'gdb-bt': 'Linux', 'dmp': 'Windows'}[extension]
@@ -164,7 +158,6 @@ class Jira:
                 versions=[{'name': report.version}],
                 fixVersions=[{'name': v} for v in self._fix_versions_for(report.version)],
                 components=[{'name': reason.component}],
-                customfield_10200={"value": team(reason.component)},
                 customfield_10009=self._epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
         except jira.exceptions.JIRAError as error:
@@ -196,13 +189,13 @@ class Jira:
             if issue.fields.resolution.name == 'Rejected':
                 return logger.debug('JIRA issue {} is rejected'.format(key))
 
-            if not fix_build:
-                min_fix_version = min(v.name for v in issue.fields.fixVersions)
-                max_report_version = max(r.version for r in reports)
-                if min_fix_version >= max_report_version:
-                    return logger.debug('JIRA issue {} is already fixed'.format(key))
-
             if issue.fields.resolution.name != 'Duplicate':
+                if not fix_build:
+                    min_fix_version = min(v.name for v in issue.fields.fixVersions)
+                    max_report_version = max(r.version for r in reports)
+                    if min_fix_version >= max_report_version:
+                        return logger.debug('JIRA issue {} is already fixed'.format(key))
+
                 self._transition(issue, 'Reopen')
                 logger.info('Reopen JIRA issue {} for reports from {}'.format(
                     key, ', '.join(r.full_version for r in reports)))

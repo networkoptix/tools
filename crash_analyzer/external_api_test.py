@@ -105,7 +105,6 @@ def _test_jira():
         assert 'Open' == jira.issue.fields.status.name
         assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
         assert 'Call Stack:\n{code}\nf1\nf2\n{code}' == jira.issue.fields.description
-        assert 'Server' == jira.issue.fields.customfield_10200.value
         assert 'VMS-2022' == jira.issue.fields.customfield_10009
         assert {'Server'} == jira.field_set('components')
         assert {'3.1'} == jira.field_set('versions')
