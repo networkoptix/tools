@@ -6,7 +6,7 @@
         "can_preview": true,
         "contexts": [
             {
-                "name": "Description",
+                "name": "General information",
                 "label": "",
                 "description": "",
                 "file_path": "description.json",
@@ -24,7 +24,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -37,7 +37,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -59,6 +59,7 @@
 			              ]
 			            }
                     },
+					
                     {
                         "label": "",
                         "name": "%uriProtocol%",
@@ -69,7 +70,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -82,7 +83,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -95,7 +96,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -108,7 +109,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -121,7 +122,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -134,7 +135,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -147,7 +148,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -160,7 +161,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -173,7 +174,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -196,12 +197,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
-                    {
+					{
                         "label": "",
-                        "name": "%backgroundImage.enabled%",
+                        "name": "%desktop.backgroundImage.enabled%",
                         "value": true,
                         "description": "",
                         "type": "check_box",
@@ -211,7 +212,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%backgroundImage.name%",
+                        "name": "%desktop.backgroundImage.name%",
                         "value": "",
                         "description": "Example: \":/skin/background.png\"",
                         "type": "Text",
@@ -219,12 +220,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%backgroundImage.mode%",
+                        "name": "%desktop.backgroundImage.mode%",
                         "value": "",
                         "description": "Example: \"Crop\"",
                         "type": "Text",
@@ -232,38 +233,22 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%defaultWebPages.Home Page%",
+                        "name": "%desktop.defaultWebPages%",
                         "value": "",
-                        "description": "Example: \"http://networkoptix.com\"",
-                        "type": "Text",
+                        "description": "Example: {\n  \"Home Page\": \"http://networkoptix.com\",\n  \"Support\": \"http://support.networkoptix.com\"\n}",
+                        "type": "object",
                         "advanced": false,
                         "optional": false,
-                        "public": true,
-                        "meta": {
-                            "format": ""
-                        }
+                        "public": true
                     },
                     {
                         "label": "",
-                        "name": "%defaultWebPages.Support%",
-                        "value": "",
-                        "description": "Example: \"http://support.networkoptix.com\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "meta": {
-                            "format": ""
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "%windows.serverUpgradeCode%",
+                        "name": "%desktop.windows.serverUpgradeCode%",
                         "value": "",
                         "description": "Example: \"{ce572797-45bf-4f1c-a783-369ea79c597e}\"",
                         "type": "guid",
@@ -273,7 +258,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%windows.serverBundleUpgradeCode%",
+                        "name": "%desktop.windows.serverBundleUpgradeCode%",
                         "value": "",
                         "description": "Example: \"{4904f26d-6146-45f4-be37-80a31c15872d}\"",
                         "type": "guid",
@@ -283,7 +268,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%windows.clientUpgradeCode%",
+                        "name": "%desktop.windows.clientUpgradeCode%",
                         "value": "",
                         "description": "Example: \"{6ae0699e-af9d-4cc1-85a3-9bf8819563af}\"",
                         "type": "guid",
@@ -293,7 +278,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%windows.clientBundleUpgradeCode%",
+                        "name": "%desktop.windows.clientBundleUpgradeCode%",
                         "value": "",
                         "description": "Example: \"{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}\"",
                         "type": "guid",
@@ -303,7 +288,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%windows.fullBundleUpgradeCode%",
+                        "name": "%desktop.windows.fullBundleUpgradeCode%",
                         "value": "",
                         "description": "Example: \"{2c83e785-23e4-4b70-be6c-ed49fa329bb5}\"",
                         "type": "guid",
@@ -313,7 +298,7 @@
                     },
                     {
                         "label": "",
-                        "name": "%linux.debCompanyName%",
+                        "name": "%desktop.linux.debCompanyName%",
                         "value": "",
                         "description": "Example: \"networkoptix\"",
                         "type": "Text",
@@ -321,12 +306,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%macos.bundleIdentifier%",
+                        "name": "%desktop.macos.bundleIdentifier%",
                         "value": "",
                         "description": "Example: \"com.networkoptix.HDWitness2\"",
                         "type": "Text",
@@ -334,12 +319,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%macos.protocolHandlerBundleIdentifier%",
+                        "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
                         "value": "",
                         "description": "Example: \"com.networkoptix.protocol_handler\"",
                         "type": "Text",
@@ -347,12 +332,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%macos.signIdentity%",
+                        "name": "%desktop.macos.signIdentity%",
                         "value": "",
                         "description": "Example: \"Developer ID Application: Network Optix, Inc. (L6FE34GJWM)\"",
                         "type": "Text",
@@ -360,35 +345,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%mobile.displayName%",
-                        "value": "",
-                        "description": "Example: \"Nx Mobile\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "meta": {
-                            "format": ""
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "%mobile.compatibleCustomizations%",
-                        "value": "",
-                        "description": "Example: [\n    \"default_cn\",\n    \"default_zh_CN\"\n]",
-                        "type": "array",
-                        "advanced": true,
-                        "optional": false,
-                        "public": true
-                    },
-                    {
-                        "label": "",
-                        "name": "%android.packageName%",
+                        "name": "%mobile.android.packageName%",
                         "value": "",
                         "description": "Example: \"com.networkoptix.nxwitness\"",
                         "type": "Text",
@@ -396,12 +358,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%android.alias%",
+                        "name": "%mobile.android.alias%",
                         "value": "",
                         "description": "Example: \"hdwitness\"",
                         "type": "Text",
@@ -409,12 +371,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%android.storepass%",
+                        "name": "%mobile.android.storepass%",
                         "value": "",
                         "description": "Example: \"hYCmvTDu\"",
                         "type": "Text",
@@ -422,12 +384,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%android.keypass%",
+                        "name": "%mobile.android.keypass%",
                         "value": "",
                         "description": "Example: \"31O2zNNy\"",
                         "type": "Text",
@@ -435,12 +397,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%android.compatibilityPackage%",
+                        "name": "%mobile.android.compatibilityPackage%",
                         "value": "",
                         "description": "Example: \"com.networkoptix.hdwitness\"",
                         "type": "Text",
@@ -448,12 +410,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%ios.bundleName%",
+                        "name": "%mobile.ios.bundleName%",
                         "value": "",
                         "description": "Example: \"NxMobile\"",
                         "type": "Text",
@@ -461,12 +423,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%ios.bundleIdentifier%",
+                        "name": "%mobile.ios.bundleIdentifier%",
                         "value": "",
                         "description": "Example: \"com.networkoptix.NxMobile\"",
                         "type": "Text",
@@ -474,12 +436,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%ios.groupIdentifier%",
+                        "name": "%mobile.ios.groupIdentifier%",
                         "value": "",
                         "description": "Example: \"group.com.networkoptix.NxMobile\"",
                         "type": "Text",
@@ -487,12 +449,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%ios.signIdentity%",
+                        "name": "%mobile.ios.signIdentity%",
                         "value": "",
                         "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\"",
                         "type": "Text",
@@ -500,12 +462,12 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
                         "label": "",
-                        "name": "%ios.compatibilityPackage%",
+                        "name": "%mobile.ios.compatibilityPackage%",
                         "value": "",
                         "description": "Example: \"id648369716\"",
                         "type": "Text",
@@ -513,7 +475,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -526,7 +488,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -569,7 +531,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {
@@ -676,7 +638,10 @@
 						"name": "%LEGAL_COMPANY_JURISDICTION%",
 						"value": "State of California",
 						"description": "Company's jurisdiction (for EULA)",
-						"type": "text"
+						"type": "text",
+                        "meta": {
+                            "regex": ""
+                        }
 					},
                     {
                         "label": "Legal Company Court",
@@ -752,7 +717,7 @@
                         "optional": false,
                         "public": true,
                         "meta": {
-                            "format": ""
+                            "regex": ""
                         }
                     },
                     {

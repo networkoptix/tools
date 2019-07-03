@@ -25,10 +25,7 @@
             "mode": "Crop"
         },
 
-        "defaultWebPages": {
-            "Home Page": "http://networkoptix.com",
-            "Support": "http://support.networkoptix.com"
-        },
+        "defaultWebPages": "%desktop.defaultWebPages%",
 
         "windows": {
             "serverUpgradeCode": "{ce572797-45bf-4f1c-a783-369ea79c597e}",
