@@ -35,7 +35,10 @@ class Api(object):
         return json.loads(response.text)['result']
 
     def reviews(self, query):
-        return self.get('getReviews', query=query, limit=LIMIT)['reviews']
+        result = self.get('getReviews', query=query, limit=LIMIT)
+        if not result or 'reviews' not in result:
+            raise KeyError('Query "{}" returned no reviews: {}'.format(query, str(result)))
+        return result['reviews']
 
     def user(self, id, field=None):
         infos = self.get('getUserInfo', ids=[id])['infos']

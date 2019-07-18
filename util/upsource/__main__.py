@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import collections
-import api
-import printers
 from pprint import pprint
+
+from . import api
+from . import printers
 
 
 def print_todo(api, format, user_grep='', flags=''):
-
     Todo = collections.namedtuple('Todo', ['to_fix', 'to_review'])
     by_users = {}
 
@@ -29,7 +29,6 @@ def print_todo(api, format, user_grep='', flags=''):
     users.sort(key=lambda x: x.name)
 
     printer = printers.HtmlPrinter(api.url) if format == 'html' else printers.TxtPrinter()
-
     with printer:
         total_count = 0
         for user in users:
@@ -56,11 +55,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('options', nargs='*', default=[])
-    parser.add_argument('-a', '--action', choices=['todo, reviews, users'], default='todo')
-    parser.add_argument('-U', '--url', default='http://enk.me:8082')
+    parser.add_argument('-a', '--action', choices=['todo', 'reviews', 'users'], default='todo')
+    parser.add_argument('-U', '--url', default='http://upsource.enk.me/')
     parser.add_argument('-u', '--user', default='')
     parser.add_argument('-p', '--password', default='')
     parser.add_argument('-f', '--format', choices=['txt', 'html'], default='txt')
+    parser.add_argument('-d', '--debug', action='store_true', default=False)
 
     arguments = parser.parse_args()
     api = api.Api(arguments.url, arguments.user, arguments.password)
@@ -72,5 +72,7 @@ if __name__ == '__main__':
     try:
         action(api, arguments.format, *arguments.options)
     except Exception as error:
-        print(str(error))
+        if arguments.debug:
+            raise
+        print(error)
         exit(1)
