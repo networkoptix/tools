@@ -10,10 +10,12 @@ Options:
     U - Credentials, default: admin:qweasd123
     F - File to store results, default: /tmp/server_query.json
     B - Browser, default: empty (print to stdout)
+    E - Query extension, e.g. E=Ex or E=?param=value
+    T - Formatter, default: python -m json.tool
 Query aliases:
     m      - api/moduleInformation (default)
-    c [id] - ec2/getCameras[Ex?id=...]
-    s [id] - ec2/getMediaServers[Ex?id=...]
+    c [id] - ec2/getCameras[$E?id=...]
+    s [id] - ec2/getMediaServers[$E?id=...]
 END
 exit 0
 fi
@@ -25,7 +27,13 @@ USER=${U:-"admin:QWEasd123"}
 FILE=${F:-"/tmp/server_query.json"}
 BROWSER=$B
 
-QUERY=${1:-"api/moduleInformation"}; shift
+FORMATTER=${T:-"python -m json.tool"}
+if [ $FORMATTER == mux ]; then
+    FORMATTER="mux-format -lo json"
+    BROWSER=firefox
+fi
+
+QUERY=${1:-"m"}; shift
 case "$QUERY" in
     "m")
         QUERY="api/moduleInformation"
@@ -43,7 +51,7 @@ esac
 RAW=$FILE.raw
 curl -u $USER -k https://$HOST/$QUERY "$@" > $RAW
 
-if cat $RAW | python -m json.tool > $FILE; then
+if cat $RAW | $FORMATTER > $FILE; then
     if [ $BROWSER ]; then
         $BROWSER $FILE >/dev/null 2>&1 &
     else
