@@ -7,7 +7,7 @@ set -u #< Forbid undefined variables.
 
 source "build_common.sh"
 
-declare -r SUPPORTED_TARGETS=( linux_arm32 linux_arm64 rpi )
+declare -r SUPPORTED_TARGETS=( linux_x64 linux_arm32 linux_arm64 rpi )
 declare -r FFMPEG_VERSION="3.1.9"
 declare -r TARGET_ARTIFACT_DEV_ARTIFACT_TARGET="linux"
 declare -r TARGET_ARTIFACT_DEV_ARTIFACT="ffmpeg-dev-${FFMPEG_VERSION}"
@@ -50,6 +50,18 @@ downloadArtifacts()
     nx_popd
 }
 
+installSysroot()
+{
+    local -rA TARGET_TO_SYSROOT_DIR=(
+        [linux_x64]=linux_x64
+        [linux_arm32]=linux_arm32
+        [linux_arm64]=linux_arm64
+        [rpi]=linux_arm32
+    )
+
+    cp -af "$TARGET_ARTIFACT_DEV/"sysroot/${TARGET_TO_SYSROOT_DIR[$TARGET]}/* "$SYSROOT/"
+}
+
 # [in] GCC
 buildOgg()
 {
@@ -65,6 +77,23 @@ buildOgg()
     )
 
     nxAutotoolsBuild
+}
+
+# [in] GCC
+buildAlsaLib()
+{
+    nx_echo "Building alsa-lib..."
+
+    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/alsa-lib-1.1.9"
+
+    local -r AUTOCONF_OPTIONS=(
+        --host="${GCC_PREFIX%-}" #< Make host from gcc prefix by stripping trailing hyphen.
+        --prefix=/usr
+    )
+
+    export LD="${GCC_PREFIX}ld"
+
+    nxAutotoolsBuild 
 }
 
 # [in] GCC
@@ -97,12 +126,13 @@ buildLibVpx()
     local -r TOOLCHAIN_PREFIX="${GCC_PREFIX}"
 
     local -rA TARGET_OPTION_BY_TARGET=(
+        [linux_x64]=x86_64-linux-gcc
         [linux_arm32]=armv7-linux-gcc
         [rpi]=armv7-linux-gcc
         [linux_arm64]=arm64-linux-gcc
     )
 
-    local -r AUTOCONF_OPTIONS=(
+    local -r COMMON_OPTIONS=(
         --target="${TARGET_OPTION_BY_TARGET[$TARGET]}"
         --prefix=/usr
         --disable-examples
@@ -110,7 +140,19 @@ buildLibVpx()
         --enable-pic
         --disable-docs
     )
-    
+
+    local -r LINUX_X64_OPTIONS=(
+        --as=yasm
+    )
+
+    local AUTOCONF_OPTIONS=()
+    AUTOCONF_OPTIONS+=( "${COMMON_OPTIONS[@]}" )
+
+    if [[ $TARGET == linux_x64 ]]
+    then
+        AUTOCONF_OPTIONS+=( "${LINUX_X64_OPTIONS[@]}" )
+    fi
+
     nxAutotoolsBuild
 }
 
@@ -140,6 +182,8 @@ buildOpenH264()
 
     nxExportToolchainMediatorVars "${GCC_PREFIX}"
 
+    export >.env
+
     nxMake ARCH="${ARCH_BY_TARGET[$TARGET]}" PREFIX=/usr
     nxMake ARCH="${ARCH_BY_TARGET[$TARGET]}" PREFIX=/usr DESTDIR="$SYSROOT" install-static
 }
@@ -168,21 +212,17 @@ buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
         --disable-doc
         --enable-encoder=adpcm_g726
         --enable-gray
+        --enable-postproc
         --enable-libvorbis
         --enable-libvpx
         --enable-libmp3lame
         --enable-libopenh264
-        --enable-neon
         --extra-cflags="-I$SYSROOT/usr/include"
-        --extra-cflags="-I$SYSROOT/opt/vc/include"
-        --extra-cflags="-I$SYSROOT/opt/vc/include/IL"
         --extra-ldflags="-L$SYSROOT/usr/lib"
         --extra-ldflags="-L$SYSROOT/usr/lib"
         --extra-ldflags="-L$SYSROOT/usr/lib/${GCC_PREFIX%-}"
-        --extra-ldflags="-L$SYSROOT/opt/vc/lib"
         --extra-ldflags="-Wl,-rpath-link,$SYSROOT/usr/lib"
         --extra-ldflags="-Wl,-rpath-link,$SYSROOT/usr/lib/${GCC_PREFIX%-}"
-        --extra-ldflags="-Wl,-rpath-link,$SYSROOT/opt/vc/lib"
         --extra-ldflags="-lstdc++"
     )
 
@@ -191,9 +231,19 @@ buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
         --enable-omx
         --enable-omx-rpi
         --disable-mmx
+        --enable-neon
+        --extra-cflags="-I$SYSROOT/opt/vc/include"
+        --extra-cflags="-I$SYSROOT/opt/vc/include/IL"
+        --extra-ldflags="-L$SYSROOT/opt/vc/lib"
+        --extra-ldflags="-Wl,-rpath-link,$SYSROOT/opt/vc/lib"
+    )
+
+    local -r LINUX_ARM32_OPTIONS=(
+        --enable-neon
     )
 
     local -r LINUX_ARM64_OPTIONS=(
+        --enable-neon
         --pkg-config=pkg-config
     )
 
@@ -203,6 +253,9 @@ buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
     case "$TARGET" in
         rpi)
         AUTOCONF_OPTIONS+=( "${RPI_OPTIONS[@]}" )
+        ;;
+        linux_arm32)
+        AUTOCONF_OPTIONS+=( "${LINUX_ARM32_OPTIONS[@]}" )
         ;;
         linux_arm64)
         AUTOCONF_OPTIONS+=( "${LINUX_ARM64_OPTIONS[@]}" )
@@ -310,8 +363,8 @@ main()
         downloadArtifacts
     fi
 
-    cp -af "$TARGET_ARTIFACT_DEV/src/"sysroot/* "$SYSROOT/"
-
+    ( installSysroot )
+    ( buildAlsaLib )
     ( buildOpenH264 )
     ( buildOgg )
     ( buildVorbis )
@@ -319,6 +372,7 @@ main()
     ( buildLame )
     ( buildFfmpeg "$(nx_absolute_path "$DESTINATION_DIR")" )
 
+    echo "Removing build dir $BUILD_ROOT_DIR"
     rm -rf "$BUILD_ROOT_DIR"
 }
 
