@@ -1,4 +1,5 @@
 subinclude:apidoctool/.hgignore
+subinclude:customization/.hgignore
 subinclude:rdep/.hgignore
 subinclude:infra/playbooks/.hgignore
 subinclude:infra/jenkins_jobs/.hgignore
