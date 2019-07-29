@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import argparse
 import os
 import re
@@ -37,9 +38,11 @@ def download_packages(session, instance, product_type, product_ids):
         for product_id in product_ids:
             futures.append(executor.submit(download_package, session, instance, product_type, product_id))
 
-        # Catch any exceptions that happen in a thread worker
         for future in futures:
-            future.result()
+            try:
+                future.result()
+            except requests.exceptions.HTTPError as e:
+                print(e)
 
 
 def get_cmd_args():
