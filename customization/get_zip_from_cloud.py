@@ -14,7 +14,12 @@ FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
 
 def download_package(session, instance, product_type, product_id, draft):
     with session.get(f"{instance}/admin/cms/package/{product_id}/{draft}", stream=True) as fs:
-        fs.raise_for_status()
+        try:
+            fs.raise_for_status()
+        except Exception as e:
+            print(e)
+            print(f"Reason: {fs.text}")
+
         package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
         package_name = f"{package_name[0] if len(package_name) else 'package'}"
 
@@ -39,10 +44,7 @@ def download_packages(session, instance, product_type, product_ids, draft):
             futures.append(executor.submit(download_package, session, instance, product_type, product_id, draft))
 
         for future in futures:
-            try:
-                future.result()
-            except Exception as e:
-                print(e)
+            future.result()
 
 
 def get_cmd_args():
