@@ -33,18 +33,22 @@ EOF
 # [in] RDEP_PACKAGES_DIR
 downloadArtifacts()
 {
-    local -r TARGET_ARTIFACT_DEV_CHECKSUM="90ab6287ac1ebe5b6ff517973fd319d7 *files.md5"
+    local -r TARGET_ARTIFACT_DEV_CHECKSUM="67ea726ddb8ab84b8e9202aaea5ab124 *files.md5"
 
     nxDownloadGccArtifact
 
     rm -rf "$TARGET_ARTIFACT_DEV"
     nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$TARGET_ARTIFACT_DEV_ARTIFACT_TARGET" "$TARGET_ARTIFACT_DEV_ARTIFACT"
 
-    nx_pushd "$RDEP_PACKAGES_DIR/linux/$TARGET_ARTIFACT_DEV_ARTIFACT"
+    nx_pushd "$TARGET_ARTIFACT_DEV"
+
+    local -r checksumCalculated=$(./test_checksums.sh)
 
     if [[ $(./test_checksums.sh) != $TARGET_ARTIFACT_DEV_CHECKSUM ]]
     then
-        nx_fail "Unexpected checksum in $TARGET_ARTIFACT_DEV_ARTIFACT"
+        nx_fail "Unexpected checksum in $TARGET_ARTIFACT_DEV_ARTIFACT: \n" \
+            "expected: $TARGET_ARTIFACT_DEV_CHECKSUM \n" \
+            "got: $checksumCalculated"
     fi
 
     nx_popd
@@ -52,14 +56,12 @@ downloadArtifacts()
 
 installSysroot()
 {
-    local -rA TARGET_TO_SYSROOT_DIR=(
-        [linux_x64]=linux_x64
-        [linux_arm32]=linux_arm32
-        [linux_arm64]=linux_arm64
-        [rpi]=linux_arm32
-    )
+    cp -a "$GCC_ARTIFACT_PATH/${GCC_PREFIX%-}/sysroot" "$SYSROOT"
 
-    cp -af "$TARGET_ARTIFACT_DEV/"sysroot/${TARGET_TO_SYSROOT_DIR[$TARGET]}/* "$SYSROOT/"
+    if [[ $TARGET == "rpi" ]]
+    then
+        cp -a "$TARGET_ARTIFACT_DEV/src/rpi-precompiled-files"/* "$SYSROOT"/
+    fi
 }
 
 # [in] GCC
@@ -349,7 +351,6 @@ main()
 
     NX_EXIT_HOOKS+=( warnTempBuildDir )
 
-    mkdir -p "$BUILD_ROOT_DIR/sysroot"
     local -r SYSROOT="$BUILD_ROOT_DIR/sysroot"
 
     local -r JOB_COUNT=$(($(cat /proc/cpuinfo | grep "^processor" | wc -l)+1))

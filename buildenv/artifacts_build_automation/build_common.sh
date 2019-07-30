@@ -53,9 +53,9 @@ nxInitToolchain()
     )
 
     local -rA GCC_PREFIX_BY_TARGET=(
-        [linux_x64]="x86_64-linux-gnu-"
+        [linux_x64]="x86_64-pc-linux-gnu-"
         [linux_arm32]="arm-linux-gnueabihf-"
-        [linux_arm64]="aarch64-linux-gnu-"
+        [linux_arm64]="aarch64-unknown-linux-gnu-"
         [rpi]="arm-linux-gnueabihf-"
     )
 
@@ -64,7 +64,7 @@ nxInitToolchain()
     declare -r -g GCC_PREFIX="${GCC_PREFIX_BY_TARGET[$TARGET]}"
     declare -r -g GCC_ARTIFACT_PATH="$RDEP_PACKAGES_DIR/$GCC_ARTIFACT_GROUP/$GCC_ARTIFACT"
 
-    export PATH="$PATH:$GCC_ARTIFACT_PATH/bin"
+    export PATH="$GCC_ARTIFACT_PATH/bin:$PATH"
 }
 
 nxCheckVarIsSet() #< VAR_NAME
@@ -142,19 +142,18 @@ nxAutotoolsBuild()
 #-------------------------------------------------------------------------------------------------
 
 # [in] CMAKE_GEN_OPTIONS (optional)
-# [in] CMAKE_BUILD_OPTIONS (optional)
 # [in] DESTDIR or SYSROOT
 nxCmakeBuild()
 {
     export >.env
 
-    echo "cmake -G \"Unix Makefiles\" \"${CMAKE_GEN_OPTIONS[@]}\" ." >.cmake_gen.sh
+    echo "cmake -G \"Unix Makefiles\" ${CMAKE_GEN_OPTIONS:+\"${CMAKE_GEN_OPTIONS[@]}\"} ." >.cmake_gen.sh
     chmod +x .cmake_gen.sh
-    nx_verbose cmake -G "Unix Makefiles" "${CMAKE_GEN_OPTIONS[@]}" .
+    nx_verbose cmake -G "Unix Makefiles" "${CMAKE_GEN_OPTIONS:+${CMAKE_GEN_OPTIONS[@]}}" .
 
-    echo "cmake --build \"${CMAKE_BUILD_OPTIONS[@]}\" ." >.cmake_build.sh
+    echo "cmake --build ." >.cmake_build.sh
     chmod +x .cmake_build.sh
-    nx_verbose cmake --build "${CMAKE_BUILD_OPTIONS[@]}" .
+    nx_verbose cmake --build .
 
     # Install build results to DESTDIR or SYSROOT. If DESTDIR was not passed, SYSROOT will be used.
     nxMake install DESTDIR="${DESTDIR:-${SYSROOT}}"
