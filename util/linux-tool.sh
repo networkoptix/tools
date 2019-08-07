@@ -8,7 +8,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty, detect "linux"/"windows".
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
-: ${SDK=0} #< 0|1 - enable/disable building with analytics_sdk when not building with distribs.
+: ${SDK=0} #< 0|1 - enable/disable building with metadata_sdk when not building with distribs.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -69,7 +69,7 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
 
- sdk # Rebuild nx_analytics_sdk.
+ sdk # Rebuild nx_metadata_sdk.
 
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
@@ -382,7 +382,7 @@ do_gen() # [cache] "$@"
     else
         if [[ $SDK = 1 ]]
         then
-            COMPOSITION_ARG+=( "-DwithAnalyticsSdk=ON" )
+            COMPOSITION_ARG+=( "-DwithMetadataSdk=ON" )
         fi
     fi
     [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
@@ -487,7 +487,10 @@ find_APIDOCTOOL_JAR()
 
 find_APIDOCTOOL_PARAMS()
 {
-    APIDOCTOOL_PARAMS=( -config "$(nx_path "$VMS_DIR/mediaserver_core/api/apidoctool.properties")" )
+    APIDOCTOOL_PARAMS=(
+        -config
+        "$(nx_path "$VMS_DIR/vms/server/nx_vms_server/api/apidoctool.properties")"
+    )
     nx_log_array APIDOCTOOL_PARAMS
 }
 
@@ -516,10 +519,10 @@ do_apidoc() # dev|prod [action] "$@"
     local -a APIDOCTOOL_PARAMS
     find_APIDOCTOOL_PARAMS
 
-    local -r API_XML="$BUILD_DIR/mediaserver_core/api.xml"
-    local -r API_JSON="$BUILD_DIR/mediaserver_core/api.json"
+    local -r API_XML="$BUILD_DIR/vms/server/nx_vms_server/api.xml.out"
+    local -r API_JSON="$BUILD_DIR/vms/server/nx_vms_server/api.json.out"
 
-    local -r API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
+    local -r API_TEMPLATE_XML="$VMS_DIR/vms/server/nx_vms_server/api/api_template.xml"
     if [ ! -f "$API_TEMPLATE_XML" ]
     then
         nx_fail "Cannot open file $API_TEMPLATE_XML"
@@ -574,9 +577,9 @@ do_apidoc() # dev|prod [action] "$@"
     fi
 
     copy_if_exists_and_different "$API_XML" \
-        "$BUILD_DIR/mediaserver_core/resources/static/api.xml"
+        "$BUILD_DIR/vms/server/nx_vms_server/api.xml"
     copy_if_exists_and_different "$API_JSON" \
-        "$BUILD_DIR/mediaserver_core/resources/static/api.json"
+        "$BUILD_DIR/vms/server/nx_vms_server/api.json"
 
     return $RESULT
 }
@@ -1566,10 +1569,10 @@ main()
             do_kit "$@"
             ;;
         sdk)
-            nx_verbose rm -rf "$BUILD_DIR/distrib"/*analytics_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_analytics_sdk"
+            nx_verbose rm -rf "$BUILD_DIR/distrib"/*metadata_sdk*.zip
+            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_metadata_sdk"
             SDK=1 do_gen "$@"
-            do_build --target nx_analytics_sdk
+            do_build --target nx_metadata_sdk
             ;;
         copyright)
             do_copyright "$@"
