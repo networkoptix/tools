@@ -1,10 +1,11 @@
 {
-    "name": "default",
-    "skin": "dark_blue",
-    "uriProtocol": "nx-vms",
+    "name": "%CUSTOMIZATION%",
+    "skin": "%SKIN%",
+    "uriProtocol": "%CLIENT_PROTOCOL%",
     "displayName": "%VMS_NAME%",
     "installerName": "nxwitness",
     "cloudName": "%CLOUD_NAME%",
+
 
     "support": {
         "companyUrl": "http://networkoptix.com",
@@ -18,12 +19,6 @@
         "appName": "hdwitness",
         "supportsHanwha": "true",
         "freeLicenseKey": "0000-0000-0000-0005",
-
-        "backgroundImage": {
-            "enabled": true,
-            "name": ":/skin/background.png",
-            "mode": "Crop"
-        },
 
         "defaultWebPages": "%desktop.defaultWebPages%",
 
@@ -48,7 +43,7 @@
 
     "mobile": {
         "displayName": "Nx Mobile",
-        "compatibleCustomizations": ["default_cn", "default_zh_CN"],
+        "compatibleCustomizations": "%mobile.compatibleCustomizations%",
 
         "android": {
             "packageName": "com.networkoptix.nxwitness",
