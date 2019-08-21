@@ -97,19 +97,23 @@ def main():
     args = get_cmd_args()
     with requests.Session() as session:
         # Login and start session
-        session.post(f"{args.instance}/api/account/login", json={"email": args.login, "password": args.password})
+        try:
+            res = session.post(f"{args.instance}/api/account/login", json={"email": args.login, "password": args.password})
+            res.raise_for_status()
+            # Get all of the products of a specific product_type
+            if args.command == FETCH_BY_TYPE:
+                query = f"?type={args.type}&name={args.name}&customization={args.customization}"
+                url = f"{args.instance}/admin/cms/get_product_ids/{query}"
+                res = session.get(url)
+                res.raise_for_status()
+                product_ids = res.json()
+            else:
+                product_ids = [args.product_id]
 
-        # Get all of the products of a specific product_type
-        if args.command == FETCH_BY_TYPE:
-            query = f"?type={args.type}&name={args.name}&customization={args.customization}"
-            url = f"{args.instance}/admin/cms/get_product_ids/{query}"
-            res = session.get(url)
-            product_ids = res.json()
-        else:
-            product_ids = [args.product_id]
-
-        draft = "?draft" if args.draft else ""
-        download_packages(session, args.instance, args.type, product_ids, draft)
+            draft = "?draft" if args.draft else ""
+            download_packages(session, args.instance, args.type, product_ids, draft)
+        except requests.HTTPError as e:
+            print(e)
 
 
 if __name__ == "__main__":
