@@ -8,7 +8,8 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty, detect "linux"/"windows".
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
-: ${SDK=0} #< 0|1 - enable/disable building with metadata_sdk when not building with distribs.
+: ${SDK=0} #< 0|1 - enable/disable building with SDKs when not building with distribs.
+: ${BOX_TOOL=0} #< 0|1 - enable/disable building with nx_box_tool when not building with distribs.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -69,7 +70,7 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
 
- sdk # Rebuild nx_metadata_sdk.
+ sdk # Rebuild nx_*_sdk.
 
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
@@ -382,7 +383,11 @@ do_gen() # [cache] "$@"
     else
         if [[ $SDK = 1 ]]
         then
-            COMPOSITION_ARG+=( "-DwithMetadataSdk=ON" )
+            COMPOSITION_ARG+=( "-DwithSdk=ON" )
+        fi
+        if [[ $BOX_TOOL = 1 ]]
+        then
+            COMPOSITION_ARG+=( "-DwithBoxTool=ON" )
         fi
     fi
     [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
@@ -1569,10 +1574,12 @@ main()
             do_kit "$@"
             ;;
         sdk)
-            nx_verbose rm -rf "$BUILD_DIR/distrib"/*metadata_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_metadata_sdk"
+            nx_verbose rm -rf "$BUILD_DIR/distrib"/*_sdk*.zip
+            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_*_sdk"
             SDK=1 do_gen "$@"
             do_build --target nx_metadata_sdk
+            do_build --target nx_camera_sdk
+            do_build --target nx_storage_sdk
             ;;
         copyright)
             do_copyright "$@"

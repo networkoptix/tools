@@ -405,7 +405,7 @@ nx_cd() # dir
     local -r DIR="$1"
     if [ "$(nx_absolute_path "$(pwd)")" != "$(nx_absolute_path "$DIR")" ]
     then
-        nx_verbose cd "$DIR"
+        nx_verbose cd "$DIR" || nx_fail "Unable to change directory, see the error message above."
     fi
 }
 
