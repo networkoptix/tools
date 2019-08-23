@@ -14,6 +14,12 @@ Instruction on how to do it most easily can be found here: https://networkoptix.
 vms_structure.json describes all files and fields required for customization pack, including validation logic and limitations.
 Every time new file or field is needed for customization - it should be described in that file.
 
+Default values for parameters:
+* advanced: false
+* optional: false
+* protected: false
+* background: transparent
+
 ### description.json
 description.json is a template file, which contains a general description of customization including names, some GUIDs and other text fields.
 This file should not contain any real sensitive values, because all values will be shown to the user as an example to the users of CMS interface (partners).

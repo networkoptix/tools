@@ -6,84 +6,63 @@
         "contexts": [
             {
                 "name": "root",
-                "label": "",
+                "label": "Main icon",
                 "file_path": ".",
-                "description": "",
-                "url": "",
+                "description": "Main customization icon",
                 "translatable": false,
                 "values": [
                     {
-                        "label": "",
+                        "label": "Compatibility data file",
                         "name": "customization.cmake",
-                        "value": "",
-                        "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
+                        "advanced": true,
                         "meta": {
-                            "format": "cmake"
+                            "format": "cmake",
+                            "size": 16384
                         }
                     },
                     {
                         "label": "",
                         "name": "main_icon.ico",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "ico",
-                            "background": "dark"
+                            "format": "ico"
                         }
                     }
                 ]
             },
             {
                 "name": "General information",
-                "label": "",
                 "file_path": "description.json",
-                "description": "",
-                "url": "",
+                "description": "List of all customizable parameters",
                 "translatable": false,
                 "values": [
                     {
-                        "label": "",
+                        "label": "Id",
                         "name": "%CUSTOMIZATION%",
-                        "value": "",
-                        "description": "Example: \"\"",
+                        "description": "Internal customization identifier",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": true,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "advanced": true,
+                        "protected": true
                     },
                     {
                         "label": "Skin",
                         "name": "%SKIN%",
                         "value": "dark_blue",
-                        "description": "Supported values: dark_blue, dark_orange, dark_green, gray_orange.",
+                        "description": "Applications color scheme",
                         "type": "Select",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "multi": false,
                             "options": [
                                 "dark_blue",
                                 "dark_orange",
                                 "dark_green",
-                                "gray_orange"
+                                "gray_orange",
+                                "gray_white"
                             ]
                         }
                     },
@@ -91,141 +70,66 @@
                         "label": "Client Protocol",
                         "name": "%CLIENT_PROTOCOL%",
                         "value": "demo-vms",
-                        "description": "URL protocol for calling native clients from browser, example: \"nx-vms\"",
+                        "description": "URL protocol for calling native clients from browser, should be unique",
                         "type": "Text",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "protected": true
                     },
                     {
                         "label": "VMS Name",
                         "name": "%VMS_NAME%",
                         "value": "VMS Demonstration",
                         "description": "Name of the VMS customization. Must be short!",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
-                        "label": "",
+                        "label": "Base installer filename",
                         "name": "%installerName%",
-                        "value": "",
                         "description": "Example: \"nxwitness\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "Cloud Name",
                         "name": "%CLOUD_NAME%",
                         "value": "VMS Demo Cloud",
                         "description": "Name for cloud",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%support.companyUrl%",
-                        "value": "",
                         "description": "Example: \"http://networkoptix.com\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%support.productUrl%",
-                        "value": "",
                         "description": "Example: \"http://networkoptix.com/nxwitness-overview\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%support.supportUrl%",
-                        "value": "",
                         "description": "Example: \"http://support.networkoptix.com\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%support.licenseEmail%",
-                        "value": "",
                         "description": "Example: \"https://support.networkoptix.com/hc/en-us/requests/new?ticket_form_id=316807\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%desktop.internalName%",
-                        "value": "",
                         "description": "Example: \"HD Witness\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%desktop.appName%",
-                        "value": "",
                         "description": "Example: \"hdwitness\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
@@ -233,24 +137,18 @@
                         "value": "True",
                         "description": "Example: \"true\"",
                         "type": "Check Box",
-                        "advanced": false,
-                        "optional": true,
-                        "public": true,
-                        "protected": false,
-                        "meta": {}
+                        "advanced": true,
+                        "protected": true
                     },
                     {
                         "label": "",
                         "name": "%desktop.freeLicenseKey%",
-                        "value": "",
                         "description": "Example: \"0000-0000-0000-0005\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
+                        "advanced": true,
+                        "protected": true,
                         "meta": {
-                            "regex": ""
+                            "regex": "0000-0000-0000-\\d\\d\\d\\d$"
                         }
                     },
                     {
@@ -259,82 +157,53 @@
                         "value": "{\n    \"Home Page\": \"http://networkoptix.com\",\n    \"Support\": \"http://support.networkoptix.com\"\n}",
                         "description": "Example: \"http://networkoptix.com\"",
                         "type": "Object",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.windows.serverUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{ce572797-45bf-4f1c-a783-369ea79c597e}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.windows.serverBundleUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{4904f26d-6146-45f4-be37-80a31c15872d}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.windows.clientUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{6ae0699e-af9d-4cc1-85a3-9bf8819563af}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.windows.clientBundleUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.windows.fullBundleUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{2c83e785-23e4-4b70-be6c-ed49fa329bb5}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%desktop.linux.debCompanyName%",
-                        "value": "",
                         "description": "Example: \"networkoptix\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -342,13 +211,8 @@
                     {
                         "label": "",
                         "name": "%desktop.macos.bundleIdentifier%",
-                        "value": "",
                         "description": "Example: \"com.networkoptix.HDWitness2\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -356,13 +220,8 @@
                     {
                         "label": "",
                         "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
-                        "value": "",
                         "description": "Example: \"com.networkoptix.protocol_handler\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -370,13 +229,8 @@
                     {
                         "label": "",
                         "name": "%desktop.macos.signIdentity%",
-                        "value": "",
                         "description": "Example: \"Developer ID Application: Network Optix, Inc. (L6FE34GJWM)\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -384,13 +238,8 @@
                     {
                         "label": "",
                         "name": "%mobile.displayName%",
-                        "value": "",
                         "description": "Example: \"Nx Mobile\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -402,21 +251,13 @@
                         "description": "Example: [\n    \"default_cn\",\n    \"default_zh_CN\"\n]",
                         "type": "Array",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%mobile.android.packageName%",
-                        "value": "",
                         "description": "Example: \"com.networkoptix.nxwitness\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -424,13 +265,8 @@
                     {
                         "label": "",
                         "name": "%mobile.android.alias%",
-                        "value": "",
                         "description": "Example: \"hdwitness\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -438,41 +274,20 @@
                     {
                         "label": "",
                         "name": "%mobile.android.storepass%",
-                        "value": "",
                         "description": "Example: \"hYCmvTDu\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%mobile.android.keypass%",
-                        "value": "",
                         "description": "Example: \"31O2zNNy\"",
-                        "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
-                        "meta": {
-                            "regex": ""
-                        }
+                        "type": "Text"
                     },
                     {
                         "label": "",
                         "name": "%mobile.android.compatibilityPackage%",
-                        "value": "",
                         "description": "Example: \"com.networkoptix.hdwitness\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -480,13 +295,8 @@
                     {
                         "label": "",
                         "name": "%mobile.ios.bundleName%",
-                        "value": "",
                         "description": "Example: \"NxMobile\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -494,13 +304,8 @@
                     {
                         "label": "",
                         "name": "%mobile.ios.bundleIdentifier%",
-                        "value": "",
                         "description": "Example: \"com.networkoptix.NxMobile\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -508,13 +313,8 @@
                     {
                         "label": "",
                         "name": "%mobile.ios.groupIdentifier%",
-                        "value": "",
                         "description": "Example: \"group.com.networkoptix.NxMobile\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -522,13 +322,8 @@
                     {
                         "label": "",
                         "name": "%mobile.ios.signIdentity%",
-                        "value": "",
                         "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -536,13 +331,8 @@
                     {
                         "label": "",
                         "name": "%mobile.ios.compatibilityPackage%",
-                        "value": "",
                         "description": "Example: \"id648369716\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -550,13 +340,8 @@
                     {
                         "label": "",
                         "name": "%paxton.libraryName%",
-                        "value": "",
                         "description": "Example: \"NetworkOptix.NxWitness\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -564,49 +349,32 @@
                     {
                         "label": "",
                         "name": "%paxton.productId%",
-                        "value": "",
                         "description": "Example: \"{234bf98e-b18c-4798-9cb5-a0e90269ef9f}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%paxton.productUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{44777db8-96b1-4b09-9746-6d0390288c84}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%paxton.bundleUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{f72abad4-21ca-4c1f-845e-fe437f2859e4}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%nxtool.companyName%",
-                        "value": "",
                         "description": "Example: \"Nx\"",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -614,37 +382,24 @@
                     {
                         "label": "",
                         "name": "%nxtool.productId%",
-                        "value": "",
                         "description": "Example: \"{be19c0da-73f6-4ea7-9ad6-9dfd86d9e35e}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%nxtool.productUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{cc740987-5070-4750-b853-327417176031}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
                         "label": "",
                         "name": "%nxtool.bundleUpgradeCode%",
-                        "value": "",
                         "description": "Example: \"{222b19dc-f75f-4096-9cf2-807e309ce06b}\"",
                         "type": "GUID",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     }
                 ]
@@ -654,7 +409,6 @@
                 "label": "License Agreement",
                 "file_path": "license.html",
                 "description": "End User License Agreement",
-                "url": "",
                 "translatable": false,
                 "values": [
                     {
@@ -664,9 +418,6 @@
                         "description": "End user licence agreement.",
                         "type": "HTML",
                         "advanced": true,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
@@ -675,10 +426,6 @@
                         "value": "Network Optix, Inc.",
                         "description": "Legal name of the company (for EULA)",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -689,10 +436,6 @@
                         "value": "State of California",
                         "description": "Company's jurisdiction (for EULA)",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {}
                     },
                     {
@@ -701,10 +444,6 @@
                         "value": "state and federal courts located in Los Angeles County, California",
                         "description": "Court to handle disputes (for EULA)",
                         "type": "Text",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -712,13 +451,8 @@
                     {
                         "label": "Legal Company Address",
                         "name": "%LEGAL_COMPANY_ADDRESS%",
-                        "value": "",
                         "description": "Company address",
                         "type": "HTML",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "regex": ""
                         }
@@ -730,36 +464,24 @@
                 "label": "Desktop",
                 "file_path": "desktop",
                 "description": "",
-                "url": "",
                 "translatable": false,
                 "values": [
                     {
                         "label": "",
                         "name": "desktop/window_icon.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/macos/main_icon.icns",
-                        "value": "",
                         "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "format": "icns"
                         }
@@ -767,13 +489,8 @@
                     {
                         "label": "",
                         "name": "desktop/macos/installer_config",
-                        "value": "",
                         "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "format": ""
                         }
@@ -781,30 +498,19 @@
                     {
                         "label": "",
                         "name": "desktop/macos/installer_background.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 600,
                             "height": 400,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/macos/installer_icon.icns",
-                        "value": "",
                         "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "format": "icns"
                         }
@@ -812,30 +518,19 @@
                     {
                         "label": "",
                         "name": "desktop/webadmin_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 142,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/webadmin_config.js",
-                        "value": "",
                         "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "format": "js"
                         }
@@ -843,13 +538,8 @@
                     {
                         "label": "",
                         "name": "desktop/email_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 272,
                             "height": 80,
@@ -860,13 +550,9 @@
                     {
                         "label": "",
                         "name": "desktop/background.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 2160,
                             "height": 2160,
@@ -875,288 +561,189 @@
                         }
                     },
                     {
-                        "label": "",
+                        "label": "Intro image (exclusive with intro video)",
                         "name": "desktop/intro.png",
-                        "value": "",
-                        "description": "",
+                        "description": "Displayed on the login dialog",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
-                            "width": 720,
-                            "height": 400,
                             "format": "png"
                         }
                     },
                     {
-                        "label": "",
+                        "label": "Intro video (exclusive with intro image)",
                         "name": "desktop/intro.mkv",
-                        "value": "",
-                        "description": "",
+                        "description": "Displayed on the login dialog",
                         "type": "File",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
-                            "format": "mkv"
+                            "format": "mkv",
+                             "size": 2048000
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_128x128.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 128,
                             "height": 128,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_32x32.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 32,
                             "height": 32,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_22x22.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 22,
                             "height": 22,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_24x24.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_48x48.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/linux/icon_16x16.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 16,
                             "height": 16,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/videowall.ico",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "ico",
-                            "background": "dark"
+                            "format": "ico"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/windows/installer_logo_64x64.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 64,
                             "height": 64,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/windows/installer_background.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 480,
                             "height": 360,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/windows/nxtool/icon.ico",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "ico",
-                            "background": "dark"
+                            "format": "ico"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/windows/nxtool/installer_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 64,
                             "height": 64,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
-                        "label": "",
+                        "label": "Installer icon",
                         "name": "desktop/windows/installer_icon.ico",
-                        "value": "",
-                        "description": "",
+                        "description": "Windows-specific",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "ico",
-                            "background": "dark"
+                            "format": "ico"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/windows/installer_logo_102x102.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 102,
                             "height": 102,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/welcome_page_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 120,
                             "height": 120,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/welcome_page_logo@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 240,
                             "height": 240,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     }
                 ]
@@ -1166,461 +753,299 @@
                 "label": "Mobile Application",
                 "file_path": "mobile",
                 "description": "",
-                "url": "",
                 "translatable": false,
                 "values": [
                     {
                         "label": "",
                         "name": "mobile/ios/icon_80x80.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 80,
                             "height": 80,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_20x20.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_167x167.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 167,
                             "height": 167,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_76x76.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 76,
                             "height": 76,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_29x29.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 29,
                             "height": 29,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_58x58.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 58,
                             "height": 58,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_60x60.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 60,
                             "height": 60,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_appstore.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 1024,
                             "height": 1024,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_152x152.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 152,
                             "height": 152,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/logo@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 768,
                             "height": 768,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/logo@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 512,
                             "height": 512,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_180x180.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 180,
                             "height": 180,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_87x87.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 87,
                             "height": 87,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_120x120.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 120,
                             "height": 120,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/ios/icon_40x40.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/logo_hdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 384,
                             "height": 384,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_ldpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 36,
                             "height": 36,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_hdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/logo_ldpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 192,
                             "height": 192,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_xhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_xxxhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 192,
                             "height": 192,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_xxhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 144,
                             "height": 144,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/logo_xxhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 768,
                             "height": 768,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/logo_xxxhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 1024,
                             "height": 1024,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/launcher_mdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/key.store",
-                        "value": "",
                         "description": "",
                         "type": "File",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "format": "store"
                         }
@@ -1628,35 +1053,49 @@
                     {
                         "label": "",
                         "name": "mobile/android/logo_mdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "mobile/android/logo_xhdpi.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
-                        "optional": false,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 512,
                             "height": 512,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "Launcher icon background (LDPI)",
+                        "name": "mobile/android/launcher_bg_ldpi.png",
+                        "description": "",
+                        "type": "Image",
+                        "advanced": true,
+                        "optional": true,
+                        "meta": {
+                            "width": 81,
+                            "height": 81,
+                            "format": "png"
+                        }
+                    },
+                    {
+                        "label": "Launcher icon background (MDPI)",
+                        "name": "mobile/android/launcher_bg_mdpi.png",
+                        "description": "Some description",
+                        "type": "Image",
+                        "protected": true,
+                        "meta": {
+                            "width": 108,
+                            "height": 108,
                             "format": "png",
-                            "background": "dark"
+                            "background": "transparent"
                         }
                     }
                 ]
@@ -1666,653 +1105,462 @@
                 "label": "Custom cloud icons",
                 "file_path": "custom_cloud",
                 "description": "",
-                "url": "",
                 "translatable": false,
                 "values": [
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_selected.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_user_logo@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 64,
                             "height": 64,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 64,
                             "height": 64,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_offline_disabled.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_logo@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 128,
                             "height": 128,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_user_logo.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 32,
                             "height": 32,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_offline_disabled@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_accented@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_accented.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_disabled@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_selected@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 40,
                             "height": 40,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_disabled.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 20,
                             "height": 20,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_not_logged_in@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_disabled@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_disabled@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_big@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 256,
                             "height": 256,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_not_logged_in@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_big@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 192,
                             "height": 192,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_disabled@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_logged_in.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_big@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 128,
                             "height": 128,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_not_logged_in@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_unavailable@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_unavailable.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_logged_in@4x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 96,
                             "height": 96,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_unavailable@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_not_logged_in.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_logged_in@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_logged_in@2x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 48,
                             "height": 48,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_big.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 64,
                             "height": 64,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_disabled.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 24,
                             "height": 24,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/mobile/cloud_unavailable@3x.png",
-                        "value": "",
                         "description": "",
                         "type": "Image",
-                        "advanced": false,
                         "optional": true,
-                        "public": true,
-                        "protected": false,
                         "meta": {
                             "width": 72,
                             "height": 72,
-                            "format": "png",
-                            "background": "dark"
+                            "format": "png"
                         }
                     }
                 ]
