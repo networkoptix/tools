@@ -4,6 +4,7 @@
         "can_preview": true,
         "single_customization": true,
         "contexts": [
+
             {
                 "name": "root",
                 "label": "Main icon",
@@ -22,7 +23,7 @@
                         }
                     },
                     {
-                        "label": "",
+                        "label": "Main icon",
                         "name": "main_icon.ico",
                         "description": "",
                         "type": "Image",
@@ -34,7 +35,9 @@
                     }
                 ]
             },
+
             {
+                "_": "-------------------------- DESCRIPTION.JSON --------------------------",
                 "name": "General information",
                 "file_path": "description.json",
                 "description": "List of all customizable parameters",
@@ -42,18 +45,15 @@
                 "values": [
                     {
                         "label": "Id",
-                        "name": "%CUSTOMIZATION%",
-                        "description": "Internal customization identifier",
-                        "type": "Text",
+                        "name": "%id%",
                         "advanced": true,
                         "protected": true
                     },
                     {
-                        "label": "Skin",
-                        "name": "%SKIN%",
-                        "value": "dark_blue",
-                        "description": "Applications color scheme",
                         "type": "Select",
+                        "label": "Skin",
+                        "name": "%skin%",
+                        "value": "dark_blue",
                         "advanced": true,
                         "meta": {
                             "multi": false,
@@ -68,83 +68,117 @@
                     },
                     {
                         "label": "Client Protocol",
-                        "name": "%CLIENT_PROTOCOL%",
+                        "name": "%uriProtocol%",
                         "value": "demo-vms",
-                        "description": "URL protocol for calling native clients from browser, should be unique",
-                        "type": "Text",
-                        "advanced": true,
-                        "protected": true
+                        "description": "URL protocol for calling native clients from browser, should be unique"
                     },
                     {
                         "label": "VMS Name",
-                        "name": "%VMS_NAME%",
-                        "value": "VMS Demonstration",
-                        "description": "Name of the VMS customization. Must be short!",
-                        "type": "Text"
+                        "name": "%vmsName%",
+                        "value": "VMS Demonstration"
                     },
                     {
                         "label": "Base installer filename",
                         "name": "%installerName%",
-                        "description": "Example: \"nxwitness\"",
-                        "type": "Text"
+                        "description": "Example: \"nxwitness\""
                     },
                     {
                         "label": "Cloud Name",
-                        "name": "%CLOUD_NAME%",
-                        "value": "VMS Demo Cloud",
-                        "description": "Name for cloud",
-                        "type": "Text"
+                        "name": "%cloudName%",
+                        "value": "Cloud"
+                    },
+
+
+                    {
+                        "_": "-------------------------- CONTACT BLOCK --------------------------",
+                        "label": "Company Web Page",
+                        "name": "%contact.companyUrl%",
+                        "description": "Example: \"http://networkoptix.com\""
                     },
                     {
-                        "label": "",
-                        "name": "%support.companyUrl%",
-                        "description": "Example: \"http://networkoptix.com\"",
-                        "type": "Text"
+                        "label": "Product Web Page",
+                        "name": "%contact.productUrl%",
+                        "description": "Example: \"http://networkoptix.com/nxwitness-overview\""
                     },
                     {
-                        "label": "",
-                        "name": "%support.productUrl%",
-                        "description": "Example: \"http://networkoptix.com/nxwitness-overview\"",
-                        "type": "Text"
+                        "type": "Select",
+                        "label": "Support channel",
+                        "name": "%contact.supportChannel%",
+                        "value": "web",
+                        "meta": {
+                            "multi": false,
+                            "options": [
+                                "web",
+                                "email",
+                                "phone"
+                            ]
+                        }
                     },
                     {
-                        "label": "",
-                        "name": "%support.supportUrl%",
-                        "description": "Example: \"http://support.networkoptix.com\"",
-                        "type": "Text"
+                        "label": "Support address",
+                        "name": "%contact.supportAddress%",
+                        "description": "Depending on the selected channel, this can be web page or an email address or a phone number"
                     },
                     {
-                        "label": "",
-                        "name": "%support.licenseEmail%",
-                        "description": "Example: \"https://support.networkoptix.com/hc/en-us/requests/new?ticket_form_id=316807\"",
-                        "type": "Text"
+                        "type": "Select",
+                        "label": "Licensing channel",
+                        "name": "%contact.licensingChannel%",
+                        "value": "web",
+                        "meta": {
+                            "multi": false,
+                            "options": [
+                                "web",
+                                "email",
+                                "phone"
+                            ]
+                        }
                     },
                     {
+                        "label": "Licensing address",
+                        "name": "%contact.licensingAddress%",
+                        "description": "Depending on the selected channel, this can be web page or an email address or a phone number"
+                    },
+                    {
+                        "label": "System Web Page - Home",
+                        "name": "%contact.systemWebPages.homePage%",
+                        "description": "On the clean install, this page will be added to the System Web Pages as \"Home\"",
+                        "optional": true
+                    },
+                    {
+                        "label": "System Web Page - Support",
+                        "name": "%contact.systemWebPages.supportPage%",
+                        "description": "On the clean install, this page will be added to the System Web Pages as \"Support\"",
+                        "optional": true
+                    },
+
+
+                    {
+                        "_": "-------------------------- DESKTOP BLOCK --------------------------",
                         "label": "",
                         "name": "%desktop.internalName%",
                         "description": "Example: \"HD Witness\"",
-                        "type": "Text"
+                        "advanced": true,
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "???",
                         "name": "%desktop.appName%",
-                        "description": "Example: \"hdwitness\"",
-                        "type": "Text"
+                        "description": "TODO: product.name.short or product.appName",
+                        "advanced": true,
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "Enable Hanwha-specific support",
                         "name": "%desktop.supportsHanwha%",
                         "value": "True",
-                        "description": "Example: \"true\"",
                         "type": "Check Box",
                         "advanced": true,
                         "protected": true
                     },
                     {
-                        "label": "",
-                        "name": "%desktop.freeLicenseKey%",
+                        "label": "Trial licenses key",
+                        "name": "%desktop.trialLicenseKey%",
                         "description": "Example: \"0000-0000-0000-0005\"",
-                        "type": "Text",
                         "advanced": true,
                         "protected": true,
                         "meta": {
@@ -152,88 +186,64 @@
                         }
                     },
                     {
-                        "label": "",
-                        "name": "%desktop.defaultWebPages%",
-                        "value": "{\n    \"Home Page\": \"http://networkoptix.com\",\n    \"Support\": \"http://support.networkoptix.com\"\n}",
-                        "description": "Example: \"http://networkoptix.com\"",
-                        "type": "Object",
-                        "meta": {}
-                    },
-                    {
-                        "label": "",
+                        "label": "[Windows] Server package upgrade code",
                         "name": "%desktop.windows.serverUpgradeCode%",
-                        "description": "Example: \"{ce572797-45bf-4f1c-a783-369ea79c597e}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "[Windows] Server bundle upgrade code",
                         "name": "%desktop.windows.serverBundleUpgradeCode%",
-                        "description": "Example: \"{4904f26d-6146-45f4-be37-80a31c15872d}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "[Windows] Client package upgrade code",
                         "name": "%desktop.windows.clientUpgradeCode%",
-                        "description": "Example: \"{6ae0699e-af9d-4cc1-85a3-9bf8819563af}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "[Windows] Client bundle upgrade code",
                         "name": "%desktop.windows.clientBundleUpgradeCode%",
-                        "description": "Example: \"{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "protected": true
                     },
                     {
-                        "label": "",
+                        "label": "[Windows] full bundle upgrade code",
                         "name": "%desktop.windows.fullBundleUpgradeCode%",
-                        "description": "Example: \"{2c83e785-23e4-4b70-be6c-ed49fa329bb5}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "protected": true
                     },
                     {
-                        "label": "",
-                        "name": "%desktop.linux.debCompanyName%",
-                        "description": "Example: \"networkoptix\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "label": "[Linux] Company Id",
+                        "name": "%desktop.linux.companyId%",
+                        "description": "Company name in lowecase without spaces. Only alphanumeric symbols are allowed.",
+                        "meta": { "regex": "[a-z]+$" }
                     },
                     {
-                        "label": "",
+                        "_": "TODO: Tune regex",
+                        "label": "[MacOS] VMS Bundle Identifier",
                         "name": "%desktop.macos.bundleIdentifier%",
-                        "description": "Example: \"com.networkoptix.HDWitness2\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "description": "Unique bundler identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName\"",
+                        "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Protocol Handler Bundle Identifier",
                         "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
-                        "description": "Example: \"com.networkoptix.protocol_handler\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "description": "Unique bundler identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName.protocol_handler\"",
+                        "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Sign Identity",
                         "name": "%desktop.macos.signIdentity%",
                         "description": "Example: \"Developer ID Application: Network Optix, Inc. (L6FE34GJWM)\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "meta": { "regex": "Developer ID Application: [\\w\\.]+ \\([0-9A-Z]{10}\\)" }
                     },
                     {
                         "label": "",

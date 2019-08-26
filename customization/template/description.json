@@ -1,43 +1,47 @@
 {
-    "name": "%CUSTOMIZATION%",
-    "skin": "%SKIN%",
-    "uriProtocol": "%CLIENT_PROTOCOL%",
-    "displayName": "%VMS_NAME%",
-    "installerName": "nxwitness",
-    "cloudName": "%CLOUD_NAME%",
+    "id": "%id%",
+    "skin": "%skin%",
+    "uriProtocol": "%uriProtocol%",
+    "displayName": "%vmsName%",
+    "installerName": "%installerName%",
+    "cloudName": "%cloudName%",
 
 
-    "support": {
-        "companyUrl": "http://networkoptix.com",
-        "productUrl": "http://networkoptix.com/nxwitness-overview",
-        "supportUrl": "http://support.networkoptix.com",
-        "licenseEmail": "https://support.networkoptix.com/hc/en-us/requests/new?ticket_form_id=316807"
+    "contact": {
+        "companyUrl": "%contact.companyUrl%",
+        "productUrl": "%contact.productUrl%",
+        "supportChannel": "%contact.supportChannel%",
+        "supportAddress": "%contact.supportAddress%",
+        "licensingChannel": "%contact.licensingChannel%",
+        "licensingAddress": "%contact.licensingAddress%",
+        "systemWebPages": {
+            "homePage": "%contact.systemWebPages.homePage%",
+            "supportPage": "%contact.systemWebPages.supportPage%"
+        }
     },
 
     "desktop": {
-        "internalName": "HD Witness",
-        "appName": "hdwitness",
-        "supportsHanwha": "true",
-        "freeLicenseKey": "0000-0000-0000-0005",
-
-        "defaultWebPages": "%desktop.defaultWebPages%",
+        "internalName": "%desktop.internalName%",
+        "appName": "%desktop.appName%",
+        "supportsHanwha": "%desktop.supportsHanwha%",
+        "trialLicenseKey": "%desktop.trialLicenseKey%",
 
         "windows": {
-            "serverUpgradeCode": "{ce572797-45bf-4f1c-a783-369ea79c597e}",
-            "serverBundleUpgradeCode": "{4904f26d-6146-45f4-be37-80a31c15872d}",
-            "clientUpgradeCode": "{6ae0699e-af9d-4cc1-85a3-9bf8819563af}",
-            "clientBundleUpgradeCode": "{4505af3c-b20c-4ae9-b5c4-c1fddbc5db34}",
-            "fullBundleUpgradeCode": "{2c83e785-23e4-4b70-be6c-ed49fa329bb5}"
+            "serverUpgradeCode": "%desktop.windows.serverUpgradeCode%",
+            "serverBundleUpgradeCode": "%desktop.windows.serverBundleUpgradeCode%",
+            "clientUpgradeCode": "%desktop.windows.clientUpgradeCode%",
+            "clientBundleUpgradeCode": "%desktop.windows.clientBundleUpgradeCode%",
+            "fullBundleUpgradeCode": "%desktop.windows.fullBundleUpgradeCode%"
         },
 
         "linux": {
-            "debCompanyName": "networkoptix"
+            "companyName": "%desktop.linux.companyId%"
         },
 
         "macos": {
-            "bundleIdentifier": "com.networkoptix.HDWitness2",
-            "protocolHandlerBundleIdentifier": "com.networkoptix.protocol_handler",
-            "signIdentity": "Developer ID Application: Network Optix, Inc. (L6FE34GJWM)"
+            "bundleIdentifier": "%desktop.macos.bundleIdentifier%",
+            "protocolHandlerBundleIdentifier": "%desktop.macos.protocolHandlerBundleIdentifier%",
+            "signIdentity": "%desktop.macos.signIdentity%"
         }
     },
 
