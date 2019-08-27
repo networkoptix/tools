@@ -53,7 +53,6 @@
                         "type": "Select",
                         "label": "Skin",
                         "name": "%skin%",
-                        "value": "dark_blue",
                         "advanced": true,
                         "meta": {
                             "multi": false,
@@ -69,13 +68,11 @@
                     {
                         "label": "Client Protocol",
                         "name": "%uriProtocol%",
-                        "value": "demo-vms",
                         "description": "URL protocol for calling native clients from browser, should be unique"
                     },
                     {
                         "label": "VMS Name",
-                        "name": "%vmsName%",
-                        "value": "VMS Demonstration"
+                        "name": "%vmsName%"
                     },
                     {
                         "label": "Base installer filename",
@@ -84,8 +81,7 @@
                     },
                     {
                         "label": "Cloud Name",
-                        "name": "%cloudName%",
-                        "value": "Cloud"
+                        "name": "%cloudName%"
                     },
 
 
@@ -96,15 +92,9 @@
                         "description": "Example: \"http://networkoptix.com\""
                     },
                     {
-                        "label": "Product Web Page",
-                        "name": "%contact.productUrl%",
-                        "description": "Example: \"http://networkoptix.com/nxwitness-overview\""
-                    },
-                    {
                         "type": "Select",
                         "label": "Support channel",
                         "name": "%contact.supportChannel%",
-                        "value": "web",
                         "meta": {
                             "multi": false,
                             "options": [
@@ -123,7 +113,6 @@
                         "type": "Select",
                         "label": "Licensing channel",
                         "name": "%contact.licensingChannel%",
-                        "value": "web",
                         "meta": {
                             "multi": false,
                             "options": [
@@ -170,7 +159,6 @@
                     {
                         "label": "Enable Hanwha-specific support",
                         "name": "%desktop.supportsHanwha%",
-                        "value": "True",
                         "type": "Check Box",
                         "advanced": true,
                         "protected": true
@@ -230,187 +218,140 @@
                         "_": "TODO: Tune regex",
                         "label": "[MacOS] VMS Bundle Identifier",
                         "name": "%desktop.macos.bundleIdentifier%",
-                        "description": "Unique bundler identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName\"",
+                        "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName\"",
                         "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
                         "label": "[MacOS] Protocol Handler Bundle Identifier",
                         "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
-                        "description": "Unique bundler identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName.protocol_handler\"",
+                        "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName.protocol_handler\"",
                         "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
                         "label": "[MacOS] Sign Identity",
                         "name": "%desktop.macos.signIdentity%",
                         "description": "Example: \"Developer ID Application: Network Optix, Inc. (L6FE34GJWM)\"",
-                        "meta": { "regex": "Developer ID Application: [\\w\\.]+ \\([0-9A-Z]{10}\\)" }
+                        "meta": { "regex": "Developer ID Application: .+ \\([0-9A-Z]{10}\\)$" }
+                    },
+
+                    {
+                        "_": "-------------------------- MOBILE BLOCK --------------------------",
+                        "label": "[Mobile] Application Title",
+                        "name": "%mobile.displayName%"
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.displayName%",
-                        "description": "Example: \"Nx Mobile\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
-                    },
-                    {
-                        "label": "",
+                        "label": "[Mobile] Compatible customizations",
                         "name": "%mobile.compatibleCustomizations%",
-                        "value": "\"\"",
-                        "description": "Example: [\n    \"default_cn\",\n    \"default_zh_CN\"\n]",
-                        "type": "Array",
+                        "description": "Example: default_cn, default_zh_CN",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[Android] package name",
                         "name": "%mobile.android.packageName%",
-                        "description": "Example: \"com.networkoptix.nxwitness\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "description": "Unique package identifier. Only lowercase alphanumeric symbols are allowed. Should be in format: \"com.companyName.productname\"",
+                        "meta": { "regex": "[a-z\\.]+$" }
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.android.alias%",
-                        "description": "Example: \"hdwitness\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "label": "[Android] Keystore password",
+                        "name": "%mobile.android.storepass%"
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.android.storepass%",
-                        "description": "Example: \"hYCmvTDu\"",
-                        "type": "Text"
+                        "label": "[Android] Keystore alias",
+                        "name": "%mobile.android.alias%"
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.android.keypass%",
-                        "description": "Example: \"31O2zNNy\"",
-                        "type": "Text"
+                        "label": "[Android] Keystore alias password",
+                        "name": "%mobile.android.keypass%"
                     },
                     {
-                        "label": "",
+                        "label": "[Android] Compatibility app package",
                         "name": "%mobile.android.compatibilityPackage%",
-                        "description": "Example: \"com.networkoptix.hdwitness\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "description": "Package Id for the VMS 2.4 and older",
+                        "advanced": true,
+                        "optional": true,
+                        "meta": { "regex": "[a-z\\.]+$" }
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.ios.bundleName%",
-                        "description": "Example: \"NxMobile\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "label": "[iOS] Bundle name",
+                        "name": "%mobile.ios.bundleName%"
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.ios.bundleIdentifier%",
-                        "description": "Example: \"com.networkoptix.NxMobile\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "label": "[iOS] Bundle Id",
+                        "name": "%mobile.ios.bundleIdentifier%"
                     },
                     {
-                        "label": "",
-                        "name": "%mobile.ios.groupIdentifier%",
-                        "description": "Example: \"group.com.networkoptix.NxMobile\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "label": "[iOS] Group Id",
+                        "name": "%mobile.ios.groupIdentifier%"
                     },
                     {
-                        "label": "",
+                        "label": "[iOS] Sign Identity",
                         "name": "%mobile.ios.signIdentity%",
-                        "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\""
                     },
                     {
-                        "label": "",
+                        "label": "[iOS] Compatibility app package",
                         "name": "%mobile.ios.compatibilityPackage%",
-                        "description": "Example: \"id648369716\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "advanced": true,
+                        "optional": true
                     },
+
                     {
-                        "label": "",
+                        "_": "-------------------------- PAXTON BLOCK --------------------------",
+                        "label": "[Paxton] Library name",
                         "name": "%paxton.libraryName%",
-                        "description": "Example: \"NetworkOptix.NxWitness\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "advanced": true,
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[Paxton] Product Id",
                         "name": "%paxton.productId%",
-                        "description": "Example: \"{234bf98e-b18c-4798-9cb5-a0e90269ef9f}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[Paxton] Product Upgrade Code",
                         "name": "%paxton.productUpgradeCode%",
-                        "description": "Example: \"{44777db8-96b1-4b09-9746-6d0390288c84}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[Paxton] Bundle Upgrade Code",
                         "name": "%paxton.bundleUpgradeCode%",
-                        "description": "Example: \"{f72abad4-21ca-4c1f-845e-fe437f2859e4}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
+
                     {
-                        "label": "",
+                        "_": "-------------------------- NXTOOL BLOCK --------------------------",
+                        "label": "[NxTool] Short Company Name",
                         "name": "%nxtool.companyName%",
-                        "description": "Example: \"Nx\"",
-                        "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "advanced": true,
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[NxTool] Product Id",
                         "name": "%nxtool.productId%",
-                        "description": "Example: \"{be19c0da-73f6-4ea7-9ad6-9dfd86d9e35e}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[NxTool] Product Upgrade Code",
                         "name": "%nxtool.productUpgradeCode%",
-                        "description": "Example: \"{cc740987-5070-4750-b853-327417176031}\"",
                         "type": "GUID",
                         "advanced": true,
-                        "meta": {}
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[NxTool] Bundle Upgrade Code",
                         "name": "%nxtool.bundleUpgradeCode%",
-                        "description": "Example: \"{222b19dc-f75f-4096-9cf2-807e309ce06b}\"",
                         "type": "GUID",
-                        "meta": {}
+                        "advanced": true,
+                        "optional": true
                     }
                 ]
             },

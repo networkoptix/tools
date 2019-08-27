@@ -6,10 +6,8 @@
     "installerName": "%installerName%",
     "cloudName": "%cloudName%",
 
-
     "contact": {
         "companyUrl": "%contact.companyUrl%",
-        "productUrl": "%contact.productUrl%",
         "supportChannel": "%contact.supportChannel%",
         "supportAddress": "%contact.supportAddress%",
         "licensingChannel": "%contact.licensingChannel%",
@@ -46,37 +44,37 @@
     },
 
     "mobile": {
-        "displayName": "Nx Mobile",
+        "displayName": "%mobile.displayName%",
         "compatibleCustomizations": "%mobile.compatibleCustomizations%",
 
         "android": {
             "packageName": "com.networkoptix.nxwitness",
-            "alias": "hdwitness",
-            "storepass": "hYCmvTDu",
-            "keypass": "31O2zNNy",
-            "compatibilityPackage": "com.networkoptix.hdwitness"
+            "storepass": "%mobile.android.storepass%",
+            "alias": "%mobile.android.alias%",
+            "keypass": "%mobile.android.keypass%",
+            "compatibilityPackage": "%mobile.android.compatibilityPackage%"
         },
 
         "ios": {
-            "bundleName": "NxMobile",
-            "bundleIdentifier": "com.networkoptix.NxMobile",
-            "groupIdentifier": "group.com.networkoptix.NxMobile",
-            "signIdentity": "iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)",
-            "compatibilityPackage": "id648369716"
+            "bundleName": "%mobile.ios.bundleName%",
+            "bundleIdentifier": "%mobile.ios.bundleIdentifier%",
+            "groupIdentifier": "%mobile.ios.groupIdentifier%",
+            "signIdentity": "%mobile.ios.signIdentity%",
+            "compatibilityPackage": "%mobile.ios.compatibilityPackage%"
         }
     },
 
     "paxton": {
-        "libraryName": "NetworkOptix.NxWitness",
-        "productId": "{234bf98e-b18c-4798-9cb5-a0e90269ef9f}",
-        "productUpgradeCode": "{44777db8-96b1-4b09-9746-6d0390288c84}",
-        "bundleUpgradeCode": "{f72abad4-21ca-4c1f-845e-fe437f2859e4}"
+        "libraryName": "%paxton.libraryName%",
+        "productId": "%paxton.productId%",
+        "productUpgradeCode": "%paxton.productUpgradeCode%",
+        "bundleUpgradeCode": "%paxton.bundleUpgradeCode%"
     },
 
     "nxtool": {
-        "companyName": "Nx",
-        "productId": "{be19c0da-73f6-4ea7-9ad6-9dfd86d9e35e}",
-        "productUpgradeCode": "{cc740987-5070-4750-b853-327417176031}",
-        "bundleUpgradeCode": "222b19dc-f75f-4096-9cf2-807e309ce06b}"
+        "companyName": "%nxtool.companyName%",
+        "productId": "%nxtool.productId%",
+        "productUpgradeCode": "%nxtool.productUpgradeCode%",
+        "bundleUpgradeCode": "%nxtool.bundleUpgradeCode%"
     }
 }
