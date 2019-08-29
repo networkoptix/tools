@@ -79,7 +79,7 @@ def setup_logging(level: str = 'debug', title: str = '', botocore_level='warning
     botocore_logger.propagate = False
     botocore_logger.setLevel(
         getattr(logging, botocore_level.upper(), None) or int(botocore_level))
-        
+
     logging.info('=' * 80)
     if title:
         print(title)

@@ -152,7 +152,7 @@ class Monitor:
                 logger.warning('Unregistered report file: ' + report.name)
                 return False
             return not('issue' in r or r.get('crash_id') == FAILED_CRASH_ID)
-        
+
         # No force cleanup because it's better to catch warning and increase storage.
         self._cleanup_cache(
             directory, self._options.reports_size_limit, is_useful, is_forced_on_failure=False)
@@ -253,9 +253,9 @@ class Monitor:
 
         jira.update_issue(issue, reports, directory=directory)
         return issue, reports
-        
+
     @classmethod
-    def _cleanup_cache(cls, directory: utils.Directory, size_limit: utils.Size, 
+    def _cleanup_cache(cls, directory: utils.Directory, size_limit: utils.Size,
                        is_important: callable, is_forced_on_failure: bool = True):
         def directory_message():
             return 'size {} is {} limit {} in {}'.format(
@@ -295,7 +295,7 @@ class Monitor:
 def main():
     try:
         import subprocess
-        change_set, *_ = subprocess.check_output('hg id').decode().split()
+        change_set, *_ = subprocess.check_output(['hg', 'id']).decode().split()
     except (ImportError, OSError):
         change_set = 'UNKNOWN'
 

@@ -126,7 +126,7 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 
 class Jira:
-    def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list, 
+    def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list,
                  epic_link: str = '', prefix: str = ''):
         try:
             self._jira = jira.JIRA(server=url, basic_auth=(login, password))
@@ -137,7 +137,7 @@ class Jira:
         self._fix_versions = fix_versions
         self._epic_link = epic_link
         self._prefix = prefix + ' ' if prefix else ''
-        
+
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         """Creates JIRA issue by crash :report.
         Return issue key of created issue.
@@ -199,7 +199,7 @@ class Jira:
                 self._transition(issue, 'Reopen')
                 logger.info('Reopen JIRA issue {} for reports from {}'.format(
                     key, ', '.join(r.full_version for r in reports)))
-                
+
         versions = set()
         fix_versions = set()
         for r in reports:
@@ -209,26 +209,36 @@ class Jira:
             if not files:
                 raise JiraError('Unable to find files for {}'.format(r.name))
             self._attach_files(key, files)
-            
+
         self._update_field_names(issue, 'versions', versions)
         self._update_field_names(issue, 'fixVersions', fix_versions, skip_on='Future')
 
-    def all_issues(self):
+    def all_issues(self, max_results=1000, block_size=100, fields=None):
+        block_num = 0
         issues = []
-        try:
-            for issue in self._jira.search_issues('summary ~ "has crashed on"', maxResults=1000):
+
+        while True:
+            start_index = block_num * block_size
+            search_result = self._jira.search_issues('summary ~ "has crashed on"', start_index, block_size,
+                                                     fields=fields)
+            if len(search_result) == 0:
+                break  # Retrieve issues until there are no more to come
+            block_num += 1
+
+            for issue in search_result:
                 summary = issue.fields.summary
                 if summary.startswith(self._prefix) and 'has crashed on' in summary:
                     issues.append(issue)
+                else:
+                    logger.debug('Skipping JIRA issue "{}"'.format(summary))
 
-        except jira.exceptions.JIRAError as error:
-            raise JiraError('Unable to get all issues', error)
-
+                if len(issues) >= max_results:
+                    return issues
         return issues
-    
+
     def _fix_versions_for(self, version):
         return set(v for v in self._fix_versions if v >= version)
-        
+
     @staticmethod
     def _update_field_names(issue: jira.Issue, name: str, values: list, skip_on: str = ''):
         current_values = set(v.name for v in getattr(issue.fields, name))
@@ -242,7 +252,7 @@ class Jira:
             issue.update(fields={name: [{'name': v} for v in new_values]})
             logger.debug('JIRA issue {} is updated for {}: {}'.format(
                 issue.key, name, ', '.join(new_values)))
-    
+
     def _attach_files(self, key: str, reports: List[utils.File]):
         """Attaches new :files to JIRA issue.
         """
