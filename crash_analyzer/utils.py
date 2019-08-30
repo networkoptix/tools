@@ -189,7 +189,8 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
         for line in logs:
             try:
                 date, time, level, message = line.split(maxsplit=3)
-                if level == 'INFO': level = 'DEBUG'
+                if level == 'INFO':
+                    level = 'DEBUG'
                 resolved_level = int(getattr(logging, level))
                 logger.log(resolved_level, time + '    ' + message)
             except (AttributeError, TypeError, ValueError):
@@ -246,7 +247,7 @@ class Size:
     def __mul__(self, scalar):
         return Size(int(self.bytes * scalar))
 
-    def __truediv__ (self, scalar):
+    def __truediv__(self, scalar):
         return Size(int(self.bytes / scalar))
 
     def __str__(self):
@@ -312,7 +313,8 @@ class File:
             with open(self.path, 'r' + mode) as f:
                 return action(f)
         except FileNotFoundError:
-            if default is None: raise
+            if default is None:
+                raise
             logger.warning('Read "{}" for non-existing file: {}'.format(default, self.path))
             return default
         except UnicodeDecodeError as error:
@@ -401,7 +403,7 @@ class Directory:
     def remove(self):
         shutil.rmtree(self.path)
 
-        
+
 class MultiDirectory:
     """Emulates a single directory interface for multiple directories. Useful when there is
     several directories for single type of objects.
@@ -419,7 +421,7 @@ class MultiDirectory:
     @property
     def path(self):
         return self._directories[0].path
-        
+
     @property
     def name(self):
         return self._directories[0].name
@@ -441,19 +443,19 @@ class MultiDirectory:
 
     def make(self):
         return [d.make() for d in self._directories]
-            
+
     def size(self, *args, **kwargs):
         return self._sum_result('size', Size(), *args, **kwargs)
 
     def remove(self):
         return [d.remove() for d in self._directories]
-            
+
     def _one_result(self, method, *args, **kwargs):
         return getattr(self._directories[0], method)(*args, **kwargs)
-        
+
     def _sum_result(self, method, init, *args, **kwargs):
         return sum([getattr(d, method)(*args, **kwargs) for d in self._directories], init)
-        
+
 
 class TemporaryDirectory(Directory):
     def __init__(self):

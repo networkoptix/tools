@@ -17,9 +17,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import http.client
-import msvcrt
 import traceback
 from typing import List, Callable
+if os.name == 'nt':
+    import msvcrt
 
 logger = logging.getLogger(__name__)
 
@@ -340,8 +341,7 @@ class DumpAnalyzer:
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(dist_url, build_path)
-        suffixes = list(s % self.dist for s in DIST_SUFFIXES) + \
-                   list(s % {'module': self.dist} for s in PDB_SUFFIXES)
+        suffixes = list(s % self.dist for s in DIST_SUFFIXES) + list(s % {'module': self.dist} for s in PDB_SUFFIXES)
 
         out = self.fetch_url_data(
             build_url, (r'>([a-zA-Z0-9-_\.]+%s)<' % r for r in suffixes),
@@ -401,7 +401,7 @@ class DumpAnalyzer:
            .zip - just extract to the target exe directory.
         """
 
-        def run(command, retry_code = 0, retry_count = 0):
+        def run(command, retry_code=0, retry_count=0):
             try:
                 logger.debug(shell_line(command))
                 return subprocess.check_output(command, timeout=self.subprocess_timeout_s)
@@ -449,12 +449,11 @@ class DumpAnalyzer:
             pass
 
         with FileLock(
-            os.path.join(self.base_build_path, self.dist + '-lock'), 
+            os.path.join(self.base_build_path, self.dist + '-lock'),
             self.subprocess_timeout_s * len(urls)
         ) as lock:
             self.download_dist_urls(urls)
             self.prepare_dist_for_debug()
-
 
     def download_dist_urls(self, urls):
         try:
@@ -482,7 +481,6 @@ class DumpAnalyzer:
                     logger.error('Unable to cleanup: {}'.format(traceback.format_exc()))
             raise
 
-
     def prepare_dist_for_debug(self):
         """Move all PDBs into the root so CDB and VS can use them.
         """
@@ -491,10 +489,9 @@ class DumpAnalyzer:
             if not os.path.isfile(os.path.join(self.module_dir(), os.path.basename(item))):
                 shutil.move(item, self.module_dir())
                 moved.append(item[len(self.module_dir()):])
-                
+
         if moved:
             logger.debug('Move files to module: ' + ', '.join(moved))
-        
 
     def run_visual_studio(self):
         """Open dump in visual studio.
