@@ -99,3 +99,20 @@ A service works in an infinite loop until it's stopped:
 - WARNING is to be reviewed. Usually indicates a broken distribution or report.
 - ERROR is to be fixed. Indicates some problems.
 - CRITICAL is to be fixed ASAP! Happens when analysis cycle is broken by exception.
+
+# Crash Monitor Records Restorer
+
+Linux and Windows Crash Monitor Records Restorer which restores records.json file.
+
+## Requirements
+See Crash Monitor & Analyzer Requirements.
+
+## How it works
+1. Fetches all crash issues from JIRA
+2. Parses JIRA issues fields
+3. Generates new records.json file
+
+## Usage
+Run restorer from terminal: `python restore_records_file.py <config>`.
+`config` is the same file as the one  used for the Crash Monitor, but only 'logging' and
+ 'upload' groups are required.
