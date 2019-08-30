@@ -219,8 +219,12 @@ class Jira:
 
         while True:
             start_index = block_num * block_size
-            search_result = self._jira.search_issues('summary ~ "has crashed on"', start_index, block_size,
-                                                     fields=fields)
+            try:
+                search_result = self._jira.search_issues('summary ~ "has crashed on"', start_index, block_size,
+                                                         fields=fields)
+            except jira.exceptions.JIRAError as error:
+                raise JiraError('Unable to get all issues', error)
+
             if len(search_result) == 0:
                 break  # Retrieve issues until there are no more to come
             block_num += 1
@@ -263,7 +267,7 @@ class Jira:
             except jira.exceptions.JIRAError as jira_error:
                 error = JiraError(
                     'Unable to attach "{}" file to issue {}'.format(report.name, key), jira_error)
-                if jira_error.status_code == 413: #< HTTP Code: Payload Too Large.
+                if jira_error.status_code == 413:  # HTTP Code: Payload Too Large.
                     logger.warning(utils.format_error(error))
                 else:
                     raise error
@@ -291,4 +295,3 @@ class Jira:
 
             except jira.exceptions.JIRAError as error:
                 raise JiraError('Unable to transition issue {} to {}'.format(issue.key, name), error)
-
