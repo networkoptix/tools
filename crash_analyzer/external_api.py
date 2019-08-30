@@ -232,7 +232,7 @@ class Jira:
                 else:
                     logger.debug('Skipping JIRA issue "{}"'.format(summary))
 
-                if len(issues) >= max_results:
+                if max_results and len(issues) >= max_results:
                     return issues
         return issues
 
