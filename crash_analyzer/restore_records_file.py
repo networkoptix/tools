@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 
 NAME = 'Crash Monitor Records Restorer'
 VERSION = '2.0'
-RETRY_CRASH_ID = 'RETRY'
-FAILED_CRASH_ID = 'FAILED'
 
 
 def extract_records_from_issues(issues: List[jira.resources.Issue]):
@@ -26,8 +24,8 @@ def extract_records_from_issues(issues: List[jira.resources.Issue]):
             continue
 
         # Some of the issues could be edited or created manually. Ignoring them.
-        description_lines = issue.fields.description.splitlines()
-        if description_lines[1] != "{code}" or description_lines[-1] != "{code}":
+        _, open_tag, *stack, close_tag = issue.fields.description.splitlines()
+        if not open_tag == close_tag == "{code}":
             logger.warning("Skipping JIRA issue {}. Invalid description".format(issue.key))
             continue
 
@@ -38,7 +36,7 @@ def extract_records_from_issues(issues: List[jira.resources.Issue]):
         reason_args = {}
         reason_args["component"] = str(issue.fields.components[0])
         reason_args["code"] = issue.fields.summary.split(":")[-1].strip()
-        reason_args["stack"] = description_lines[2:-1]
+        reason_args["stack"] = stack
 
         reason = crash_info.Reason(**reason_args)
         record_data = {"crash_id": reason.crash_id, "issue": issue.key}
@@ -69,7 +67,7 @@ def main():
     parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
     parser.add_argument('config_file', help="Same config as the one used for the Crash Monitor,"
                                             " only 'logging' and 'upload' groups are required")
-    parser.add_argument('-f', '--records_file', default="records.json", help="File where all records should be written")
+    parser.add_argument('-f', '--records-file', default="records.json", help="File where all records should be written")
     parser.add_argument('-o', '--override', action='append', default=[], help='SECTION.KEY=VALUE to override config')
 
     arguments = parser.parse_args()
