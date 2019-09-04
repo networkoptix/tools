@@ -25,7 +25,7 @@ declare -i NX_GO_VERBOSE=0 #< Whether nx_go() logs each command to be executed.
 # specified.
 nx_handle_help() # "$@"
 {
-    if [ $# = 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
+    if (( $# == 0 )) || [[ $1 == "-h" || $1 == "--help" ]]; then
         help_callback
         exit 0
     fi
@@ -35,7 +35,7 @@ nx_handle_help() # "$@"
 # is consumed.
 nx_handle_verbose() # "$@" && shift
 {
-    if [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+    if (( $# >= 1 )) && [[ $1 == "--verbose" || $1 == "-v" ]]; then
         NX_VERBOSE=1
         set -x
         return 0
@@ -47,7 +47,7 @@ nx_handle_verbose() # "$@" && shift
 # Set the global NX_GO_VERBOSE var to 1 if required by $1; return whether $1 is consumed.
 nx_handle_go_verbose() # "$@" && shift
 {
-    if [ "$1" = "-gov" -o "$1" = "--go-verbose" ]; then
+    if (( $# >= 1 )) && [[ $1 == "-gov" || $1 == "--go-verbose" ]]; then
         NX_GO_VERBOSE=1
         return 0
     else
@@ -58,7 +58,7 @@ nx_handle_go_verbose() # "$@" && shift
 # Set the mode to simulate rsync calls and return whether $1 is consumed.
 nx_handle_mock_rsync() # "$@" && shift
 {
-    if [ "$1" == "--mock-rsync" ]; then
+    if (( $# >= 1 )) && [[ $1 == "--mock-rsync" ]]; then
         rsync() #< Define the function which overrides rsync executable name.
         {
             nx_echo

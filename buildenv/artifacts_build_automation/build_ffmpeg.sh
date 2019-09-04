@@ -1,75 +1,83 @@
 #!/bin/bash
 
-source "../../util/utils.sh"
-
 set -e #< Stop on error.
 set -u #< Forbid undefined variables.
 
+source "../../util/utils.sh"
 source "build_common.sh"
 
 declare -r SUPPORTED_TARGETS=( linux_x64 linux_arm32 linux_arm64 rpi )
 declare -r FFMPEG_VERSION="3.1.9"
-declare -r TARGET_ARTIFACT_DEV_ARTIFACT_TARGET="linux"
-declare -r TARGET_ARTIFACT_DEV_ARTIFACT="ffmpeg-dev-${FFMPEG_VERSION}"
+declare -r DEV_ARTIFACT_PLATFORM="linux"
+declare -r DEV_ARTIFACT_NAME="ffmpeg-dev-${FFMPEG_VERSION}"
 
 help_callback()
 {
     cat \
 <<EOF
-This script should be used to build ffmpeg artifact.
+Builds ffmpeg artifact from sources taken from the dedicated rdep artifact.
+
 Prerequisites:
-  - Rdep should be on path as "rdep".
+  - Rdep should be on path as "rdep" (not required if --no-rdep is specified).
   - RDEP_PACKAGES_DIR env var should point to rdep packages.
+  
 Usage: run this script directly from devtools repo; current dir doesn't matter.
 
- $(basename "$0") <options> [--no-rdep] <target> <build-result-dir>
+ $(basename "$0") <options> [--no-rdep] <target> <destination-dir>
+
+If --no-rdep is specified, required artifacts will not be synced via rdep.
+
+Here <target> is one of: ${SUPPORTED_TARGETS[*]}
 
 $NX_HELP_TEXT_OPTIONS
 EOF
 }
 
 # [in] GCC
-# [in] TARGET_ARTIFACT_DEV
+# [in] DEV_ARTIFACT
 # [in] RDEP_PACKAGES_DIR
 downloadArtifacts()
 {
-    local -r TARGET_ARTIFACT_DEV_CHECKSUM="67ea726ddb8ab84b8e9202aaea5ab124 *files.md5"
+    local -r DEV_ARTIFACT_CHECKSUM="67ea726ddb8ab84b8e9202aaea5ab124 *files.md5"
 
     nxDownloadGccArtifact
 
-    rm -rf "$TARGET_ARTIFACT_DEV"
-    nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$TARGET_ARTIFACT_DEV_ARTIFACT_TARGET" "$TARGET_ARTIFACT_DEV_ARTIFACT"
+    nx_verbose rm -rf "$DEV_ARTIFACT"
+    nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$DEV_ARTIFACT_PLATFORM" "$DEV_ARTIFACT_NAME"
 
-    nx_pushd "$TARGET_ARTIFACT_DEV"
+    nx_pushd "$DEV_ARTIFACT"
 
     local -r checksumCalculated=$(./test_checksums.sh)
 
-    if [[ $(./test_checksums.sh) != $TARGET_ARTIFACT_DEV_CHECKSUM ]]
+    if [[ $(./test_checksums.sh) != $DEV_ARTIFACT_CHECKSUM ]]
     then
-        nx_fail "Unexpected checksum in $TARGET_ARTIFACT_DEV_ARTIFACT: \n" \
-            "expected: $TARGET_ARTIFACT_DEV_CHECKSUM \n" \
-            "got: $checksumCalculated"
+        nx_fail "Unexpected checksum in $DEV_ARTIFACT:" \
+            "Expected: $DEV_ARTIFACT_CHECKSUM" \
+            "Actual: $checksumCalculated"
     fi
 
     nx_popd
 }
 
+# [in] DEV_ARTIFACT
+# [in] SYSROOT
 installSysroot()
 {
     cp -a "$GCC_ARTIFACT_PATH/${GCC_PREFIX%-}/sysroot" "$SYSROOT"
 
     if [[ $TARGET == "rpi" ]]
     then
-        cp -a "$TARGET_ARTIFACT_DEV/src/rpi-precompiled-files"/* "$SYSROOT"/
+        cp -a "$DEV_ARTIFACT/src/rpi-precompiled-files"/* "$SYSROOT"/
     fi
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
 buildOgg()
 {
     nx_echo "Building libogg..."
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/libogg-1.3.3"
+    nxPrepareSources "$DEV_ARTIFACT/src/libogg-1.3.3"
 
     local -r AUTOCONF_OPTIONS=(
         --host="${GCC_PREFIX%-}" #< Make host from gcc prefix by stripping trailing hyphen.
@@ -82,11 +90,12 @@ buildOgg()
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
 buildAlsaLib()
 {
     nx_echo "Building alsa-lib..."
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/alsa-lib-1.1.9"
+    nxPrepareSources "$DEV_ARTIFACT/src/alsa-lib-1.1.9"
 
     local -r AUTOCONF_OPTIONS=(
         --host="${GCC_PREFIX%-}" #< Make host from gcc prefix by stripping trailing hyphen.
@@ -99,11 +108,13 @@ buildAlsaLib()
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
+# [in] SYSROOT
 buildVorbis()
 {
     nx_echo "Building libvorbis..."
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/vorbis-1.3.6"
+    nxPrepareSources "$DEV_ARTIFACT/src/vorbis-1.3.6"
 
     local -r CMAKE_GEN_OPTIONS=(
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -119,11 +130,12 @@ buildVorbis()
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
 buildLibVpx()
 {
     nx_echo "Building libvpx..."
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/libvpx-1.7.0"
+    nxPrepareSources "$DEV_ARTIFACT/src/libvpx-1.7.0"
 
     local -r TOOLCHAIN_PREFIX="${GCC_PREFIX}"
 
@@ -159,10 +171,11 @@ buildLibVpx()
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
 buildLame()
 {
     nx_echo "Building lame..."
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/lame-3.100"
+    nxPrepareSources "$DEV_ARTIFACT/src/lame-3.100"
 
     local -r AUTOCONF_OPTIONS=(
         --host="${GCC_PREFIX%-}"
@@ -176,11 +189,13 @@ buildLame()
 }
 
 # [in] GCC
+# [in] DEV_ARTIFACT
+# [in] SYSROOT
 buildOpenH264()
 {
     nx_echo "Building openh264..."
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/openh264-1.7.0"
+    nxPrepareSources "$DEV_ARTIFACT/src/openh264-1.7.0"
 
     nxExportToolchainMediatorVars "${GCC_PREFIX}"
 
@@ -191,14 +206,15 @@ buildOpenH264()
 }
 
 # [in] GCC
-# [in] TARGET_ARTIFACT_DEV 
+# [in] DEV_ARTIFACT 
+# [in] SYSROOT
 buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
 {
     nx_echo "Building ffmpeg..."
 
     local -r ABSOLUTE_DESTINATION_DIR="$1"
 
-    nxPrepareSources "$TARGET_ARTIFACT_DEV/src/ffmpeg-$FFMPEG_VERSION"
+    nxPrepareSources "$DEV_ARTIFACT/src/ffmpeg-$FFMPEG_VERSION"
 
     local -r COMMON_OPTIONS=(
         --prefix=/
@@ -300,12 +316,12 @@ checkDestinationDirArg()
 {
     if [[ -z $DESTINATION_DIR ]]
     then
-        nx_fail "Specify build result dir as an argument."
+        nx_fail "Specify destination dir as an argument."
     fi
 
     if [[ -d "$DESTINATION_DIR" ]]
     then
-        nx_fail "Build result dir already exists."
+        nx_fail "Destination dir already exists."
     fi
 }
 
@@ -316,17 +332,16 @@ main()
         nx_fail "RDEP_PACKAGES_DIR should be defined."
     fi
 
-    if ! which rdep &>/dev/null
-    then
-        nx_fail "Rdep should be on path as \"rdep\"."
-    fi
-
     if (( $# > 0 )) && [[ $1 == "--no-rdep" ]]
     then
         local -r -i NO_RDEP=1
         shift
     else
         local -r -i NO_RDEP=0
+        if ! which rdep &>/dev/null
+        then
+            nx_fail "Rdep should be on path as \"rdep\"."
+        fi
     fi
 
     local -r TARGET="${1:-}"
@@ -346,7 +361,7 @@ main()
     {
         (( "$RESULT" == 0 )) && return
 
-        nx_echo "The temporary build dir '${BUILD_ROOT_DIR}' is retained for the problem investigations."
+        nx_echo "Temp build dir retained for investigation: ${BUILD_ROOT_DIR}"
     }
 
     NX_EXIT_HOOKS+=( warnTempBuildDir )
@@ -357,7 +372,7 @@ main()
 
     nxInitToolchain
 
-    local -r TARGET_ARTIFACT_DEV="$RDEP_PACKAGES_DIR/$TARGET_ARTIFACT_DEV_ARTIFACT_TARGET/$TARGET_ARTIFACT_DEV_ARTIFACT"
+    local -r DEV_ARTIFACT="$RDEP_PACKAGES_DIR/$DEV_ARTIFACT_PLATFORM/$DEV_ARTIFACT_NAME"
 
     if (( $NO_RDEP == 0 ))
     then
@@ -378,4 +393,3 @@ main()
 }
 
 nx_run "$@"
-

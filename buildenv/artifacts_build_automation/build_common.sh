@@ -99,7 +99,6 @@ nxExportToolchainMediatorVars()
 # [in] GCC_ARTIFACT_GROUP
 nxDownloadGccArtifact()
 {
-    rm -rf "$GCC_ARTIFACT_PATH"
     nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$GCC_ARTIFACT_GROUP" "$GCC_ARTIFACT"
 }
 
