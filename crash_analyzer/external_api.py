@@ -5,7 +5,7 @@ import jira.exceptions
 import json
 import logging
 import requests
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Set
 
 import crash_info
 import utils
@@ -200,18 +200,23 @@ class Jira:
                 logger.info('Reopen JIRA issue {} for reports from {}'.format(
                     key, ', '.join(r.full_version for r in reports)))
 
-        versions = set()
         fix_versions = set()
         for r in reports:
-            versions.add(r.version)
             fix_versions.update(self._fix_versions_for(r.version))
             files = directory.files(r.file_mask())
             if not files:
                 raise JiraError('Unable to find files for {}'.format(r.name))
             self._attach_files(key, files)
 
-        self._update_field_names(issue, 'versions', versions)
-        self._update_field_names(issue, 'fixVersions', fix_versions, skip_on='Future')
+        self._update_field_values(issue, 'versions', {r.version for r in reports})
+
+        current_fix_versions = {v.name for v in issue.fields.fixVersions}
+        new_fix_versions = self._cut_off_older_versions(fix_versions, current_fix_versions)
+        if current_fix_versions == new_fix_versions:
+            logger.debug('JIRA issue {} update for fixVersions is skipped: reports versions {} are older than current'
+                         .format(issue.key, fix_versions))
+        else:
+            self._update_field_values(issue, 'fixVersions', new_fix_versions)
 
     def all_issues(self, max_results=1000, block_size=100, fields=None):
         block_num = 0
@@ -240,22 +245,21 @@ class Jira:
                     return issues
         return issues
 
-    def _fix_versions_for(self, version):
-        return set(v for v in self._fix_versions if v >= version)
+    def _fix_versions_for(self, version: str) -> Set[str]:
+        return {v for v in self._fix_versions if v >= version}
 
     @staticmethod
-    def _update_field_names(issue: jira.Issue, name: str, values: list, skip_on: str = ''):
-        current_values = set(v.name for v in getattr(issue.fields, name))
-        if skip_on and skip_on in current_values:
-            logger.debug('JIRA issue {} update for {} is skipped on: {}'.format(
-                issue.key, name, skip_on))
-            return
+    def _cut_off_older_versions(new_versions: Set[str], current_versions: Set[str]) -> Set[str]:
+        current_min_version = min(current_versions)
+        return {v for v in new_versions if v >= current_min_version}
 
-        new_values = current_values | set(values)
+    @staticmethod
+    def _update_field_values(issue: jira.Issue, name: str, values: Set):
+        current_values = set(v.name for v in getattr(issue.fields, name))
+        new_values = current_values | values
         if current_values != new_values:
             issue.update(fields={name: [{'name': v} for v in new_values]})
-            logger.debug('JIRA issue {} is updated for {}: {}'.format(
-                issue.key, name, ', '.join(new_values)))
+            logger.debug('JIRA issue {} is updated for {}: {}'.format(issue.key, name, ', '.join(new_values)))
 
     def _attach_files(self, key: str, reports: List[utils.File]):
         """Attaches new :files to JIRA issue.
