@@ -54,7 +54,7 @@ def check_config(config):
         conf.write(config_template.format(id, posix_path, config))
 
 
-def run_server(config, verbose):
+def run_server(config, verbose, *args):
     command = [
         SERVER_EXECUTABLE,
         "-e",
@@ -62,6 +62,7 @@ def run_server(config, verbose):
         "--runtime-conf-file", runtime_config_file(config),
         "--dev-mode-key=razrazraz"
     ]
+    command += args
     if verbose:
         print(" ".join(command))
 
@@ -74,9 +75,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", nargs=1, help="Server config.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output.")
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     check_config(args.config[0])
-    run_server(args.config[0], args.verbose)
+    run_server(args.config[0], args.verbose, *unknown)
 
 
 if __name__ == "__main__":
