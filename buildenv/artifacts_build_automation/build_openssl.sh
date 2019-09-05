@@ -38,22 +38,29 @@ EOF
 # [in] RDEP_PACKAGES_DIR
 downloadArtifacts()
 {
-    local -r DEV_ARTIFACT_CHECKSUM="b00501abc9119701a5396965a1a3a5be *files.md5"
+    local -r DEV_ARTIFACT_CHECKSUM="d05c71e954ee4c06a9881f85bbf3d28b *files.md5"
 
     nxDownloadGccArtifact
 
     nx_verbose rm -rf "$DEV_ARTIFACT"
     nx_verbose rdep --root "$RDEP_PACKAGES_DIR" -t "$DEV_ARTIFACT_PLATFORM" "$DEV_ARTIFACT_NAME"
 
-    nx_pushd "$RDEP_PACKAGES_DIR/linux/$DEV_ARTIFACT_NAME"
+    nx_pushd "$DEV_ARTIFACT"
 
-    local -r checksumCalculated=$(./test_checksums.sh)
+    # The variable has to be global to fail on error in the called script.
+    checksumComputed=$(./test_checksums.sh)
 
-    if [[ $(./test_checksums.sh) != $DEV_ARTIFACT_CHECKSUM ]]
+    if (( $? != 0 ))
+    then
+        nx_fail "Failed checksum check in $DEV_ARTIFACT" \
+            "Run ./test_checksum.sh in that dir to see details."
+    fi
+
+    if [[ $checksumComputed != $DEV_ARTIFACT_CHECKSUM ]]
     then
         nx_fail "Unexpected checksum in $DEV_ARTIFACT:" \
             "Expected: $DEV_ARTIFACT_CHECKSUM" \
-            "Actual: $checksumCalculated"
+            "Actual: $checksumComputed"
     fi
 
     nx_popd

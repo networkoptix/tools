@@ -2,6 +2,7 @@
 
 #-------------------------------------------------------------------------------------------------
 
+# [in] DEV_ARTIFACT
 nxPrepareSources() # PKG_SRC_DIR
 {
     local -r PKG_SRC_DIR="$1"
@@ -12,9 +13,9 @@ nxPrepareSources() # PKG_SRC_DIR
 
     nx_cd "$BUILD_DIR"
 
-    if ls "$TARGET_ARTIFACT_DEV/src/patches/$PKG_NAME"-* &>/dev/null
+    if ls "$DEV_ARTIFACT/src/patches/$PKG_NAME"-* &>/dev/null
     then
-        for patch in "$TARGET_ARTIFACT_DEV/src/patches/$PKG_NAME"-*
+        for patch in "$DEV_ARTIFACT/src/patches/$PKG_NAME"-*
         do
             # Apply the patch to files in the current directory. '-p1' should be used when patch
             # is executed inside the root directory of sources.
