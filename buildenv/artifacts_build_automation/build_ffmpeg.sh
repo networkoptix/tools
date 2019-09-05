@@ -20,6 +20,7 @@ Builds ffmpeg artifact from sources taken from the dedicated rdep artifact.
 Prerequisites:
   - Rdep should be on path as "rdep" (not required if --no-rdep is specified).
   - RDEP_PACKAGES_DIR env var should point to rdep packages.
+  - nasm should be installed in the system.
   
 Usage: run this script directly from devtools repo; current dir doesn't matter.
 
@@ -345,10 +346,15 @@ main()
         shift
     else
         local -r -i NO_RDEP=0
-        if ! which rdep &>/dev/null
+        if ! type -p rdep &>/dev/null
         then
             nx_fail "Rdep should be on path as \"rdep\"."
         fi
+    fi
+
+    if ! type -p nasm &>/dev/null
+    then
+        nx_fail "nasm should be installed (\`sudo apt install nasm\` in Ubuntu)."
     fi
 
     local -r TARGET="${1:-}"
