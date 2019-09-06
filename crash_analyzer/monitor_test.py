@@ -4,7 +4,7 @@ import logging
 import os
 import multiprocessing
 import functools
-from typing import List
+from typing import List, Dict
 
 import pytest
 
@@ -33,7 +33,7 @@ class CrashServerMock:
 
 
 class JiraMock:
-    def __init__(self, issues, url: str, login: str, password: str,
+    def __init__(self, issues, url: str, login: str, password: str, autoclose_indicators: Dict[str, str],
                  file_limit: int, fix_versions: list, epic_link: str, prefix: str = ''):
         self.issues = issues
         self.args = [url, login, password, file_limit, fix_versions, epic_link, prefix]
@@ -49,6 +49,9 @@ class JiraMock:
         }
         logger.info('Issue {} is created for {}'.format(key, reason))
         return key
+
+    def autoclose_issue_if_required(self, key: str, reason: crash_info.Reason):
+        return
 
     def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory):
         issue = self.issues[key]

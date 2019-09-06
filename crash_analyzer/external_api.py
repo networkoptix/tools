@@ -127,7 +127,7 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 class Jira:
     def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list,
-                 epic_link: str = '', prefix: str = ''):
+                 autoclose_indicators: Dict[str, str], epic_link: str = '', prefix: str = ''):
         try:
             self._jira = jira.JIRA(server=url, basic_auth=(login, password))
         except jira.exceptions.JIRAError as error:
@@ -137,6 +137,7 @@ class Jira:
         self._fix_versions = fix_versions
         self._epic_link = epic_link
         self._prefix = prefix + ' ' if prefix else ''
+        self._autoclose_indicators = autoclose_indicators
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         """Creates JIRA issue by crash :report.
@@ -165,6 +166,32 @@ class Jira:
 
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
+
+    def autoclose_issue_if_required(self, key: str, reason: crash_info.Reason):
+        """Autocloses the issue based on the crash stack from :reason.
+        Leaves the comment with the autoclose reason.
+        """
+        if not self._autoclose_indicators:
+            logger.debug('No autoclose indicators, nothing to autoclose')
+            return
+
+        stack_lines_to_analyze = "\n".join(reason.full_stack[:3])  # Only first 3 lines should be checked for autoclose
+
+        close_reason = None
+        for keyphrase, reason in self._autoclose_indicators.items():
+            if keyphrase in stack_lines_to_analyze:
+                close_reason = reason
+        if not close_reason:
+            logger.debug('Issue {} should not be autoclosed'.format(key))
+            return
+
+        logger.debug('Autoclosing issue {} with the reason "{}"'.format(key, close_reason))
+        try:
+            issue = self._jira.issue(key)
+            self._transition(issue, 'Close')
+            self._jira.add_comment(key, "Resolved via automated process. Reason: {}".format(close_reason))
+        except jira.exceptions.JIRAError as error:
+            raise JiraError('Unable to autoclose the issue {}'.format(key), error)
 
     def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory) -> bool:
         """Update JIRA issue with new crash :reports.

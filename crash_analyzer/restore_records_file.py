@@ -37,6 +37,7 @@ def extract_records_from_issues(issues: List[jira.resources.Issue]):
         reason_args["component"] = str(issue.fields.components[0])
         reason_args["code"] = issue.fields.summary.split(":")[-1].strip()
         reason_args["stack"] = stack
+        reason_args["full_stack"] = stack
 
         reason = crash_info.Reason(**reason_args)
         record_data = {"crash_id": reason.crash_id, "issue": issue.key}
@@ -50,7 +51,7 @@ def extract_records_from_issues(issues: List[jira.resources.Issue]):
 def restore_records_file(records_filename: str, thread_count: int, **options):
     assert records_filename.endswith(".json")
 
-    jira = external_api.Jira(**options)
+    jira = external_api.Jira(**options, autoclose_indicators=None)
     issues = jira.all_issues(max_results=None, fields=["attachment", "summary", "components", "description"])
     records = extract_records_from_issues(issues)
     records_file = utils.File(records_filename)

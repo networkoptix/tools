@@ -17,9 +17,10 @@ SERVER_CONFIG = {k: v for k, v in CONFIG['fetch'].items() if k in (
 
 JIRA_CONFIG = {k: v for k, v in CONFIG['upload'].items() if k in (
     'url', 'login', 'password', 'fix_versions', 'epic_link')}
+AUTOCLOSE_INDICATORS = CONFIG['issue_autoclose_indicators']
 
 JIRA_PREFIX = 'TEST-RUN'
-JIRA_REASON = crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])
+JIRA_REASON = crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])
 
 
 @pytest.mark.parametrize("extension", ['gdb-bt', 'dmp', '*'])
@@ -51,8 +52,9 @@ def _test_crash_server(extension: str):
 
 
 class JiraFixture:
-    def __init__(self):
-        self.api = external_api.Jira(**JIRA_CONFIG, file_limit=4, prefix=JIRA_PREFIX)
+    def __init__(self, autoclose_indicators=None):
+        self.api = external_api.Jira(**JIRA_CONFIG, autoclose_indicators=autoclose_indicators,
+                                     file_limit=4, prefix=JIRA_PREFIX)
         self.issue = None
 
     def __enter__(self):
@@ -65,7 +67,11 @@ class JiraFixture:
     def create_issue(self, name: str):
         self.issue = self.api._jira.issue(self.api.create_issue(
             crash_info.Report(name),
-            crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])))
+            crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])))
+
+    def autoclose_issue(self, reason: crash_info.Reason):
+        self.api.autoclose_issue_if_required(self.issue.key, reason)
+        self.issue = self.api._jira.issue(self.issue.key)
 
     def update_issue(self, names: List[str]):
         self.api.update_issue(self.issue.key, [crash_info.Report(n) for n in names],
@@ -83,7 +89,7 @@ class JiraFixture:
     @staticmethod
     def _report(name: str) -> Tuple[crash_info.Report, crash_info.Reason]:
         report = crash_info.Report(name)
-        reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'])
+        reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])
         return report, reason
 
 
@@ -181,3 +187,20 @@ def _test_jira():
         assert {'3.0', '3.1', '3.2', '4.0'} == jira.field_set('versions')
         assert {'Future'} == jira.field_set('fixVersions')
         assert {'e', 'f', 'g', 'h'} == jira.attachments()
+
+
+def test_jira_autoclose():
+    with JiraFixture(AUTOCLOSE_INDICATORS) as jira:
+        jira.create_issue('server--3.1.0.311-abc-default--linux-x64--a.gdb-bt')
+        jira.update_issue(['server--3.1.0.311-abc-default--linux-x64--a.gdb-bt'])
+        jira.autoclose_issue(crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'Zorz::create_sys', 'f2']))
+        assert jira.issue.key.startswith('VMS-')
+        assert 'Closed' == jira.issue.fields.status.name
+        assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
+        assert 'Call Stack:\n{code}\nf1\nf2\n{code}' == jira.issue.fields.description
+        assert 'VMS-2022' == jira.issue.fields.customfield_10009
+        assert {'Server'} == jira.field_set('components')
+        assert {'3.1'} == jira.field_set('versions')
+        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        assert {'a'} == jira.attachments()
+        assert 1 == len(jira.issue.fields.comment.comments)

@@ -107,17 +107,18 @@ class Reason:
     """Represents unique crash reason. Several reports may produce the same reason.
     """
 
-    def __init__(self, component: str, code: str, stack: List[str]):
+    def __init__(self, component: str, code: str, stack: List[str], full_stack: List[str]):
         self.component = component
         self.code = code
         self.stack = stack
+        self.full_stack = full_stack
 
     def __repr__(self):
         return 'Reason({}, {}, {})'.format(repr(self.component), repr(self.code), repr(self.stack))
 
     def __str__(self):
-        return '{}, code: {}, stack: {} frames, id: {}'.format(
-            self.component, self.code, len(self.stack), self.crash_id)
+        return '{}, code: {}, stack: {} frames, full_stack: {} frames, id: {}'.format(
+            self.component, self.code, len(self.stack), len(self.full_stack), self.crash_id)
 
     def __eq__(self, other):
         return self.component == other.component and \
@@ -234,7 +235,7 @@ def analyze_bt(report: Report, content: ReportContent) -> Reason:
         raise AnalyzeError('Entirely external stack in: ' + report.name)
 
     if is_own_values.count(True) < CXX_ONW_MODULES_MIN_COUNT:
-        return Reason(report.component, code, transformed_stack)
+        return Reason(report.component, code, transformed_stack, transformed_stack)
 
     useful_stack = []
     is_skipped = False
@@ -248,7 +249,7 @@ def analyze_bt(report: Report, content: ReportContent) -> Reason:
         else:
             is_skipped = True
 
-    return Reason(report.component, code, useful_stack)
+    return Reason(report.component, code, useful_stack, transformed_stack)
 
 
 def analyze_linux_gdb_bt(report: Report, content: str, **options) -> Reason:

@@ -50,12 +50,14 @@ class Options:
 
 
 class Monitor:
-    def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict, debug: dict = {}):
+    def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict,
+                 issue_autoclose_indicators: dict, debug: dict = {}):
         self._debug = debug
         self._options = Options(**options)
         self._options.reports_directory.make()
         self._options.dump_tool_directory.make()
         self._fetch, self._upload, self._analyze = fetch, upload, analyze
+        self._autoclose_indicators = issue_autoclose_indicators
         self._analyze['cache_directory'] = self._options.dump_tool_directory.path
         self._records = self._options.records_file.parse(dict())
 
@@ -214,8 +216,8 @@ class Monitor:
         logger.info('Create or update {} JIRA issue(s) with new report(s)'.format(len(crashes_to_push)))
         uploads_count = 0
         for result in utils.run_concurrent(
-                self._jira_sync, crashes_to_push,
-                directory=self._options.reports_directory, **self._upload):
+                self._jira_sync, crashes_to_push, directory=self._options.reports_directory,
+                autoclose_indicators=self._autoclose_indicators, **self._upload):
             if isinstance(result, external_api.JiraError):
                 logger.warning(utils.format_error(result))
             elif isinstance(result, Exception):
@@ -248,8 +250,9 @@ class Monitor:
                 logger.warning(utils.format_error(error, include_stack=True))
                 logger.error('Skip creating issue for reports with useless stack')
                 return USELESS_STACK_KEY, reports
-            else:
-                issue = jira.create_issue(report, reason)
+
+            issue = jira.create_issue(report, reason)
+            jira.autoclose_issue_if_required(issue, reason)
 
         jira.update_issue(issue, reports, directory=directory)
         return issue, reports
