@@ -204,3 +204,4 @@ def test_jira_autoclose():
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a'} == jira.attachments()
         assert 1 == len(jira.issue.fields.comment.comments)
+        assert "Rejected" == jira.issue.fields.resolution.name

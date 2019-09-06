@@ -188,7 +188,7 @@ class Jira:
         logger.debug('Autoclosing issue {} with the reason "{}"'.format(key, close_reason))
         try:
             issue = self._jira.issue(key)
-            self._transition(issue, 'Close')
+            self._transition(issue, 'Close', resolution={'name': 'Rejected'})
             self._jira.add_comment(key, "Resolved via automated process. Reason: {}".format(close_reason))
         except jira.exceptions.JIRAError as error:
             raise JiraError('Unable to autoclose the issue {}'.format(key), error)

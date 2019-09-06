@@ -252,9 +252,10 @@ class Monitor:
                 return USELESS_STACK_KEY, reports
 
             issue = jira.create_issue(report, reason)
+            jira.update_issue(issue, reports, directory=directory)
             jira.autoclose_issue_if_required(issue, reason)
-
-        jira.update_issue(issue, reports, directory=directory)
+        else:
+            jira.update_issue(issue, reports, directory=directory)
         return issue, reports
 
     @classmethod
