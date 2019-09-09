@@ -69,7 +69,7 @@ def check_junkshop_status(rev):
     '''
     Validate if build passed on all platforms. Unit tests are ignored for now.
     '''
-    url = 'http://junkshop/check_revision/{}'.format(rev)
+    url = 'http://junkshop.lan.hdw.mx/check_revision/{}'.format(rev)
     logging.debug("Junkshop request url: {}".format(url))
     response = requests.get(url)
     json = response.json()
