@@ -300,7 +300,6 @@
                         "_": "-------------------------- PAXTON BLOCK --------------------------",
                         "label": "[Paxton] Library name",
                         "name": "%paxton.libraryName%",
-                        "advanced": true,
                         "optional": true
                     },
                     {
@@ -327,9 +326,8 @@
 
                     {
                         "_": "-------------------------- NXTOOL BLOCK --------------------------",
-                        "label": "[NxTool] Short Company Name",
-                        "name": "%nxtool.companyName%",
-                        "advanced": true,
+                        "label": "[NxTool] Application name",
+                        "name": "%nxtool.applicationName%",
                         "optional": true
                     },
                     {
@@ -414,28 +412,20 @@
                 "name": "desktop",
                 "label": "Desktop",
                 "file_path": "desktop",
-                "description": "",
+                "description": "Desktop application assets",
                 "translatable": false,
                 "values": [
                     {
-                        "label": "",
+                        "label": "Window icon",
                         "name": "desktop/window_icon.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "png"
-                        }
+                        "meta": { "width": 256, "height": 256, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Application icon",
                         "name": "desktop/macos/main_icon.icns",
-                        "description": "",
                         "type": "File",
-                        "meta": {
-                            "format": "icns"
-                        }
+                        "meta": { "format": "icns" }
                     },
                     {
                         "label": "",
@@ -499,7 +489,7 @@
                         }
                     },
                     {
-                        "label": "",
+                        "label": "Background",
                         "name": "desktop/background.png",
                         "description": "",
                         "type": "Image",
@@ -508,7 +498,8 @@
                             "width": 2160,
                             "height": 2160,
                             "format": "png",
-                            "background": "dark"
+                            "background": "dark",
+                            "size": 1024000
                         }
                     },
                     {
@@ -683,18 +674,19 @@
                         "meta": {
                             "width": 120,
                             "height": 120,
-                            "format": "png"
+                            "format": "png",
+                            "background": "dark"
                         }
                     },
                     {
                         "label": "",
                         "name": "desktop/welcome_page_logo@2x.png",
-                        "description": "",
                         "type": "Image",
                         "meta": {
                             "width": 240,
                             "height": 240,
-                            "format": "png"
+                            "format": "png",
+                            "background": "dark"
                         }
                     }
                 ]
@@ -1024,30 +1016,88 @@
                         }
                     },
                     {
-                        "label": "Launcher icon background (LDPI)",
+                        "label": "[Android] Launcher icon background (LDPI)",
                         "name": "mobile/android/launcher_bg_ldpi.png",
-                        "description": "",
                         "type": "Image",
-                        "advanced": true,
                         "optional": true,
-                        "meta": {
-                            "width": 81,
-                            "height": 81,
-                            "format": "png"
-                        }
+                        "meta": { "width": 81, "height": 81, "format": "png" }
                     },
                     {
-                        "label": "Launcher icon background (MDPI)",
-                        "name": "mobile/android/launcher_bg_mdpi.png",
-                        "description": "Some description",
+                        "label": "[Android] Launcher icon foreground (LDPI)",
+                        "name": "mobile/android/launcher_fg_ldpi.png",
                         "type": "Image",
-                        "protected": true,
-                        "meta": {
-                            "width": 108,
-                            "height": 108,
-                            "format": "png",
-                            "background": "transparent"
-                        }
+                        "optional": true,
+                        "meta": { "width": 81, "height": 81, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background (MDPI)",
+                        "name": "mobile/android/launcher_bg_mdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 108, "height": 108, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon foreground (MDPI)",
+                        "name": "mobile/android/launcher_fg_mdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 108, "height": 108, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background (HDPI)",
+                        "name": "mobile/android/launcher_bg_hdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 162, "height": 162, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon foreground (HDPI)",
+                        "name": "mobile/android/launcher_fg_hdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 162, "height": 162, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background (XHDPI)",
+                        "name": "mobile/android/launcher_bg_xhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 216, "height": 216, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon foreground (XHDPI)",
+                        "name": "mobile/android/launcher_fg_xhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 216, "height": 216, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background (XXHDPI)",
+                        "name": "mobile/android/launcher_bg_xxhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 324, "height": 324, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon foreground (XXHDPI)",
+                        "name": "mobile/android/launcher_fg_xxhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 324, "height": 324, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background (XXXHDPI)",
+                        "name": "mobile/android/launcher_bg_xxxhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 432, "height": 432, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon foreground (XXXHDPI)",
+                        "name": "mobile/android/launcher_fg_xxxhdpi.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 432, "height": 432, "format": "png", "background": "dark" }
                     }
                 ]
             },

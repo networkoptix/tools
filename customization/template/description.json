@@ -72,7 +72,7 @@
     },
 
     "nxtool": {
-        "companyName": "%nxtool.companyName%",
+        "applicationName": "%nxtool.applicationName%",
         "productId": "%nxtool.productId%",
         "productUpgradeCode": "%nxtool.productUpgradeCode%",
         "bundleUpgradeCode": "%nxtool.bundleUpgradeCode%"
