@@ -696,409 +696,265 @@
                 "name": "mobile",
                 "label": "Mobile Application",
                 "file_path": "mobile",
-                "description": "",
+                "description": "Mobile application icons",
                 "translatable": false,
                 "values": [
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_80x80.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 80,
-                            "height": 80,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
+                        "_": "---------------------- iOS Launcher Icons ------------------------",
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_20x20.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 20,
-                            "height": 20,
-                            "format": "png"
-                        }
+                        "meta": { "width": 20, "height": 20, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_167x167.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 167,
-                            "height": 167,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/ios/icon_76x76.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 76,
-                            "height": 76,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_29x29.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 29,
-                            "height": 29,
-                            "format": "png"
-                        }
+                        "meta": { "width": 29, "height": 29, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_40x40.png",
+                        "type": "Image",
+                        "meta": { "width": 40, "height": 40, "format": "png" }
+                    },
+                    {
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_58x58.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 58,
-                            "height": 58,
-                            "format": "png"
-                        }
+                        "meta": { "width": 58, "height": 58, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_60x60.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 60,
-                            "height": 60,
-                            "format": "png"
-                        }
+                        "meta": { "width": 60, "height": 60, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_appstore.png",
-                        "description": "",
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_76x76.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 1024,
-                            "height": 1024,
-                            "format": "png"
-                        }
+                        "meta": { "width": 76, "height": 76, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_80x80.png",
+                        "type": "Image",
+                        "meta": { "width": 80, "height": 80,  "format": "png" }
+                    },
+                    {
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_87x87.png",
+                        "type": "Image",
+                        "meta": { "width": 87, "height": 87, "format": "png" }
+                    },
+                    {
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_120x120.png",
+                        "type": "Image",
+                        "meta": { "width": 120, "height": 120, "format": "png" }
+                    },
+                    {
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_152x152.png",
                         "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 152,
-                            "height": 152,
-                            "format": "png"
-                        }
+                        "meta": { "width": 152, "height": 152, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/logo@3x.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 768,
-                            "height": 768,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/ios/logo.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/ios/logo@2x.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 512,
-                            "height": 512,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
+                        "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_180x180.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 180,
-                            "height": 180,
-                            "format": "png"
-                        }
+                        "meta": { "width": 180, "height": 180, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_87x87.png",
-                        "description": "",
+                        "label": "[iOS] Launcher icon",
+                        "name": "mobile/ios/icon_167x167.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 87,
-                            "height": 87,
-                            "format": "png"
-                        }
+                        "meta": { "width": 167, "height": 167, "format": "png" }
+                    },
+
+                    {
+                        "_": "---------------------- iOS other icons -------------------------",
+                        "label": "[iOS] AppStore Promo material",
+                        "name": "mobile/ios/icon_appstore.png",
+                        "type": "Image",
+                        "meta": { "width": 1024, "height": 1024, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_120x120.png",
-                        "description": "",
+                        "label": "[iOS] Splash Screen",
+                        "name": "mobile/ios/logo@3x.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 120,
-                            "height": 120,
-                            "format": "png"
-                        }
+                        "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/ios/icon_40x40.png",
-                        "description": "",
+                        "label": "[iOS] Splash Screen",
+                        "name": "mobile/ios/logo.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 40,
-                            "height": 40,
-                            "format": "png"
-                        }
+                        "meta": { "width": 256, "height": 256, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/android/logo_hdpi.png",
-                        "description": "",
+                        "label": "[iOS] Splash Screen",
+                        "name": "mobile/ios/logo@2x.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 384,
-                            "height": 384,
-                            "format": "png"
-                        }
+                        "meta": { "width": 512, "height": 512, "format": "png", "background": "dark" }
                     },
+
                     {
-                        "label": "",
+                        "_": "------------------ Android Launcher Icons ------------------------",
+                        "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_ldpi.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 36,
-                            "height": 36,
-                            "format": "png"
-                        }
+                        "meta": { "width": 36, "height": 36, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/android/launcher_hdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 72,
-                            "height": 72,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/logo_ldpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 192,
-                            "height": 192,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/launcher_xhdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 96,
-                            "height": 96,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/launcher_xxxhdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 192,
-                            "height": 192,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/launcher_xxhdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 144,
-                            "height": 144,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/logo_xxhdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 768,
-                            "height": 768,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/logo_xxxhdpi.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 1024,
-                            "height": 1024,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
+                        "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_mdpi.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 48,
-                            "height": 48,
-                            "format": "png"
-                        }
+                        "meta": { "width": 48, "height": 48, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/android/key.store",
-                        "description": "",
-                        "type": "File",
-                        "meta": {
-                            "format": "store"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "mobile/android/logo_mdpi.png",
-                        "description": "",
+                        "label": "[Android] Launcher icon",
+                        "name": "mobile/android/launcher_hdpi.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "png"
-                        }
+                        "meta": { "width": 72, "height": 72, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "mobile/android/logo_xhdpi.png",
-                        "description": "",
+                        "label": "[Android] Launcher icon",
+                        "name": "mobile/android/launcher_xhdpi.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 512,
-                            "height": 512,
-                            "format": "png"
-                        }
+                        "meta": { "width": 96, "height": 96, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (LDPI)",
+                        "label": "[Android] Launcher icon",
+                        "name": "mobile/android/launcher_xxhdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 144, "height": 144, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon",
+                        "name": "mobile/android/launcher_xxxhdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 192, "height": 192, "format": "png" }
+                    },
+                    {
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_ldpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 81, "height": 81, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (LDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_ldpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 81, "height": 81, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (MDPI)",
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_mdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 108, "height": 108, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (MDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_mdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 108, "height": 108, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (HDPI)",
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_hdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 162, "height": 162, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (HDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_hdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 162, "height": 162, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (XHDPI)",
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 216, "height": 216, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (XHDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 216, "height": 216, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (XXHDPI)",
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xxhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 324, "height": 324, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (XXHDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xxhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 324, "height": 324, "format": "png", "background": "dark" }
                     },
                     {
-                        "label": "[Android] Launcher icon background (XXXHDPI)",
+                        "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xxxhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 432, "height": 432, "format": "png" }
                     },
                     {
-                        "label": "[Android] Launcher icon foreground (XXXHDPI)",
+                        "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xxxhdpi.png",
                         "type": "Image",
-                        "optional": true,
                         "meta": { "width": 432, "height": 432, "format": "png", "background": "dark" }
+                    },
+
+                    {
+                        "_": "------------------ Android other icons --------------------------",
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_ldpi.png",
+                        "description": "",
+                        "type": "Image",
+                        "meta": { "width": 192, "height": 192, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_mdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 256, "height": 256, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_hdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 384, "height": 384, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_xhdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 512, "height": 512, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_xxhdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[Android] Splash screen",
+                        "name": "mobile/android/logo_xxxhdpi.png",
+                        "type": "Image",
+                        "meta": { "width": 1024, "height": 1024, "format": "png", "background": "dark" }
+                    },
+
+                    {
+                        "_": "------------------ Android other files --------------------------",
+                        "label": "[Android] Key Store",
+                        "name": "mobile/android/key.store",
+                        "type": "File",
+                        "meta": { "format": "store" }
                     }
                 ]
             },

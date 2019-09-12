@@ -2,7 +2,7 @@
     "id": "%id%",
     "skin": "%skin%",
     "uriProtocol": "%uriProtocol%",
-    "displayName": "%vmsName%",
+    "vmsName": "%vmsName%",
     "installerName": "%installerName%",
     "cloudName": "%cloudName%",
 
