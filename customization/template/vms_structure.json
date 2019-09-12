@@ -242,7 +242,7 @@
                     {
                         "label": "[Mobile] Compatible customizations",
                         "name": "%mobile.compatibleCustomizations%",
-                        "description": "Example: default_cn, default_zh_CN",
+                        "description": "Example: default_cn;default_zh_CN",
                         "advanced": true,
                         "optional": true
                     },
@@ -274,7 +274,8 @@
                     },
                     {
                         "label": "[iOS] Bundle name",
-                        "name": "%mobile.ios.bundleName%"
+                        "name": "%mobile.ios.bundleName%",
+                        "description": "Must differ from the [Mobile] Application Title"
                     },
                     {
                         "label": "[iOS] Bundle Id",
