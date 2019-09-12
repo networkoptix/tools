@@ -776,18 +776,6 @@
 
                     {
                         "_": "---------------------- iOS other icons -------------------------",
-                        "label": "[iOS] AppStore Promo material",
-                        "name": "mobile/ios/icon_appstore.png",
-                        "type": "Image",
-                        "meta": { "width": 1024, "height": 1024, "format": "png" }
-                    },
-                    {
-                        "label": "[iOS] Splash Screen",
-                        "name": "mobile/ios/logo@3x.png",
-                        "type": "Image",
-                        "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
-                    },
-                    {
                         "label": "[iOS] Splash Screen",
                         "name": "mobile/ios/logo.png",
                         "type": "Image",
@@ -798,6 +786,18 @@
                         "name": "mobile/ios/logo@2x.png",
                         "type": "Image",
                         "meta": { "width": 512, "height": 512, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[iOS] Splash Screen",
+                        "name": "mobile/ios/logo@3x.png",
+                        "type": "Image",
+                        "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "[iOS] AppStore Promo material",
+                        "name": "mobile/ios/icon_appstore.png",
+                        "type": "Image",
+                        "meta": { "width": 1024, "height": 1024, "format": "png" }
                     },
 
                     {
