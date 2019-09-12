@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src', 'third_party']
+        }
+    }
+}
+
+jar {
+    manifest {
+        from file("${rootDir}/src/META-INF/MANIFEST.MF")
+    }
+}
+
+task runTest {
+    dependsOn = [jar]
+    doLast {
+        javaexec { 
+            main = "-jar";
+            args = [
+                    jar.outputs.files.getFiles()[0],
+                    "-verbose",
+                    "test",
+                    "-test-path", "${rootDir}/test",
+                    "-output-test-path", "${rootDir}/out_test",
+                    "-config", "${rootDir}/test/apidoctool.properties"
+                ]
+        }
+    }
+}
+
+test {
+    dependsOn = [runTest]
+}
+
+clean {
+    delete "${rootDir}/out_test"
+}

@@ -17,4 +17,8 @@ out_test
 .idea/dynamic.xml
 .idea/uiDesigner.xml
 
+# Gradle
+.gradle
+build
+
 .DS_Store
