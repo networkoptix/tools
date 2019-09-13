@@ -332,6 +332,7 @@ public final class Tests extends TestBase
         this.params = params;
         this.testPath = testPath;
         this.outputTestPath = outputTestPath;
+        outputTestPath.mkdir();
         this.sourceCodeParserTestPath = new File(testPath, "source_code_parser");
         this.sourceCodeParserApiTemplateXmlFile = new File(
             sourceCodeParserTestPath, "api_template.xml");
