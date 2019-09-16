@@ -168,6 +168,13 @@
                         "protected": true
                     },
                     {
+                        "label": "Enable VMax-specific support",
+                        "name": "%desktop.supportsVmax%",
+                        "type": "Check Box",
+                        "advanced": true,
+                        "protected": true
+                    },
+                    {
                         "label": "Trial licenses key",
                         "name": "%desktop.trialLicenseKey%",
                         "description": "Example: \"0000-0000-0000-0005\"",
@@ -240,6 +247,11 @@
 
                     {
                         "_": "-------------------------- MOBILE BLOCK --------------------------",
+                        "label": "Build mobile client",
+                        "name": "%mobile.enabled%",
+                        "type": "Check Box"
+                    },
+                    {
                         "label": "[Mobile] Application Title",
                         "name": "%mobile.displayName%"
                     },
@@ -303,6 +315,11 @@
 
                     {
                         "_": "-------------------------- PAXTON BLOCK --------------------------",
+                        "label": "Build Paxton plugin",
+                        "name": "%paxton.enabled%",
+                        "type": "Check Box"
+                    },
+                    {
                         "label": "[Paxton] Library name",
                         "name": "%paxton.libraryName%",
                         "optional": true
@@ -331,26 +348,31 @@
 
                     {
                         "_": "-------------------------- NXTOOL BLOCK --------------------------",
-                        "label": "[NxTool] Application name",
+                        "label": "Build Server Tool",
+                        "name": "%nxtool.enabled%",
+                        "type": "Check Box"
+                    },
+                    {
+                        "label": "[Server Tool] Application name",
                         "name": "%nxtool.applicationName%",
                         "optional": true
                     },
                     {
-                        "label": "[NxTool] Product Id",
+                        "label": "[Server Tool] Product Id",
                         "name": "%nxtool.productId%",
                         "type": "GUID",
                         "advanced": true,
                         "optional": true
                     },
                     {
-                        "label": "[NxTool] Product Upgrade Code",
+                        "label": "[Server Tool] Product Upgrade Code",
                         "name": "%nxtool.productUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
                         "optional": true
                     },
                     {
-                        "label": "[NxTool] Bundle Upgrade Code",
+                        "label": "[Server Tool] Bundle Upgrade Code",
                         "name": "%nxtool.bundleUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,

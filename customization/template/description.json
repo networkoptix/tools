@@ -23,6 +23,7 @@
         "internalName": "%desktop.internalName%",
         "appName": "%desktop.appName%",
         "supportsHanwha": "%desktop.supportsHanwha%",
+        "supportsVmax": "%desktop.supportsVmax%",
         "trialLicenseKey": "%desktop.trialLicenseKey%",
 
         "windows": {
@@ -45,6 +46,7 @@
     },
 
     "mobile": {
+        "enabled": "%mobile.enabled%",
         "displayName": "%mobile.displayName%",
         "compatibleCustomizations": "%mobile.compatibleCustomizations%",
 
@@ -66,6 +68,7 @@
     },
 
     "paxton": {
+        "enabled": "%paxton.enabled%",
         "libraryName": "%paxton.libraryName%",
         "productId": "%paxton.productId%",
         "productUpgradeCode": "%paxton.productUpgradeCode%",
@@ -73,6 +76,7 @@
     },
 
     "nxtool": {
+        "enabled": "%nxtool.enabled%",
         "applicationName": "%nxtool.applicationName%",
         "productId": "%nxtool.productId%",
         "productUpgradeCode": "%nxtool.productUpgradeCode%",
