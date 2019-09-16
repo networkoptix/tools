@@ -50,6 +50,18 @@
                         "protected": true
                     },
                     {
+                        "label": "Company Name",
+                        "name": "%companyName%"
+                    },
+                    {
+                        "label": "VMS Name",
+                        "name": "%vmsName%"
+                    },
+                    {
+                        "label": "Cloud Name",
+                        "name": "%cloudName%"
+                    },
+                    {
                         "type": "Select",
                         "label": "Skin",
                         "name": "%skin%",
@@ -71,17 +83,9 @@
                         "description": "URL protocol for calling native clients from browser, should be unique"
                     },
                     {
-                        "label": "VMS Name",
-                        "name": "%vmsName%"
-                    },
-                    {
-                        "label": "Base installer filename",
+                        "label": "Base distribution filename",
                         "name": "%installerName%",
                         "description": "Example: \"nxwitness\""
-                    },
-                    {
-                        "label": "Cloud Name",
-                        "name": "%cloudName%"
                     },
 
 

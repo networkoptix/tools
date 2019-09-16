@@ -1,8 +1,9 @@
 {
     "id": "%id%",
+    "companyName": "%companyName%",
+    "vmsName": "%vmsName%",
     "skin": "%skin%",
     "uriProtocol": "%uriProtocol%",
-    "vmsName": "%vmsName%",
     "installerName": "%installerName%",
     "cloudName": "%cloudName%",
 
