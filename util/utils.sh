@@ -522,8 +522,11 @@ nx_unpack_archive_DIR() # archive-filename [directory]
         DIR="${DIR%.tar}" #< Remove the preceding ".tar" (if any).
     fi
 
-    rm -rf "$DIR" || return $?
-    mkdir -p "$DIR" || return $?
+    if [[ -d "$DIR" ]]
+    then
+        rm -r "$DIR" || return $?
+    fi
+    mkdir "$DIR" || return $?
 
     local -i SUCCESS=1
     nx_pushd "$DIR"

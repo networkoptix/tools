@@ -9,7 +9,6 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
 : ${SDK=0} #< 0|1 - enable/disable building with SDKs when not building with distribs.
-: ${BOX_TOOL=0} #< 0|1 - enable/disable building with nx_box_tool when not building with distribs.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -69,8 +68,8 @@ Here <command> can be one of the following:
  apidoc-rdep # Run apidoctool tests, deploy from devtools to packages/any and upload via "rdep -u".
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
-
  sdk # Rebuild nx_*_sdk.
+ benchmark # Rebuild, unzip and run vms_benchmark, deleting the old one but keeping .conf and .ini.
 
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
@@ -384,10 +383,6 @@ do_gen() # [cache] "$@"
         if [[ $SDK = 1 ]]
         then
             COMPOSITION_ARG+=( "-DwithSdk=ON" )
-        fi
-        if [[ $BOX_TOOL = 1 ]]
-        then
-            COMPOSITION_ARG+=( "-DwithBoxTool=ON" )
         fi
     fi
     [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
@@ -844,6 +839,63 @@ do_copyright() # "$@"
         do
             nx_echo "[$FILE]"
         done
+    fi
+}
+
+do_benchmark() # "$@"
+{
+    nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
+    nx_verbose rm -rf "$BUILD_DIR/vms/vms_benchmark"
+    do_gen "$@" || exit $?
+    do_build --target vms_benchmark || exit $?
+    
+    local -r parentDir="$BUILD_DIR/distrib"
+    
+    nx_find_file ZIP_FILE "vms_benchmark zip" "$parentDir" \
+        -name "*vms_benchmark*.zip"
+        
+    local -r unzipDir="${ZIP_FILE%.zip}"
+    local -r toolDir="$unzipDir/vms_benchmark"
+
+    # Back up configuration.    
+    for ext in .conf .ini
+    do
+        local file="$toolDir/vms_benchmark$ext"
+        if [[ -f $file ]]
+        then
+            nx_verbose cp "$file" "$parentDir/"
+        fi
+    done
+            
+    nx_verbose nx_unpack_archive_DIR "$ZIP_FILE" || exit $? #< Deletes dir if it exists.
+
+    # Restore configuration.    
+    for ext in .conf .ini
+    do
+        local file="$parentDir/vms_benchmark$ext"
+        if [[ -f $file ]]
+        then
+            nx_verbose mv "$file" "$toolDir/"
+        fi
+    done
+    
+    if nx_is_cygwin
+    then
+        nx_log_command chmod +x "$DIR/vms_benchmark/testcamera/*" #< Avoid "*" expanding in output.
+        chmod +x "$DIR/vms_benchmark/testcamera"/* #< Needed on Windows after unzipping.
+    fi
+    
+    nx_echo "SUCCESS: vms_benchmark rebuilt and unpacked to $DIR"
+    
+    nx_cd "$DIR/vms_benchmark"
+
+    # Run the tool.
+    if nx_is_cygwin
+    then
+        # Opening CMD window is needed to avoid Python buffering all the output.
+        nx_verbose cygstart cmd /c "vms_benchmark & pause"
+    else
+        nx_verbose ./vms_benchmark
     fi
 }
 
@@ -1544,7 +1596,7 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|sdk|start-s|start-c|run-ut|testcamera|log-s| \
+        apidoc|kit|sdk|benchmark|start-s|start-c|run-ut|testcamera|log-s| \
         share|gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
         print-dirs|print-vars|rsync)
             setup_vars
@@ -1576,10 +1628,13 @@ main()
         sdk)
             nx_verbose rm -rf "$BUILD_DIR/distrib"/*_sdk*.zip
             nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_*_sdk"
-            SDK=1 do_gen "$@"
-            do_build --target nx_metadata_sdk
-            do_build --target nx_camera_sdk
-            do_build --target nx_storage_sdk
+            SDK=1 do_gen "$@" || exit $?
+            do_build --target nx_metadata_sdk || exit $?
+            do_build --target nx_camera_sdk || exit $?
+            do_build --target nx_storage_sdk || exit $?
+            ;;
+        benchmark)
+            do_benchmark "$@"
             ;;
         copyright)
             do_copyright "$@"
@@ -1629,7 +1684,11 @@ main()
                 windows)
                     local -r EXTRA_PATH="$QT_DIR/bin:$PACKAGES_DIR\windows-x64\icu-60.2\bin"
                     nx_append_path "$EXTRA_PATH"
-                    nx_verbose "bin/Nx MetaVMS.exe" "$@"
+                    case "$CUSTOMIZATION" in
+                        metavms) local -r CLIENT_BIN="Nx MetaVMS.exe";;
+                        *) local -r CLIENT_BIN="HD Witness.exe";;
+                    esac
+                    nx_verbose "bin/$CLIENT_BIN" "$@"
                     ;;
                 linux)
                     nx_verbose bin/client-bin "$@"
@@ -1662,7 +1721,7 @@ main()
 
             if [ $SHOW_HELP = 1 ]
             then
-                "$TEST_CAMERA_BIN" || true
+                nx_verbose "$TEST_CAMERA_BIN" || true
             else
                 local SELF_IP
                 nx_get_SELF_IP "$TESTCAMERA_SELF_IP_SUBNET_PREFIX"
