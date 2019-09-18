@@ -12,23 +12,23 @@ class PackUploader:
         self.instance = config.instance
         self.login(config.login, config.password)
 
-    def get_product_id(self, product_type, name, customization):
-        query = urlencode({"customization": customization, "name": name, "type": product_type})
-        url = f"{self.instance}/admin/cms/get_product_ids/"
+    def get_asset_id(self, asset_type, name, customization):
+        query = urlencode({"customization": customization, "name": name, "type": asset_type})
+        url = f"{self.instance}/admin/cms/get_asset_ids/"
         res = self.session.get(url, params=query)
         res.raise_for_status()
-        product_ids = res.json()[0]
-        return product_ids
+        asset_ids = res.json()[0]
+        return asset_ids
 
     def login(self, login, password):
         res = self.session.post(f"{self.instance}/api/account/login", json={"email": login, "password": password})
         res.raise_for_status()
         self.session.headers['X-CSRFToken'] = self.session.cookies['csrftoken']
 
-    def upload(self, product_id, package):
+    def upload(self, asset_id, package):
         data = {"action": "update_content"}
         files = {'file': (package, open(package, 'rb'), 'application/zip')}
-        res = self.session.post(f"{self.instance}/admin/cms/product_settings/{product_id}/",
+        res = self.session.post(f"{self.instance}/admin/cms/asset_settings/{asset_id}/",
                                 files=files, json=data, cookies=self.session.cookies)
         res.raise_for_status()
         print(f"Status Code {res.status_code}")
@@ -46,11 +46,11 @@ def get_args():
                         help=f"The url of the instance that you want to upload a package to.\n"
                         f"Default is {DEFAULT_INSTANCE}")
 
-    parser.add_argument("-n", "--product_type_name", nargs="?", default="",
-                        help="The name of the ProductType you are trying to upload")
+    parser.add_argument("-n", "--asset_type_name", nargs="?", default="",
+                        help="The name of the AssetType you are trying to upload")
 
-    parser.add_argument("-pt", "--product_type", nargs="?", default="vms",
-                        help="The type of the ProductType you are trying to upload")
+    parser.add_argument("-pt", "--asset_type", nargs="?", default="vms",
+                        help="The type of the AssetType you are trying to upload")
 
     parser.add_argument("-c", "--customization",
                         help="The name of the specific customization you want to upload.")
@@ -62,8 +62,8 @@ def get_args():
 def main():
     args = get_args()
     uploader = PackUploader(args)
-    product_id = uploader.get_product_id(args.product_type, args.product_type_name, args.customization)
-    uploader.upload(product_id, args.package_path)
+    asset_id = uploader.get_asset_id(args.asset_type, args.asset_type_name, args.customization)
+    uploader.upload(asset_id, args.package_path)
 
 
 if __name__ == "__main__":
