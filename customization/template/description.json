@@ -1,5 +1,6 @@
 {
     "id": "%id%",
+    "brand": "%brand%",
     "companyName": "%companyName%",
     "vmsName": "%vmsName%",
     "skin": "%skin%",
@@ -21,7 +22,6 @@
 
     "desktop": {
         "internalName": "%desktop.internalName%",
-        "appName": "%desktop.appName%",
         "supportsHanwha": "%desktop.supportsHanwha%",
         "supportsVmax": "%desktop.supportsVmax%",
         "trialLicenseKey": "%desktop.trialLicenseKey%",

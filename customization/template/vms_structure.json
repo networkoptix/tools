@@ -50,6 +50,14 @@
                         "protected": true
                     },
                     {
+                        "label": "Brand",
+                        "name": "%brand%",
+                        "description": "Product brand, must be consistent with licenses server",
+                        "advanced": true,
+                        "protected": true,
+                        "meta": { "regex": "[a-z]+$" }
+                    },
+                    {
                         "label": "Company Name",
                         "name": "%companyName%"
                     },
@@ -150,13 +158,6 @@
                         "label": "",
                         "name": "%desktop.internalName%",
                         "description": "Example: \"HD Witness\"",
-                        "advanced": true,
-                        "protected": true
-                    },
-                    {
-                        "label": "???",
-                        "name": "%desktop.appName%",
-                        "description": "TODO: product.name.short or product.appName",
                         "advanced": true,
                         "protected": true
                     },
