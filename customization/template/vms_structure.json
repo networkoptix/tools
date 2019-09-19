@@ -20,7 +20,8 @@
                         "meta": {
                             "format": "cmake",
                             "size": 16384
-                        }
+                        },
+                        "optional": true
                     },
                     {
                         "label": "Main icon",
@@ -47,7 +48,8 @@
                         "label": "Id",
                         "name": "%id%",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "Brand",
@@ -55,7 +57,7 @@
                         "description": "Product brand, must be consistent with licenses server",
                         "advanced": true,
                         "protected": true,
-                        "meta": { "regex": "[a-z]+$" }
+                        "meta": { "regex": "[a-z_]+$" }
                     },
                     {
                         "label": "Company Name",
@@ -88,12 +90,14 @@
                     {
                         "label": "Client Protocol",
                         "name": "%uriProtocol%",
-                        "description": "URL protocol for calling native clients from browser, should be unique"
+                        "description": "URL protocol for calling native clients from browser",
+                        "unique": true
                     },
                     {
                         "label": "Base distribution filename",
                         "name": "%installerName%",
-                        "description": "Example: \"nxwitness\""
+                        "description": "Example: \"nxwitness\"",
+                        "unique": true
                     },
 
 
@@ -159,7 +163,8 @@
                         "name": "%desktop.internalName%",
                         "description": "Example: \"HD Witness\"",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "Enable Hanwha-specific support",
@@ -181,6 +186,7 @@
                         "description": "Example: \"0000-0000-0000-0005\"",
                         "advanced": true,
                         "protected": true,
+                        "unique": true,
                         "meta": {
                             "regex": "0000-0000-0000-\\d\\d\\d\\d$"
                         }
@@ -190,35 +196,40 @@
                         "name": "%desktop.windows.serverUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "[Windows] Server bundle upgrade code",
                         "name": "%desktop.windows.serverBundleUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "[Windows] Client package upgrade code",
                         "name": "%desktop.windows.clientUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "[Windows] Client bundle upgrade code",
                         "name": "%desktop.windows.clientBundleUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "[Windows] full bundle upgrade code",
                         "name": "%desktop.windows.fullBundleUpgradeCode%",
                         "type": "GUID",
                         "advanced": true,
-                        "protected": true
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "[Linux] Company Id",
@@ -231,12 +242,14 @@
                         "label": "[MacOS] VMS Bundle Identifier",
                         "name": "%desktop.macos.bundleIdentifier%",
                         "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName\"",
+                        "unique": true,
                         "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
                         "label": "[MacOS] Protocol Handler Bundle Identifier",
                         "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
                         "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName.protocol_handler\"",
+                        "unique": true,
                         "meta": { "regex": "[\\w\\.]+$" }
                     },
                     {
@@ -254,12 +267,13 @@
                     },
                     {
                         "label": "[Mobile] Application Title",
-                        "name": "%mobile.displayName%"
+                        "name": "%mobile.displayName%",
+                        "optional": true
                     },
                     {
                         "label": "[Mobile] Compatible customizations",
                         "name": "%mobile.compatibleCustomizations%",
-                        "description": "Example: default_cn;default_zh_CN",
+                        "description": "Example: default_cn;default_zh_CN;metavms",
                         "advanced": true,
                         "optional": true
                     },
@@ -267,19 +281,24 @@
                         "label": "[Android] package name",
                         "name": "%mobile.android.packageName%",
                         "description": "Unique package identifier. Only lowercase alphanumeric symbols are allowed. Should be in format: \"com.companyName.productname\"",
-                        "meta": { "regex": "[a-z\\.]+$" }
+                        "meta": { "regex": "[a-z\\.]+$" },
+                        "unique": true,
+                        "optional": true
                     },
                     {
                         "label": "[Android] Keystore password",
-                        "name": "%mobile.android.storepass%"
+                        "name": "%mobile.android.storepass%",
+                        "optional": true
                     },
                     {
                         "label": "[Android] Keystore alias",
-                        "name": "%mobile.android.alias%"
+                        "name": "%mobile.android.alias%",
+                        "optional": true
                     },
                     {
                         "label": "[Android] Keystore alias password",
-                        "name": "%mobile.android.keypass%"
+                        "name": "%mobile.android.keypass%",
+                        "optional": true
                     },
                     {
                         "label": "[Android] Compatibility app package",
@@ -287,29 +306,36 @@
                         "description": "Package Id for the VMS 2.4 and older",
                         "advanced": true,
                         "optional": true,
+                        "unique": true,
                         "meta": { "regex": "[a-z\\.]+$" }
                     },
                     {
                         "label": "[iOS] Bundle name",
                         "name": "%mobile.ios.bundleName%",
-                        "description": "Must differ from the [Mobile] Application Title"
+                        "description": "Must differ from the [Mobile] Application Title",
+                        "optional": true
                     },
                     {
                         "label": "[iOS] Bundle Id",
-                        "name": "%mobile.ios.bundleIdentifier%"
+                        "name": "%mobile.ios.bundleIdentifier%",
+                        "unique": true,
+                        "optional": true
                     },
                     {
                         "label": "[iOS] Group Id",
-                        "name": "%mobile.ios.groupIdentifier%"
+                        "name": "%mobile.ios.groupIdentifier%",
+                        "optional": true
                     },
                     {
                         "label": "[iOS] Sign Identity",
                         "name": "%mobile.ios.signIdentity%",
-                        "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\""
+                        "description": "Example: \"iPhone Distribution: Network Optix, Inc. (L6FE34GJWM)\"",
+                        "optional": true
                     },
                     {
                         "label": "[iOS] Compatibility app package",
                         "name": "%mobile.ios.compatibilityPackage%",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -323,12 +349,14 @@
                     {
                         "label": "[Paxton] Library name",
                         "name": "%paxton.libraryName%",
+                        "unique": true,
                         "optional": true
                     },
                     {
                         "label": "[Paxton] Product Id",
                         "name": "%paxton.productId%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -336,6 +364,7 @@
                         "label": "[Paxton] Product Upgrade Code",
                         "name": "%paxton.productUpgradeCode%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -343,6 +372,7 @@
                         "label": "[Paxton] Bundle Upgrade Code",
                         "name": "%paxton.bundleUpgradeCode%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -362,6 +392,7 @@
                         "label": "[Server Tool] Product Id",
                         "name": "%nxtool.productId%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -369,6 +400,7 @@
                         "label": "[Server Tool] Product Upgrade Code",
                         "name": "%nxtool.productUpgradeCode%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     },
@@ -376,6 +408,7 @@
                         "label": "[Server Tool] Bundle Upgrade Code",
                         "name": "%nxtool.bundleUpgradeCode%",
                         "type": "GUID",
+                        "unique": true,
                         "advanced": true,
                         "optional": true
                     }
@@ -391,11 +424,9 @@
                     {
                         "label": "EULA Text",
                         "name": "%CONTENT%",
-                        "value": " <p align='CENTER'><u><b>%LEGAL_COMPANY_NAME%</b></u></p>    <p align='CENTER'><u><b>END USER LICENSE AGREEMENT</b></u></p>    <p>        <u><b>IMPORTANT – PLEASE READ CAREFULLY</b></u><b>:</b> This End User License Agreement (the “Agreement”) is a legally enforceable contract between You (either an individual or an entity) and %LEGAL_COMPANY_NAME% (the “Company”) regarding the use of the Company’s software programs accompanying or provided under this Agreement together with the SDK made available by the Company, associated media, corresponding Documentation, technical configurations, and technical data (collectively, the “Software”). “Documentation” means the user’s guide and other documentation (including print and online), if any, provided to you with the Software.    </p>    <p>        BY CLICKING “I ACCEPT” BUTTON BELOW OR BY DOWNLOADING, INSTALLING OR OTHERWISE USING THE SOFTWARE, YOU CONSENT TO BE LEGALLY BOUND BY ALL THE TERMS AND CONDITIONS OF THE AGREEMENT. IF YOU ARE ENTERING INTO THE AGREEMENT ON BEHALF OF A COMPANY OR OTHER LEGAL ENTITY, YOU REPRESENT THAT YOU HAVE THE AUTHORITY TO BIND SUCH ENTITY AND ITS AFFILIATES TO THE AGREEMENT, IN WHICH CASE THE TERMS 'YOU' OR 'YOUR' SHALL REFER TO SUCH ENTITY AND ITS AFFILIATES. IF YOU DO NOT HAVE SUCH AUTHORITY, OR IF YOU DO NOT AGREE WITH ANY OF THE TERMS OF THE AGREEMENT, YOU MUST NOT ACCEPT THE AGREEMENT AND MAY NOT USE THE SOFTWARE.    </p>    <p>        In addition, certain third party programs or code set forth on <u>Schedule A</u> attached hereto (“Third Party Software”) are being provided to you under the terms and conditions of GNU Lesser General Public License v2.1 (“LGPL”), which is available for you to review at http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html. BY INSTALLING, COPYING OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT AS WELL AS THE TERMS OF THIRD PARTY LICENSES. IF YOU DO NOT AGREE TO ALL SUCH TERMS, DO NOT INSTALL OR USE THE SOFTWARE.    </p>    <p>        <b>1.License Grant.</b> Subject to the terms and conditions of this Agreement, the Company grants you a non-exclusive, non-transferable, non-sublicensable, limited license to install and use the Software, in object code version only, for your own use subject to the restrictions contained in this Agreement.    </p>    <p>        <b>2.Backup Copies.</b> You may make one backup copy of the Software, provided your backup copy is not installed or used on any computer and further provided that all such copies shall bear the original and unmodified copyright, patent and other intellectual property markings that appear on or in the Software. You may not transfer the rights to a backup copy unless you transfer all rights in the Software as provided in this Agreement.    </p>    <p>        <b>3.Ownership.</b> You acknowledge that the Software and any copies that you are authorized by the Company to make are the intellectual property of, and are owned by, the Company and its licensors. The structure, sequence and organization of the Software are the valuable trade secrets and confidential information of the Company and its licensors. The Software is protected by copyright, including without limitation by United States copyright law, international treaty provisions and applicable laws in the country in which it is used. You acknowledge that the Company, or its licensors, retain the ownership of all patents, copyrights, trade secrets, trademarks and other intellectual property rights pertaining to the Software. You will take no actions which adversely affect the Company’s intellectual property rights in the Software. This Agreement is a license and not an agreement for sale. No title to, or ownership of, the Software, or any intellectual property rights subsisting therein, is transferred to you.    </p>    <p>        <b>4.Restrictions.</b> The Software is licensed solely for your own use. The Company and its licensors reserve all rights not expressly granted to you in this Agreement. Without limiting the generality of the foregoing, you shall not nor shall you permit any other party to: (i) make copies of the Software except as expressly set forth in this Agreement, or (ii) disassemble, decompile or translate any part of the Software, or otherwise attempt to reconstruct or discover the source code of the Software, except and only to the extent that such activity is expressly permitted by applicable law notwithstanding this limitation, or (iii) modify or create derivative works based upon the Software, or (iv) externally distribute, sublicense, resell, encumber or otherwise transfer the Software, or (v) rent, lease, lend, or use the Software, or any part thereof, for timesharing or bureau use, or (vi) allow a third party to copy, access, or use the Software (except as expressly provided in this Agreement), or (vii) alter or remove any copyright, trademark or other proprietary notice which may appear on the Software, (viii) take any action that would cause the Software to be placed in the public domain or become subject to open source license agreement, or (ix) use the Software in any manner that violates any statute, law, rule, regulation, directive, guideline, bylaw whether presently in force or may be implemented by federal, state or local authorities.    </p>    <p>        <b>5.Paid Features.</b> The Software is made available to you at no charge or fees. However, the Company may offer certain premium features to you upon payment of a license fees determined by the Company in its sole discretion (“Paid Features”). In order to use Paid Features, you must agree to pay the license fees plus any applicable taxes through one of the payment methods accepted by the Company. Upon receipt of the license fees, the Company will either provide you a license key to activate the Paid Features or allow you to download the Software with the Paid Features. You expressly acknowledge and agree that this Agreement will govern your use of the Paid Features.    </p>    <p>        <b>6.Updates.</b> Except as otherwise expressly provided herein, this Agreement will govern any updates and upgrades to the Software that may be provided to you in accordance with the Company’s then-current maintenance and support policies, unless such updates and upgrades are provided under a separate license agreement. You may use such updates or upgrades only in conjunction with your then-existing the Software licensed under this Agreement. The Software and all updates and upgrades are licensed as a single product and such updates and upgrades may not be separated from the Software to exceed the scope of your original license. Any other software that may be provided with the Software that is associated with a separate end-user license agreement is licensed to you under the terms of that separate license agreement.    </p>    <p>        <b>7.No Support.</b> Except as expressly required by applicable law, nothing in this Agreement entitles you to any support, maintenance or new versions of the Software. You may contact the Company to determine the availability of support, maintenance, and new versions, and the fees terms and conditions that would apply.    </p>    <p>        <b>8.Disclaimer of Warranties.</b> THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OR REPRESENTATION OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE. NEITHER THE COMPANY NOR ITS LICENSORS REPRESENT OR WARRANT THAT THE SOFTWARE WILL SATISFY YOUR REQUIREMENTS OR THAT IT IS WITHOUT DEFECT OR ERROR OR THAT THE OPERATION THEREOF WILL BE UNINTERRUPTED OR ERROR FREE. The Company does not warrant that functions contained in the Software will meet your requirements or that the operation of the Software will be error-free or uninterrupted. The Company is not responsible for problems caused by changes in, or modifications to, the operating characteristics of any computer hardware or operating system for which the Software or any upgrade or update is procured, nor is the Company responsible for problems which occur as a result of the use of the Software in conjunction with software of third parties or with hardware, which does not meet the Company’s specific requirements. Some jurisdictions do not allow certain disclaimers or limitations of warranties, so some of these may not apply to you.    </p>    <p>        <b>9.Limitation Of Liability.</b> TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW EVEN IF A REMEDY FAILS ITS ESSENTIAL PURPOSE, IN NO EVENT SHALL THE COMPANY OR ITS LICENSORS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE OR THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES, EVEN IF THE COMPANY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, THE COMPANY’S ENTIRE LIABILITY TO YOU OR ANY OTHER PARTY FOR LOSS OR DAMAGE RESULTING FROM ANY CLAIMS, DEMANDS OR ACTIONS ARISING OUT OF THIS AGREEMENT SHALL NOT EXCEED THE FEE ACTUALLY PAID BY YOU TO THE COMPANY FOR THE SOFTWARE, IF ANY, NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. Because some states and jurisdictions do not allow the exclusion or limitation of liability, the above limitation may not apply to you. In such states and jurisdictions, the Company’s liability shall be limited to the greatest extent permitted by law.    </p>    <p>        <b>10.Sole Remedy and Allocation of Risk.</b> YOUR SOLE AND EXCLUSIVE REMEDY AND THE COMPANY’S SOLE AND EXCLUSIVE LIABILITY ARE SET FORTH IN THIS AGREEMENT. This Agreement defines a mutually agreed-upon allocation of risk.    </p>    <p>        <b>11.Third Party Licenses.</b> For the avoidance of doubt, Third Party Software included with the Software is free software licensed under the terms of the LGPL. You understand and agree that, although provided to you by the Company with the Software, your use of Third Party Software shall be and is governed by the LGPL. The ownership terms in Section 3 and restrictions in Section 4 do not apply to Third Party Software. You understand and acknowledge that under the LGPL, Third Party Software is being provided “AS IS” WITHOUT ANY WARRANTY, INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. If there is a conflict between this Agreement and LGPL with respect to Third Party Software, the provisions of the LGPL shall prevail.    </p>    <p>        <b>12.Export Restrictions.</b> You agree to comply with all export and re-export restrictions and regulations (“Export Restrictions”) imposed by the United States or any other country in which you conduct business. Without limiting the generality of the foregoing, and regardless of any disclosure made by you to the Company regarding an ultimate destination of the Software, you represent and warrant that you understand the U.S. law currently prohibits the export or re-export, directly or indirectly (including via remote access) of U.S. origin products and technology to certain proscribed countries (including Cuba, Iran, Sudan, North Korea and Syria and/or any other country that may become subject to an embargo by the United States), entities, organizations and individuals, without prior authorization from the U.S. Government. You will not commit any act or omission that will result in a breach of any such Export Restrictions. Your breach of this clause shall constitute cause for immediate termination of this Agreement.    </p>    <p>        <b>13.High Risk Activities.</b> The Software is not designed, manufactured or intended for use or resale as on-line control equipment in hazardous environments requiring fail-safe performance, such as in the operation of nuclear facilities, aircraft navigation or communication systems, air traffic control, direct life support machines, or weapons systems, in which the failure of the Software could lead directly to death, personal injury, or severe physical or environmental damage (“High Risk Activities”). The Company specifically disclaims any express or implied warranty of fitness for High Risk Activities.    </p>    <p>        <b>14.Termination.</b> The licenses granted herein shall automatically terminate without notice if you fail to comply with any material provision of this Agreement. In such event, you must immediately uninstall and return the Software, including all Documentation and original media, to the Company. This shall not limit or affect any remedy available to the Company for your breach of this Agreement.    </p>    <p>        <b>15.Miscellaneous.</b>    </p>    <p>        (a)If you are a unit or agency of the United States Government, the following applies: The Software is provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the Government is subject to restrictions as set forth in Subparagraphs (a) through (d) of the Commercial Computer-Restricted Rights clause at FAR 52.227-19 when applicable, or in Subparagraph 252.227-7013 (c)(1)(ii) of the Rights in Technical Data and Computer Software at DFARS, and in similar clauses in the NASA FAR Supplement. Contractor/manufacturer is %LEGAL_COMPANY_NAME%    </p>    <p>        (b)This Agreement shall be governed by the laws of the %LEGAL_COMPANY_JURISDICTION%, exclusive of its choice of law rules. Any dispute between you and the Company regarding this Agreement will be subject to the exclusive jurisdiction of the %LEGAL_COMPANY_COURT%. In any such action, the prevailing party will be entitled to costs and attorneys’ fees.    </p>    <p>        (c)You may not assign, sublicense, or transfer this Agreement, the Software, or any rights or obligations hereunder without prior written consent of the Company. Any such attempted assignment, sublicense, or transfer will be null and void. The Company may terminate this Agreement in the event of any such attempted assignment, sublicense, or transfer.    </p>    <p>        (d)This Agreement is in the English language only, and will only be provided in the English language, which language will be controlling in all respects, and all versions hereof in any other language will not be binding on the parties hereto. All communications and notices to be made or given pursuant to this Agreement must be in the English language.    </p>    <p>        (e)The Agreement constitutes the final and complete understanding between you and the Company with respect to the subject matter of this Agreement. Any modifications or waivers of this Agreement must be in writing and signed by both parties hereto.    </p>    <p>        (f)If any provision in this Agreement is invalid or unenforceable or contrary to applicable law, such provision shall be construed, limited, or altered, as necessary, to eliminate the invalidity or unenforceability or the conflict with applicable law, and all other provisions of this Agreement shall remain in effect.    </p>    <p>        (g)Failure or delay on the part of the Company to exercise any right, power, privilege, or remedy will not constitute a waiver of, or bar the later exercise of, that or any other right, power, privilege, or remedy of the Company.    </p>    <p>        (h)No rule of strict construction shall apply against or in favor of either party in the construction and interpretation of this Agreement.    </p>    <br/>    <p align='CENTER'>        <b>SCHEDULE A</b>    </p>    <p align='CENTER'>        <b>THIRD PARTY SOFTWARE</b>    </p>    <p>        The Software uses FFmpeg and Qt under the terms and conditions of the GNU Lesser General Public License v2.1.    </p>    <p>        You may obtain a complete copy of the source code for the above-mentioned free software, under the terms of the LGPL, from the Company, without charge, except for the cost of media, shipping, and handling, upon written request to the Company at the address set forth below:    </p>    <p align='CENTER'>        %LEGAL_COMPANY_NAME%<br/>        %LEGAL_COMPANY_ADDRESS%    </p>",
                         "description": "End user licence agreement.",
                         "type": "HTML",
-                        "advanced": true,
-                        "meta": {}
+                        "advanced": true
                     },
                     {
                         "label": "Legal Company Name",
@@ -403,9 +434,7 @@
                         "value": "Network Optix, Inc.",
                         "description": "Legal name of the company (for EULA)",
                         "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "optional": true
                     },
                     {
                         "label": "Legal Company Jurisdiction",
@@ -413,7 +442,7 @@
                         "value": "State of California",
                         "description": "Company's jurisdiction (for EULA)",
                         "type": "Text",
-                        "meta": {}
+                        "optional": true
                     },
                     {
                         "label": "Legal Company Court",
@@ -421,18 +450,14 @@
                         "value": "state and federal courts located in Los Angeles County, California",
                         "description": "Court to handle disputes (for EULA)",
                         "type": "Text",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "optional": true
                     },
                     {
                         "label": "Legal Company Address",
                         "name": "%LEGAL_COMPANY_ADDRESS%",
                         "description": "Company address",
                         "type": "HTML",
-                        "meta": {
-                            "regex": ""
-                        }
+                        "optional": true
                     }
                 ]
             },
@@ -456,33 +481,25 @@
                         "meta": { "format": "icns" }
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Legacy ds_store file",
                         "name": "desktop/macos/installer_config",
-                        "description": "",
                         "type": "File",
-                        "meta": {
-                            "format": ""
-                        }
+                        "meta": { "format": "" },
+                        "advanced": true,
+                        "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Installer Background",
                         "name": "desktop/macos/installer_background.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 600,
-                            "height": 400,
-                            "format": "png"
-                        }
+                        "meta": { "width": 600, "height": 400, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[MacOS] Installer icons",
                         "name": "desktop/macos/installer_icon.icns",
                         "description": "",
                         "type": "File",
-                        "meta": {
-                            "format": "icns"
-                        }
+                        "meta": { "format": "icns" }
                     },
                     {
                         "label": "",
@@ -659,7 +676,8 @@
                             "width": 256,
                             "height": 256,
                             "format": "ico"
-                        }
+                        },
+                        "optional": true
                     },
                     {
                         "label": "",
@@ -670,7 +688,8 @@
                             "width": 64,
                             "height": 64,
                             "format": "png"
-                        }
+                        },
+                        "optional": true
                     },
                     {
                         "label": "Installer icon",
@@ -681,7 +700,8 @@
                             "width": 256,
                             "height": 256,
                             "format": "ico"
-                        }
+                        },
+                        "optional": true
                     },
                     {
                         "label": "",
@@ -731,73 +751,84 @@
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_20x20.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 20, "height": 20, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_29x29.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 29, "height": 29, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_40x40.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 40, "height": 40, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_58x58.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 58, "height": 58, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_60x60.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 60, "height": 60, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_76x76.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 76, "height": 76, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_80x80.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 80, "height": 80,  "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_87x87.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 87, "height": 87, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_120x120.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 120, "height": 120, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_152x152.png",
-                        "description": "",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 152, "height": 152, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_180x180.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 180, "height": 180, "format": "png" }
                     },
                     {
                         "label": "[iOS] Launcher icon",
                         "name": "mobile/ios/icon_167x167.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 167, "height": 167, "format": "png" }
                     },
 
@@ -806,24 +837,28 @@
                         "label": "[iOS] Splash Screen",
                         "name": "mobile/ios/logo.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 256, "height": 256, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[iOS] Splash Screen",
                         "name": "mobile/ios/logo@2x.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 512, "height": 512, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[iOS] Splash Screen",
                         "name": "mobile/ios/logo@3x.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[iOS] AppStore Promo material",
                         "name": "mobile/ios/icon_appstore.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 1024, "height": 1024, "format": "png" }
                     },
 
@@ -832,108 +867,126 @@
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_ldpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 36, "height": 36, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_mdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 48, "height": 48, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_hdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 72, "height": 72, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_xhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 96, "height": 96, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_xxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 144, "height": 144, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon",
                         "name": "mobile/android/launcher_xxxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 192, "height": 192, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_ldpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 81, "height": 81, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_ldpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 81, "height": 81, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_mdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 108, "height": 108, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_mdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 108, "height": 108, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_hdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 162, "height": 162, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_hdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 162, "height": 162, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 216, "height": 216, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 216, "height": 216, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 324, "height": 324, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 324, "height": 324, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Launcher icon background",
                         "name": "mobile/android/launcher_bg_xxxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 432, "height": 432, "format": "png" }
                     },
                     {
                         "label": "[Android] Launcher icon foreground",
                         "name": "mobile/android/launcher_fg_xxxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 432, "height": 432, "format": "png", "background": "dark" }
                     },
 
@@ -941,38 +994,43 @@
                         "_": "------------------ Android other icons --------------------------",
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_ldpi.png",
-                        "description": "",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 192, "height": 192, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_mdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 256, "height": 256, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_hdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 384, "height": 384, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_xhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 512, "height": 512, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_xxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 768, "height": 768, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "[Android] Splash screen",
                         "name": "mobile/android/logo_xxxhdpi.png",
                         "type": "Image",
+                        "optional": true,
                         "meta": { "width": 1024, "height": 1024, "format": "png", "background": "dark" }
                     },
 
@@ -981,6 +1039,7 @@
                         "label": "[Android] Key Store",
                         "name": "mobile/android/key.store",
                         "type": "File",
+                        "optional": true,
                         "meta": { "format": "store" }
                     }
                 ]
@@ -989,25 +1048,20 @@
                 "name": "custom_cloud",
                 "label": "Custom cloud icons",
                 "file_path": "custom_cloud",
-                "description": "",
+                "description": "Customized cloud icons",
                 "translatable": false,
                 "values": [
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_icon_selected.png",
-                        "description": "",
                         "type": "Image",
                         "optional": true,
-                        "meta": {
-                            "width": 20,
-                            "height": 20,
-                            "format": "png"
-                        }
+                        "advanced": true,
+                        "meta": { "width": 20, "height": 20, "format": "png", "background": "dark" }
                     },
                     {
                         "label": "",
                         "name": "custom_cloud/desktop/cloud_user_logo@2x.png",
-                        "description": "",
                         "type": "Image",
                         "optional": true,
                         "meta": {
