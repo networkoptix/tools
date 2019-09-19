@@ -10,9 +10,7 @@
 
     "contact": {
         "companyUrl": "%contact.companyUrl%",
-        "supportChannel": "%contact.supportChannel%",
         "supportAddress": "%contact.supportAddress%",
-        "licensingChannel": "%contact.licensingChannel%",
         "licensingAddress": "%contact.licensingAddress%",
         "systemWebPages": {
             "homePage": "%contact.systemWebPages.homePage%",

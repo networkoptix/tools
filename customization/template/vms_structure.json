@@ -108,35 +108,9 @@
                         "description": "Example: \"http://networkoptix.com\""
                     },
                     {
-                        "type": "Select",
-                        "label": "Support channel",
-                        "name": "%contact.supportChannel%",
-                        "meta": {
-                            "multi": false,
-                            "options": [
-                                "web",
-                                "email",
-                                "phone"
-                            ]
-                        }
-                    },
-                    {
                         "label": "Support address",
                         "name": "%contact.supportAddress%",
                         "description": "Depending on the selected channel, this can be web page or an email address or a phone number"
-                    },
-                    {
-                        "type": "Select",
-                        "label": "Licensing channel",
-                        "name": "%contact.licensingChannel%",
-                        "meta": {
-                            "multi": false,
-                            "options": [
-                                "web",
-                                "email",
-                                "phone"
-                            ]
-                        }
                     },
                     {
                         "label": "Licensing address",
