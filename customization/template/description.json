@@ -5,8 +5,11 @@
     "vmsName": "%vmsName%",
     "skin": "%skin%",
     "uriProtocol": "%uriProtocol%",
+    "eulaVersion": "%eulaVersion%",
     "installerName": "%installerName%",
     "cloudName": "%cloudName%",
+    "defaultLanguage": "%defaultLanguage%",
+    "customLanguages": "%customLanguages%",
 
     "contact": {
         "companyUrl": "%contact.companyUrl%",
