@@ -61,11 +61,28 @@
                     },
                     {
                         "label": "Company Name",
-                        "name": "%companyName%"
+                        "name": "%companyName%",
+                        "protected": true
+                    },
+                    {
+                        "label": "Company Id",
+                        "name": "%companyId%",
+                        "description": "Company name in lowecase without spaces. Only alphanumeric symbols are allowed.",
+                        "protected": true,
+                        "unique": true,
+                        "meta": { "regex": "[a-z]+$" }
                     },
                     {
                         "label": "VMS Name",
-                        "name": "%vmsName%"
+                        "name": "%vmsName%",
+                        "description": "VMS name, which will be displayed to users"
+                    },
+                    {
+                        "label": "VMS Id",
+                        "name": "%vmsId%",
+                        "description": "VMS name, which will be used in the paths and settings keys",
+                        "protected": true,
+                        "unique": true
                     },
                     {
                         "label": "Cloud Name",
@@ -218,14 +235,6 @@
 
                     {
                         "_": "-------------------------- DESKTOP BLOCK --------------------------",
-                        "label": "",
-                        "name": "%desktop.internalName%",
-                        "description": "Example: \"HD Witness\"",
-                        "advanced": true,
-                        "protected": true,
-                        "unique": true
-                    },
-                    {
                         "label": "Enable Hanwha-specific support",
                         "name": "%desktop.supportsHanwha%",
                         "type": "Check Box",
@@ -289,12 +298,6 @@
                         "advanced": true,
                         "protected": true,
                         "unique": true
-                    },
-                    {
-                        "label": "[Linux] Company Id",
-                        "name": "%desktop.linux.companyId%",
-                        "description": "Company name in lowecase without spaces. Only alphanumeric symbols are allowed.",
-                        "meta": { "regex": "[a-z]+$" }
                     },
                     {
                         "_": "TODO: Tune regex",
@@ -470,7 +473,46 @@
                         "unique": true,
                         "advanced": true,
                         "optional": true
+                    },
+
+                    {
+                        "_": "------------------------ ADVANCED BLOCK --------------------------",
+                        "label": "Use Meta Version",
+                        "name": "%advanced.useMetaVersion%",
+                        "type": "Check Box",
+                        "advanced": true
+                    },
+                    {
+                        "label": "Use full cloud name everywhere",
+                        "name": "%advanced.useFullCloudNameEverywhere%",
+                        "type": "Check Box",
+                        "advanced": true
+                    },
+                    {
+                        "label": "Custom Windows install path",
+                        "name": "%advanced.customWindowsInstallPath%",
+                        "optional": true,
+                        "advanced": true
+                    },
+                    {
+                        "label": "Custom desktop client display name",
+                        "name": "%advanced.customClientDisplayName%",
+                        "optional": true,
+                        "advanced": true
+                    },
+                    {
+                        "label": "Custom mediaserver service name",
+                        "name": "%advanced.customMediaserverServiceName%",
+                        "optional": true,
+                        "advanced": true
+                    },
+                    {
+                        "label": "Custom mediaserver application name",
+                        "name": "%advanced.customMediaserverApplicationName%",
+                        "optional": true,
+                        "advanced": true
                     }
+
                 ]
             },
             {

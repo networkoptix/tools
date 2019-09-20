@@ -2,7 +2,9 @@
     "id": "%id%",
     "brand": "%brand%",
     "companyName": "%companyName%",
+    "companyId": "%companyId%",
     "vmsName": "%vmsName%",
+    "vmsId": "%vmsId%",
     "skin": "%skin%",
     "uriProtocol": "%uriProtocol%",
     "eulaVersion": "%eulaVersion%",
@@ -22,7 +24,6 @@
     },
 
     "desktop": {
-        "internalName": "%desktop.internalName%",
         "supportsHanwha": "%desktop.supportsHanwha%",
         "supportsVmax": "%desktop.supportsVmax%",
         "trialLicenseKey": "%desktop.trialLicenseKey%",
@@ -33,10 +34,6 @@
             "clientUpgradeCode": "%desktop.windows.clientUpgradeCode%",
             "clientBundleUpgradeCode": "%desktop.windows.clientBundleUpgradeCode%",
             "fullBundleUpgradeCode": "%desktop.windows.fullBundleUpgradeCode%"
-        },
-
-        "linux": {
-            "companyName": "%desktop.linux.companyId%"
         },
 
         "macos": {
@@ -82,5 +79,14 @@
         "productId": "%nxtool.productId%",
         "productUpgradeCode": "%nxtool.productUpgradeCode%",
         "bundleUpgradeCode": "%nxtool.bundleUpgradeCode%"
+    },
+
+    "advanced": {
+        "useMetaVersion": "%advanced.useMetaVersion%",
+        "useFullCloudNameEverywhere": "%advanced.useFullCloudNameEverywhere%",
+        "customWindowsInstallPath": "%advanced.customWindowsInstallPath%",
+        "customClientDisplayName": "%advanced.customClientDisplayName%",
+        "customMediaserverServiceName": "%advanced.customMediaserverServiceName%",
+        "customMediaserverApplicationName": "%advanced.customMediaserverApplicationName%"
     }
 }
