@@ -49,7 +49,7 @@
         "compatibleCustomizations": "%mobile.compatibleCustomizations%",
 
         "android": {
-            "packageName": "com.networkoptix.nxwitness",
+            "packageName": "%mobile.android.packageName%",
             "storepass": "%mobile.android.storepass%",
             "alias": "%mobile.android.alias%",
             "keypass": "%mobile.android.keypass%",
