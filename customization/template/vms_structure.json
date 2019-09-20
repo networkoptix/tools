@@ -489,6 +489,12 @@
                         "advanced": true
                     },
                     {
+                        "label": "Disable code signing",
+                        "name": "%advanced.disableCodeSigning%",
+                        "type": "Check Box",
+                        "advanced": true
+                    },
+                    {
                         "label": "Custom Windows install path",
                         "name": "%advanced.customWindowsInstallPath%",
                         "optional": true,

@@ -84,6 +84,7 @@
     "advanced": {
         "useMetaVersion": "%advanced.useMetaVersion%",
         "useFullCloudNameEverywhere": "%advanced.useFullCloudNameEverywhere%",
+        "disableCodeSigning": "%advanced.disableCodeSigning%",
         "customWindowsInstallPath": "%advanced.customWindowsInstallPath%",
         "customClientDisplayName": "%advanced.customClientDisplayName%",
         "customMediaserverServiceName": "%advanced.customMediaserverServiceName%",
