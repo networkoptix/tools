@@ -543,6 +543,95 @@
                         "meta": { "width": 256, "height": 256, "format": "png" }
                     },
                     {
+                        "label": "Welcome Page Logo",
+                        "name": "desktop/welcome_page_logo.png",
+                        "type": "Image",
+                        "meta": { "width": 120, "height": 120, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "Welcome Page Logo",
+                        "name": "desktop/welcome_page_logo@2x.png",
+                        "type": "Image",
+                        "meta": { "width": 240, "height": 240, "format": "png", "background": "dark" }
+                    },
+                    {
+                        "label": "WebAdmin Logo",
+                        "name": "desktop/webadmin_logo.png",
+                        "description": "Will be displayed on the server web page",
+                        "type": "Image",
+        "_": ">>>> Brand background is needed",
+                        "meta": { "width": 142, "height": 40, "format": "png"}
+                    },
+                    {
+                        "label": "WebAdmin configuration file",
+                        "name": "desktop/webadmin_config.js",
+                        "type": "File",
+                        "meta": { "format": "js" }
+                    },
+                    {
+                        "label": "Email Logo",
+                        "name": "desktop/email_logo.png",
+                        "description": "Will be displayed in the server's emails",
+                        "type": "Image",
+                        "meta": { "width": 272, "height": 80, "format": "png", "background": "light" }
+                    },
+                    {
+                        "label": "Background",
+                        "name": "desktop/background.png",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "width": 2160, "height": 2160, "format": "png", "background": "dark", "size": 1024000 }
+                    },
+                    {
+                        "label": "Intro image (exclusive with intro video)",
+                        "name": "desktop/intro.png",
+                        "description": "Displayed on the login dialog",
+                        "type": "Image",
+                        "optional": true,
+                        "meta": { "format": "png" }
+                    },
+                    {
+                        "label": "Intro video (exclusive with intro image)",
+                        "name": "desktop/intro.mkv",
+                        "description": "Displayed on the login dialog",
+                        "type": "File",
+                        "optional": true,
+                        "meta": { "format": "mkv", "size": 2048000 }
+                    },
+                    {
+                        "label": "Videowall Desktop icon",
+                        "name": "desktop/videowall.ico",
+                        "type": "Image",
+                        "meta": { "width": 256, "height": 256, "format": "ico"
+                        }
+                    },
+                    {
+                        "label": "[Windows] Installer icon",
+                        "name": "desktop/windows/installer_icon.ico",
+                        "type": "Image",
+                        "meta": { "width": 256, "height": 256, "format": "ico" },
+                        "optional": true
+                    },
+                    {
+                        "label": "[Windows] Installer logo",
+                        "name": "desktop/windows/installer_logo_64x64.png",
+                        "type": "Image",
+                        "meta": { "width": 64, "height": 64, "format": "png" }
+                    },
+                    {
+                        "label": "[Windows] Installer logo",
+                        "name": "desktop/windows/installer_logo_102x102.png",
+                        "type": "Image",
+                        "meta": { "width": 102, "height": 102, "format": "png" }
+                    },
+                    {
+                        "label": "[Windows] Installer background",
+                        "name": "desktop/windows/installer_background.png",
+                        "description": "Bottom left corner must be while as image takes only a part of the background",
+                        "type": "Image",
+                        "meta": { "width": 480, "height": 360, "format": "png", "background": "light"}
+                    },
+                    {
                         "label": "[MacOS] Application icon",
                         "name": "desktop/macos/main_icon.icns",
                         "type": "File",
@@ -570,240 +659,54 @@
                         "meta": { "format": "icns" }
                     },
                     {
-                        "label": "",
-                        "name": "desktop/webadmin_logo.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 142,
-                            "height": 40,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/webadmin_config.js",
-                        "description": "",
-                        "type": "File",
-                        "meta": {
-                            "format": "js"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/email_logo.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 272,
-                            "height": 80,
-                            "format": "png",
-                            "background": "light"
-                        }
-                    },
-                    {
-                        "label": "Background",
-                        "name": "desktop/background.png",
-                        "description": "",
-                        "type": "Image",
-                        "optional": true,
-                        "meta": {
-                            "width": 2160,
-                            "height": 2160,
-                            "format": "png",
-                            "background": "dark",
-                            "size": 1024000
-                        }
-                    },
-                    {
-                        "label": "Intro image (exclusive with intro video)",
-                        "name": "desktop/intro.png",
-                        "description": "Displayed on the login dialog",
-                        "type": "Image",
-                        "optional": true,
-                        "meta": {
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "Intro video (exclusive with intro image)",
-                        "name": "desktop/intro.mkv",
-                        "description": "Displayed on the login dialog",
-                        "type": "File",
-                        "optional": true,
-                        "meta": {
-                            "format": "mkv",
-                             "size": 2048000
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/linux/icon_128x128.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 128,
-                            "height": 128,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/linux/icon_32x32.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 32,
-                            "height": 32,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/linux/icon_22x22.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 22,
-                            "height": 22,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/linux/icon_24x24.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 24,
-                            "height": 24,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/linux/icon_48x48.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 48,
-                            "height": 48,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
+                        "label": "[Linux] Desktop icon",
                         "name": "desktop/linux/icon_16x16.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 16,
-                            "height": 16,
-                            "format": "png"
-                        }
+                        "meta": { "width": 16, "height": 16, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "desktop/videowall.ico",
-                        "description": "",
+                        "label": "[Linux] Desktop icon",
+                        "name": "desktop/linux/icon_22x22.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "ico"
-                        }
+                        "meta": { "width": 22, "height": 22, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "desktop/windows/installer_logo_64x64.png",
-                        "description": "",
+                        "label": "[Linux] Desktop icon",
+                        "name": "desktop/linux/icon_24x24.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 64,
-                            "height": 64,
-                            "format": "png"
-                        }
+                        "meta": { "width": 24, "height": 24, "format": "png" }
                     },
                     {
-                        "label": "",
-                        "name": "desktop/windows/installer_background.png",
-                        "description": "",
+                        "label": "[Linux] Desktop icon",
+                        "name": "desktop/linux/icon_32x32.png",
                         "type": "Image",
-                        "meta": {
-                            "width": 480,
-                            "height": 360,
-                            "format": "png"
-                        }
+                        "meta": { "width": 32, "height": 32, "format": "png" }
                     },
                     {
-                        "label": "",
+                        "label": "[Linux] Desktop icon",
+                        "name": "desktop/linux/icon_48x48.png",
+                        "type": "Image",
+                        "meta": { "width": 48, "height": 48, "format": "png" }
+                    },
+                    {
+                        "label": "[Linux] Desktop icon",
+                        "name": "desktop/linux/icon_128x128.png",
+                        "type": "Image",
+                        "meta": { "width": 128, "height": 128, "format": "png" }
+                    },
+                    {
+                        "label": "Server Tool Desktop icon",
                         "name": "desktop/windows/nxtool/icon.ico",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "ico"
-                        },
+                        "meta": { "width": 256, "height": 256, "format": "ico" },
                         "optional": true
                     },
                     {
-                        "label": "",
+                        "label": "[Windows] Server Tool Installer logo",
                         "name": "desktop/windows/nxtool/installer_logo.png",
-                        "description": "",
                         "type": "Image",
-                        "meta": {
-                            "width": 64,
-                            "height": 64,
-                            "format": "png"
-                        },
+                        "meta": { "width": 64, "height": 64, "format": "png" },
                         "optional": true
-                    },
-                    {
-                        "label": "Installer icon",
-                        "name": "desktop/windows/installer_icon.ico",
-                        "description": "Windows-specific",
-                        "type": "Image",
-                        "meta": {
-                            "width": 256,
-                            "height": 256,
-                            "format": "ico"
-                        },
-                        "optional": true
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/windows/installer_logo_102x102.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 102,
-                            "height": 102,
-                            "format": "png"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/welcome_page_logo.png",
-                        "description": "",
-                        "type": "Image",
-                        "meta": {
-                            "width": 120,
-                            "height": 120,
-                            "format": "png",
-                            "background": "dark"
-                        }
-                    },
-                    {
-                        "label": "",
-                        "name": "desktop/welcome_page_logo@2x.png",
-                        "type": "Image",
-                        "meta": {
-                            "width": 240,
-                            "height": 240,
-                            "format": "png",
-                            "background": "dark"
-                        }
                     }
                 ]
             },
