@@ -19,6 +19,7 @@ def download_package(session, instance, asset_type, asset_id, draft):
         except Exception as e:
             print(e)
             print(f"Reason: {fs.text}")
+            return
 
         package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
         package_name = f"{package_name[0] if len(package_name) else 'package'}"
