@@ -1,0 +1,44 @@
+
+echo -n "" > /var/gerrit/tmp/commit-received.out
+function log() {
+    echo -e $* >> /var/gerrit/tmp/commit-received.out
+}
+
+log "Reading args"
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+
+    case $key in
+        --project|--refname|--uploader|--oldrev|--newrev|--cmdref)
+            varname=${key:2}
+        ;;
+        --uploader-username)
+            varname=uploader_username
+        ;;
+        *)
+        echo "Unknown argument [$1]"
+        exit 1
+        ;;
+    esac
+
+    declare $varname="$2"
+    shift; shift
+    log "$key\t${!varname}"
+done
+
+log "Checking project"
+if ! [[ "$project" =~ ^(dev/nx|dev/nx_test|dev/tools)$ ]]; then
+    log "Project does not require commit message checks"
+    exit 0
+fi
+
+log "Checking commit message"
+git show -s --format=%B $newrev | grep '^Branch: \S*$' 
+if [ $? != 0 ]; then
+    echo 'Invalid or empty branch specified in commit message'
+    exit 1
+fi
+
+log "Commit has passed all checks"
+exit 0

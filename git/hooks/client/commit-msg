@@ -1,0 +1,90 @@
+#!/bin/sh
+# From Gerrit Code Review 2.16.7
+#
+# Part of Gerrit Code Review (https://www.gerritcodereview.com/)
+#
+# Copyright (C) 2009 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+COMMIT_MESSAGE_FILE="$1"
+
+strip_space() {
+    if ! git stripspace --strip-comments < "$1" > "$2" ; then
+       echo "cannot strip comments from ${COMMIT_MESSAGE_FILE}"
+       exit 1
+    fi
+}
+
+add_branch_name() {
+    if test -z "$GIT_BRANCH" ; then
+        GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    fi
+    
+    if test -z "$GIT_BRANCH" || test "HEAD" = "$GIT_BRANCH" ; then
+        echo "cannot determine git branch"
+        exit 1
+    fi
+
+    if ! git -c trailer.ifexists=doNothing interpret-trailers \
+          --trailer "Branch: $GIT_BRANCH" < "$1" > "$2" ; then
+        echo "cannot insert branch line in $2"
+        exit 1
+    fi
+}
+
+add_change_id() {
+    # Do not create a change id if requested
+    if test "false" = "`git config --bool --get gerrit.createChangeId`" ; then
+      return
+    fi
+
+    # Avoid the --in-place option which only appeared in Git 2.8
+    # Avoid the --if-exists option which only appeared in Git 2.15
+    if ! git -c trailer.ifexists=doNothing interpret-trailers \
+          --trailer "Change-Id: I${random}" < "$1" > "$2" ; then
+      echo "cannot insert change-id line in $2"
+      exit 1
+    fi
+}
+
+# avoid [[ which is not POSIX sh.
+if test "$#" != 1 ; then
+  echo "$0 requires an argument."
+  exit 1
+fi
+
+if test ! -f "$COMMIT_MESSAGE_FILE" ; then
+  echo "file does not exist: $COMMIT_MESSAGE_FILE"
+  exit 1
+fi
+
+# $RANDOM will be undefined if not using bash, so don't use set -u
+random=$( (whoami ; hostname ; date; cat $COMMIT_MESSAGE_FILE ; echo $RANDOM) | git hash-object --stdin)
+dest="$COMMIT_MESSAGE_FILE.tmp.${random}"
+trap 'rm -f "${dest}"' EXIT
+
+strip_space ${COMMIT_MESSAGE_FILE} ${dest}
+
+if test ! -s "${dest}" ; then
+  echo "file is empty: ${COMMIT_MESSAGE_FILE}"
+  exit 1
+fi
+
+add_branch_name ${dest} ${COMMIT_MESSAGE_FILE}
+add_change_id ${COMMIT_MESSAGE_FILE} ${dest}
+
+if ! mv "${dest}" "${COMMIT_MESSAGE_FILE}" ; then
+  echo "cannot mv ${dest} to ${COMMIT_MESSAGE_FILE}"
+  exit 1
+fi
