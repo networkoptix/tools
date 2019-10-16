@@ -1,4 +1,11 @@
 
+ERROR_MESSAGE="Invalid or empty branch specified in commit message.
+ !
+ ! Probably you are missing commit-msg hook. Copy file 'git/hooks/client/commit-msg' from 
+ ! dev/tools (devtools) repo to the '.git/hooks/' directory in your local clone of dev/nx repo.
+ !
+"
+
 echo -n "" > /var/gerrit/tmp/commit-received.out
 function log() {
     echo -e $* >> /var/gerrit/tmp/commit-received.out
@@ -36,7 +43,7 @@ fi
 log "Checking commit message"
 git show -s --format=%B $newrev | grep '^Branch: \S*$' 
 if [ $? != 0 ]; then
-    echo 'Invalid or empty branch specified in commit message'
+    echo "$ERROR_MESSAGE"
     exit 1
 fi
 
