@@ -70,6 +70,7 @@ CUSTOMIZATIONS = (
     'vmsdemoblue',
     'vmsdemoorange',
     'metavms',
+    'viveex',
 )
 
 CUSTOMIZATION_ALIASES = {
