@@ -32,7 +32,7 @@ save_backup()
 # [in] NEW_CLOUD_HOST
 process_file()
 {
-    local STRING=$(strings --radix=d -d "$FILE" |grep "$CLOUD_HOST_KEY")
+    local STRING=$(strings --radix=d "$FILE" |grep "$CLOUD_HOST_KEY")
     [ -z "$STRING" ] && nx_fail "'$CLOUD_HOST_KEY' string not found in $FILE"
 
     local OFFSET=$(echo "$STRING" |awk '{print $1}')
