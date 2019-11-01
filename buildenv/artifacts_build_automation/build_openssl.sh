@@ -33,7 +33,6 @@ $NX_HELP_TEXT_OPTIONS
 EOF
 }
 
-# [in] GCC
 # [in] DEV_ARTIFACT
 # [in] RDEP_PACKAGES_DIR
 downloadArtifacts()
@@ -66,17 +65,17 @@ downloadArtifacts()
     nx_popd
 }
 
-# [in] GCC
+# [in] GCC_PREFIX
 # [in] DEV_ARTIFACT 
 buildOpenssl() # ABSOLUTE_DESTINATION_DIR
 {
-    nx_echo "Building openssl..."
+    local -r ABSOLUTE_DESTINATION_DIR="$1"; shift
 
-    local -r ABSOLUTE_DESTINATION_DIR="$1"
+    nx_echo "Building openssl..."
 
     nxPrepareSources "$DEV_ARTIFACT/src/openssl-$OPENSSL_VERSION"
 
-    nxExportToolchainMediatorVars "${GCC_PREFIX}"
+    nxExportToolchainMediatorVars "$GCC_PREFIX"
 
     local -rA TARGET_OPTION_BY_TARGET=(
         [linux_arm32]=linux-armv4
@@ -104,22 +103,18 @@ checkTargetArg()
         nx_fail "Specify target as an argument."
     fi
 
-    local -i targetIsOk=0
     local t
 
     for t in "${SUPPORTED_TARGETS[@]}"
     do
         if [[ $t == $TARGET ]]
         then
-            targetIsOk=1
+            return 0
             break
         fi
     done
 
-    if (( $targetIsOk != 1 ))
-    then
-        nx_fail "Unsupported target specified: $TARGET"
-    fi
+    nx_fail "Unsupported target specified: $TARGET"
 }
 
 # [in] DESTINATION_DIR
@@ -155,10 +150,10 @@ main()
         fi
     fi
 
-    local -r TARGET="${1:-}"
+    local -r TARGET="${1:-}"; shift
     checkTargetArg
 
-    local -r DESTINATION_DIR="${2:-}"
+    local -r DESTINATION_DIR="${1:-}"; shift
     checkDestinationDirArg
 
     local -r BUILD_ROOT_DIR=$(mktemp -d -p "${TMPDIR:-/tmp}" --suffix=-openssl_build)
