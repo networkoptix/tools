@@ -17,8 +17,8 @@ nxPrepareSources() # PKG_SRC_DIR
     then
         for patch in "$DEV_ARTIFACT/src/patches/$PKG_NAME"-*
         do
-            # Apply the patch to files in the current directory. '-p1' should be used when patch
-            # is executed inside the root directory of sources.
+            # Apply the patch to files in the current directory. '-p1' should be used when the
+            # patch is executed inside the root directory of the sources.
             nx_verbose patch --forward -p1 --input="$patch"
         done
     fi

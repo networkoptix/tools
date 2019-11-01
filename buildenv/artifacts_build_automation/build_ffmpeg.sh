@@ -278,16 +278,16 @@ buildFfmpeg() # ABSOLUTE_DESTINATION_DIR
 
     case "$TARGET" in
         rpi)
-        AUTOCONF_OPTIONS+=( "${RPI_OPTIONS[@]}" )
-        ;;
+            AUTOCONF_OPTIONS+=( "${RPI_OPTIONS[@]}" )
+            ;;
         linux_arm32)
-        AUTOCONF_OPTIONS+=( "${LINUX_ARM32_OPTIONS[@]}" )
-        ;;
+            AUTOCONF_OPTIONS+=( "${LINUX_ARM32_OPTIONS[@]}" )
+            ;;
         linux_arm64)
-        AUTOCONF_OPTIONS+=( "${LINUX_ARM64_OPTIONS[@]}" )
-        ;;
+            AUTOCONF_OPTIONS+=( "${LINUX_ARM64_OPTIONS[@]}" )
+            ;;
         *)
-        ;;
+            ;;
     esac
 
     DESTDIR="$ABSOLUTE_DESTINATION_DIR" V=1 nxAutotoolsBuild
