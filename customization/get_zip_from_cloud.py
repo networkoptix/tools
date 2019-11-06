@@ -5,6 +5,7 @@ import re
 import requests
 import shutil
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 FETCH_BY_TYPE = 'type'
 FETCH_BY_ID = 'id'
@@ -12,8 +13,9 @@ DEFAULT_INSTANCE = "https://cloud-test.hdw.mx"
 FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
 
 
-def download_package(session, instance, asset_type, asset_id, draft):
-    with session.get(f"{instance}/admin/cms/package/{asset_id}/{draft}", stream=True) as fs:
+def download_package(session, args, asset_id):
+    draft = "?draft" if args.draft else ""
+    with session.get(f"{args.instance}/admin/cms/package/{asset_id}/{draft}", stream=True) as fs:
         try:
             fs.raise_for_status()
         except Exception as e:
@@ -24,25 +26,24 @@ def download_package(session, instance, asset_type, asset_id, draft):
         package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
         package_name = f"{package_name[0] if len(package_name) else 'package'}"
 
-        if asset_type == 'vms':
-            package_dir = f"customization_pack-{package_name}"
-            if not os.path.exists(package_dir):
-                os.makedirs(package_dir)
+        if args.type == 'vms':
+            package_dir = args.destination_path / f"customization_pack-{args.package_name_prefix}{package_name}"
+            package_dir.mkdir(parents=True, exist_ok=True)
             package_name = f"{package_dir}/package"
 
         with open(f"{package_name}.zip", "wb") as f:
             shutil.copyfileobj(fs.raw, f)
 
 
-def download_packages(session, instance, asset_type, asset_ids, draft):
+def download_packages(session, args, asset_ids):
     if len(asset_ids) == 1:
-        download_package(session, instance, asset_type, asset_ids[0], draft)
+        download_package(session, args, asset_ids[0], draft)
         return
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = []
         for asset_id in asset_ids:
-            futures.append(executor.submit(download_package, session, instance, asset_type, asset_id, draft))
+            futures.append(executor.submit(download_package, session, args, asset_id))
 
         for future in futures:
             future.result()
@@ -66,6 +67,11 @@ def get_cmd_args():
                         help=f"The url of the instance that you want to download packages from.\n"
                         f"Default is {DEFAULT_INSTANCE}")
     parser.add_argument("--draft", help="Get the latest version of the asset.", dest="draft", action='store_true')
+    parser.add_argument("--destination-path", type=Path, default=Path.cwd(),
+                        help="Path to store downloaded packages")
+    parser.add_argument("--package-name-prefix", default="",
+                        help="Prefix for package name to make difference with release")
+
 
     subparsers = parser.add_subparsers(dest="command", help='Decides how to fetch packages.',
                                        required=True)
@@ -111,8 +117,7 @@ def main():
             else:
                 asset_ids = [args.asset_id]
 
-            draft = "?draft" if args.draft else ""
-            download_packages(session, args.instance, args.type, asset_ids, draft)
+            download_packages(session, args, asset_ids)
         except requests.HTTPError as e:
             print(e)
 
