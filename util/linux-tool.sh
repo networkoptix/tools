@@ -1649,6 +1649,17 @@ main()
         rsync)
             local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
+
+            # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
+            local -r unknown_changeset="000000000000" #< hg yields such value if no repo is found.
+            local -r changesetTxt="$VMS_DIR/changeset.txt"
+            if ! hg --repository "$VMS_DIR" log --rev . --template "{node|short}" >"$changesetTxt" \
+                || [[ $(cat "$changesetTxt") == $unknown_changeset ]]
+            then
+                rm -rf "$changesetTxt"
+                nx_echo "WARNING: Unable to detect changeset via hg."
+            fi
+
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
             nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
