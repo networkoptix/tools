@@ -1653,17 +1653,27 @@ main()
             # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
             local -r unknown_changeset="000000000000" #< hg yields such value if no repo is found.
             local -r changesetTxt="$VMS_DIR/changeset.txt"
-            if ! hg --repository "$VMS_DIR" log --rev . --template "{node|short}" >"$changesetTxt" \
+            local -r hdGetChangesetCommand=( `# Uncomment the desired variant. #`
+                # Not appending `+` if there are local changes.
+                hg --repository "$VMS_DIR" log --rev . --template "{node|short}"
+                
+                # Appending `+` if there are local changes.
+                #eval "hg identify | awk '{print $1}'" `#< eval needed to support "|". #`
+            )
+            if ! "${hdGetChangesetCommand[@]}" >"$changesetTxt" \
+                || [ ! -s "$changesetTxt" ] `#< The file is missing or empty. #` \
                 || [[ $(cat "$changesetTxt") == $unknown_changeset ]]
             then
-                rm -rf "$changesetTxt"
-                nx_echo "WARNING: Unable to detect changeset via hg."
+                nx_echo "WARNING: Unable to obtain changeset via: ${hgGetChangesetCommand[@]}"
             fi
 
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
             nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
                 "$VMS_DIR/" "$VEGA_DIR" || exit $?
+
+            rm -rf "$changesetTxt"
+            
             if (($# > 0))
             then
                 doGoCd "$@"
