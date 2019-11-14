@@ -114,7 +114,7 @@ EOF
 go_callback()
 {
     nx_ssh_without_password \
-        "$VEGA_USER" "$VEGA_HOST" "$VEGA_USER@vega" "$VEGA_BACKGROUND_RRGGBB" "$@"
+        "$VEGA_USER" "$VEGA_HOST" "$VEGA_USER@$VEGA_HOST" "$VEGA_BACKGROUND_RRGGBB" "$@"
 }
 
 # [out] TARGET
