@@ -654,7 +654,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     else
         local -r UT_EXE_PATTERN="nx_kit_*"
     fi
-    nx_find_file UT_EXE "Unit tests executable" -type f -name "$UT_EXE_PATTERN"
+    nx_find_file UT_EXE "Unit tests executable" . -type f -name "$UT_EXE_PATTERN"
     nx_verbose "$UT_EXE"
 }
 
@@ -813,7 +813,7 @@ do_copyright_file() # <file> <prefix> [add]
 do_copyright() # "$@"
 {
     local FILES=()
-    nx_find_files FILES -type f ! -path */docs/html/*
+    nx_find_files FILES . -type f ! -path */docs/html/*
 
     nx_log_array FILES
 
