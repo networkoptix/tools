@@ -1630,7 +1630,7 @@ main()
             nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_*_sdk"
             SDK=1 do_gen "$@" || exit $?
             do_build --target nx_metadata_sdk || exit $?
-            do_build --target nx_camera_sdk || exit $?
+            do_build --target nx_video_source_sdk || exit $?
             do_build --target nx_storage_sdk || exit $?
             ;;
         benchmark)
