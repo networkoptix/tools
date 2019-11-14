@@ -1,7 +1,8 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-nx_load_config "${RC=".android-toolrc"}"
+nx_load_config "${RC="?.android-toolrc"}"
+
 : ${DEVELOP_DIR="$HOME/develop"}
 
 #--------------------------------------------------------------------------------------------------

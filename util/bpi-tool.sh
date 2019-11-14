@@ -1,7 +1,8 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${RC=".bpi-toolrc"}"
+nx_load_config "${RC="?.bpi-toolrc"}"
+
 : ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".

@@ -3,7 +3,7 @@ set -o pipefail
 
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${RC=".linux-toolrc"}"
+nx_load_config "${RC=?.linux-toolrc}"
 : ${VMS_DIR=""} #< nx_vms repo.
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty, detect "linux"/"windows".
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".

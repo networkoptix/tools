@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${RC=".tx1-toolrc"}"
+nx_load_config "${RC="?.tx1-toolrc"}"
 
 : ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 

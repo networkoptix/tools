@@ -870,12 +870,27 @@ nx_sudo_dd() # dd_args...
     wait $SUDO_PID #< Get the Status Code of finished "dd".
 }
 
-# Source the specified file (typically with settings), return whether it exists.
-nx_load_config() # "${CONFIG='.<tool-name>rc'}"
+# Source the specified file (typically with settings), return whether it exists. If the path is
+# relative and does not start with `./`, treat it as relative to the home dir. If the path starts
+# with `?`, the `?` is removed but no error is produced if the file is missing.
+nx_load_config() # "${RC=?.<tool-name>rc}"
 {
-    local FILE="$1"
+    local FILE=$(nx_unix_path "$1")
+    if [[ $FILE == \?* ]]
+    then
+        local -r -i OPTIONAL=1
+        FILE=${FILE#?} #< Remove the `?` prefix.
+    else        
+        local -r -i OPTIONAL=0
+    fi
 
-    local FILE_PATH="$HOME/$FILE"
+    if [[ $FILE == /* || $FILE == ./* ]]
+    then
+        local -r FILE_PATH="$FILE"
+    else
+        local -r FILE_PATH="$HOME/$FILE"
+    fi
+    
     if [ -f "$FILE_PATH" ]; then
         # To enable overriding variables from the config file, transform config file to perform 
         # assignment only if the variable is unset.
@@ -884,7 +899,10 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
             -e '/^[[:space:]]*#/d' `#< Delete comment lines (starting with '#'). #` \
             -e 's/^\(.*\)$/: ${\1}/' `#< Transform to ': ${VAR=val}' - assign only if unset. #`)
     else
-        return 1
+        if [[ $OPTIONAL == 0 ]]
+        then
+            nx_fail "RC file not found: $FILE_PATH"
+        fi
     fi
 }
 
