@@ -69,8 +69,8 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
  sdk # Rebuild nx_*_sdk.
- benchmark # Rebuild, unzip and run vms_benchmark, deleting the old one but keeping .conf and .ini.
-
+ benchmark [run|build] # Rebuild (if 'run' is not specified), unzip and run (if 'build' is not
+     specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
@@ -844,10 +844,30 @@ do_copyright() # "$@"
 
 do_benchmark() # "$@"
 {
-    nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
-    nx_verbose rm -rf "$BUILD_DIR/vms/vms_benchmark"
-    do_gen "$@" || exit $?
-    do_build --target vms_benchmark || exit $?
+    if (( $# >= 1 )) && [[ $1 == 'run' ]]
+    then
+        local -i -r runOnly=1
+        shift
+    else
+        local -i -r runOnly=0
+    fi
+
+    if (( $# >= 1 )) && [[ $1 == 'build' ]]
+    then
+        local -i -r buildOnly=1
+        shift
+    else
+        local -i -r buildOnly=0
+    fi
+
+    if [[ $runOnly == 0 ]]
+    then
+        nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
+        nx_verbose rm -rf "$BUILD_DIR/vms/vms_benchmark"
+        do_gen "$@" || exit $?
+        do_build --target vms_benchmark || exit $?
+    fi
+    
     
     local -r parentDir="$BUILD_DIR/distrib"
     
@@ -867,7 +887,7 @@ do_benchmark() # "$@"
         fi
     done
             
-    nx_verbose nx_unpack_archive_DIR "$ZIP_FILE" || exit $? #< Deletes dir if it exists.
+    nx_verbose nx_unpack_archive_DIR "$ZIP_FILE" || exit $? #< Deletes the old dir if it exists.
 
     # Restore configuration.    
     for ext in .conf .ini
@@ -881,21 +901,25 @@ do_benchmark() # "$@"
     
     if nx_is_cygwin
     then
-        nx_log_command chmod +x "$DIR/vms_benchmark/testcamera/*" #< Avoid "*" expanding in output.
-        chmod +x "$DIR/vms_benchmark/testcamera"/* #< Needed on Windows after unzipping.
+        nx_log_command chmod +x "$toolDir/testcamera/*" #< Avoid "*" expanding in output.
+        chmod +x "$toolDir/testcamera"/* #< Needed on Windows after unzipping.
     fi
     
     nx_echo "SUCCESS: vms_benchmark rebuilt and unpacked to $DIR"
-    
-    nx_cd "$DIR/vms_benchmark"
 
-    # Run the tool.
-    if nx_is_cygwin
+    if [[ $buildOnly == 0 ]]
     then
-        # Opening CMD window is needed to avoid Python buffering all the output.
-        nx_verbose cygstart cmd /c "vms_benchmark & pause"
-    else
-        nx_verbose ./vms_benchmark
+        nx_cd "$toolDir"
+
+        # Run the tool.
+        if nx_is_cygwin
+        then
+            # Opening CMD window is needed to avoid Python buffering all the output.
+            nx_verbose cygstart cmd /c "vms_benchmark & pause"
+            nx_verbose tail -F "vms_benchmark.log"
+        else
+            nx_verbose ./vms_benchmark
+        fi
     fi
 }
 
