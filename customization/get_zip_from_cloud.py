@@ -27,7 +27,8 @@ def download_package(session, args, asset_id):
         package_name = f"{package_name[0] if len(package_name) else 'package'}"
 
         if args.type == 'vms':
-            package_dir = args.destination_path / f"customization_pack-{args.package_name_prefix}{package_name}"
+            package_suffix = f"_{args.package_name_suffix}" if args.package_name_suffix else ""
+            package_dir = args.destination_path / f"customization_pack-{package_name}{package_suffix}"
             package_dir.mkdir(parents=True, exist_ok=True)
             package_name = f"{package_dir}/package"
 
@@ -69,8 +70,8 @@ def get_cmd_args():
     parser.add_argument("--draft", help="Get the latest version of the asset.", dest="draft", action='store_true')
     parser.add_argument("--destination-path", type=Path, default=Path.cwd(),
                         help="Path to store downloaded packages")
-    parser.add_argument("--package-name-prefix", default="",
-                        help="Prefix for package name to make difference with release")
+    parser.add_argument("--package-name-suffix",
+                        help="Suffix for package name to make difference with release")
 
 
     subparsers = parser.add_subparsers(dest="command", help='Decides how to fetch packages.',
