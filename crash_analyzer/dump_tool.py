@@ -421,7 +421,15 @@ class DumpAnalyzer:
                 os.mkdir(wix_dir)
                 run(['dark', '-x', wix_dir, path])
 
-            return self.extract_dist(self.find_file('.msi', wix_dir))
+            wix_parts = list(self.find_files_iter(
+                lambda n: (n.endswith('.msi') or n.endswith('.cab')), wix_dir))
+            if not wix_parts:
+                raise DistError("WIX installer '%s' does not contain file archives" % path)
+
+            return [self.extract_dist(part) for part in wix_parts]
+
+        if path.endswith('.cab'):
+             return run(['7z', 'x', path, '-o' + self.target_path + '/cabs', '-y', '-aos'])
 
         if path.endswith('.msi'):
             p, d = path.replace('/', '\\'), self.target_path.replace('/', '\\')
