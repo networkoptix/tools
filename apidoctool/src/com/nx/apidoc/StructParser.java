@@ -128,7 +128,7 @@ public final class StructParser
                 return fields;
 
             final String[] match = sourceCode.matchLine(line, fieldRegex);
-            if (match != null)
+            if (match != null && !"using".equals(match[0]))
                 fields.add(parseField(match[0], match[1]));
 
             ++line;
