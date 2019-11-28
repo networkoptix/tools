@@ -38,7 +38,7 @@ def download_package(session, args, asset_id):
 
 def download_packages(session, args, asset_ids):
     if len(asset_ids) == 1:
-        download_package(session, args, asset_ids[0], draft)
+        download_package(session, args, asset_ids[0])
         return
 
     with ThreadPoolExecutor(max_workers=4) as executor:
