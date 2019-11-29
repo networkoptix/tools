@@ -176,6 +176,18 @@ public final class StructParser
             field.typeName = type.substring(
                 "std::vector<".length(), type.length() - ">".length()).trim();
         }
+        else if (type.startsWith("std::optional<"))
+        {
+            final StructInfo.Field optField = parseField(
+                type.substring("std::optional<".length(), type.length() - ">".length()).trim(),
+                name);
+            if (optField.items == null)
+                optField.items = new ArrayList<ApidocTagParser.Item>();
+            optField.items.add(new ApidocTagParser.Item(
+                "%apidoc", "[opt]", optField.type.toString(), "", new ArrayList<String>(),
+                sourceCode.getFilename(), line, verbose));
+            return optField;
+        }
         else
         {
             field.type = Apidoc.Type.UNKNOWN;
