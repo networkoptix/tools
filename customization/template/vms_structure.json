@@ -70,7 +70,7 @@
                         "description": "Company name in lowecase without spaces. Only alphanumeric symbols are allowed.",
                         "protected": true,
                         "unique": true,
-                        "meta": { "regex": "[a-z]+$" }
+                        "meta": { "regex": "[a-z0-9-_]+$" }
                     },
                     {
                         "label": "VMS Name",
