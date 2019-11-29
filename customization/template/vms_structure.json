@@ -313,14 +313,14 @@
                         "name": "%desktop.macos.bundleIdentifier%",
                         "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName\"",
                         "unique": true,
-                        "meta": { "regex": "[\\w\\.]+$" }
+                        "meta": { "regex": "[\\w\\._-]+$" }
                     },
                     {
                         "label": "[MacOS] Protocol Handler Bundle Identifier",
                         "name": "%desktop.macos.protocolHandlerBundleIdentifier%",
                         "description": "Unique bundle identifier. Only alphanumeric symbols are allowed. Should be in format: \"com.companyName.ProductName.protocol_handler\"",
                         "unique": true,
-                        "meta": { "regex": "[\\w\\.]+$" }
+                        "meta": { "regex": "[\\w\\._-]+$" }
                     },
                     {
                         "label": "[MacOS] Sign Identity",
@@ -351,7 +351,7 @@
                         "label": "[Android] package name",
                         "name": "%mobile.android.packageName%",
                         "description": "Unique package identifier. Only lowercase alphanumeric symbols are allowed. Should be in format: \"com.companyName.productname\"",
-                        "meta": { "regex": "[a-z\\.]+$" },
+                        "meta": { "regex": "[a-z\\._-]+$" },
                         "unique": true,
                         "optional": true
                     },
