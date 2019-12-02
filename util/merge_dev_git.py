@@ -53,6 +53,8 @@ def is_inside_git():
         return "true" == execute_command("git rev-parse --is-inside-work-tree")
     except subprocess.CalledProcessError as e:
         return False
+    except WindowsError as e:
+        return False
 
 def get_header(merged, current):
     return "Merge: {} -> {}\n".format(merged, current)
