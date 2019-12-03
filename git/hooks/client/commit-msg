@@ -44,8 +44,9 @@ add_branch_name() {
 }
 
 add_change_id() {
-    # Do not create a change id if requested
-    if test "false" = "`git config --bool --get gerrit.createChangeId`" ; then
+    # Create a change id if requested
+    if test "true" != "`git config --bool --get gerrit.createChangeId`" ; then
+      cat "$1" > "$2"
       return
     fi
 
