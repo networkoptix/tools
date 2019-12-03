@@ -57,7 +57,7 @@
                         "description": "Product brand, must be consistent with licenses server",
                         "advanced": true,
                         "protected": true,
-                        "meta": { "regex": "[a-z_]+$" }
+                        "meta": { "regex": "[a-z0-9_]+$" }
                     },
                     {
                         "label": "Company Name",
@@ -351,7 +351,7 @@
                         "label": "[Android] package name",
                         "name": "%mobile.android.packageName%",
                         "description": "Unique package identifier. Only lowercase alphanumeric symbols are allowed. Should be in format: \"com.companyName.productname\"",
-                        "meta": { "regex": "[a-z\\._-]+$" },
+                        "meta": { "regex": "[a-z0-9\\._-]+$" },
                         "unique": true,
                         "optional": true
                     },
