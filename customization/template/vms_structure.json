@@ -648,7 +648,8 @@
                         "name": "desktop/macos/installer_icon.icns",
                         "description": "",
                         "type": "File",
-                        "meta": { "format": "icns" }
+                        "meta": { "format": "icns" },
+                        "optional": true
                     },
                     {
                         "label": "[Linux] Desktop icon",
