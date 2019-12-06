@@ -50,6 +50,8 @@ do
         WITH_VALGRIND=1
     elif [[ "$i" =~ "--run-valgrind-log=" ]] ; then
         VALGRIND_LOG_FILE="`echo $i | sed 's/--run-valgrind-log=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--run-branch=" ]] ; then
+        BRANCH_NAME="`echo $i | sed 's/--run-branch=\(.*\)/\1/'`"
     fi
 done
 
@@ -84,17 +86,17 @@ fi
 #echo "MSERVER_ARGS $MSERVER_ARGS"
 
 TARGET_ROOT="`pwd`"
-if [[ $TARGET_ROOT =~ (.*/build_environment/target).* ]]; then
-    TARGET_ROOT="${BASH_REMATCH[1]}"
-    #auto-detecting branch (not hg branch, but netoptix_vms dir suffix)
-    if [[ $TARGET_ROOT =~ .*netoptix_vms(.*)/build_environment/target ]]; then
-        BRANCH_NAME="${BASH_REMATCH[1]}"
-    fi
-else
-    TARGET_ROOT=$HOME/develop/netoptix_vms$BRANCH_NAME/build_environment/target
-fi
+#if [[ $TARGET_ROOT =~ (.*/build_environment/target).* ]]; then
+#    TARGET_ROOT="${BASH_REMATCH[1]}"
+#    #auto-detecting branch (not hg branch, but netoptix_vms dir suffix)
+#    if [[ $TARGET_ROOT =~ .*netoptix_vms(.*)/build_environment/target ]]; then
+#        BRANCH_NAME="${BASH_REMATCH[1]}"
+#    fi
+#else
+#    TARGET_ROOT=$HOME/develop/netoptix_vms$BRANCH_NAME/build_environment/target
+#fi
 
-BIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/
+BIN_DIR=$TARGET_ROOT/bin/
 
 if [ "`uname -s`" = "Darwin" ]; then
     PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/macosx-x64/
