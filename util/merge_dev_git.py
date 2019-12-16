@@ -4,7 +4,7 @@
 This script creates merge commit and it's description.
 
 PLEASE NOTE:
-This script is completely useless for git and is written only for backward 
+This script is completely useless for git and is written only for backward
 compatibility with miserable and feature-lacking mercurial. Consider using git commands instead.
 
 TODO: '--patience' flag should be tried for difficult merges
@@ -18,16 +18,16 @@ script:
     merge_dev.py -r prod_2.5 -p
 
 2. Merge prod_2.5 to the current branch
-git: 
-    git merge --no-ff --log prod_2.5 
+git:
+    git merge --no-ff --log prod_2.5
 script:
-    merge_dev.py -r prod_2.5 
+    merge_dev.py -r prod_2.5
 
 3. Merge current branch (e.g. 'dev') to prod_2.5
 git:
     git checkout prod_2.5 && git merge --no-ff --log dev
 script:
-    merge_dev.py -t prod_2.5 
+    merge_dev.py -t prod_2.5
 """
 
 import subprocess
@@ -100,10 +100,6 @@ def main():
 
     global verbose
     verbose = args.verbose
-
-    print("NOTE: This script is completely useless for git and is written only for backward compatibility "
-        "with miserable and feature-lacking mercurial. Consider using git commands instead.\n")
-
     current_branch = get_current_branch()
 
     global target_branch
@@ -125,7 +121,7 @@ def main():
     execute_command("git checkout " + target_branch)
     execute_command("git merge --no-ff -m ", [changelog, revision])
     execute_command("git checkout " + current_branch)
-    
+
     return 0
 
 if __name__ == "__main__":
