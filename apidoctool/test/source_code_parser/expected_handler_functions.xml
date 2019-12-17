@@ -99,6 +99,18 @@ continue description</description>
                                 </value>
                             </values>
                         </param>
+                        <param>
+                            <name>optUuid</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>optUuids</name>
+                            <type>uuidArray</type>
+                            <description/>
+                            <optional>true</optional>
+                        </param>
                     </params>
                     <result>
                         <caption>some result description</caption>
@@ -132,6 +144,18 @@ continue description</description>
                                         <description>value2 description</description>
                                     </value>
                                 </values>
+                            </param>
+                            <param>
+                                <name>optUuid</name>
+                                <type>uuid</type>
+                                <description/>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>optUuids</name>
+                                <type>uuidArray</type>
+                                <description/>
+                                <optional>true</optional>
                             </param>
                         </params>
                     </result>
@@ -169,6 +193,18 @@ continue description</description>
                                         <description>value2 description</description>
                                     </value>
                                 </values>
+                            </param>
+                            <param>
+                                <name>someParam.optUuid</name>
+                                <type>uuid</type>
+                                <description/>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>someParam.optUuids</name>
+                                <type>uuidArray</type>
+                                <description/>
+                                <optional>true</optional>
                             </param>
                             <param>
                                 <name>someParam.outputParam</name>

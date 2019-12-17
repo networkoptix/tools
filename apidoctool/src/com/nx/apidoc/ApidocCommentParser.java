@@ -488,14 +488,13 @@ public final class ApidocCommentParser
     private void parseFunctionResultParamAttr(ApidocTagParser.Item tag, Apidoc.Param param)
         throws Error
     {
-        param.optional = false;
-        if ("".equals(tag.getAttribute()))
-            param.proprietary = false;
-        else if (ATTR_PROPRIETARY.equals(tag.getAttribute()))
+        if (ATTR_PROPRIETARY.equals(tag.getAttribute()))
             param.proprietary = true;
         else if (ATTR_UNUSED.equals(tag.getAttribute()))
             param.unused = true;
-        else
+        else if(ATTR_OPT.equals(tag.getAttribute()))
+            param.optional = true;
+        else if (!"".equals(tag.getAttribute()))
             throwInvalidAttribute(tag);
     }
 

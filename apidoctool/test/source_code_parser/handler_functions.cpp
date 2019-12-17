@@ -42,6 +42,8 @@ struct SomeStruct
      */
     int outputParam;
     Enum enumParam;
+    std::optional<QnUuid> optUuid;
+    std::optional<std::vector<QnUuid>> optUuids;
 };
 
 /**%apidoc GET /urlPrefix/testFunction3
