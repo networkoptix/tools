@@ -16,6 +16,7 @@ public final class VmsCodeToApiXmlExecutor
     public File templateApiXmlFile;
     public File outputApiXmlFile;
     public File optionalOutputApiJsonFile; //< Can be null if not needed.
+    public File optionalOutputOpenApiJsonFile; //< Can be null if not needed.
 
     protected Apidoc apidoc;
 
@@ -54,6 +55,10 @@ public final class VmsCodeToApiXmlExecutor
             params.handlerRegistrationCpp(),
             new HandlerRegistrationMatcher(),
             typeManager);
+        processedFunctionsCount += processCppFile(
+            params.templateRegistrationCpp(),
+            new HandlerRegistrationMatcher(),
+            typeManager);
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");
@@ -73,6 +78,13 @@ public final class VmsCodeToApiXmlExecutor
             final String json = JsonSerializer.toJsonString(apidoc);
             Utils.writeStringToFile(optionalOutputApiJsonFile, json);
             System.out.println("    Output: " + optionalOutputApiJsonFile);
+        }
+
+        if (optionalOutputOpenApiJsonFile != null)
+        {
+            final String json = OpenApiSerializer.toString(apidoc);
+            Utils.writeStringToFile(optionalOutputOpenApiJsonFile, json);
+            System.out.println("    Output: " + optionalOutputOpenApiJsonFile);
         }
 
         return processedFunctionsCount;

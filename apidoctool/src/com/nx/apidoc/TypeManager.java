@@ -234,6 +234,9 @@ public final class TypeManager
             if (param == null)
                 param = new Apidoc.Param();
 
+            param.structName = structInfo.name;
+            param.isGeneratedFromStruct = true;
+
             param.name = namePrefix + field.name;
             if (field.type == Apidoc.Type.ENUM || field.type == Apidoc.Type.FLAGS)
                 enumToParam(param, field.typeName);

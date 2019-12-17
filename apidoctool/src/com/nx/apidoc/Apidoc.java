@@ -82,6 +82,7 @@ public final class Apidoc extends Serializable
         public boolean hasDefaultDescription = false; ///< Internal field
 
         public boolean proprietary = false; ///< attribute; optional
+        public boolean readonly = false; ///< attribute; optional
         public String name;
         public Type type;
         public String description; ///< optional
@@ -149,7 +150,6 @@ public final class Apidoc extends Serializable
 
     public static final class Function extends Serializable
     {
-        public Group parentGroup;
         public List<Param> unusedParams; ///< Internal field.
 
         public boolean arrayParams; ///< optional(false)

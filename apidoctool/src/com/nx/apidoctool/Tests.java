@@ -289,6 +289,7 @@ public final class Tests extends TestBase
         final File apiTemplateXmlFile = new File(testPath, "api_template.xml");
         final File generatedApiXmlFile = new File(outputTestPath, "api.FROM_CPP.xml");
         final File generatedApiJsonFile = new File(outputTestPath, "api.FROM_CPP.json");
+        final File generatedOpenApiJsonFile = new File(outputTestPath, "openapi.FROM_CPP.json");
 
         final VmsCodeToApiXmlExecutor executor = new VmsCodeToApiXmlExecutor();
         executor.verbose = verbose;
@@ -296,6 +297,7 @@ public final class Tests extends TestBase
         executor.templateApiXmlFile = apiTemplateXmlFile;
         executor.outputApiXmlFile = generatedApiXmlFile;
         executor.optionalOutputApiJsonFile = generatedApiJsonFile;
+        executor.optionalOutputOpenApiJsonFile = generatedOpenApiJsonFile;
         executor.params = params;
 
         final int processedFunctionsCount = executor.execute();
