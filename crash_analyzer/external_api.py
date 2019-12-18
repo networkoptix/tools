@@ -216,16 +216,15 @@ class Jira:
             if issue.fields.resolution.name == 'Rejected':
                 return logger.debug('JIRA issue {} is rejected'.format(key))
 
-            if issue.fields.resolution.name != 'Duplicate':
-                if not fix_build:
-                    min_fix_version = min(v.name for v in issue.fields.fixVersions)
-                    max_report_version = max(r.version for r in reports)
-                    if min_fix_version >= max_report_version:
-                        return logger.debug('JIRA issue {} is already fixed'.format(key))
+            if not fix_build:
+                min_fix_version = min(v.name for v in issue.fields.fixVersions)
+                max_report_version = max(r.version for r in reports)
+                if min_fix_version >= max_report_version:
+                    return logger.debug('JIRA issue {} is already fixed'.format(key))
 
-                self._transition(issue, 'Reopen')
-                logger.info('Reopen JIRA issue {} for reports from {}'.format(
-                    key, ', '.join(r.full_version for r in reports)))
+            self._transition(issue, 'Reopen')
+            logger.info('Reopen JIRA issue {} for reports from {}'.format(
+                key, ', '.join(r.full_version for r in reports)))
 
         fix_versions = set()
         for r in reports:

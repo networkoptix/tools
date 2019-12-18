@@ -188,6 +188,9 @@ def _test_jira():
         assert {'Future'} == jira.field_set('fixVersions')
         assert {'e', 'f', 'g', 'h'} == jira.attachments()
 
+        logging.info('Issue must be reopened if the problem reproduced in the next version')
+        assert 'Open' == jira.issue.fields.status.name
+
 
 def test_jira_autoclose():
     with JiraFixture(AUTOCLOSE_INDICATORS) as jira:
