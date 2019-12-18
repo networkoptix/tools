@@ -86,6 +86,19 @@ public final class SourceCodeParser
 
                             typeManager.mergeDescription(
                                 inputStructName, outputStructName, description.function);
+
+                            if (description.inputIsOptional)
+                            {
+                                for (int i = 0; i < description.function.params.size(); ++i)
+                                {
+                                    Apidoc.Param param = description.function.params.get(i);
+                                    if (param.isGeneratedFromStruct &&
+                                        param.structName.equals(inputStructName))
+                                    {
+                                        param.optional = true;
+                                    }
+                                }
+                            }
                         }
 
                         if (!ApidocUtils.checkFunctionDuplicate(group, description.function))

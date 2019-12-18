@@ -29,6 +29,7 @@ public final class ApidocCommentParser
     {
         public String urlPrefix;
         public String inputStructName;
+        public boolean inputIsOptional = false;
         public Apidoc.Function function;
     }
 
@@ -128,6 +129,8 @@ public final class ApidocCommentParser
             else if (TAG_STRUCT.equals(item.getTag()))
             {
                 description.inputStructName = item.getFullText(indentLevel);
+                if (ATTR_OPT.equals(item.getAttribute()))
+                    description.inputIsOptional = true;
             }
             else if (TAG_CAPTION.equals(item.getTag()))
             {
