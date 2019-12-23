@@ -89,9 +89,8 @@ public final class SourceCodeParser
 
                             if (description.inputIsOptional)
                             {
-                                for (int i = 0; i < description.function.params.size(); ++i)
+                                for (Apidoc.Param param: description.function.params)
                                 {
-                                    Apidoc.Param param = description.function.params.get(i);
                                     if (param.isGeneratedFromStruct &&
                                         param.structName.equals(inputStructName))
                                     {

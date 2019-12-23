@@ -7,7 +7,7 @@ import com.nx.apidoc.Apidoc;
 
 public final class OpenApiSerializer
 {
-    private static JSONObject getObject(JSONObject from, String key)
+    private static JSONObject getObject(JSONObject from, final String key)
     {
         JSONObject value = from.optJSONObject(key);
         if (value == null)
@@ -18,7 +18,7 @@ public final class OpenApiSerializer
         return value;
     }
 
-    private static JSONArray getArray(JSONObject from, String key)
+    private static JSONArray getArray(JSONObject from, final String key)
     {
         JSONArray value = from.optJSONArray(key);
         if (value == null)
@@ -73,7 +73,7 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public static String toString(Apidoc apidoc)
+    public static String toString(final Apidoc apidoc)
     {
         if (apidoc.groups.isEmpty())
             return "";
@@ -85,9 +85,8 @@ public final class OpenApiSerializer
         JSONObject url = new JSONObject();
         url.put("url", "https://localhost:7001");
         getArray(root, "servers").put(url);
-        for (int i = 0; i < apidoc.groups.size(); ++i)
+        for (final Apidoc.Group group: apidoc.groups)
         {
-            final Apidoc.Group group = apidoc.groups.get(i);
             if (!group.urlPrefix.equals("/rest"))
                 continue;
             fillPaths(getObject(root, "paths"), group);
@@ -95,11 +94,10 @@ public final class OpenApiSerializer
         return root.toString(2);
     }
 
-    private static void fillPaths(JSONObject paths, Apidoc.Group group)
+    private static void fillPaths(JSONObject paths, final Apidoc.Group group)
     {
-        for (int i = 0; i < group.functions.size(); ++i)
+        for (final Apidoc.Function function: group.functions)
         {
-            Apidoc.Function function = group.functions.get(i);
             if (function.method.isEmpty())
                 continue;
             JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
@@ -107,12 +105,11 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillPath(JSONObject path, Apidoc.Function function)
+    private static void fillPath(JSONObject path, final Apidoc.Function function)
     {
         JSONObject method = getObject(path, function.method.toLowerCase());
-        for (int i = 0; i < function.params.size(); ++i)
+        for (final Apidoc.Param param: function.params)
         {
-            Apidoc.Param param = function.params.get(i);
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
             if (!inPath && !method.equals("get") && !method.equals("delete") && param.readonly)
                 continue;
@@ -143,7 +140,7 @@ public final class OpenApiSerializer
         fillResult(method, function.result);
     }
 
-    private static void fillResult(JSONObject path, Apidoc.Result result)
+    private static void fillResult(JSONObject path, final Apidoc.Result result)
     {
         JSONObject default_ = getObject(getObject(path, "responses"), "default");
         String description = result.caption.isEmpty() ? "none" : result.caption;
@@ -161,12 +158,12 @@ public final class OpenApiSerializer
         }
         if (type.equals("object"))
         {
-            for (int i = 0; i < result.params.size(); ++i)
-                addStructParam(schema, result.params.get(i));
+            for (final Apidoc.Param param: result.params)
+                addStructParam(schema, param);
         }
     }
 
-    private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
+    private static void fillSchemaType(JSONObject schema, final Apidoc.Param param)
     {
         final String type = toString(param.type);
         schema.put("type", type);
@@ -180,7 +177,7 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void addStructParam(JSONObject schema, Apidoc.Param param)
+    private static void addStructParam(JSONObject schema, final Apidoc.Param param)
     {
         if (param.proprietary)
             return;
@@ -197,7 +194,7 @@ public final class OpenApiSerializer
         fillSchemaType(parameter, param);
     }
 
-    private static JSONObject toJson(Apidoc.Param param)
+    private static JSONObject toJson(final Apidoc.Param param)
     {
         if (param.proprietary)
             return null;
@@ -216,7 +213,7 @@ public final class OpenApiSerializer
         return result;
     }
 
-    private static String toString(Apidoc.Type type)
+    private static String toString(final Apidoc.Type type)
     {
         if (type == Apidoc.Type.FLOAT)
             return "number";
