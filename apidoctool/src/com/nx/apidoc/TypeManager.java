@@ -132,6 +132,18 @@ public final class TypeManager
         {
             if (findParam(unusedParams, structParam.name) != null) //< Skip unused params.
                 continue;
+            boolean isUnusedStructParam = false;
+            for (Apidoc.Param unusedParam: unusedParams)
+            {
+                if (structParam.name.startsWith(unusedParam.name + '.')
+                    || structParam.name.startsWith(unusedParam.name + "[]."))
+                {
+                    isUnusedStructParam = true;
+                    break;
+                }
+            }
+            if (isUnusedStructParam)
+                continue;
 
             final Apidoc.Param functionParam = findParam(functionParams, structParam.name);
 
