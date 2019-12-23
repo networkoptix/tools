@@ -166,13 +166,25 @@ public final class OpenApiSerializer
         }
     }
 
+    private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
+    {
+        final String type = toString(param.type);
+        schema.put("type", type);
+        if (type.equals("array"))
+            getObject(schema, "items").put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
+        if (param.type == Apidoc.Type.ENUM)
+        {
+            JSONArray enum_ = getArray(schema, "enum");
+            for (Apidoc.Value value: param.values)
+                enum_.put(value.name);
+        }
+    }
+
     private static void addStructParam(JSONObject schema, Apidoc.Param param)
     {
         if (param.proprietary)
             return;
         JSONObject parameter = getParamByPath(schema, param.name);
-        final String type = toString(param.type);
-        parameter.put("type", type);
         if (param.description != null && !param.description.isEmpty())
         {
             String description = param.description.replace('\n', ' ').replace('"', '\'');
@@ -180,10 +192,9 @@ public final class OpenApiSerializer
         }
         if (param.readonly)
             parameter.put("readOnly", true);
-        if (type.equals("array"))
-            getObject(parameter, "items").put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
         if (!param.optional)
             setRequired(schema, param.name);
+        fillSchemaType(parameter, param);
     }
 
     private static JSONObject toJson(Apidoc.Param param)
@@ -201,15 +212,7 @@ public final class OpenApiSerializer
             result.put("readOnly", true);
         else if (!param.optional)
             result.put("required", true);
-        JSONObject schema = new JSONObject();
-        final String type = toString(param.type);
-        schema.put("type", type);
-        if (type.equals("array"))
-        {
-            JSONObject items = getObject(schema, "items");
-            items.put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
-        }
-        result.put("schema", schema);
+        fillSchemaType(getObject(result, "schema"), param);
         return result;
     }
 
