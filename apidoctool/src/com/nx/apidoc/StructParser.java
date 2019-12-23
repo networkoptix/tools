@@ -184,7 +184,7 @@ public final class StructParser
             if (optField.items == null)
                 optField.items = new ArrayList<ApidocTagParser.Item>();
             optField.items.add(new ApidocTagParser.Item(
-                "%apidoc", "[opt]", optField.type.toString(), "", new ArrayList<String>(),
+                "%param", "[opt]", optField.type.toString(), "", new ArrayList<String>(),
                 sourceCode.getFilename(), line, verbose));
             return optField;
         }

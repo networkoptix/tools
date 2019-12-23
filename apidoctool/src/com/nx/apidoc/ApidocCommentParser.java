@@ -57,9 +57,11 @@ public final class ApidocCommentParser
 
             if (tagIterator.hasNext())
             {
-                final ApidocTagParser.Item unexpectedItem = tagIterator.next();
-                throw new Error(unexpectedItem.getErrorPrefix() +
-                    "Unexpected tag " + unexpectedItem.getTag() + " found.");
+                final ApidocTagParser.Item next = tagIterator.next();
+                if (!TAG_PARAM.equals(next.getTag()))
+                    throw new Error(next.getErrorPrefix() +
+                        "Unexpected tag " + next.getTag() + " found.");
+                parseFunctionParamAttr(next, result);
             }
             return result;
         }
@@ -291,7 +293,7 @@ public final class ApidocCommentParser
         return param;
     }
 
-    private void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
+    private static void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
         if ("".equals(item.getAttribute()))
@@ -365,7 +367,7 @@ public final class ApidocCommentParser
         return paramDescription;
     }
 
-    private void fillDefaultFormatParam(ApidocTagParser.Item item, Apidoc.Param param)
+    private static void fillDefaultFormatParam(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
         if (!param.name.equals(PARAM_FORMAT))
@@ -524,7 +526,7 @@ public final class ApidocCommentParser
         throw new Error(item.getErrorPrefix() + "Unknown tag " + item.getTag() + " found.");
     }
 
-    private void throwInvalidAttribute(ApidocTagParser.Item item)
+    private static void throwInvalidAttribute(ApidocTagParser.Item item)
         throws Error
     {
         throw new Error(item.getErrorPrefix() + "The attribute " + item.getAttribute() +
