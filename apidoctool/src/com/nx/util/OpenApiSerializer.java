@@ -155,6 +155,8 @@ public final class OpenApiSerializer
             schema = getObject(schema, "items");
             type = result.type == Apidoc.Type.ARRAY ? "object" : "string";
             schema.put("type", type);
+            if (result.type == Apidoc.Type.UUID_ARRAY)
+                schema.put("format", "uuid");
         }
         if (type.equals("object"))
         {
@@ -168,12 +170,24 @@ public final class OpenApiSerializer
         final String type = toString(param.type);
         schema.put("type", type);
         if (type.equals("array"))
-            getObject(schema, "items").put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
+        {
+            JSONObject items = getObject(schema, "items");
+            items.put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
+            if (param.type == Apidoc.Type.UUID_ARRAY)
+                items.put("format", "uuid");
+        }
         if (param.type == Apidoc.Type.ENUM)
         {
-            JSONArray enum_ = getArray(schema, "enum");
-            for (Apidoc.Value value: param.values)
-                enum_.put(value.name);
+            if (!param.values.isEmpty())
+            {
+                JSONArray enum_ = getArray(schema, "enum");
+                for (Apidoc.Value value: param.values)
+                    enum_.put(value.name);
+            }
+        }
+        else if (param.type == Apidoc.Type.UUID)
+        {
+            schema.put("format", "uuid");
         }
     }
 
@@ -217,6 +231,8 @@ public final class OpenApiSerializer
     {
         if (type == Apidoc.Type.FLOAT)
             return "number";
+        if (type == Apidoc.Type.FLAGS)
+            return "integer";
         if (
                 type != Apidoc.Type.BOOLEAN &&
                 type != Apidoc.Type.INTEGER &&
