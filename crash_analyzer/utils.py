@@ -343,7 +343,7 @@ class File:
         self.write(lambda f: yaml.dump(data, f, default_flow_style=False))
 
     def read_yaml(self, default=None):
-        return self.read(lambda f: yaml.load(f), default)
+        return self.read(lambda f: yaml.safe_load(f), default)
 
     def serialize(self, data):
         if self.extension == 'json':

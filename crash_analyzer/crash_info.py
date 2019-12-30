@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Suppress crazy amount of logs from network modules.
 logging.getLogger('chardet.charsetprober').setLevel(logging.INFO)
 
-REPORT_NAME_REGEXP = re.compile('''
+REPORT_NAME_REGEXP = re.compile(r'''
     (?P<binary> (?: (?!--). )+)
     --
     (?P<version> [0-9]+ \. [0-9]+ \. [0-9]+) \. (?P<build> [0-9]+)
