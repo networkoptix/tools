@@ -43,6 +43,7 @@
                 "file_path": "description.json",
                 "description": "List of all customizable parameters",
                 "translatable": false,
+                "is_global": true,
                 "values": [
                     {
                         "label": "Id",
@@ -527,6 +528,29 @@
                         "advanced": true
                     }
 
+                ]
+            },
+            {
+                "name": "license-new.html",
+                "label": "Eula",
+                "file_path": "license-new.html",
+                "description": "End User License Agreement",
+                "values": [
+                    {
+                        "label": "EULA Page Title",
+                        "name": "%eulaTitle%",
+                        "advanced": true,
+                        "type": "text",
+                        "placeholder": "%vmsName% EULA"
+
+                    },
+                    {
+                        "label": "EULA Content",
+                        "name": "%eulaContent%",
+                        "advanced": true,
+                        "type": "HTML",
+                        "placeholder": ""
+                    }
                 ]
             },
             {
