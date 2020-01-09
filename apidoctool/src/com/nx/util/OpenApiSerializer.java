@@ -7,24 +7,24 @@ import com.nx.apidoc.Apidoc;
 
 public final class OpenApiSerializer
 {
-    private static JSONObject getObject(JSONObject from, final String key)
+    private static JSONObject getObject(JSONObject object, String key)
     {
-        JSONObject value = from.optJSONObject(key);
+        JSONObject value = object.optJSONObject(key);
         if (value == null)
         {
             value = new JSONObject();
-            from.put(key, value);
+            object.put(key, value);
         }
         return value;
     }
 
-    private static JSONArray getArray(JSONObject from, final String key)
+    private static JSONArray getArray(JSONObject object, String key)
     {
-        JSONArray value = from.optJSONArray(key);
+        JSONArray value = object.optJSONArray(key);
         if (value == null)
         {
             value = new JSONArray();
-            from.put(key, value);
+            object.put(key, value);
         }
         return value;
     }
@@ -33,8 +33,8 @@ public final class OpenApiSerializer
     {
         schema = getObject(schema, "properties");
         final int subpathPos = path.indexOf('.');
-        String item = subpathPos < 0 ? path : path.substring(0, subpathPos);
-        path = subpathPos < 0 ? "" : path.substring(subpathPos + 1);
+        String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
+        path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
         if (item.endsWith("[]"))
         {
             item = item.substring(0, item.length() - 2);
@@ -54,8 +54,8 @@ public final class OpenApiSerializer
     private static void setRequired(JSONObject schema, String path)
     {
         final int subpathPos = path.indexOf('.');
-        String item = subpathPos < 0 ? path : path.substring(0, subpathPos);
-        path = subpathPos < 0 ? "" : path.substring(subpathPos + 1);
+        String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
+        path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
         if (item.endsWith("[]"))
         {
             item = item.substring(0, item.length() - 2);
@@ -73,16 +73,16 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public static String toString(final Apidoc apidoc)
+    public static String toString(Apidoc apidoc)
     {
         if (apidoc.groups.isEmpty())
             return "";
-        JSONObject root = new JSONObject();
+        final JSONObject root = new JSONObject();
         root.put("openapi", "3.0.0");
-        JSONObject info = getObject(root, "info");
+        final JSONObject info = getObject(root, "info");
         info.put("title", "Nx VMS API");
         info.put("version", "2.0.0");
-        JSONObject url = new JSONObject();
+        final JSONObject url = new JSONObject();
         url.put("url", "https://localhost:7001");
         getArray(root, "servers").put(url);
         for (final Apidoc.Group group: apidoc.groups)
@@ -94,20 +94,20 @@ public final class OpenApiSerializer
         return root.toString(2);
     }
 
-    private static void fillPaths(JSONObject paths, final Apidoc.Group group)
+    private static void fillPaths(JSONObject paths, Apidoc.Group group)
     {
         for (final Apidoc.Function function: group.functions)
         {
             if (function.method.isEmpty())
                 continue;
-            JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
+            final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
             fillPath(path, function);
         }
     }
 
-    private static void fillPath(JSONObject path, final Apidoc.Function function)
+    private static void fillPath(JSONObject path, Apidoc.Function function)
     {
-        JSONObject method = getObject(path, function.method.toLowerCase());
+        final JSONObject method = getObject(path, function.method.toLowerCase());
         for (final Apidoc.Param param: function.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
@@ -115,45 +115,46 @@ public final class OpenApiSerializer
                 continue;
             if (inPath)
             {
-                JSONObject parameter = toJson(param);
+                final JSONObject parameter = toJson(param);
                 parameter.put("in", "path");
                 parameter.remove("readOnly");
                 parameter.put("required", true);
-                getArray(method,"parameters").put(parameter);
+                getArray(method, "parameters").put(parameter);
                 continue;
             }
             if (param.isGeneratedFromStruct)
             {
-                JSONObject requestBody = getObject(method, "requestBody");
+                final JSONObject requestBody = getObject(method, "requestBody");
                 requestBody.put("required", true);
-                JSONObject schema = getObject(getObject(getObject(
+                final JSONObject schema = getObject(getObject(getObject(
                     requestBody, "content"), "application/json"), "schema");
                 addStructParam(schema, param);
                 continue;
             }
-            JSONObject parameter = toJson(param);
+            final JSONObject parameter = toJson(param);
             if (parameter == null)
                 continue;
             parameter.put("in", "query");
-            getArray(method,"parameters").put(parameter);
+            getArray(method, "parameters").put(parameter);
         }
         fillResult(method, function.result);
     }
 
-    private static void fillResult(JSONObject path, final Apidoc.Result result)
+    private static void fillResult(JSONObject path, Apidoc.Result result)
     {
-        JSONObject default_ = getObject(getObject(path, "responses"), "default");
-        String description = result.caption.isEmpty() ? "none" : result.caption;
-        description = description.replace('\n', ' ').replace('"', '\'');
+        final JSONObject default_ = getObject(getObject(path, "responses"), "default");
+        final String description = result.caption.isEmpty()
+            ? "none"
+            : result.caption.replace('\n', ' ').replace('"', '\'');
         default_.put("description", description);
         JSONObject schema = getObject(getObject(getObject(
-                default_, "content"), "application/json"), "schema");
+            default_, "content"), "application/json"), "schema");
         String type = toString(result.type);
         schema.put("type", type);
         if (type.equals("array"))
         {
             schema = getObject(schema, "items");
-            type = result.type == Apidoc.Type.ARRAY ? "object" : "string";
+            type = (result.type == Apidoc.Type.ARRAY) ? "object" : "string";
             schema.put("type", type);
             if (result.type == Apidoc.Type.UUID_ARRAY)
                 schema.put("format", "uuid");
@@ -165,14 +166,14 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillSchemaType(JSONObject schema, final Apidoc.Param param)
+    private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
     {
         final String type = toString(param.type);
         schema.put("type", type);
         if (type.equals("array"))
         {
-            JSONObject items = getObject(schema, "items");
-            items.put("type", param.type == Apidoc.Type.ARRAY ? "object" : "string");
+            final JSONObject items = getObject(schema, "items");
+            items.put("type", (param.type == Apidoc.Type.ARRAY) ? "object" : "string");
             if (param.type == Apidoc.Type.UUID_ARRAY)
                 items.put("format", "uuid");
         }
@@ -180,8 +181,8 @@ public final class OpenApiSerializer
         {
             if (!param.values.isEmpty())
             {
-                JSONArray enum_ = getArray(schema, "enum");
-                for (Apidoc.Value value: param.values)
+                final JSONArray enum_ = getArray(schema, "enum");
+                for (final Apidoc.Value value: param.values)
                     enum_.put(value.name);
             }
         }
@@ -191,14 +192,14 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void addStructParam(JSONObject schema, final Apidoc.Param param)
+    private static void addStructParam(JSONObject schema, Apidoc.Param param)
     {
         if (param.proprietary)
             return;
-        JSONObject parameter = getParamByPath(schema, param.name);
+        final JSONObject parameter = getParamByPath(schema, param.name);
         if (param.description != null && !param.description.isEmpty())
         {
-            String description = param.description.replace('\n', ' ').replace('"', '\'');
+            final String description = param.description.replace('\n', ' ').replace('"', '\'');
             parameter.put("description", description);
         }
         if (param.readonly)
@@ -208,15 +209,15 @@ public final class OpenApiSerializer
         fillSchemaType(parameter, param);
     }
 
-    private static JSONObject toJson(final Apidoc.Param param)
+    private static JSONObject toJson(Apidoc.Param param)
     {
         if (param.proprietary)
             return null;
-        JSONObject result = new JSONObject();
+        final JSONObject result = new JSONObject();
         result.put("name", param.name);
         if (param.description != null && !param.description.isEmpty())
         {
-            String description = param.description.replace('\n', ' ').replace('"', '\'');
+            final String description = param.description.replace('\n', ' ').replace('"', '\'');
             result.put("description", description);
         }
         if (param.readonly)
@@ -227,27 +228,23 @@ public final class OpenApiSerializer
         return result;
     }
 
-    private static String toString(final Apidoc.Type type)
+    private static String toString(Apidoc.Type type)
     {
         if (type == Apidoc.Type.FLOAT)
             return "number";
         if (type == Apidoc.Type.FLAGS)
             return "integer";
-        if (
-                type != Apidoc.Type.BOOLEAN &&
-                type != Apidoc.Type.INTEGER &&
-                type != Apidoc.Type.OBJECT &&
-                type != Apidoc.Type.ARRAY
-            )
+        if (type == Apidoc.Type.STRING_ARRAY
+            || type == Apidoc.Type.UUID_ARRAY
+            || type == Apidoc.Type.ARRAY_JSON)
         {
-            if (
-                    type == Apidoc.Type.STRING_ARRAY ||
-                    type == Apidoc.Type.UUID_ARRAY ||
-                    type == Apidoc.Type.ARRAY_JSON
-                )
-            {
-                return "array";
-            }
+            return "array";
+        }
+        if (type != Apidoc.Type.BOOLEAN
+            && type != Apidoc.Type.INTEGER
+            && type != Apidoc.Type.OBJECT
+            && type != Apidoc.Type.ARRAY)
+        {
             return "string";
         }
         return type.toString();
