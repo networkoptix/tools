@@ -25,6 +25,7 @@ public final class StructParser
             public Apidoc.Type type;
             public String typeName;
             public List<ApidocTagParser.Item> items;
+            public boolean isStdOptional = false; ///< whether the field is std::optional
         }
 
         public String name;
@@ -181,11 +182,7 @@ public final class StructParser
             final StructInfo.Field optField = parseField(
                 type.substring("std::optional<".length(), type.length() - ">".length()).trim(),
                 name);
-            if (optField.items == null)
-                optField.items = new ArrayList<ApidocTagParser.Item>();
-            optField.items.add(new ApidocTagParser.Item(
-                "%param", "[opt]", optField.type.toString(), "", new ArrayList<String>(),
-                sourceCode.getFilename(), line, verbose));
+            optField.isStdOptional = true;
             return optField;
         }
         else

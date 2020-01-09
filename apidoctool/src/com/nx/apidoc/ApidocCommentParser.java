@@ -57,11 +57,9 @@ public final class ApidocCommentParser
 
             if (tagIterator.hasNext())
             {
-                final ApidocTagParser.Item next = tagIterator.next();
-                if (!TAG_PARAM.equals(next.getTag()))
-                    throw new Error(next.getErrorPrefix() +
-                        "Unexpected tag " + next.getTag() + " found.");
-                parseFunctionParamAttr(next, result);
+                final ApidocTagParser.Item unexpectedItem = tagIterator.next();
+                throw new Error(unexpectedItem.getErrorPrefix() +
+                    "Unexpected tag " + unexpectedItem.getTag() + " found.");
             }
             return result;
         }
@@ -502,7 +500,9 @@ public final class ApidocCommentParser
             param.proprietary = true;
         else if (ATTR_UNUSED.equals(tag.getAttribute()))
             param.unused = true;
-        else if(ATTR_OPT.equals(tag.getAttribute()))
+        else if (ATTR_READONLY.equals(tag.getAttribute()))
+            param.readonly = true;
+        else if (ATTR_OPT.equals(tag.getAttribute()))
             param.optional = true;
         else if (!"".equals(tag.getAttribute()))
             throwInvalidAttribute(tag);

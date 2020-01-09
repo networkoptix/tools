@@ -254,6 +254,8 @@ public final class TypeManager
                 enumToParam(param, field.typeName);
 
             param.type = field.type;
+            if (field.isStdOptional)
+                param.optional = true;
 
             params.add(param);
             if (field.type == Apidoc.Type.OBJECT || field.type == Apidoc.Type.ARRAY)
