@@ -32,6 +32,10 @@ add_branch_name() {
     fi
     
     if test -z "$GIT_BRANCH" || test "HEAD" = "$GIT_BRANCH" ; then
+        # The check is required to support interactive rebase: ENV-259
+        if grep -q '^Branch: \S*$' < "$1"; then
+            exit 0
+        fi
         echo "cannot determine git branch"
         exit 1
     fi
