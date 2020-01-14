@@ -55,6 +55,10 @@ public final class TypeManager
                 outputDataType = outputDataType.substring(
                     0, outputDataType.length() - "List".length());
             }
+            else
+            {
+                function.result.type = Apidoc.Type.OBJECT;
+            }
             function.result.params = mergeStructParams(
                 outputDataType,
                 function.result.params,
