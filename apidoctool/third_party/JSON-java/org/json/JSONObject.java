@@ -156,6 +156,16 @@ public class JSONObject {
     private final Map<String, Object> map;
 
     /**
+     * The map where the JSONObject's properties' order is kept.
+     */
+    private final Map<String, Integer> order = new HashMap<String, Integer>();
+
+    /**
+     * Current order of next property that will be added to this JSONObject.
+     */
+    private Integer currentOrder = 0;
+
+    /**
      * It is sometimes more convenient and less ambiguous to have a
      * <code>NULL</code> object than to use Java's <code>null</code> value.
      * <code>JSONObject.NULL.equals(null)</code> returns <code>true</code>.
@@ -266,7 +276,9 @@ public class JSONObject {
         	for (final Entry<?, ?> e : m.entrySet()) {
                 final Object value = e.getValue();
                 if (value != null) {
-                    this.map.put(String.valueOf(e.getKey()), wrap(value));
+                    final String key = String.valueOf(e.getKey());
+                    this.map.put(key, wrap(value));
+                    this.order.put(key, currentOrder++);
                 }
             }
         }
@@ -1444,6 +1456,7 @@ public class JSONObject {
                         final Object result = method.invoke(bean);
                         if (result != null) {
                             this.map.put(key, wrap(result));
+                            this.order.put(key, currentOrder++);
                             // we don't use the result anywhere outside of wrap
                             // if it's a resource we should be sure to close it after calling toString
                             if(result instanceof Closeable) {
@@ -1595,6 +1608,7 @@ public class JSONObject {
         if (value != null) {
             testValidity(value);
             this.map.put(key, value);
+            this.order.put(key, currentOrder++);
         } else {
             this.remove(key);
         }
@@ -1806,6 +1820,7 @@ public class JSONObject {
      *         no value.
      */
     public Object remove(String key) {
+        this.order.remove(key);
         return this.map.remove(key);
     }
 
@@ -2326,7 +2341,14 @@ public class JSONObject {
                 }
             } else if (length != 0) {
                 final int newindent = indent + indentFactor;
-                for (final Entry<String,?> entry : this.entrySet()) {
+                final String[] keys = new String[currentOrder];
+                for (final Entry<String, Integer> keyOrder : this.order.entrySet()) {
+                    keys[keyOrder.getValue()] = keyOrder.getKey();
+                }
+                for (final String key : keys) {
+                    if (key == null) {
+                        continue;
+                    }
                     if (commanate) {
                         writer.write(',');
                     }
@@ -2334,14 +2356,13 @@ public class JSONObject {
                         writer.write('\n');
                     }
                     indent(writer, newindent);
-                    final String key = entry.getKey();
                     writer.write(quote(key));
                     writer.write(':');
                     if (indentFactor > 0) {
                         writer.write(' ');
                     }
                     try {
-                        writeValue(writer, entry.getValue(), indentFactor, newindent);
+                        writeValue(writer, this.map.get(key), indentFactor, newindent);
                     } catch (Exception e) {
                         throw new JSONException("Unable to write JSONObject value for key: " + key, e);
                     }
