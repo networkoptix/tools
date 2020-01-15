@@ -55,7 +55,7 @@ public final class TypeManager
                 outputDataType = outputDataType.substring(
                     0, outputDataType.length() - "List".length());
             }
-            else
+            else if (!outputDataType.isEmpty())
             {
                 function.result.type = Apidoc.Type.OBJECT;
             }

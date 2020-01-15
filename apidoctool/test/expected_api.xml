@@ -1768,6 +1768,7 @@ only the top level data is provided.</description>
                     </params>
                     <result>
                         <caption>Object in the requested format.</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>value</name>
@@ -2255,6 +2256,7 @@ only the top level data is provided.</description>
                     </params>
                     <result>
                         <caption>Object in the requested format.</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>resourceTypes</name>
@@ -5274,6 +5276,7 @@ only the top level data is provided.</description>
                     </params>
                     <result>
                         <caption>Object in the requested format.</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>path</name>
@@ -5920,6 +5923,7 @@ only the top level data is provided.</description>
                     </params>
                     <result>
                         <caption>List of objects in the requested format.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>

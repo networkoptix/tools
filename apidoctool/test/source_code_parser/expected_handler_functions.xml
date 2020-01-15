@@ -114,6 +114,7 @@ continue description</description>
                     </params>
                     <result>
                         <caption>some result description</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>outputParam</name>
