@@ -10,6 +10,8 @@ Options:
     EMI     set to 1 to enableMultipleInstances=1, port will be also fixed.
     PART    clean up partialy, values: l(logs), d(data), e(ecs db), m(mserver db).
     SYS     system name, default muskov (the creator).
+    PERSONAL_ID 
+            4 char long hex value unique for developer, default '8aeb'.
     WIPE    set to 1 to do not preserve config and static database.
 END
 exit 0
@@ -24,9 +26,16 @@ fi
 set -x -e
 
 ID=${1:-0}
+PERSONAL_ID=${PERSONAL_ID:-8aeb}
 DIR=${DIR:-$DEFAULT_DEVELOP/mediaserver$ID}
 SYS=${SYS:-muskov}
 CONFIG=mediaserver.conf
+
+if [[ ! $PERSONAL_ID =~ ^[a-f0-9]{4}$ ]]
+then
+    echo "Error: PERSONAL_ID must be 4 chars long hex value!"
+    exit 1
+fi
 
 if [[ "$PART" ]]; then
     [[ "$PART" =~ *l* ]] && rm $DIR/log/*
@@ -63,14 +72,19 @@ appserverPassword=
 authKey=@ByteArray(SK_1267cfbb4010058a2c8e5d2abaf917ed)
 dataDir=$DATA_DIR
 guidIsHWID=0
-logLevel=DEBUG2
+
+http-log-level=VERBOSE
+logLevel=VERBOSE
+logArchiveSize=7
 logFile=$DATA_DIR/log/log_file
+maxLogFileSize=110485760
+
 lowPriorityPassword=
 publicIPEnabled=1
 removeDbOnStartup=0
 secureAppserverConnection=1
 separateGuidForRemoteEC=1
-serverGuid={0000000$ID-8aeb-7d56-2bc7-67afae00335c}
+serverGuid={0000000$ID-$PERSONAL_ID-7d56-2bc7-67afae00335c}
 systemName=$SYS
 
 EOF
