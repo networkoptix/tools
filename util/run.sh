@@ -74,7 +74,7 @@ else
 fi
 
 # Setup required PATH variables from rdep packages and
-export PATH="$PWD/build-$EXTRA/bin:$PWD/build/bin:$PWD/build_environment/target/bin/$EXTRA:$PATH"
+export PATH="$PWD/bin:$PWD/build-$EXTRA/bin:$PWD/build/bin:$PWD/build_environment/target/bin/$EXTRA:$PATH"
 set +x
 BUILD_LIB_DIRS="$PWD/build_environment/target$ARCH/lib/$EXTRA"
 RDEP_LIB_DIRS=$(find "$PWD/../buildenv/packages/" -name lib -o -name platforms \
