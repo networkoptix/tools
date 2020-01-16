@@ -522,7 +522,8 @@
                         "name": "%eulaTitle%",
                         "advanced": true,
                         "type": "text",
-                        "placeholder": "%vmsName% EULA"
+                        "placeholder": "%vmsName% - EULA",
+                        "default": "%vmsName% - EULA"
 
                     },
                     {
