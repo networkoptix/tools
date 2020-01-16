@@ -1,5 +1,7 @@
 package com.nx.util;
 
+import java.util.HashSet;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -78,34 +80,50 @@ public final class OpenApiSerializer
         if (apidoc.groups.isEmpty())
             return "";
         final JSONObject root = new JSONObject();
-        root.put("openapi", "3.0.0");
+        root.put("openapi", "3.0.2");
         final JSONObject info = getObject(root, "info");
         info.put("title", "Nx VMS API");
-        info.put("version", "2.0.0");
+        info.put("version", "1.0.0");
         final JSONObject url = new JSONObject();
         url.put("url", "https://localhost:7001");
         getArray(root, "servers").put(url);
+        final JSONArray tags = getArray(root, "tags");
+        final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
             if (!group.urlPrefix.equals("/rest"))
                 continue;
-            fillPaths(getObject(root, "paths"), group);
+            if (!fillPaths(getObject(root, "paths"), group))
+                continue;
+            if (!usedTags.contains(group.groupName))
+            {
+                usedTags.add(group.groupName);
+                JSONObject tag = new JSONObject();
+                tag.put("name", group.groupName);
+                tag.put("description", group.groupDescription);
+                tags.put(tag);
+            }
         }
         return root.toString(2);
     }
 
-    private static void fillPaths(JSONObject paths, Apidoc.Group group)
+    private static boolean fillPaths(JSONObject paths, Apidoc.Group group)
     {
+        boolean filled = false;
         for (final Apidoc.Function function: group.functions)
         {
             if (function.method.isEmpty())
                 continue;
             final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
-            fillPath(path, function);
+            final JSONObject method = fillPath(path, function);
+            final JSONArray tags = getArray(method, "tags");
+            tags.put(group.groupName);
+            filled = true;
         }
+        return filled;
     }
 
-    private static void fillPath(JSONObject path, Apidoc.Function function)
+    private static JSONObject fillPath(JSONObject path, Apidoc.Function function)
     {
         final JSONObject method = getObject(path, function.method.toLowerCase());
         for (final Apidoc.Param param: function.params)
@@ -138,15 +156,15 @@ public final class OpenApiSerializer
             getArray(method, "parameters").put(parameter);
         }
         fillResult(method, function.result);
+        return method;
     }
 
     private static void fillResult(JSONObject path, Apidoc.Result result)
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
-        final String description = result.caption.isEmpty()
-            ? "none"
-            : result.caption.replace('\n', ' ').replace('"', '\'');
-        default_.put("description", description);
+        default_.put("description", result.caption);
+        if (result.type == Apidoc.Type.UNKNOWN)
+            return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
         String type = toString(result.type);
@@ -198,10 +216,7 @@ public final class OpenApiSerializer
             return;
         final JSONObject parameter = getParamByPath(schema, param.name);
         if (param.description != null && !param.description.isEmpty())
-        {
-            final String description = param.description.replace('\n', ' ').replace('"', '\'');
-            parameter.put("description", description);
-        }
+            parameter.put("description", param.description);
         if (param.readonly)
             parameter.put("readOnly", true);
         if (!param.optional)
@@ -216,10 +231,7 @@ public final class OpenApiSerializer
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
         if (param.description != null && !param.description.isEmpty())
-        {
-            final String description = param.description.replace('\n', ' ').replace('"', '\'');
-            result.put("description", description);
-        }
+            result.put("description", param.description);
         if (param.readonly)
             result.put("readOnly", true);
         else if (!param.optional)
