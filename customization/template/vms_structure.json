@@ -112,14 +112,6 @@
                         "unique": true
                     },
                     {
-                        "label": "EULA",
-                        "name": "license.html",
-                        "description": "End User License Agreement",
-                        "type": "File",
-                        "optional": false,
-                        "meta": { "format": "html" }
-                    },
-                    {
                         "label": "EULA Version",
                         "name": "%eulaVersion%",
                         "value": "1",
@@ -531,9 +523,9 @@
                 ]
             },
             {
-                "name": "license-new.html",
+                "name": "license.html",
                 "label": "Eula",
-                "file_path": "license-new.html",
+                "file_path": "license.html",
                 "description": "End User License Agreement",
                 "values": [
                     {
