@@ -13,17 +13,6 @@
                 "translatable": false,
                 "values": [
                     {
-                        "label": "Compatibility data file",
-                        "name": "customization.cmake",
-                        "type": "File",
-                        "advanced": true,
-                        "meta": {
-                            "format": "cmake",
-                            "size": 16384
-                        },
-                        "optional": true
-                    },
-                    {
                         "label": "Main icon",
                         "name": "main_icon.ico",
                         "description": "",
