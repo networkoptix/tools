@@ -64,3 +64,37 @@ reg("urlPrefix/testFunction3", new onTestFunction3());
  *     %param:integer someParam.outputParam overridden description
  */
 reg("urlPrefix/testFunction4", new onTestFunction4());
+
+/**%apidoc Derived description
+ * %param [unused] outputParam
+ * %param enumParam Derived param description
+ */
+struct StructDerived: SomeStruct
+{
+    /**%apidoc Additional param*/
+    int addParam;
+};
+
+/**%apidoc GET /urlPrefix/testFunction5
+ * %return
+ *     %struct StructDerived
+ */
+reg("urlPrefix/testFunction5", new onTestFunction5());
+
+/**%apidoc Nested description
+ * %param [unused] nested.outputParam
+ * %param nested.enumParam Nested param description
+ */
+struct StructNested
+{
+    /**%apidoc Nested overriden description*/
+    SomeStruct nested;
+    /**%apidoc Additional param*/
+    int addParam;
+};
+
+/**%apidoc GET /urlPrefix/testFunction6
+ * %return
+ *     %struct StructNested
+ */
+reg("urlPrefix/testFunction6", new onTestFunction6());

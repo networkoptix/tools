@@ -95,7 +95,7 @@ public final class TypeManager
             return null;
         }
         final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
-        structToParams(structParams, prefix, structInfo, paramDirection);
+        structToParams(new ArrayList<Apidoc.Param>(), structParams, prefix, structInfo, paramDirection);
         return structParams;
     }
 
@@ -131,7 +131,7 @@ public final class TypeManager
 
         final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
-        structToParams(structParams, "", structInfo, paramDirection);
+        structToParams(new ArrayList<Apidoc.Param>(), structParams, "", structInfo, paramDirection);
         for (Apidoc.Param structParam: structParams)
         {
             if (findParam(unusedParams, structParam.name) != null) //< Skip unused params.
@@ -226,14 +226,29 @@ public final class TypeManager
     }
 
     private void structToParams(
+        List<Apidoc.Param> overiddenParams,
         List<Apidoc.Param> params,
         String namePrefix,
         StructParser.StructInfo structInfo,
         ApidocCommentParser.ParamDirection paramDirection)
         throws Error
     {
+        try
+        {
+            overiddenParams.addAll(ApidocCommentParser.parseParams(
+                structInfo.items, namePrefix, paramDirection, ApidocCommentParser.ParamMode.WithToken));
+        }
+        catch (ApidocCommentParser.Error e)
+        {
+            throw new Error(e.getMessage());
+        }
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
+            final String name = namePrefix + field.name;
+            final Apidoc.Param overiddenParam = findParam(overiddenParams, name);
+            if (overiddenParam != null && overiddenParam.unused)
+                continue;
+
             Apidoc.Param param;
             try
             {
@@ -251,7 +266,7 @@ public final class TypeManager
             param.structName = structInfo.name;
             param.isGeneratedFromStruct = true;
 
-            param.name = namePrefix + field.name;
+            param.name = name;
             if (field.type == Apidoc.Type.ENUM || field.type == Apidoc.Type.FLAGS)
                 enumToParam(param, field.typeName);
 
@@ -259,7 +274,16 @@ public final class TypeManager
             if (field.isStdOptional)
                 param.optional = true;
 
-            params.add(param);
+            if (overiddenParam != null)
+            {
+                overiddenParam.fillMissedFieldsFrom(param);
+                params.add(overiddenParam);
+            }
+            else
+            {
+                params.add(param);
+            }
+
             if (field.type == Apidoc.Type.OBJECT || field.type == Apidoc.Type.ARRAY)
             {
                 StructParser.StructInfo innerStructInfo = structs.get(field.typeName);
@@ -274,7 +298,7 @@ public final class TypeManager
                     nextNamePrefix += "[].";
                 else
                     nextNamePrefix += ".";
-                structToParams(params, nextNamePrefix, innerStructInfo, paramDirection);
+                structToParams(overiddenParams, params, nextNamePrefix, innerStructInfo, paramDirection);
             }
         }
     }

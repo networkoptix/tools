@@ -66,6 +66,30 @@ public final class ApidocCommentParser
         return null; //< No tags found.
     }
 
+    public static List<Apidoc.Param> parseParams(
+        List<ApidocTagParser.Item> tags, String namePrefix, ParamDirection paramDirection, ParamMode paramMode)
+        throws Error
+    {
+        List<Apidoc.Param> result = new ArrayList<Apidoc.Param>();
+        if (tags == null)
+            return result;
+        final ApidocCommentParser parser = new ApidocCommentParser();
+        final ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
+        while (tagIterator.hasNext())
+        {
+            final ApidocTagParser.Item item = tagIterator.next();
+            if (TAG_PARAM.equals(item.getTag()))
+            {
+                final Apidoc.Param param =
+                        parser.parseParam(item, tagIterator, paramDirection, paramMode);
+                checkDuplicateParam(item, result, param.name);
+                param.name = namePrefix + param.name;
+                result.add(param);
+            }
+        }
+        return result;
+    }
+
     /**
      * @return Empty list if the comment should not convert to an XML function.
      */
@@ -540,7 +564,7 @@ public final class ApidocCommentParser
             throwInvalidAttribute(item);
     }
 
-    private void checkDuplicateParam(
+    private static void checkDuplicateParam(
         ApidocTagParser.Item item, List<Apidoc.Param> params, String paramName)
         throws Error
     {
