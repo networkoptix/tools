@@ -1333,6 +1333,16 @@ multi-channel cameras together.</description>
                                 <type>flags</type>
                                 <description>Usually this field is zero. Non-zero value indicates that the camera
 is causing a lot of network issues.</description>
+                                <values>
+                                    <value>
+                                        <name>CSF_NoFlags</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>CSF_HasIssuesFlag</name>
+                                        <description/>
+                                    </value>
+                                </values>
                             </param>
                             <param>
                                 <name>vendor</name>

@@ -94,6 +94,35 @@ public final class Apidoc extends Serializable
             values = new ArrayList<Value>();
         }
 
+        public void fillMissedFieldsFrom(Param origin)
+        {
+            if (!isGeneratedFromStruct)
+                isGeneratedFromStruct = origin.isGeneratedFromStruct;
+            if (structName == null || structName.isEmpty())
+                structName = origin.structName;
+            if (!omitOptionalFieldIfFalse)
+                omitOptionalFieldIfFalse = origin.omitOptionalFieldIfFalse;
+            if (!unused)
+                unused = origin.unused;
+            if (!hasDefaultDescription)
+                hasDefaultDescription = origin.hasDefaultDescription;
+            if (!proprietary)
+                proprietary = origin.proprietary;
+            if (!readonly)
+                readonly = origin.readonly;
+            if (name == null || name.isEmpty())
+                name = origin.name;
+            if (type == Type.values()[0])
+                type = origin.type;
+            if (description == null || description.isEmpty())
+                description = origin.description;
+            if (!optional)
+                optional = origin.optional;
+            if (values == null || values.isEmpty())
+                values = origin.values;
+            // TODO: #lbusygin: Merge param values?
+        }
+
         protected void readFromParser(Parser p) throws Parser.Error
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);

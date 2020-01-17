@@ -161,8 +161,7 @@ public final class TypeManager
             }
             if (functionParam != null)
             {
-                if (functionParam.type == Apidoc.Type.UNKNOWN)
-                    functionParam.type = structParam.type;
+                functionParam.fillMissedFieldsFrom(structParam);
 
                 mergedParams.add(functionParam);
                 if (functionParam.type == Apidoc.Type.OBJECT_JSON
@@ -172,7 +171,6 @@ public final class TypeManager
                     mergeObjectJsons(
                         functionParam.name, isArray, functionParams, structParams, mergedParams);
                 }
-                // TODO: #lbusygin: Merge param values?
             }
             else
             {
