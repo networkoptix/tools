@@ -134,6 +134,8 @@ public final class TypeManager
         structToParams(new ArrayList<Apidoc.Param>(), structParams, "", structInfo, paramDirection);
         for (Apidoc.Param structParam: structParams)
         {
+            if (structParam.unused)
+                continue;
             if (findParam(unusedParams, structParam.name) != null) //< Skip unused params.
                 continue;
             boolean isUnusedStructParam = false;
