@@ -270,7 +270,8 @@ public final class TypeManager
             if (field.type == Apidoc.Type.ENUM || field.type == Apidoc.Type.FLAGS)
                 enumToParam(param, field.typeName);
 
-            param.type = field.type;
+            if (field.type != Apidoc.Type.UNKNOWN || param.type == null)
+                param.type = field.type;
             if (field.isStdOptional)
                 param.optional = true;
 
