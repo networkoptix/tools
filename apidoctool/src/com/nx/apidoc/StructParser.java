@@ -208,7 +208,7 @@ public final class StructParser
         "QString", "QnLatin1Array", "QByteArray");
     private static final List<String> booleanAliases = Arrays.asList("bool");
     private static final List<String> uuidAliases = Arrays.asList("QnUuid");
-    private static final List<String> floatAliases = Arrays.asList("float");
+    private static final List<String> floatAliases = Arrays.asList("float", "qreal");
 
     private static final Pattern structFirstLineRegex = Pattern.compile(
         "struct [^;]*");
