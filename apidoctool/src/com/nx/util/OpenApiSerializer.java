@@ -129,8 +129,6 @@ public final class OpenApiSerializer
         for (final Apidoc.Param param: function.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
-            if (!inPath && !method.equals("get") && !method.equals("delete") && param.readonly)
-                continue;
             if (inPath)
             {
                 final JSONObject parameter = toJson(param);
