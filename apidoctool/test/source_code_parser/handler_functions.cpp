@@ -33,9 +33,15 @@ enum class Enum
     value2,
 };
 
+struct ElementStruct
+{
+};
+
 /**%apidoc Output description*/
 struct SomeStruct
 {
+    /**%apidoc[opt]:object List as object*/
+    std::vector<ElementStruct> elements;
     /**%apidoc outputParam Param description
      * %value 1 one
      * %value 2 two

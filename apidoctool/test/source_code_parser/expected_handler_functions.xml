@@ -72,6 +72,12 @@ continue description</description>
                     <method>GET</method>
                     <params>
                         <param>
+                            <name>elements</name>
+                            <type>object</type>
+                            <description>List as object</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
                             <name>outputParam</name>
                             <type>integer</type>
                             <description>Param description overridden</description>
@@ -116,6 +122,12 @@ continue description</description>
                         <caption>some result description</caption>
                         <type>object</type>
                         <params>
+                            <param>
+                                <name>elements</name>
+                                <type>object</type>
+                                <description>List as object</description>
+                                <optional>true</optional>
+                            </param>
                             <param>
                                 <name>outputParam</name>
                                 <type>integer</type>
@@ -181,6 +193,12 @@ continue description</description>
                                 <description>description</description>
                             </param>
                             <param>
+                                <name>someParam.elements</name>
+                                <type>object</type>
+                                <description>List as object</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
                                 <name>someParam.enumParam</name>
                                 <type>enum</type>
                                 <description>Enum description</description>
@@ -223,6 +241,12 @@ continue description</description>
                     <result>
                         <type>object</type>
                         <params>
+                            <param>
+                                <name>elements</name>
+                                <type>object</type>
+                                <description>List as object</description>
+                                <optional>true</optional>
+                            </param>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
@@ -270,6 +294,12 @@ continue description</description>
                                 <name>nested</name>
                                 <type>object</type>
                                 <description>Nested overriden description</description>
+                            </param>
+                            <param>
+                                <name>nested.elements</name>
+                                <type>object</type>
+                                <description>List as object</description>
+                                <optional>true</optional>
                             </param>
                             <param>
                                 <name>nested.enumParam</name>
