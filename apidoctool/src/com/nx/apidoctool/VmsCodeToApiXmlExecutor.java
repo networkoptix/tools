@@ -26,6 +26,7 @@ public final class VmsCodeToApiXmlExecutor
         System.out.println("apidoctool: parsing apidoc in C++ and inserting into XML");
 
         System.out.println("    Input: " + templateApiXmlFile);
+        System.out.println("    Input: " + vmsPath + vmsPath.separatorChar);
         try
         {
             apidoc = XmlSerializer.fromDocument(
@@ -95,7 +96,8 @@ public final class VmsCodeToApiXmlExecutor
         throws Exception
     {
         final File sourceCppFile = new File(vmsPath, sourceCppFilename);
-        System.out.println("    Input: " + sourceCppFile);
+        if (verbose)
+            System.out.println("    Parsing API functions from " + sourceCppFile);
 
         SourceCode reader = new SourceCode(sourceCppFile);
         SourceCodeParser parser = new SourceCodeParser(verbose, reader);
