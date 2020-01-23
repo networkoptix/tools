@@ -111,6 +111,16 @@ public final class SourceCodeParser
                         group.functions.add(description.function);
                     }
                 }
+                else
+                {
+                    if (verbose && match.functionName != null)
+                    {
+                        System.out.println("NOTE: " + sourceCode.getFilename() + ":" + mainLine
+                            + ": Skipping undocumented function: "
+                            + ((match.method == null) ? "" : (match.method + " "))
+                            + match.functionName);
+                    }
+                }
             }
             ++mainLine;
         }
