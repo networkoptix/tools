@@ -523,7 +523,7 @@
                         "advanced": true,
                         "type": "text",
                         "placeholder": "%vmsName% - EULA",
-                        "default": "%vmsName% - EULA"
+                        "value": "%vmsName% - EULA"
 
                     },
                     {
