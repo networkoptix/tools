@@ -1730,8 +1730,8 @@ main()
             else
                 local SELF_IP
                 nx_get_SELF_IP "$TESTCAMERA_SELF_IP_SUBNET_PREFIX"
-                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" "$@" \
-                    "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
+                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" \
+                    "files=$(nx_path "$VIDEO_FILE")" "$@"
             fi
             ;;
         log-s)
