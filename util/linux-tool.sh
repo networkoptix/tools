@@ -1574,6 +1574,37 @@ doGoCd() # "$@"
     nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
 }
 
+doRsync() # "$@"
+{
+    local -r relativeVmsDir=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
+    local -r sshVmsDir="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$relativeVmsDir"
+
+    # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
+    local -r changesetTxt="changeset.txt"
+    local -r remoteChangesetTxt="$VEGA_DEVELOP_DIR/$relativeVmsDir/$changesetTxt"
+    local -r getChangesetCommand=( git -C "$VMS_DIR" rev-parse --short=12 HEAD )
+    
+    local changeset #< Separate declaration is needed to capture the command exit status.
+    changeset=$("${getChangesetCommand[@]}")
+    if (( $? > 0 ))
+    then
+        nx_echo "WARNING: Unable to obtain changeset via: ${getChangesetCommand[@]}"
+        nx_go_verbose rm -rf "$remoteChangesetTxt"
+    else
+        nx_go_verbose echo "$changeset" "[>]" "$remoteChangesetTxt"
+    fi
+    
+    nx_echo "Rsyncing to" $(nx_lcyan)"$sshVmsDir/"$(nx_nocolor)
+    # ATTENTION: Trailing slashes are essential for rsync to work properly.
+    nx_rsync --delete --exclude "$changesetTxt" --exclude "/.git" --exclude="*.orig" \
+        "$VMS_DIR/" "$sshVmsDir/" || exit $?
+
+    if (($# > 0))
+    then
+        doGoCd "$@"
+    fi
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -1633,35 +1664,7 @@ main()
             doGoCd "$@"
             ;;
         rsync)
-            local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
-            local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
-
-            # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
-            local -r unknown_changeset="000000000000"
-            # TODO: Repurpose var for basename; rename this var to changesetTxtPath.
-            local -r changesetTxt="$VMS_DIR/changeset.txt"
-            local -r getChangesetCommand=(
-                git -C "$VMS_DIR" rev-parse --short=12 HEAD
-            )
-            if ! "${getChangesetCommand[@]}" >"$changesetTxt" \
-                || [ ! -s "$changesetTxt" ] `#< The file is missing or empty. #` \
-                || [[ $(cat "$changesetTxt") == $unknown_changeset ]]
-            then
-                nx_echo "WARNING: Unable to obtain changeset via: ${getChangesetCommand[@]}"
-                nx_go rm -rf "$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/$(basename "$changesetTxt")"
-            else
-                scp "$changesetTxt" "$VEGA_DIR$(basename "$changesetTxt")"
-            fi
-            
-            nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
-            # ATTENTION: Trailing slashes are essential for rsync to work properly.
-            nx_rsync --delete --exclude "changeset.txt" --exclude "/.git" --exclude="*.orig" \
-                "$VMS_DIR/" "$VEGA_DIR" || exit $?
-
-            if (($# > 0))
-            then
-                doGoCd "$@"
-            fi
+            doRsync "$@"
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
