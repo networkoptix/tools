@@ -26,7 +26,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${VEGA_BACKGROUND_RRGGBB="300000"}
 if nx_is_cygwin
 then
-    : ${CMAKE_GEN="Visual Studio 15 2017"}
+    : ${CMAKE_GEN="Visual Studio 16 2019"}
 else
     : ${CMAKE_GEN="Ninja"}
 fi
@@ -1888,9 +1888,10 @@ main()
             nx_is_cygwin || nx_fail "This is a Windows-only command."
             local -r SLN=$(nx_path "$BUILD_DIR\vms.sln")
             [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
-            local -r VS_EXE="C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/devenv.exe"
+            local -r VS_EXE="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
             [ ! -f "$VS_EXE" ] && nx_fail "Cannot find VS executable: $VS_EXE"
-            cmd /c start "$VS_EXE" "$SLN" "$@"
+            # Empty arg of `start` stands for window title - needed to allow exe name in quotes.
+            nx_verbose cmd /c start "" "$VS_EXE" "$SLN" "$@"
             ;;
         thg)
             nx_is_cygwin || nx_fail "Linux support not implemented yet."
