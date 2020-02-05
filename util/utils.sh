@@ -25,7 +25,8 @@ declare -i NX_GO_VERBOSE=0 #< Whether nx_go() logs each command to be executed.
 # specified.
 nx_handle_help() # "$@"
 {
-    if (( $# == 0 )) || [[ $1 == "-h" || $1 == "--help" ]]; then
+    if declare -f help_callback >/dev/null && [[ $# == 0 || $1 == "-h" || $1 == "--help" ]]
+    then
         help_callback
         exit 0
     fi
@@ -35,7 +36,8 @@ nx_handle_help() # "$@"
 # is consumed.
 nx_handle_verbose() # "$@" && shift
 {
-    if (( $# >= 1 )) && [[ $1 == "--verbose" || $1 == "-v" ]]; then
+    if (( $# >= 1 )) && [[ $1 == "--verbose" || $1 == "-v" ]]
+    then
         NX_VERBOSE=1
         set -x
         return 0
@@ -47,7 +49,8 @@ nx_handle_verbose() # "$@" && shift
 # Set the global NX_GO_VERBOSE var to 1 if required by $1; return whether $1 is consumed.
 nx_handle_go_verbose() # "$@" && shift
 {
-    if (( $# >= 1 )) && [[ $1 == "-gov" || $1 == "--go-verbose" ]]; then
+    if (( $# >= 1 )) && [[ $1 == "-gov" || $1 == "--go-verbose" ]]
+    then
         NX_GO_VERBOSE=1
         return 0
     else
@@ -58,7 +61,8 @@ nx_handle_go_verbose() # "$@" && shift
 # Set the mode to simulate rsync calls and return whether $1 is consumed.
 nx_handle_mock_rsync() # "$@" && shift
 {
-    if (( $# >= 1 )) && [[ $1 == "--mock-rsync" ]]; then
+    if (( $# >= 1 )) && [[ $1 == "--mock-rsync" ]]
+    then
         rsync() #< Define the function which overrides rsync executable name.
         {
             nx_echo
@@ -68,11 +72,14 @@ nx_handle_mock_rsync() # "$@" && shift
             # Check that all local files exist.
             local FILE
             local -i I=0
-            for FILE in "$@"; do
+            for FILE in "$@"
+            do
                  # Check all args not starting with "-" except the last, which is the remote path.
                 let I='I+1'
-                if [[ $I < $# && $FILE != \-* ]]; then
-                    if [ ! -r "$FILE" ]; then
+                if [[ $I < $# && $FILE != \-* ]]
+                then
+                    if [ ! -r "$FILE" ]
+                    then
                         nx_fail "Mocked rsync: Cannot access local file: $FILE"
                     fi
                 fi
