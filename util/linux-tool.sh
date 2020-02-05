@@ -4,7 +4,7 @@ set -o pipefail
 source "$(dirname "$0")/utils.sh"
 
 nx_load_config "${RC=?.linux-toolrc}"
-: ${VMS_DIR=""} #< nx_vms repo.
+: ${VMS_DIR=""} #< nx repo.
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty, detect "linux"/"windows".
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
@@ -17,7 +17,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.3"}
 : ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.3"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
-: ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
+: ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 : ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
 : ${VEGA_USER="$USER"}
@@ -30,7 +30,7 @@ then
 else
     : ${CMAKE_GEN="Ninja"}
 fi
-: ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
+: ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx".
 : ${SSH_MEDIATOR_HOST="la.hdw.mx"}
 : ${SSH_MEDIATOR_USER="$USER"}
 : ${TUNNEL_BACKGROUND_RRGGBB="600000"}
@@ -54,7 +54,7 @@ help_callback()
 <<EOF
 Swiss Army Knife for Linux: execute various commands.
 Use ~/$RC to override workstation-dependent environment vars (see them in this script).
-Usage: run from any dir inside the proper nx_vms dir:
+Usage: run from any dir inside the proper "nx" dir:
 
  $(basename "$0") <options> <command>
 
@@ -86,7 +86,6 @@ Here <command> can be one of the following:
 
  dmp file.dmp [args] # Cygwin-only: Analyze .dmp with crash_analyzer. Requires win-python3.
 
- share target_dir [branch] # Do hg share, update and copy ".hg/hgrc". Default branch is target_dir.
  cd # Change current dir: source dir <-> build dir.
  gen [cache] [cmake-args] # Perform cmake generation.
  build # Build via "cmake --build <dir>".
@@ -134,11 +133,6 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
     fi
 
     local DEFAULT_CUSTOMIZATION=""
-
-    # Assign DEFAULT_CUSTOMIZATION for certain branches.
-    case "$(cat "$VMS_DIR/.hg/branch")" in
-        meta*) local DEFAULT_CUSTOMIZATION="metavms";;
-    esac
 
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
@@ -235,7 +229,7 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 }
 
 # Determine value of common variables, including current repository directory: scan from the
-# current dir upwards to find root repository dir (e.g. develop/nx_vms).
+# current dir upwards to find root repository dir (e.g. develop/nx).
 # [in,out] CUSTOMIZATION
 # [in,out] VMS_DIR
 # [in] DEVELOP_DIR
@@ -244,7 +238,7 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 # [out] QT_DIR
 setup_vars()
 {
-    local -r HELP="Run this script from any dir inside nx_vms repo dir or its cmake build dir."
+    local -r HELP="Run this script from any dir inside \"nx\" repo dir or its cmake build dir."
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" "$HELP"
     local -r CMAKE_CACHE_TXT="$VMS_DIR/CMakeCache.txt"
     local -r CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
@@ -288,40 +282,6 @@ setup_vars()
         Release|Debug);;
         *) nx_fail "Invalid build configuration in \$CONFIG: [$CONFIG].";;
     esac
-}
-
-do_share() # target_path [branch]
-{
-    if (($# >= 1))
-    then
-        local -r TARGET_PATH="$1" && shift
-    else
-        nx_fail "Target path should be specified as the first arg."
-    fi
-
-    if (($# >= 1))
-    then
-        local -r BRANCH="$1" && shift
-    else
-        local -r BRANCH=$(basename "$TARGET_PATH")
-    fi
-
-    # Determine TARGET_DIR.
-    if [[ $TARGET_PATH != /* ]]
-    then #< The path is relative, treat as relative to VMS_DIR parent.
-        local -r TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
-    else #< The path is absolute: use as is.
-        local -r TARGET_DIR="$TARGET_PATH"
-    fi
-    if [[ -d $TARGET_DIR ]]
-    then
-        nx_fail "Target dir already exists: $TARGET_DIR"
-    fi
-
-    nx_verbose hg share "$(nx_path "$VMS_DIR")" "$(nx_path "$TARGET_DIR")" || return $?
-    cd "$TARGET_DIR" || return $?
-    nx_verbose hg update "$BRANCH" || return $?
-    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
 }
 
 do_gen() # [cache] "$@"
@@ -826,7 +786,7 @@ do_copyright() # "$@"
             *.h|*.cpp|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
             *.sh|*.py|Doxyfile) do_copyright_file "$FILE" "## " "$@";;
             *.bat) do_copyright_file "$FILE" ":: " "$@";;
-            .hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
+            .gitignore|.hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
             *) SKIPPED_FILES+=( "$FILE" );;
         esac
     done
@@ -867,7 +827,6 @@ do_benchmark() # "$@"
         do_gen "$@" || exit $?
         do_build --target vms_benchmark || exit $?
     fi
-    
     
     local -r parentDir="$BUILD_DIR/distrib"
     
@@ -1621,7 +1580,7 @@ main()
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
         apidoc|kit|sdk|benchmark|start-s|start-c|run-ut|testcamera|log-s| \
-        share|gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
+        gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
         print-dirs|print-vars|rsync)
             setup_vars
             ;;
@@ -1675,29 +1634,27 @@ main()
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
 
             # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
-            local -r unknown_changeset="000000000000" #< hg yields such value if no repo is found.
+            local -r unknown_changeset="000000000000"
+            # TODO: Repurpose var for basename; rename this var to changesetTxtPath.
             local -r changesetTxt="$VMS_DIR/changeset.txt"
-            local -r hdGetChangesetCommand=( `# Uncomment the desired variant. #`
-                # Not appending `+` if there are local changes.
-                hg --repository "$VMS_DIR" log --rev . --template "{node|short}"
-                
-                # Appending `+` if there are local changes.
-                #eval "hg identify | awk '{print $1}'" `#< eval needed to support "|". #`
+            local -r getChangesetCommand=(
+                git -C "$VMS_DIR" rev-parse --short=12 HEAD
             )
-            if ! "${hdGetChangesetCommand[@]}" >"$changesetTxt" \
+            if ! "${getChangesetCommand[@]}" >"$changesetTxt" \
                 || [ ! -s "$changesetTxt" ] `#< The file is missing or empty. #` \
                 || [[ $(cat "$changesetTxt") == $unknown_changeset ]]
             then
-                nx_echo "WARNING: Unable to obtain changeset via: ${hgGetChangesetCommand[@]}"
+                nx_echo "WARNING: Unable to obtain changeset via: ${getChangesetCommand[@]}"
+                nx_go rm -rf "$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/$(basename "$changesetTxt")"
+            else
+                scp "$changesetTxt" "$VEGA_DIR$(basename "$changesetTxt")"
             fi
-
+            
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
             # ATTENTION: Trailing slashes are essential for rsync to work properly.
-            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" \
+            nx_rsync --delete --exclude "changeset.txt" --exclude "/.git" --exclude="*.orig" \
                 "$VMS_DIR/" "$VEGA_DIR" || exit $?
 
-            rm -rf "$changesetTxt"
-            
             if (($# > 0))
             then
                 doGoCd "$@"
@@ -1844,10 +1801,6 @@ main()
             nx_verbose win-python3 \
                 "$(nx_path "$DEVELOP_DIR/devtools/crash_analyzer/dump_tool.py")" \
                 "$(nx_path "$DMP_FILE")" "$@"
-            ;;
-        #..........................................................................................
-        share)
-            do_share "$@"
             ;;
         #..........................................................................................
         cd)
