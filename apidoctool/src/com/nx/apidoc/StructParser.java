@@ -223,5 +223,5 @@ public final class StructParser
         "};");
 
     private static final Pattern fieldRegex = Pattern.compile(
-        "    ([_A-Za-z0-9:<>]+)\\s+([_A-Za-z0-9]+)(\\s=\\s.*)?(\\s*\\{.*}\\s*)?;.*");
+        " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(\\s=\\s.*)?(\\s*\\{.*}\\s*)?;.*");
 }
