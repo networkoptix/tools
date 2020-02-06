@@ -339,14 +339,24 @@ public final class TypeManager
         {
             if (struct.baseTypeNames != null)
             {
-                makeStructFlat(struct.fields, struct.baseTypeNames);
+                List<ApidocTagParser.Item> items = new ArrayList<ApidocTagParser.Item>();
+                makeStructFlat(struct.fields, items, struct.baseTypeNames);
+                if (!items.isEmpty())
+                {
+                    if (struct.items == null)
+                        struct.items = items;
+                    else
+                        struct.items.addAll(items);
+                }
                 struct.baseTypeNames.clear();
             }
         }
     }
 
     private void makeStructFlat(
-        List<StructParser.StructInfo.Field> fields, List<String> baseTypeNames)
+        List<StructParser.StructInfo.Field> fields,
+        List<ApidocTagParser.Item> items,
+        List<String> baseTypeNames)
         throws Error
     {
         ListIterator<String> it = baseTypeNames.listIterator(baseTypeNames.size());
@@ -358,8 +368,10 @@ public final class TypeManager
                 throw new Error("Base structure not found: \"" + baseTypeName + "\"");
 
             fields.addAll(0, baseStruct.fields);
+            if (baseStruct.items != null)
+                items.addAll(baseStruct.items);
             if (baseStruct.baseTypeNames != null)
-                makeStructFlat(fields, baseStruct.baseTypeNames);
+                makeStructFlat(fields, items, baseStruct.baseTypeNames);
         }
     }
 
