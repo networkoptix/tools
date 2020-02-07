@@ -63,6 +63,22 @@ def get_files_from_list_file(build_dir, list_file_name):
     return result
 
 
+def get_files_from_conan_manifest(build_dir):
+    result = set()
+
+    try:
+        with open(os.path.join(build_dir, "conan_imports_manifest.txt")) as manifest:
+            for line in manifest:
+                sep = line.find(':')
+                if sep > 0:
+                    file_name = line[:sep]
+                    result.add(os.path.relpath(file_name, build_dir))
+    except (OSError, IOError):
+        pass
+
+    return result
+
+
 def find_extra_files(build_dir, known_files):
     exclusions = set([
         "CTestTestfile.cmake",
@@ -71,7 +87,13 @@ def find_extra_files(build_dir, known_files):
         "build.ninja",
         "rules.ninja",
         ".ninja_deps",
-        ".ninja_log"
+        ".ninja_log",
+        "conanbuildinfo.cmake",
+        "conanbuildinfo.txt",
+        "conaninfo.txt",
+        "conan.lock",
+        "conan_imports_manifest.txt",
+        "graph_info.json",
     ])
 
     exclusion_dirs = [
@@ -114,8 +136,9 @@ def main():
 
     build_files = get_files_from_build_ninja(build_dir)
     known_files = get_files_from_list_file(build_dir, os.path.join(build_dir, "known_files.txt"))
+    conan_files = get_files_from_conan_manifest(build_dir)
 
-    all_known_files = build_files | known_files
+    all_known_files = build_files | known_files | conan_files
 
     extra_files = find_extra_files(build_dir, all_known_files)
 
