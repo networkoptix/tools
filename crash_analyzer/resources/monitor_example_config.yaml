@@ -58,6 +58,7 @@ issue_autoclose_indicators:  {
     '::create_sys': "Handles overflow",
     'RtlAllocateHeap': "Memory overflow",
     'QByteArray::QByteArray': "Memory overflow",
+    'QVector::reallocData': "Memory overflow",
     'Qt5WebKit!': "Webkit issue",
     'atio6axx': "Graphics driver issue",
     'nvoglv64': "Graphics driver issue",
