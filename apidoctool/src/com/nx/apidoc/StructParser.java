@@ -223,5 +223,6 @@ public final class StructParser
         "};");
 
     private static final Pattern fieldRegex = Pattern.compile(
-        " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(\\s=\\s.*)?(\\s*\\{.*}\\s*)?;.*");
+        " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(?:\\s=\\s.*)?(?:\\s*\\{.*}\\s*)?;.*");
+      //     0Type-----------------------------^    1Name Equals------^ Text-in-braces---^
 }
