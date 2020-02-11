@@ -94,6 +94,7 @@ public class Main
             else if ("print-deps".equals(arg.action()))
             {
                 final PrintDepsExecutor executor = new PrintDepsExecutor();
+                executor.vmsPath = arg.getFile("-vms-path");
                 executor.params = params;
                 executor.execute();
             }
