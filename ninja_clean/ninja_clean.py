@@ -79,7 +79,13 @@ def get_files_from_conan_manifest(build_dir):
     return result
 
 
-def find_extra_files(build_dir, known_files):
+def ignore_file(file):
+    if file.endswith('.pdb'):
+        return True
+
+    if file.endswith('.cpp_parameters'):
+        return True
+
     exclusions = set([
         "CTestTestfile.cmake",
         "cmake_install.cmake",
@@ -95,7 +101,10 @@ def find_extra_files(build_dir, known_files):
         "conan_imports_manifest.txt",
         "graph_info.json",
     ])
+    return file in exclusions
 
+
+def find_extra_files(build_dir, known_files):
     exclusion_dirs = [
         'CMakeFiles',
         '_autogen'
@@ -111,7 +120,7 @@ def find_extra_files(build_dir, known_files):
         relative_dir = os.path.relpath(root, build_dir)
 
         for file in files:
-            if file in exclusions:
+            if ignore_file(file):
                 continue
 
             file_path = os.path.normpath(os.path.join(relative_dir, file))
