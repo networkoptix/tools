@@ -42,8 +42,9 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
         "\\s*reg\\(\"\\w+\\/([\\w]*\\/?)\".*");
 
     /**
-     * Allow function registration with name that set as not string literal or string literal with
-     * special symbols. Such name is not intended to match function name in the apidoc comment.
+     * Allow a function registration with a name that is defined as a non-literal string or a
+     * string literal with the special symbols (:?). Such name is not intended to match its
+     * function name in the apidoc comment.
      */
     private static final Pattern regHandlerRegexForFunctorWithSpecialName = Pattern.compile(
         "\\s*reg\\((?:[^\"]|\"[\\w\\?\\:\\/]+\").*");
