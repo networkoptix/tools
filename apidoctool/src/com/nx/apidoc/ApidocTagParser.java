@@ -138,7 +138,13 @@ public final class ApidocTagParser
          */
         public String getFullText(int indentLevel)
         {
+            final boolean newLineRequired = !initialTokenUntrimmed.trim().isEmpty()
+                && textAfterInitialToken.size() > 1
+                && textAfterInitialToken.get(0).trim().isEmpty();
+            if (newLineRequired)
+                return initialTokenUntrimmed + "\n" + getTextAfterInitialToken(indentLevel);
             return initialTokenUntrimmed + getTextAfterInitialToken(indentLevel);
+
         }
 
         public  String getErrorPrefix()

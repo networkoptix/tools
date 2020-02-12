@@ -25,8 +25,8 @@
 reg("urlPrefix/testFunction2", new onTestFunction2());
 
 
-/**%apidoc
- * Enum description
+/**%apidoc Enum
+ * description
  */
 enum class Enum
 {
@@ -42,7 +42,9 @@ struct ElementStruct
 /**%apidoc Output description */
 struct SomeStruct
 {
-    /**%apidoc[opt]:object List as object*/
+    /**%apidoc[opt]:object
+     * List as object
+     */
     std::vector<ElementStruct> elements;
     /**%apidoc outputParam Param description
      * %value 1 one

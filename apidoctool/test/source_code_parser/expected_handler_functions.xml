@@ -92,7 +92,8 @@ continue description</description>
                         <param>
                             <name>enumParam</name>
                             <type>enum</type>
-                            <description>Enum description</description>
+                            <description>Enum
+description</description>
                             <optional>false</optional>
                             <values>
                                 <value>
@@ -146,7 +147,8 @@ continue description</description>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>Enum description</description>
+                                <description>Enum
+description</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
@@ -201,7 +203,8 @@ continue description</description>
                             <param>
                                 <name>someParam.enumParam</name>
                                 <type>enum</type>
-                                <description>Enum description</description>
+                                <description>Enum
+description</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
