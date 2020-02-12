@@ -80,10 +80,14 @@ def get_files_from_conan_manifest(build_dir):
 
 
 def ignore_file(file):
-    if file.endswith('.pdb'):
-        return True
+    exclusion_extensions = [
+        '.pdb',
+        '.cpp_parameters',
+        '.cab',
+        '.CABinet',
+    ]
 
-    if file.endswith('.cpp_parameters'):
+    if any(file.endswith(ext) for ext in exclusion_extensions):
         return True
 
     exclusions = set([
