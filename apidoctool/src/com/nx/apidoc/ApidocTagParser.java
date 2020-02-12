@@ -111,11 +111,9 @@ public final class ApidocTagParser
             if (textAfterInitialToken.isEmpty())
                 return "";
 
-            String indentString = "";
-            for (int i = 0; i < indentLevel * 4; ++i)
-                indentString += ' ';
+            final String indentString = Utils.stringOfSpaces(indentLevel * 4);
 
-            StringBuilder b = new StringBuilder(textAfterInitialToken.get(0));
+            StringBuilder b = new StringBuilder(Utils.trimRight(textAfterInitialToken.get(0)));
             for (int line = 1; line < textAfterInitialToken.size(); ++line)
             {
                 if (!b.toString().isEmpty()) //< skip empty lines
@@ -130,7 +128,7 @@ public final class ApidocTagParser
                     System.out.println("    WARNING: " + filename + ":" + (firstLineOfItem + line)
                             + ": Too small indent.");
                 }
-                b.append(continuationTrimmed);
+                b.append(Utils.trimRight(continuationTrimmed));
             }
             return b.toString();
         }

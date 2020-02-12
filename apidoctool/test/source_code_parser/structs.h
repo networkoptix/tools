@@ -9,7 +9,7 @@ namespace ec2 {
 enum class Enum
 {
     value1, /**<%apidoc value1 description*/
-    /**%apidoc value2 description*/
+    /**%apidoc value2 description */
     value2 = 0x1,
 };
 
@@ -18,12 +18,12 @@ namespace Qn {
     enum class IndentedEnum
     {
         value1, /**<%apidoc value1 description*/
-        /**%apidoc value2 description*/
+        /**%apidoc value2 description */
         value2
     };
 }
 
-/**%apidoc inner object description*/
+/**%apidoc inner object description */
 struct InnerStruct
 {
     QString innerParam;
@@ -43,11 +43,11 @@ struct BaseStruct
 struct NX_DEF InputStruct
     : BaseStruct
 {
-    int param1; /**<%apidoc[opt] int param description*/
+    int param1; /**<%apidoc[opt] int param description */
     InnerStruct innerObject;
 };
 
-/**%apidoc Output description*/
+/**%apidoc Output description */
 struct OutputStruct
 {
     /**%apidoc outputParam description

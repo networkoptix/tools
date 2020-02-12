@@ -116,6 +116,14 @@ public final class Utils
             strings.set(i, indentString + strings.get(i));
     }
 
+    public static String trimRight(String value)
+    {
+        int length = value.length();
+        while (length > 0 && value.charAt(length - 1) == ' ')
+            --length;
+        return (length == value.length()) ? value : value.substring(0, length);
+    }
+
     /**
      * @return Matched groups (strings may be empty but never null), or null if the line does not
      * match lineRegex.

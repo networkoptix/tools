@@ -25,11 +25,13 @@
 reg("urlPrefix/testFunction2", new onTestFunction2());
 
 
-/**%apidoc Enum description*/
+/**%apidoc
+ * Enum description
+ */
 enum class Enum
 {
-    value1, /**<%apidoc value1 description*/
-    /**%apidoc value2 description*/
+    value1, /**<%apidoc value1 description */
+    /**%apidoc value2 description */
     value2,
 };
 
@@ -37,7 +39,7 @@ struct ElementStruct
 {
 };
 
-/**%apidoc Output description*/
+/**%apidoc Output description */
 struct SomeStruct
 {
     /**%apidoc[opt]:object List as object*/
