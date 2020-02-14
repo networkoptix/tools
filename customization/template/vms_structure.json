@@ -362,9 +362,9 @@
                         "meta": { "regex": "[a-z\\.]+$" }
                     },
                     {
-                        "label": "[iOS] Bundle name",
+                        "label": "[iOS] Short Display Name",
                         "name": "%mobile.ios.bundleName%",
-                        "description": "Must differ from the [Mobile] Application Title",
+                        "description": "Must be not longer than [Mobile] Application Title",
                         "optional": true
                     },
                     {
