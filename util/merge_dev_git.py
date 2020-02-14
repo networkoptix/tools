@@ -40,10 +40,12 @@ verbose = False
 project_keys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE',
     'META', 'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
+
 def execute_command(command, extra_args=[]):
     if verbose:
         print(">> '" + command + " ".join(extra_args) + "'")
     return subprocess.check_output(command.split() + extra_args, stderr=subprocess.STDOUT, universal_newlines=True)
+
 
 def is_inside_git():
     if os.path.isdir('.git'):
@@ -51,19 +53,23 @@ def is_inside_git():
 
     try:
         return "true" == execute_command("git rev-parse --is-inside-work-tree")
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         return False
-    except WindowsError as e:
+    except WindowsError:
         return False
+
 
 def get_header(merged, current):
     return "Merge: {} -> {}\n".format(merged, current)
 
+
 def get_current_branch():
     return execute_command("git rev-parse --abbrev-ref HEAD").strip('\n')
 
+
 def has_issue_link(commit_text, project_key):
     return re.search('([^_]|\A){0}-\d+'.format(project_key.lower()), commit_text.lower()) is not None
+
 
 def include_commit(commit_text, all_commits):
     if commit_text.lower().startswith("merge"):
@@ -73,6 +79,7 @@ def include_commit(commit_text, all_commits):
     if any(has_issue_link(commit_text, key) for key in project_keys):
         return True
     return False
+
 
 def get_changelog(revision, all_commits):
     changelog = execute_command("git log --pretty=format:%s%n {}..{}".format(target_branch, revision))
@@ -88,6 +95,7 @@ def get_changelog(revision, all_commits):
         return header
 
     return '\n'.join(changes).strip('\n')
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -123,6 +131,7 @@ def main():
     execute_command("git checkout " + current_branch)
 
     return 0
+
 
 if __name__ == "__main__":
     try:
