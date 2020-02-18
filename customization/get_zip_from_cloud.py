@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import os
+import sys
 import re
 import requests
 import shutil
@@ -50,7 +51,7 @@ def download_packages(session, args, asset_ids):
             future.result()
 
 
-def get_cmd_args():
+def get_cmd_args(argv):
     description = f"This script will download zip packages for assets. Remove the --draft flag to get the latest " \
         f"published version.\n" \
         f"How to use this script:\n" \
@@ -91,7 +92,7 @@ def get_cmd_args():
     parser.set_defaults(type="other")
     parser.set_defaults(customization="")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     asset_types = ["cloud_portal", "vms", "integration", "other"]
     if args.command == FETCH_BY_TYPE and args.type not in asset_types:
@@ -101,8 +102,8 @@ def get_cmd_args():
     return args
 
 
-def main():
-    args = get_cmd_args()
+def main(argv):
+    args = get_cmd_args(argv)
     with requests.Session() as session:
         # Login and start session
         try:
@@ -120,8 +121,10 @@ def main():
 
             download_packages(session, args, asset_ids)
         except requests.HTTPError as e:
+            if __name__ != "__main__":
+                raise e
             print(e)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
