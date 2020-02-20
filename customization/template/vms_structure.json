@@ -1011,6 +1011,13 @@
                         "type": "File",
                         "optional": true,
                         "meta": { "format": "store" }
+                    },
+                    {
+                        "label": "[Android] Push Notifications settings",
+                        "name": "mobile/android/google-services.json",
+                        "type": "File",
+                        "optional": true,
+                        "meta": { "format": "application/json" }
                     }
                 ]
             },
