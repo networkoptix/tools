@@ -831,6 +831,14 @@
                         "optional": true,
                         "meta": { "width": 1024, "height": 1024, "format": "png" }
                     },
+                    {
+                        "_": "---------------------- iOS other files -------------------------",
+                        "label": "[iOS] Push Notifications settings",
+                        "name": "mobile/ios/GoogleService-Info.plist",
+                        "type": "File",
+                        "optional": true,
+                        "meta": { "format": "plist" }
+                    },
 
                     {
                         "_": "------------------ Android Launcher Icons ------------------------",
