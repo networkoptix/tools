@@ -35,6 +35,8 @@ class JiraError(Error):
 
 
 class CrashServer:
+    default_timeout = 16
+
     def __init__(self, url: str, login: str, password: str):
         self._url = url
         self._auth = (login, password)
@@ -60,7 +62,7 @@ class CrashServer:
         return self._get('get', path=('/' + name.replace('--', '/'))).content
 
     def _get(self, api: str, **params: Dict[str, str]) -> str:
-        r = requests.get(self._url + api, params=params, auth=self._auth)
+        r = requests.get(self._url + api, params=params, auth=self._auth, timeout=self.default_timeout)
         if r.status_code != 200:
             raise CrashServerError('Unable to get {} -- {}'.format(r.url, r.status_code))
 
