@@ -80,7 +80,7 @@ Here <command> can be one of the following:
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
  stop-c # Stop client-bin.
- run-ut all|test_name [args] # Run all or the specified unit test via ctest.
+ run-ut [ctest] all|test_name [args] # Run all or the specified unit test via ctest or directly.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
  log-s [installed] [find] # Tail or find server main log file for the developed or installed VMS.
 
@@ -380,27 +380,58 @@ do_build()
         "${CONFIG_ARG[@]}" "$@" "${STOP_ON_BUILD_ERRORS_ARG[@]}"
 }
 
-do_run_ut() # all|TestName "$@"
+do_run_ut() # [ctest] all|TestName "$@"
 {
     nx_cd "$BUILD_DIR"
 
-    local TEST_NAME="$1" && shift
-
-    local TEST_ARG
-    case "$TEST_NAME" in
-        all) TEST_ARG="";;
-        "") nx_fail "Expected either 'all' or a test name as the first arg.";;
-        *) TEST_ARG="-R $TEST_NAME";;
-    esac
-
-    if [ "$TARGET" = "windows" ]
+    if [[ $# > 0 && $1 == "ctest" ]]
     then
-        local -r CONFIG_ARGS=( -C "$CONFIG" )
+        shift
+        local -r -i USE_CTEST=1
     else
-        local -r CONFIG_ARGS=()
+        local -r -i USE_CTEST=0
     fi
 
-    nx_verbose ctest "${CONFIG_ARGS[@]}" $TEST_ARG "$@"
+    [[ $# == 0 ]] && nx_fail "Expected either 'all' or a test name as an arg."
+    local -r TEST_NAME="$1" && shift
+
+    if [[ $USE_CTEST == 1 ]]
+    then    
+        if [ "$TARGET" = "windows" ]
+        then
+            local -r CONFIG_ARGS=( -C "$CONFIG" )
+        else
+            local -r CONFIG_ARGS=()
+        fi
+
+        if [[ $TEST_NAME == "all" ]]
+        then
+            local -r TEST_ARGS=()
+        else
+            local -r TEST_ARGS=( -R "$TEST_NAME" )
+        fi
+        
+        nx_verbose ctest ${CONFIG_ARGS[@]+"${CONFIG_ARGS[@]}"} ${TEST_ARGS[@]+"${TEST_ARGS[@]}"} "$@"
+    else
+        if nx_is_cygwin
+        then
+            nx_append_path "$QT_DIR/bin:$BUILD_DIR/bin"
+            local -r ALL_TESTS_PATTERN="bin/*_ut.exe"
+        else
+            local -r ALL_TESTS_PATTERN="bin/*_ut"
+        fi
+        
+        if [[ $TEST_NAME == "all" ]]
+        then
+            for TEST in $ALL_TESTS_PATTERN
+            do
+                nx_verbose "$TEST" "$@"
+            done
+        else
+            nx_verbose "bin/$TEST_NAME" "$@"
+        fi
+    fi
+    
     local -i -r RESULT=$?
     if [[ $RESULT = 0 ]]
     then
@@ -805,6 +836,7 @@ do_copyright() # "$@"
     fi
 }
 
+# TODO: #mshevchenko: Adapt to the new Benchmark build system.
 do_benchmark() # "$@"
 {
     if (( $# >= 1 )) && [[ $1 == 'run' ]]
@@ -825,10 +857,11 @@ do_benchmark() # "$@"
 
     if [[ $runOnly == 0 ]]
     then
-        nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
         nx_verbose rm -rf "$BUILD_DIR/vms/vms_benchmark"
-        do_gen "$@" || exit $?
-        do_build --target vms_benchmark || exit $?
+        nx_verbose rm -rf "$BUILD_DIR/vms/distribution/standalone/vms_benchmark"
+        nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
+        do_gen -DwithVmsBenchmark=ON -DwithDistributions=ON "$@" || exit $?
+        do_build --target distribution_vms_benchmark || exit $?
     fi
     
     local -r parentDir="$BUILD_DIR/distrib"

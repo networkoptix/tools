@@ -54,7 +54,7 @@ public final class TemplateRegistrationMatcher implements RegistrationMatcher
         if ("std::nullptr_t".equals(inputDataType))
             inputDataType = null;
 
-        return new RegistrationMatch(functionName, inputDataType, outputDataType, method);
+        return new RegistrationMatch("ec2/", functionName, inputDataType, outputDataType, method);
     }
 
     //---------------------------------------------------------------------------------------------

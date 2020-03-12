@@ -184,7 +184,7 @@ public final class Tests extends TestBase
         final SourceCode reader = new SourceCode(templateFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
-            apidoc, new TemplateRegistrationMatcher(), typeManager);
+            apidoc, Arrays.<RegistrationMatcher>asList(new TemplateRegistrationMatcher()), typeManager);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
@@ -217,7 +217,7 @@ public final class Tests extends TestBase
         final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
-                apidoc, new HandlerRegistrationMatcher(), typeManager);
+                apidoc, Arrays.<RegistrationMatcher>asList(new HandlerRegistrationMatcher()), typeManager);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
