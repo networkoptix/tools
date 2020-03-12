@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source "$(dirname "$0")/utils.sh"
-
 BACKUP_SUFFIX=".repl.BAK"
 
 if [ $# -lt 3 ]
@@ -16,10 +14,10 @@ S1="$1"
 S2="$2"
 shift 2
 
-# Escape the strings to be used as sed regexes.
-SED1=$(echo "$S1" | sed -e 's/[]\/$*.^[]/\\&/g') # "${S1//\//\\\/}"
-SED2=$(echo "$S2" | sed -e 's/[\/&]/\\&/g') # "${S2//\//\\\/}"
-echo "Replacing [$SED1] with [$SED2] via sed"
+# Escaping the slash character for sed.
+SED1="${S1//\//\\\/}"
+SED2="${S2//\//\\\/}"
+echo "Replacing [$SED1] with [$SED2]"
 
 FILES_MATCHED=0
 FILES_REPLACED=0
@@ -38,7 +36,7 @@ do
     then
         FILES_MATCHED=$(expr $FILES_MATCHED + 1)
         echo "Replacing in $FILE"
-        if nx_verbose sed --in-place="$BACKUP_SUFFIX" -- "s/$SED1/$SED2/g" "$FILE"
+        if sed --in-place="$BACKUP_SUFFIX" -- "s/$SED1/$SED2/g" "$FILE"
         then
             FILES_REPLACED=$(expr $FILES_REPLACED + 1)
         else

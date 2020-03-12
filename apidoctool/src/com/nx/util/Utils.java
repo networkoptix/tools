@@ -71,21 +71,11 @@ public final class Utils
         return  namespaces[namespaces.length - 1];
     }
 
-    public static String stringOfChar(int numberOfChars, char c)
-    {
-        assert numberOfChars >= 0;
-
-        if (numberOfChars == 0)
-            return "";
-
-        char[] chars = new char[numberOfChars];
-        Arrays.fill(chars, c);
-        return new String(chars);
-    }
-
     public static String stringOfSpaces(int numberOfSpaces)
     {
-        return stringOfChar(numberOfSpaces, ' ');
+        char[] chars = new char[numberOfSpaces];
+        Arrays.fill(chars, ' ');
+        return new String(chars);
     }
 
     public static String determineLineBreak(File file)
@@ -124,14 +114,6 @@ public final class Utils
 
         for (int i = 0; i < strings.size(); ++i)
             strings.set(i, indentString + strings.get(i));
-    }
-
-    public static int determineIndent(String line)
-    {
-        int i = 0;
-        while (i < line.length() && line.charAt(i) == ' ')
-            ++i;
-        return i;
     }
 
     public static String trimRight(String value)
@@ -291,37 +273,6 @@ public final class Utils
         {
             throw new IllegalStateException(e);
         }
-    }
-
-    public static String javaEscapeString(String s)
-    {
-        final StringBuilder result = new StringBuilder();
-        for (int i = 0; i < s.length(); ++i)
-        {
-            final char c = s.charAt(i);
-            switch (c)
-            {
-                case '\t': result.append("\\t"); break;
-                case '\b': result.append("\\b"); break;
-                case '\n': result.append("\\n"); break;
-                case '\r': result.append("\\r"); break;
-                case '\f': result.append("\\f"); break;
-                // NOTE: Apostrophe does not need to be escaped in Java strings.
-                case '"': result.append("\\\""); break;
-                case '\\': result.append("\\\\"); break;
-                default:
-                    if (c >= 32 && c <= 126) //< NOTE: The char with the code 127 is non-printable.
-                    {
-                        result.append(c);
-                    }
-                    else
-                    {
-                        final String hex = Integer.toHexString(c);
-                        result.append("\\u" + stringOfChar(4 - hex.length(), '0') + hex);
-                    }
-            }
-        }
-        return result.toString();
     }
 
     //---------------------------------------------------------------------------------------------
