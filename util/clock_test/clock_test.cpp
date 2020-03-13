@@ -56,7 +56,7 @@ void logTimeDiff(const Time& startTime, const Time& time)
 
 int main()
 {
-    std::cout << "Comparing different sgtd::chrono clocks.\n";
+    std::cout << "Comparing different std::chrono clocks.\n";
     
     const Time startTime;
     

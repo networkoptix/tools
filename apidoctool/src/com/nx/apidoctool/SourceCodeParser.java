@@ -2,7 +2,12 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.*;
 import com.nx.util.SourceCode;
+import com.nx.util.SourceCodeEditor;
+import com.nx.util.Utils;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,8 +15,6 @@ import java.util.List;
  */
 public final class SourceCodeParser
 {
-    private int mainLine;
-
     public final class Error
         extends Exception
     {
@@ -30,13 +33,23 @@ public final class SourceCodeParser
     {
         this.verbose = verbose;
         this.sourceCode = sourceCode;
+
+        try
+        {
+            this.generatedCommentsSourceCodeEditor = new SourceCodeEditor(new File(sourceCode.getFilename()));
+        }
+        catch (IOException e)
+        {
+            this.generatedCommentsSourceCodeEditor = null; //< Warning suppress.
+            System.err.println("ERROR: Unable to create generated comments file: " + e.getMessage());
+        }
     }
 
     /**
      * @return Number of API functions processed.
      */
     public int parseApidocComments(
-        Apidoc apidoc, RegistrationMatcher matcher, TypeManager typeManager)
+        Apidoc apidoc, List<RegistrationMatcher> matchers, TypeManager typeManager)
         throws Error,
         ApidocUtils.Error,
         SourceCode.Error,
@@ -51,74 +64,80 @@ public final class SourceCodeParser
         int processedFunctionCount = 0;
         while (mainLine <= sourceCode.getLineCount())
         {
-            RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
-            if (match != null)
+            for (RegistrationMatcher matcher: matchers)
             {
-                final List<ApidocCommentParser.FunctionDescription> functions =
-                    createFunctionsFromComment(typeManager);
-                if (functions != null && !functions.isEmpty())
+                RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
+                if (match != null)
                 {
-                    final String urlPrefix = functions.get(0).urlPrefix;
-                    final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
-
-                    for (ApidocCommentParser.FunctionDescription description: functions)
+                    final List<ApidocCommentParser.FunctionDescription> functions =
+                        createFunctionsFromComment(typeManager);
+                    if (functions != null && !functions.isEmpty())
                     {
-                        if (!urlPrefix.equals(description.urlPrefix))
+                        final String urlPrefix = functions.get(0).urlPrefix;
+                        final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
+
+                        for (ApidocCommentParser.FunctionDescription description: functions)
                         {
-                            throw new Error("URL prefix is differ in one apidoc comment: ["
-                                + urlPrefix + "] and [" + description.urlPrefix + "]");
-                        }
-                        if (verbose)
-                            System.out.println("            " + description.function.name);
-
-                        checkFunctionProperties(match, description.function);
-                        if (typeManager != null)
-                        {
-                            String inputStructName = description.inputStructName;
-                            if (inputStructName == null)
-                                inputStructName = match.inputDataType;
-
-                            String outputStructName = null;
-                            if (description.function.result != null)
-                                outputStructName = description.function.result.outputStructName;
-                            if (outputStructName == null)
-                                outputStructName = match.outputDataType;
-
-                            typeManager.mergeDescription(
-                                inputStructName, outputStructName, description.function);
-
-                            if (description.inputIsOptional)
+                            if (!urlPrefix.equals(description.urlPrefix))
                             {
-                                for (Apidoc.Param param: description.function.params)
+                                throw new Error("URL prefix is differ in one apidoc comment: ["
+                                    + urlPrefix + "] and [" + description.urlPrefix + "]");
+                            }
+                            if (verbose)
+                                System.out.println("            " + description.function.name);
+
+                            checkFunctionProperties(match, description.function);
+                            if (typeManager != null)
+                            {
+                                String inputStructName = description.inputStructName;
+                                if (inputStructName == null)
+                                    inputStructName = match.inputDataType;
+
+                                String outputStructName = null;
+                                if (description.function.result != null)
+                                    outputStructName = description.function.result.outputStructName;
+                                if (outputStructName == null)
+                                    outputStructName = match.outputDataType;
+
+                                typeManager.mergeDescription(
+                                        inputStructName, outputStructName, description.function);
+
+                                if (description.inputIsOptional)
                                 {
-                                    if (param.isGeneratedFromStruct &&
-                                        param.structName.equals(inputStructName))
+                                    for (Apidoc.Param param: description.function.params)
                                     {
-                                        param.optional = true;
+                                        if (param.isGeneratedFromStruct &&
+                                            param.structName.equals(inputStructName))
+                                        {
+                                            param.optional = true;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
-                        {
-                            throw new Error(
-                                "Duplicate function found: " + description.function.name +
-                                ", method: " + description.function.method);
-                        }
+                            if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
+                            {
+                                throw new Error(
+                                    "Duplicate function found: " + description.function.name +
+                                    ", method: " + description.function.method);
+                            }
 
-                        ++processedFunctionCount;
-                        group.functions.add(description.function);
+                            ++processedFunctionCount;
+                            group.functions.add(description.function);
+                        }
                     }
-                }
-                else
-                {
-                    if (verbose && match.functionName != null)
+                    else
                     {
-                        System.out.println("NOTE: " + sourceCode.getFilename() + ":" + mainLine
-                            + ": Skipping undocumented function: "
-                            + ((match.method == null) ? "" : (match.method + " "))
-                            + match.functionName);
+                        if (verbose && match.functionName != null)
+                        {
+                            System.out.println("NOTE: " + sourceCode.getFilename() + ":" + mainLine
+                                + ": Skipping undocumented function: "
+                                + ((match.method == null) ? "" : (match.method + " "))
+                                + match.functionName);
+
+                            if (generatedCommentsSourceCodeEditor != null)
+                                generateCommentForUndocumentedFunction(match);
+                        }
                     }
                 }
             }
@@ -127,7 +146,61 @@ public final class SourceCodeParser
         if (verbose)
             System.out.println("        Functions count: " + processedFunctionCount);
 
+        if (generatedCommentsSourceCodeEditor != null)
+            saveGeneratedCommentsFile();
+
         return processedFunctionCount;
+    }
+
+    private void saveGeneratedCommentsFile()
+    {
+        final File generatedCommentsFile = Utils.insertSuffix(new File(sourceCode.getFilename()), ".with_undoc_stubs");
+
+        try
+        {
+            generatedCommentsSourceCodeEditor.saveToFile(generatedCommentsFile);
+            System.out.println("ATTENTION: Generated file with stubs comments: "
+                + generatedCommentsFile.getAbsolutePath());
+        }
+        catch (IOException e)
+        {
+            System.err.println("ERROR: Unable to save generated comments file "
+                + generatedCommentsFile.getAbsolutePath() + ": " + e.getMessage());
+        }
+    }
+
+    private void generateCommentForUndocumentedFunction(RegistrationMatch registrationMatch)
+    {
+        final List<String> comment = new ArrayList<String>();
+        final String method = (registrationMatch.method == null) ? "TODO" : registrationMatch.method;
+        final String urlPrefix = (registrationMatch.urlPrefix == null) ? "TODO/" : registrationMatch.urlPrefix;
+        comment.add("/**%apidoc[proprietary] " + method  + " /" + urlPrefix + registrationMatch.functionName);
+        comment.add(" * %// TODO: Write apidoc comment.");
+
+        int lineBeforeReg = mainLine - 1;
+
+        // If the line before the reg line is a "//"-comment, include it into apidoc as "%//".
+        if (mainLine > 1 && sourceCode.getLine(mainLine - 1).trim().startsWith("//"))
+        {
+            final String sourceCodeCommentBody =
+                sourceCode.getLine(mainLine - 1).trim().substring("//".length()).trim();
+            generatedCommentsSourceCodeEditor.deleteLine(generatedCommentsInsertedLinesCount + mainLine - 1);
+            --generatedCommentsInsertedLinesCount;
+            --lineBeforeReg;
+            comment.add(" * %// " + sourceCodeCommentBody);
+        }
+
+        // If there was no empty line before the function registration, insert it before the new comment.
+        if (lineBeforeReg > 0 && !sourceCode.getLine(lineBeforeReg).trim().isEmpty())
+            comment.add(0, "");
+
+        comment.add(" */");
+
+        Utils.indentStrings(comment, Utils.determineIndent(sourceCode.getLine(mainLine)));
+
+        final int lineToInsertBefore = mainLine + generatedCommentsInsertedLinesCount;
+        final int insertedLineCount = generatedCommentsSourceCodeEditor.insertLines(lineToInsertBefore, comment);
+        generatedCommentsInsertedLinesCount += insertedLineCount;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -182,5 +255,8 @@ public final class SourceCodeParser
     private final boolean verbose;
     private final SourceCode sourceCode;
 
-    //---------------------------------------------------------------------------------------------
+    private int mainLine;
+
+    private SourceCodeEditor generatedCommentsSourceCodeEditor;
+    private int generatedCommentsInsertedLinesCount;
 }
