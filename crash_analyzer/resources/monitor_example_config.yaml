@@ -12,7 +12,7 @@ logging:
     # cloud_watch:
     #   level: debug #< For AWS Cloud Watch support.
     #   log_group: crash_analyzer
-    #   stream_name: crash_analyzer_moscow 
+    #   stream_name: crash_analyzer_moscow
     #   create_log_group: False
     # botocore_level: debug #< Enable botocore debug logs.
 
@@ -54,16 +54,16 @@ upload:
     prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.
 
 # The issue should be closed if stack contains any of those lines.
-issue_autoclose_indicators:  {
-    '::create_sys': "Handles overflow",
-    'RtlAllocateHeap': "Memory overflow",
-    'QByteArray::QByteArray': "Memory overflow",
-    'QVector::reallocData': "Memory overflow",
-    'Qt5WebKit!': "Webkit issue",
-    'atio6axx': "Graphics driver issue",
-    'nvoglv64': "Graphics driver issue",
-    'ig75icd64': "Graphics driver issue",
-    'FileOpenScreenHook64': "3rd party software issue",
-    'glGetString': "OpenGL issue",
-    'initializeOpenGLFunctions': "OpenGL issue",
-}
+issue_autoclose_indicators:
+    '::create_sys': "Handles overflow"
+    'RtlAllocateHeap': "Memory overflow"
+    'QByteArray::QByteArray': "Memory overflow"
+    'QVector::reallocData': "Memory overflow"
+    'QVector::append': "Memory overflow"
+    'Qt5WebKit!': "Webkit issue"
+    'atio6axx': "Graphics driver issue"
+    'nvoglv64': "Graphics driver issue"
+    'ig75icd64': "Graphics driver issue"
+    'FileOpenScreenHook64': "3rd party software issue"
+    'glGetString': "OpenGL issue"
+    'initializeOpenGLFunctions': "OpenGL issue"
