@@ -606,7 +606,7 @@ public final class ApidocCommentParser
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
-        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?([\\w|[\\{\\w\\}]/]+)(.*)", Pattern.DOTALL);
+        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w[\\w\\{\\}/\\?]*)(.*)", Pattern.DOTALL);
       //     0HttpMthd        1UrlPre   2FnNm                3Txt
       //       GET             /ec2     getRe                \nRe
 }

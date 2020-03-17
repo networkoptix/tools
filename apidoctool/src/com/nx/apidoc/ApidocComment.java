@@ -92,10 +92,10 @@ public abstract class ApidocComment
 //     S* "*" S+ "%" Tag (S* "[" TagAttr "]")? (S* ":" S* TagLabel)? \
 //     S* (S Char+ (NewLine TextLine)*)?
 //
-// MethodName ::= ("/api/" | "/ec2/") [_A-Za-z0-9]+
+// FunctionName ::= ("/api/" | "/ec2/") [_A-Za-z0-9{}/]+ //< Braces are used as placeholders.
 //
 // FunctionHeader ::=
-//     "%apidoc" (S* ":" S* "arrayParams")? (S* "[" TagAttr "]")? S ("GET" | "POST") S MethodName
+//     "%apidoc" (S* ":" S* "arrayParams")? (S* "[" TagAttr "]")? S ("GET" | "POST") S FunctionName
 //
 // FunctionApidocComment ::= //< NOTE: Can contain multiple "%apidoc" tags.
 //     S* "/**" (FunctionHeader (NewLine TextLine)* (NewLine Item)*)+ NewLine S* "*/"
