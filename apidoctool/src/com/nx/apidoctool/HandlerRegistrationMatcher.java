@@ -18,19 +18,19 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
         String[] params;
 
         params = sourceCode.matchLine(line, regHandlerRegexForFunctor);
-        if (params != null && params.length == 2)
-            return new RegistrationMatch(params[0], params[1], null, null, null);
+        if (params != null)
+            return new RegistrationMatch(params[0], null, null, null);
 
         params = sourceCode.matchLine(line, regHandlerRegexForFunctorWithSpecialName);
         if (params != null)
-            return new RegistrationMatch(null, null, null, null, null);
+            return new RegistrationMatch(null, null, null, null);
 
         params = sourceCode.matchLine(line, regHandlerRegexForFunctorWithInvalidName);
         if (params != null)
         {
             System.out.println("WARNING: " + sourceCode.getFilename() + ":" + line + ": "
                 + "Invalid API function name.");
-            return new RegistrationMatch(null, null, null, null, null);
+            return new RegistrationMatch(null, null, null, null);
         }
 
         return null;
@@ -39,7 +39,7 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern regHandlerRegexForFunctor = Pattern.compile(
-        "\\s*reg\\(\"(\\w+\\/)([\\w]*\\/?)\".*");
+        "\\s*reg\\(\"\\w+\\/([\\w]*\\/?)\".*");
 
     /**
      * Allow a function registration with a name that is defined as a non-literal string or a

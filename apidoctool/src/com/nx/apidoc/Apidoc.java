@@ -227,7 +227,7 @@ public final class Apidoc extends Serializable
     public static final class Group extends Serializable
     {
         public String groupName;
-        public String urlPrefix; ///< optional, formatted like "api/".
+        public String urlPrefix; ///< optional
         public String groupDescription;
         public List<Function> functions; ///< optional
 

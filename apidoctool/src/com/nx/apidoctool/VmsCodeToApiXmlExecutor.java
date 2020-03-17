@@ -7,7 +7,6 @@ import com.nx.util.*;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class VmsCodeToApiXmlExecutor
@@ -51,11 +50,15 @@ public final class VmsCodeToApiXmlExecutor
         int processedFunctionsCount = 0;
         processedFunctionsCount += processCppFile(
             params.templateRegistrationCpp(),
-            Arrays.<RegistrationMatcher>asList(new TemplateRegistrationMatcher(), new HandlerRegistrationMatcher()),
+            new TemplateRegistrationMatcher(),
             typeManager);
         processedFunctionsCount += processCppFile(
             params.handlerRegistrationCpp(),
-            Arrays.<RegistrationMatcher>asList(new HandlerRegistrationMatcher()),
+            new HandlerRegistrationMatcher(),
+            typeManager);
+        processedFunctionsCount += processCppFile(
+            params.templateRegistrationCpp(),
+            new HandlerRegistrationMatcher(),
             typeManager);
 
         if (processedFunctionsCount == 0)
@@ -89,7 +92,7 @@ public final class VmsCodeToApiXmlExecutor
     }
 
     private int processCppFile(
-        String sourceCppFilename, List<RegistrationMatcher> matchers, TypeManager typeManager)
+        String sourceCppFilename, RegistrationMatcher matcher, TypeManager typeManager)
         throws Exception
     {
         final File sourceCppFile = new File(vmsPath, sourceCppFilename);
@@ -98,6 +101,6 @@ public final class VmsCodeToApiXmlExecutor
 
         SourceCode reader = new SourceCode(sourceCppFile);
         SourceCodeParser parser = new SourceCodeParser(verbose, reader);
-        return parser.parseApidocComments(apidoc, matchers, typeManager);
+        return parser.parseApidocComments(apidoc, matcher, typeManager);
     }
 }

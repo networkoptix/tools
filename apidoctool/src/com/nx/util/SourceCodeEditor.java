@@ -18,7 +18,7 @@ public final class SourceCodeEditor
     }
 
     public void saveToFile(File file)
-        throws IOException
+        throws IOException, Error
     {
         Utils.writeStringListToFile(file, lines, lineBreak);
     }
