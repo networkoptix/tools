@@ -2,6 +2,11 @@
 .idea
 .vs
 .vscode
+.gradle/
 
 # Precompiled files.
 *.pyc
+
+# Build and test output files
+/apidoctool/build/
+/apidoctool/out_test/
