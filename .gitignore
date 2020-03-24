@@ -1,0 +1,7 @@
+# IDE and misc software files.
+.idea
+.vs
+.vscode
+
+# Precompiled files.
+*.pyc
