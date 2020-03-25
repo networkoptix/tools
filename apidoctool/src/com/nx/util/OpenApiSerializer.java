@@ -85,7 +85,7 @@ public final class OpenApiSerializer
         info.put("title", "Nx VMS API");
         info.put("version", "1.0.0");
         final JSONObject url = new JSONObject();
-        url.put("url", "https://localhost:7001");
+        url.put("url", "/");
         getArray(root, "servers").put(url);
         final JSONArray tags = getArray(root, "tags");
         final HashSet<String> usedTags = new HashSet<String>();
