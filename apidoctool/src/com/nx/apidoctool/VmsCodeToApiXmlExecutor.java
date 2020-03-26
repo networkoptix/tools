@@ -4,8 +4,11 @@ import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocUtils;
 import com.nx.apidoc.TypeManager;
 import com.nx.util.*;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,7 @@ public final class VmsCodeToApiXmlExecutor
 {
     public File vmsPath;
     public File templateApiXmlFile;
+    public File openApiTemplateJsonFile;
     public File outputApiXmlFile;
     public File optionalOutputApiJsonFile; //< Can be null if not needed.
     public File optionalOutputOpenApiJsonFile; //< Can be null if not needed.
@@ -83,7 +87,27 @@ public final class VmsCodeToApiXmlExecutor
 
         if (optionalOutputOpenApiJsonFile != null)
         {
-            final String json = OpenApiSerializer.toString(apidoc);
+            JSONObject openApi;
+            try
+            {
+                openApi = new JSONObject(
+                    new String(Files.readAllBytes(openApiTemplateJsonFile.toPath())));
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error loading Open API template JSON file '"
+                    + openApiTemplateJsonFile + "': " + e.getMessage());
+            }
+            String json;
+            try
+            {
+                json = OpenApiSerializer.toString(apidoc, openApi);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error serializing with Open API template JSON file '"
+                        + openApiTemplateJsonFile + "': " + e.getMessage());
+            }
             Utils.writeStringToFile(optionalOutputOpenApiJsonFile, json);
             System.out.println("    Output: " + optionalOutputOpenApiJsonFile);
         }

@@ -343,6 +343,10 @@ public final class ApidocCommentParser
             fillDefaultFormatParam(item, param);
             param.hasDefaultDescription = true;
         }
+        else if (ATTR_REF.equals(item.getAttribute()))
+        {
+            param.isRef = true;
+        }
         else if (ATTR_UNUSED.equals(item.getAttribute()))
         {
             param.unused = true;

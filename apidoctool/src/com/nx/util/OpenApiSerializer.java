@@ -75,25 +75,18 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public static String toString(Apidoc apidoc)
+    public static String toString(Apidoc apidoc, JSONObject root) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
-        final JSONObject root = new JSONObject();
-        root.put("openapi", "3.0.2");
-        final JSONObject info = getObject(root, "info");
-        info.put("title", "Nx VMS API");
-        info.put("version", "1.0.0");
-        final JSONObject url = new JSONObject();
-        url.put("url", "/");
-        getArray(root, "servers").put(url);
         final JSONArray tags = getArray(root, "tags");
+        final JSONObject refParameters = getObject(getObject(root, "components"), "parameters");
         final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
             if (!group.urlPrefix.equals("/rest"))
                 continue;
-            if (!fillPaths(getObject(root, "paths"), group))
+            if (!fillPaths(getObject(root, "paths"), group, refParameters))
                 continue;
             if (!usedTags.contains(group.groupName))
             {
@@ -107,7 +100,8 @@ public final class OpenApiSerializer
         return root.toString(2);
     }
 
-    private static boolean fillPaths(JSONObject paths, Apidoc.Group group)
+    private static boolean fillPaths(
+        JSONObject paths, Apidoc.Group group, JSONObject refParameters) throws Exception
     {
         boolean filled = false;
         for (final Apidoc.Function function: group.functions)
@@ -115,7 +109,7 @@ public final class OpenApiSerializer
             if (function.method.isEmpty())
                 continue;
             final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
-            final JSONObject method = fillPath(path, function);
+            final JSONObject method = fillPath(path, function, refParameters);
             final JSONArray tags = getArray(method, "tags");
             tags.put(group.groupName);
             filled = true;
@@ -123,7 +117,8 @@ public final class OpenApiSerializer
         return filled;
     }
 
-    private static JSONObject fillPath(JSONObject path, Apidoc.Function function)
+    private static JSONObject fillPath(
+        JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.method.toLowerCase());
         for (final Apidoc.Param param: function.params)
@@ -147,10 +142,21 @@ public final class OpenApiSerializer
                 addStructParam(schema, param);
                 continue;
             }
-            final JSONObject parameter = toJson(param);
-            if (parameter == null)
-                continue;
-            parameter.put("in", "query");
+            JSONObject parameter;
+            if (param.isRef)
+            {
+                if (!refParameters.has(param.name))
+                    throw new Exception("Ref parameter '" + param.name + "' is missed");
+                parameter = new JSONObject();
+                parameter.put("$ref", "#/components/parameters/" + param.name);
+            }
+            else
+            {
+                parameter = toJson(param);
+                if (parameter == null)
+                    continue;
+                parameter.put("in", "query");
+            }
             getArray(method, "parameters").put(parameter);
         }
         fillResult(method, function.result);

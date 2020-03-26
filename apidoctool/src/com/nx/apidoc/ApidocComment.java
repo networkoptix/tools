@@ -23,6 +23,7 @@ public abstract class ApidocComment
     protected static final String ATTR_READONLY = "[readonly]";
     protected static final String ATTR_OPT = "[opt]";
     protected static final String ATTR_DEFAULT = "[default]";
+    protected static final String ATTR_REF = "[ref]";
     protected static final String ATTR_UNUSED = "[unused]";
 
     protected static final String LABEL_ARRAY_PARAMS = "arrayParams";

@@ -87,7 +87,10 @@ public class Main
                 executor.templateApiXmlFile = arg.getFile("-template-xml");
                 executor.outputApiXmlFile = arg.getFile("-output-xml");
                 executor.optionalOutputApiJsonFile = arg.getOptionalFile("-output-json");
-                executor.optionalOutputOpenApiJsonFile = arg.getOptionalFile("-output-openapi-json");
+                executor.optionalOutputOpenApiJsonFile =
+                    arg.getOptionalFile("-output-openapi-json");
+                if (executor.optionalOutputOpenApiJsonFile != null)
+                    executor.openApiTemplateJsonFile = arg.getFile("-openapi-template-json");
                 executor.params = params;
                 executor.execute();
             }

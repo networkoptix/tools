@@ -80,6 +80,7 @@ public final class Apidoc extends Serializable
 
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
+        public boolean isRef = false; ///< Internal field
 
         public boolean proprietary = false; ///< attribute; optional(default=false)
         public boolean readonly = false; ///< attribute; optional(default=false)
