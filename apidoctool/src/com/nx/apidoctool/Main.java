@@ -90,7 +90,10 @@ public class Main
                 executor.optionalOutputOpenApiJsonFile =
                     arg.getOptionalFile("-output-openapi-json");
                 if (executor.optionalOutputOpenApiJsonFile != null)
-                    executor.openApiTemplateJsonFile = arg.getFile("-openapi-template-json");
+                {
+                    executor.openApiTemplateJsonFile =
+                        arg.getOptionalFile("-openapi-template-json");
+                }
                 executor.params = params;
                 executor.execute();
             }

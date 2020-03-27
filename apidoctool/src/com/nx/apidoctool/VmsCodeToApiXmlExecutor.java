@@ -90,8 +90,17 @@ public final class VmsCodeToApiXmlExecutor
             JSONObject openApi;
             try
             {
-                openApi = new JSONObject(
-                    new String(Files.readAllBytes(openApiTemplateJsonFile.toPath())));
+                if (openApiTemplateJsonFile != null)
+                {
+                    openApi = new JSONObject(
+                        new String(Files.readAllBytes(openApiTemplateJsonFile.toPath())));
+                }
+                else
+                {
+                    openApi = new JSONObject();
+                    System.out.println(
+                            "    WARNING: Open API schema template is not provided");
+                }
             }
             catch (Exception e)
             {
