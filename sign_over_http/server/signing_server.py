@@ -129,9 +129,7 @@ async def sign_handler(request):
     params = request.query
     customization = params['customization']
     trusted_timestamping = (params['trusted_timestamping'].lower() == 'true')
-    sign_timeout = int(params['sign_timeout'])
-    if sign_timeout <= 0:
-        sign_timeout = DEFAULT_SIGN_TIMEOUT
+    sign_timeout = int(params['sign_timeout']) if 'sign_timeout' in params else DEFAULT_SIGN_TIMEOUT
     logging.info('Signing {0} with customization {1} {2}'.format(
         target_file_name,
         customization,
