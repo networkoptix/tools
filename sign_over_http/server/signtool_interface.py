@@ -72,7 +72,7 @@ Other options:
 """
 
 import os
-from environment import execute_command
+from environment import execute_command_async
 
 
 def _signtool_executable(signtool_directory):
@@ -122,27 +122,33 @@ def _sign_hardware_command(
     return command
 
 
-def sign_software(
+async def sign_software(
     signtool_directory,
     target_file,
     certificate,
     sign_password,
-    timestamp_server
+    timestamp_server,
+    timeout
 ):
-    return execute_command(_sign_software_command(
-        signtool_directory=signtool_directory,
-        target_file=target_file,
-        certificate=certificate,
-        sign_password=sign_password,
-        timestamp_server=timestamp_server))
+    return await execute_command_async(
+        _sign_software_command(
+            signtool_directory=signtool_directory,
+            target_file=target_file,
+            certificate=certificate,
+            sign_password=sign_password,
+            timestamp_server=timestamp_server),
+        timeout=timeout)
 
 
-def sign_hardware(
+async def sign_hardware(
     signtool_directory,
     target_file,
-    timestamp_server
+    timestamp_server,
+    timeout
 ):
-    return execute_command(_sign_hardware_command(
-        signtool_directory=signtool_directory,
-        target_file=target_file,
-        timestamp_server=timestamp_server))
+    return await execute_command_async(
+        _sign_hardware_command(
+            signtool_directory=signtool_directory,
+            target_file=target_file,
+            timestamp_server=timestamp_server),
+        timeout=timeout)

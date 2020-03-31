@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 
 import argparse
+import asyncio
 import logging
 import logging.config
 import os
+from pathlib import Path
 import random
-import subprocess
 import tempfile
 import yaml
 
 from aiohttp import web
 from signtool_interface import sign_software, sign_hardware
-from environment import execute_command
+from environment import execute_command_async
 
 certs_directory = os.getcwd()
 signtool_directory = os.getcwd()
-log_file = None
 CONFIG_NAME = 'config.yaml'
+
+CERT_INFO_TIMEOUT = 30  # seconds
+DEFAULT_SIGN_TIMEOUT = 90  # seconds
+
+FAILED_SIGNING_CODE = 418
 
 printed_certificates = set()
 
@@ -40,7 +45,7 @@ def prerare_diagnostics(process_result):
     return text
 
 
-def print_certificate_info(certificate, password):
+async def print_certificate_info(certificate, password):
     global printed_certificates
     if certificate in printed_certificates:
         return
@@ -52,16 +57,14 @@ def print_certificate_info(certificate, password):
 
     command = ['certutil', '-dump', '-p', password, certificate]
     try:
-        result = execute_command(command)
+        result = await execute_command_async(command, timeout=CERT_INFO_TIMEOUT)
         logging.info(result.stdout)
         logging.warning(result.stderr)
-    except subprocess.SubprocessError as e:
-        logging.warning(e)
     except FileNotFoundError as e:
         logging.warning(e)
 
 
-def sign_binary(customization, trusted_timestamping, target_file):
+async def sign_binary(customization, trusted_timestamping, target_file, timeout):
     default_config_file = os.path.join(certs_directory, CONFIG_NAME)
     with open(default_config_file, 'r') as f:
         default_config = yaml.load(f)
@@ -86,19 +89,21 @@ def sign_binary(customization, trusted_timestamping, target_file):
         certificate = os.path.join(signing_path, config.get('file'))
         sign_password = config.get('password')
         logging.info('Using certificate {0}'.format(certificate))
-        print_certificate_info(certificate, sign_password)
-        return sign_software(
+        await print_certificate_info(certificate, sign_password)
+        return await sign_software(
             signtool_directory=signtool_directory,
             target_file=target_file,
             certificate=certificate,
             sign_password=sign_password,
-            timestamp_server=timestamp_server)
+            timestamp_server=timestamp_server,
+            timeout=timeout)
     else:
         logging.info('Using hardware key')
-        return sign_hardware(
+        return await sign_hardware(
             signtool_directory=signtool_directory,
             target_file=target_file,
-            timestamp_server=timestamp_server)
+            timestamp_server=timestamp_server,
+            timeout=timeout)
 
 
 async def sign_handler(request):
@@ -124,6 +129,9 @@ async def sign_handler(request):
     params = request.query
     customization = params['customization']
     trusted_timestamping = (params['trusted_timestamping'].lower() == 'true')
+    sign_timeout = int(params['sign_timeout'])
+    if sign_timeout <= 0:
+        sign_timeout = DEFAULT_SIGN_TIMEOUT
     logging.info('Signing {0} with customization {1} {2}'.format(
         target_file_name,
         customization,
@@ -136,38 +144,36 @@ async def sign_handler(request):
         return response
 
     try:
-        # Try several trusted timestamping servers in case of problems
-        retries = 5 if trusted_timestamping else 1
-        for try_sign in range(retries):
-            result = sign_binary(
-                customization=customization,
-                trusted_timestamping=trusted_timestamping,
-                target_file=target_file_name)
-            if result.returncode == 0:
-                logging.info('Signing complete')
-                logging.info('================')
-                content = open(target_file_name, 'rb')
-                return await complete_response(web.Response(body=content))
+        result = await sign_binary(
+            customization=customization,
+            trusted_timestamping=trusted_timestamping,
+            target_file=target_file_name,
+            timeout=sign_timeout)
 
-            text = prerare_diagnostics(result)
+        if result.returncode == 0:
+            logging.info('Signing complete')
+            logging.info('================')
+            content = open(target_file_name, 'rb')
+            return await complete_response(web.Response(body=content))
+
+        text = prerare_diagnostics(result)
 
     except FileNotFoundError as e:
         text = str(e)
-
-    except subprocess.SubprocessError as e:
-        text = "{}\n{}".format(e, e.output)
 
     except Exception as e:
         text = "{}\n{}".format(repr(e), str(e))
 
     logging.warning('Signing failed: {}'.format(text))
     logging.warning('================')
-    return await complete_response(web.Response(status=418, text=text))
+    return await complete_response(web.Response(status=FAILED_SIGNING_CODE, text=text))
 
 
 def main():
-    with open('server_log.yaml', 'r') as f:
+    with open(Path(os.path.realpath(__file__)).parent / 'log_config.yaml', 'r') as f:
         log_config = yaml.load(f)
+        log_config["handlers"]["file"]["filename"] = os.path.expandvars(
+            log_config["handlers"]["file"]["filename"])
         logging.config.dictConfig(log_config)
 
     parser = argparse.ArgumentParser()
@@ -175,12 +181,7 @@ def main():
     parser.add_argument('-s', '--signtool', help='Signtool directory')
     parser.add_argument('-n', '--host', help='Host to listen')
     parser.add_argument('-p', '--port', help='Port to listen')
-    parser.add_argument('-l', '--log', help='Additional log file')
     args = parser.parse_args()
-
-    if args.log:
-        global log_file
-        log_file = args.log
 
     logging.info('------------------------------ Process started ------------------------------')
 
@@ -197,6 +198,9 @@ def main():
 
     app = web.Application()
     app.add_routes([web.post('/', sign_handler)])
+
+    # ProactorEventLoop is required to run async subprocesses in windows.
+    asyncio.set_event_loop(asyncio.ProactorEventLoop())
     web.run_app(app, host=args.host, port=args.port)
 
 
