@@ -12,7 +12,7 @@ from jenkins_utils import JenkinsContext
 from git_context import GitContext
 
 BUILD_KEY = 'Auto-validate:'
-BUILD_PLATFORMS = ['bpi', 'linux-x64', 'mac', 'windows-x64']
+BUILD_PLATFORMS = ['linux-x64', 'mac', 'windows-x64']
 UNIT_TEST_PLATFORMS = ['linux-x64', 'windows-x64']
 JUNKSHOP_CHECK_FREQUENCY_SECONDS = 60
 JENKINS_SEARCH_DEPTH = 20
@@ -116,7 +116,8 @@ def start_jenkins_build():
         ('BRANCH', 'validate_custom_build'),  # Actually that's only a junkshop id
         ('VMS_BUILD_CHOICE_OPTION', git.rev),
         ('VMS_BUILD_CHOICE', 'VMS_NEW_BUILD_BY_COMMIT'),
-        ('BUILD_DESCRIPTION', build_id)
+        ('BUILD_DESCRIPTION', build_id),
+        ('UT_ENABLED', 'ON'),
     ]
     for platform in BUILD_PLATFORMS:
         build_parameters += [('PLATFORMS', platform)]
