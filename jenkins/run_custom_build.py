@@ -1,17 +1,15 @@
-#!/usr/bin/env python
-
-from __future__ import print_function
+#!/usr/bin/env python3
 
 import argparse
 import logging
 import requests
+
 import sys
 import time
 from builtins import input
 from distutils.util import strtobool
-from mercurial_utils import HgContext
 from jenkins_utils import JenkinsContext
-from merge_commit import merge_commit
+from git_context import GitContext
 
 BUILD_KEY = 'Auto-validate:'
 BUILD_PLATFORMS = ['bpi', 'linux-x64', 'mac', 'windows-x64']
@@ -26,7 +24,8 @@ jenkins = JenkinsContext(
     job_name='custom.any.preset.full',
     runner_name='custom.any.vms.runner')
 
-hg = HgContext()
+git = GitContext()
+build_id = '{} {} [{}]'.format(BUILD_KEY, git.rev, git.branch)
 
 
 class JunkshopStatus:
@@ -54,22 +53,11 @@ def confirm(question):
         sys.exit(1)
 
 
-def ensure_revision_is_public(hg, rev):
-    while hg.phase(rev) != "public":
-        confirm("Revision is not public. Push it?")
-        hg.push(rev=rev, new_branch=True)
-
-
-def make_build_id(rev):
-    branch = hg.branch(rev)
-    return '{} {} [{}]'.format(BUILD_KEY, rev, branch)
-
-
-def check_junkshop_status(rev):
+def check_junkshop_status():
     '''
     Validate if build passed on all platforms. Unit tests are ignored for now.
     '''
-    url = 'http://junkshop.lan.hdw.mx/check_revision/{}'.format(rev)
+    url = 'http://junkshop.lan.hdw.mx/check_revision/{}'.format(git.rev)
     logging.debug("Junkshop request url: {}".format(url))
     response = requests.get(url)
     json = response.json()
@@ -109,8 +97,8 @@ def check_junkshop_status(rev):
     return result
 
 
-def check_jenkins_status(rev, depth=None):
-    job_status = jenkins.job_status(description=make_build_id(rev), depth=depth)
+def check_jenkins_status(depth=None):
+    job_status = jenkins.job_status(description=build_id, depth=depth)
     if job_status:
         print("Build was found on jenkins, see {}".format(job_status.url))
     return job_status
@@ -123,12 +111,12 @@ def list_jenkins_builds(print_all=False, depth=None):
         print(build)
 
 
-def start_jenkins_build(rev):
+def start_jenkins_build():
     build_parameters = [
         ('BRANCH', 'validate_custom_build'),  # Actually that's only a junkshop id
-        ('VMS_BUILD_CHOICE_OPTION', rev),
+        ('VMS_BUILD_CHOICE_OPTION', git.rev),
         ('VMS_BUILD_CHOICE', 'VMS_NEW_BUILD_BY_COMMIT'),
-        ('BUILD_DESCRIPTION', make_build_id(rev))
+        ('BUILD_DESCRIPTION', build_id)
     ]
     for platform in BUILD_PLATFORMS:
         build_parameters += [('PLATFORMS', platform)]
@@ -136,12 +124,12 @@ def start_jenkins_build(rev):
     print(url)
 
 
-def wait_until_rev_checked(rev):
+def wait_until_rev_checked():
     print("Waiting for build to complete")
-    junkshop_status = check_junkshop_status(rev)
+    junkshop_status = check_junkshop_status()
     while not junkshop_status or not junkshop_status.completed:
         time.sleep(JUNKSHOP_CHECK_FREQUENCY_SECONDS)
-        junkshop_status = check_junkshop_status(rev)
+        junkshop_status = check_junkshop_status()
         logging.debug("Current status is {}".format(junkshop_status))
     return junkshop_status
 
@@ -155,51 +143,33 @@ def get_build_url(server, id):
         return None
 
 
-def merge_to_target(rev, target):
-    hg.update(target)
-    hg.pull(branch=target, update=True)
-    hg.merge(rev)
-    merge_commit()
-    new_rev = hg.execute("id", "-i")
-    hg.push(rev=new_rev)
-
-
-def validate_commit(rev=None, target=None, depth=None, force=False):
-    if not rev:
-        rev = hg.execute("id", "-i")
-    branch = hg.branch(rev)
-    print("Validating revision {} [{}]".format(rev, branch))
-
-    ensure_revision_is_public(hg, rev)
+def validate_commit(depth=None, force=False):
+    print("Validating revision {} [{}]".format(git.rev, git.branch))
 
     if force:
-        start_jenkins_build(rev)
+        start_jenkins_build()
 
-    junkshop_status = check_junkshop_status(rev)
+    junkshop_status = check_junkshop_status()
     if not junkshop_status:
         print("Build was not found on junkshop, looking up on jenkins")
-        jenkins_status = check_jenkins_status(rev, depth)
+        jenkins_status = check_jenkins_status(depth)
         if not jenkins_status:
             confirm("Build was not found on jenkins. Launch new build?")
-            start_jenkins_build(rev)
+            start_jenkins_build()
         elif not jenkins_status.running:
             confirm("Build on jenkins is finished with result '{}'. Launch new build?".format(
                 jenkins_status.result))
-            start_jenkins_build(rev)
+            start_jenkins_build()
     if not junkshop_status or not junkshop_status.completed:
-        junkshop_status = wait_until_rev_checked(rev)
+        junkshop_status = wait_until_rev_checked()
     print("Job finished, status: {}".format(junkshop_status))
-    if target and junkshop_status.build_ok and junkshop_status.tests_ok:
-        merge_to_target(rev, target)
 
 
-def cancel_build(rev=None, build_number=None, depth=None):
+def cancel_build(build_number=None, depth=None):
     if not build_number:
-        if not rev:
-            rev = hg.execute("id", "-i")
-        jenkins_status = check_jenkins_status(rev, depth)
+        jenkins_status = check_jenkins_status(depth)
         if not jenkins_status:
-            print("Build [{}] was not found".format(make_build_id(rev)))
+            print("Build [{}] was not found".format(build_id))
             return
         build_number = jenkins_status.number
     print("Cancelling build {}".format(build_number))
@@ -209,7 +179,7 @@ def cancel_build(rev=None, build_number=None, depth=None):
 
 
 def validate_command(args):
-    validate_commit(args.rev, args.target, args.depth, args.force)
+    validate_commit(args.depth, args.force)
 
 
 def list_command(args):
@@ -217,12 +187,10 @@ def list_command(args):
 
 
 def cancel_command(args):
-    cancel_build(args.rev, args.id, args.depth)
+    cancel_build(args.id, args.depth)
 
 
 def _setup_validation_parser(parser):
-    parser.add_argument('-r', '--rev', help="Revision to check")
-    parser.add_argument('-t', '--target', help="Target branch to merge if validated")
     parser.add_argument('-f', '--force', help="Force start build", action='store_true')
     parser.add_argument('-d', '--depth', help="Jenkins search depth", type=int)
     parser.add_argument('-v', '--verbose', help="Verbose output", action='store_true')
@@ -251,7 +219,6 @@ if __name__ == "__main__":
     parser_cancel = subparsers.add_parser('cancel', help='Cancel running build')
     parser_cancel.add_argument('-v', '--verbose', help="Verbose output", action='store_true')
     cancel_target_group = parser_cancel.add_mutually_exclusive_group()
-    cancel_target_group.add_argument('-r', '--rev', help="Revision to cancel")
     cancel_target_group.add_argument('-i', '--id', help="Build id", type=int)
     parser_cancel.set_defaults(func=cancel_command)
 
