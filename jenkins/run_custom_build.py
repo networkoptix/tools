@@ -39,17 +39,18 @@ class JunkshopStatus:
             self.completed, self.build_ok, self.tests_ok)
 
 
-def ask_question(question):
-    print('{} [y/n]'.format(question))
+def ask_question(question, default=''):
+    print('{} [{}]'.format(question, '/'.join(
+        i.upper() if i == default else i for i in "yn")))
     while True:
         try:
-            return strtobool(input().lower())
+            return strtobool((input() or default).lower())
         except ValueError:
             print('Please respond with \'y\' or \'n\'.\n')
 
 
-def confirm(question):
-    if not ask_question(question):
+def confirm(question, default=''):
+    if not ask_question(question, default):
         sys.exit(1)
 
 
@@ -155,11 +156,11 @@ def validate_commit(depth=None, force=False):
         print("Build was not found on junkshop, looking up on jenkins")
         jenkins_status = check_jenkins_status(depth)
         if not jenkins_status:
-            confirm("Build was not found on jenkins. Launch new build?")
+            confirm("Build was not found on jenkins. Launch new build?", 'y')
             start_jenkins_build()
         elif not jenkins_status.running:
             confirm("Build on jenkins is finished with result '{}'. Launch new build?".format(
-                jenkins_status.result))
+                jenkins_status.result), 'n')
             start_jenkins_build()
     if not junkshop_status or not junkshop_status.completed:
         junkshop_status = wait_until_rev_checked()
@@ -227,7 +228,10 @@ if __name__ == "__main__":
     log_level = logging.DEBUG if args.verbose else logging.WARNING
     logging.basicConfig(level=log_level)
 
-    if not args.cmd:
-        validate_command(args)
-    else:
-        args.func(args)
+    try:
+        if not args.cmd:
+            validate_command(args)
+        else:
+            args.func(args)
+    except KeyboardInterrupt:
+        print(' Ctrl+C')
