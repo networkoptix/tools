@@ -21,8 +21,8 @@ jenkins = JenkinsContext(
     url='http://jenkins.lan.hdw.mx',
     username='custom-build-trigger-script',
     password='11c2f31535f69907c429bf398f59658fb9',
-    job_name='custom.any.preset.full',
-    runner_name='custom.any.vms.runner')
+    job_name='custom.vms.any.preset.full',
+    runner_name='custom.vms.any.vms.runner')
 
 git = GitContext()
 build_id = '{} {} [{}]'.format(BUILD_KEY, git.rev, git.branch)
