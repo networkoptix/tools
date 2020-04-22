@@ -121,6 +121,8 @@ public final class OpenApiSerializer
         JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.method.toLowerCase());
+        if (!function.description.isEmpty())
+            method.put("description", function.description);
         for (final Apidoc.Param param: function.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
