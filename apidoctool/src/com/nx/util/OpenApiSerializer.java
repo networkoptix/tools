@@ -75,7 +75,8 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public static String toString(Apidoc apidoc, JSONObject root) throws Exception
+    public static String toString(
+        Apidoc apidoc, JSONObject root, String openApiGroupPrefix) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
@@ -84,8 +85,11 @@ public final class OpenApiSerializer
         final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
-            if (!group.urlPrefix.equals("/rest"))
+            if ((!openApiGroupPrefix.isEmpty() && !group.urlPrefix.equals(openApiGroupPrefix))
+                || (openApiGroupPrefix.isEmpty() && !group.urlPrefix.equals("/rest")))
+            {
                 continue;
+            }
             if (!fillPaths(getObject(root, "paths"), group, refParameters))
                 continue;
             if (!usedTags.contains(group.groupName))
