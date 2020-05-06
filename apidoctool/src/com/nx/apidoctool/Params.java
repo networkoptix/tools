@@ -22,4 +22,10 @@ public class Params
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");
+
+    public String openApiPathReplacement() { return openApiPathReplacement.toString(); }
+    private final StringBuilder openApiPathReplacement = regStringParam("openApiPathReplacement",
+        "",
+        "The Open API method path replacement string pair if specified. " +
+            "The first string is the target, the second string is the replacement.");
 }

@@ -113,7 +113,8 @@ public final class VmsCodeToApiXmlExecutor
             String json;
             try
             {
-                json = OpenApiSerializer.toString(apidoc, openApi);
+                OpenApiSerializer s = new OpenApiSerializer(params.openApiPathReplacement());
+                json = s.toString(apidoc, openApi);
             }
             catch (Exception e)
             {
