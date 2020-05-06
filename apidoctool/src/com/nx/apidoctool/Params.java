@@ -23,9 +23,9 @@ public class Params
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");
 
-    public String openApiPathReplacement() { return openApiPathReplacement.toString(); }
-    private final StringBuilder openApiPathReplacement = regStringParam("openApiPathReplacement",
+    public String urlPrefixReplacement() { return urlPrefixReplacement.toString(); }
+    private final StringBuilder urlPrefixReplacement = regStringParam("urlPrefixReplacement",
         "",
-        "The Open API method path replacement string pair if specified. " +
+        "The method URL prefix replacement string pair if specified. " +
             "The first string is the target, the second string is the replacement.");
 }

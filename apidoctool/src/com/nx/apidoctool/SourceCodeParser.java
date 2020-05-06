@@ -11,6 +11,8 @@ import java.util.List;
 public final class SourceCodeParser
 {
     private int mainLine;
+    private String target = null;
+    private String replacement = null;
 
     public final class Error
         extends Exception
@@ -26,10 +28,17 @@ public final class SourceCodeParser
         }
     }
 
-    public SourceCodeParser(boolean verbose, SourceCode sourceCode)
+    public SourceCodeParser(boolean verbose, SourceCode sourceCode, String urlPrefixReplacement)
     {
         this.verbose = verbose;
         this.sourceCode = sourceCode;
+        if (urlPrefixReplacement.isEmpty())
+            return;
+        final String[] tokens = urlPrefixReplacement.split(" ");
+        if (tokens.length != 0 && tokens.length != 2)
+            throw new IllegalArgumentException("urlPrefixReplacement must be zero or two words");
+        target = tokens[0];
+        replacement = tokens[1];
     }
 
     /**
@@ -58,6 +67,14 @@ public final class SourceCodeParser
                     createFunctionsFromComment(typeManager);
                 if (functions != null && !functions.isEmpty())
                 {
+                    if (target != null && replacement != null)
+                    {
+                        for (ApidocCommentParser.FunctionDescription description: functions)
+                        {
+                            description.urlPrefix =
+                                    description.urlPrefix.replace(target, replacement);
+                        }
+                    }
                     final String urlPrefix = functions.get(0).urlPrefix;
                     final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
 

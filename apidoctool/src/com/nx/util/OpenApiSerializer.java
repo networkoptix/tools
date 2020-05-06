@@ -9,20 +9,6 @@ import com.nx.apidoc.Apidoc;
 
 public final class OpenApiSerializer
 {
-    private String m_target = null;
-    private String m_replacement = null;
-
-    public OpenApiSerializer(String pathReplacement)
-    {
-        if (pathReplacement.isEmpty())
-            return;
-        final String[] tokens = pathReplacement.split(" ");
-        if (tokens.length != 0 && tokens.length != 2)
-            throw new IllegalArgumentException("openApiPathReplacement must be zero or two words");
-        m_target = tokens[0];
-        m_replacement = tokens[1];
-    }
-
     private static JSONObject getObject(JSONObject object, String key)
     {
         JSONObject value = object.optJSONObject(key);
@@ -89,7 +75,7 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public String toString(Apidoc apidoc, JSONObject root) throws Exception
+    public static String toString(Apidoc apidoc, JSONObject root) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
@@ -112,7 +98,7 @@ public final class OpenApiSerializer
         return root.toString(2);
     }
 
-    private boolean fillPaths(
+    private static boolean fillPaths(
         JSONObject paths, Apidoc.Group group, JSONObject refParameters) throws Exception
     {
         boolean filled = false;
@@ -120,11 +106,9 @@ public final class OpenApiSerializer
         {
             if (function.method.isEmpty())
                 continue;
-            String path = group.urlPrefix + "/" + function.name;
-            if (m_target != null && m_replacement != null)
-                path = path.replace(m_target, m_replacement);
-            final JSONArray tags = getArray(
-                fillPath(getObject(paths, path), function, refParameters), "tags");
+            final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
+            final JSONObject method = fillPath(path, function, refParameters);
+            final JSONArray tags = getArray(method, "tags");
             tags.put(group.groupName);
             filled = true;
         }

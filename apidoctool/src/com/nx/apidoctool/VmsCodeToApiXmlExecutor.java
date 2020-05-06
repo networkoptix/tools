@@ -21,6 +21,7 @@ public final class VmsCodeToApiXmlExecutor
     public File outputApiXmlFile;
     public File optionalOutputApiJsonFile; //< Can be null if not needed.
     public File optionalOutputOpenApiJsonFile; //< Can be null if not needed.
+    public String urlPrefixReplacement = "";
 
     protected Apidoc apidoc;
 
@@ -51,6 +52,7 @@ public final class VmsCodeToApiXmlExecutor
             typeManager.processFiles(typeHeaders);
         }
 
+        urlPrefixReplacement = params.urlPrefixReplacement();
         int processedFunctionsCount = 0;
         if (!params.templateRegistrationCpp().isEmpty())
         {
@@ -113,8 +115,7 @@ public final class VmsCodeToApiXmlExecutor
             String json;
             try
             {
-                OpenApiSerializer s = new OpenApiSerializer(params.openApiPathReplacement());
-                json = s.toString(apidoc, openApi);
+                json = OpenApiSerializer.toString(apidoc, openApi);
             }
             catch (Exception e)
             {
@@ -137,7 +138,7 @@ public final class VmsCodeToApiXmlExecutor
             System.out.println("    Parsing API functions from " + sourceCppFile);
 
         SourceCode reader = new SourceCode(sourceCppFile);
-        SourceCodeParser parser = new SourceCodeParser(verbose, reader);
+        SourceCodeParser parser = new SourceCodeParser(verbose, reader, urlPrefixReplacement);
         return parser.parseApidocComments(apidoc, matcher, typeManager);
     }
 }
