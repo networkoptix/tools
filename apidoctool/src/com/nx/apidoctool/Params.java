@@ -22,9 +22,4 @@ public class Params
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");
-
-    public String openApiGroupPrefix() { return openApiGroupPrefix.toString(); }
-    private final StringBuilder openApiGroupPrefix = regStringParam("openApiGroupPrefix",
-        "",
-        "The prefix of group names Open API documentation is required to be generated for.");
 }

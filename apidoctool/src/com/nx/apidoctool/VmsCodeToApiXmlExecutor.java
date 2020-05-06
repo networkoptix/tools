@@ -110,7 +110,7 @@ public final class VmsCodeToApiXmlExecutor
             String json;
             try
             {
-                json = OpenApiSerializer.toString(apidoc, openApi, params.openApiGroupPrefix());
+                json = OpenApiSerializer.toString(apidoc, openApi);
             }
             catch (Exception e)
             {
