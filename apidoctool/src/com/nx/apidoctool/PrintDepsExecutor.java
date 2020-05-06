@@ -16,8 +16,12 @@ public final class PrintDepsExecutor
     {
         if (!params.templateRegistrationCpp().isEmpty())
             printVmsFile(params.templateRegistrationCpp());
-        if (!params.handlerRegistrationCpp().isEmpty())
-            printVmsFile(params.handlerRegistrationCpp());
+        for (String token: params.handlerRegistrationCpp().split(","))
+        {
+            final String source = token.trim();
+            if (!source.isEmpty())
+                printVmsFile(source);
+        }
         for (String token: params.functionCommentSources().split(","))
         {
             final String source = token.trim();

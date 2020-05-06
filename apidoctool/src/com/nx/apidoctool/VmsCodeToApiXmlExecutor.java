@@ -64,12 +64,14 @@ public final class VmsCodeToApiXmlExecutor
                 new HandlerRegistrationMatcher(),
                 typeManager);
         }
-        if (!params.handlerRegistrationCpp().isEmpty())
+        for (final String token: params.handlerRegistrationCpp().split(","))
         {
-            processedFunctionsCount += processCppFile(
-                params.handlerRegistrationCpp(),
-                new HandlerRegistrationMatcher(),
-                typeManager);
+            final String source = token.trim();
+            if (!source.isEmpty())
+            {
+                processedFunctionsCount +=
+                    processCppFile(token.trim(), new HandlerRegistrationMatcher(), typeManager);
+            }
         }
         for (final String token: params.functionCommentSources().split(","))
         {

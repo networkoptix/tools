@@ -15,9 +15,10 @@ public class Params
         "A cpp file where \"template\" API functions are registered.");
 
     public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
+
     private final StringBuilder handlerRegistrationCpp = regStringParam("handlerRegistrationCpp",
         "",
-        "A cpp file where \"handler\" methods are registered.");
+        "A comma-separated list of cpp files where \"handler\" API functions are registered.");
 
     public String functionCommentSources() { return functionCommentSources.toString(); }
 
@@ -26,6 +27,7 @@ public class Params
         "A comma-separated list of source files with apidoc comments for API functions.");
 
     public String typeHeaderPaths() { return typeHeaderPaths.toString(); }
+
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");
