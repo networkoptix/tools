@@ -16,7 +16,8 @@ public final class PrintDepsExecutor
     {
         if (!params.templateRegistrationCpp().isEmpty())
             printVmsFile(params.templateRegistrationCpp());
-        printVmsFile(params.handlerRegistrationCpp());
+        for (String token: params.handlerRegistrationCpp().split(","))
+            printVmsFile(token.trim());
         if (vmsPath != null && !params.typeHeaderPaths().isEmpty())
         {
             List<File> headers = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());

@@ -54,6 +54,7 @@ public final class VmsCodeToApiXmlExecutor
 
         urlPrefixReplacement = params.urlPrefixReplacement();
         int processedFunctionsCount = 0;
+        final RegistrationMatcher matcher = new HandlerRegistrationMatcher();
         if (!params.templateRegistrationCpp().isEmpty())
         {
             processedFunctionsCount += processCppFile(
@@ -62,13 +63,11 @@ public final class VmsCodeToApiXmlExecutor
                 typeManager);
             processedFunctionsCount += processCppFile(
                 params.templateRegistrationCpp(),
-                new HandlerRegistrationMatcher(),
+                matcher,
                 typeManager);
         }
-        processedFunctionsCount += processCppFile(
-            params.handlerRegistrationCpp(),
-            new HandlerRegistrationMatcher(),
-            typeManager);
+        for (final String token: params.handlerRegistrationCpp().split(","))
+            processedFunctionsCount += processCppFile(token.trim(), matcher, typeManager);
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");
