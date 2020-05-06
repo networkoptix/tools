@@ -84,8 +84,6 @@ public final class OpenApiSerializer
         final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
-            if (!group.urlPrefix.equals("/rest"))
-                continue;
             if (!fillPaths(getObject(root, "paths"), group, refParameters))
                 continue;
             if (!usedTags.contains(group.groupName))
