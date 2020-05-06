@@ -14,7 +14,8 @@ public final class PrintDepsExecutor
      */
     public int execute() throws Exception
     {
-        printVmsFile(params.templateRegistrationCpp());
+        if (!params.templateRegistrationCpp().isEmpty())
+            printVmsFile(params.templateRegistrationCpp());
         printVmsFile(params.handlerRegistrationCpp());
         if (vmsPath != null && !params.typeHeaderPaths().isEmpty())
         {

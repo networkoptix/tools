@@ -52,16 +52,19 @@ public final class VmsCodeToApiXmlExecutor
         }
 
         int processedFunctionsCount = 0;
-        processedFunctionsCount += processCppFile(
-            params.templateRegistrationCpp(),
-            new TemplateRegistrationMatcher(),
-            typeManager);
+        if (!params.templateRegistrationCpp().isEmpty())
+        {
+            processedFunctionsCount += processCppFile(
+                params.templateRegistrationCpp(),
+                new TemplateRegistrationMatcher(),
+                typeManager);
+            processedFunctionsCount += processCppFile(
+                params.templateRegistrationCpp(),
+                new HandlerRegistrationMatcher(),
+                typeManager);
+        }
         processedFunctionsCount += processCppFile(
             params.handlerRegistrationCpp(),
-            new HandlerRegistrationMatcher(),
-            typeManager);
-        processedFunctionsCount += processCppFile(
-            params.templateRegistrationCpp(),
             new HandlerRegistrationMatcher(),
             typeManager);
 

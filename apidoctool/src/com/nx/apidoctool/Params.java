@@ -10,7 +10,7 @@ public class Params
 {
     public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
     private final StringBuilder templateRegistrationCpp = regStringParam("templateRegistrationCpp",
-        "/appserver2/src/connection_factory.cpp",
+        "",
         "A cpp file where \"template\" methods are registered.");
 
     public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
