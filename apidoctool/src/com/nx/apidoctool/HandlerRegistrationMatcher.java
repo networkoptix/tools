@@ -39,7 +39,7 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern regHandlerRegexForFunctor = Pattern.compile(
-        "\\s*reg\\(\"\\w+\\/([\\w]*\\/?)\".*");
+        "\\s*reg\\(\"\\w+\\/([\\w-]*\\/?)\".*");
 
     /**
      * Allow a function registration with a name that is defined as a non-literal string or a
