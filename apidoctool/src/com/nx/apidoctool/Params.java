@@ -15,8 +15,8 @@ public class Params
 
     public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
     private final StringBuilder handlerRegistrationCpp = regStringParam("handlerRegistrationCpp",
-        "/mediaserver_core/src/media_server_process.cpp",
-        "A comma-separated list of cpp files where \"handler\" methods are registered.");
+            "/mediaserver_core/src/media_server_process.cpp",
+            "A cpp file where \"handler\" methods are registered.");
 
     public String typeHeaderPaths() { return typeHeaderPaths.toString(); }
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",
