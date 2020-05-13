@@ -136,7 +136,8 @@ public final class OpenApiSerializer
             if (param.isGeneratedFromStruct)
             {
                 final JSONObject requestBody = getObject(method, "requestBody");
-                requestBody.put("required", true);
+                if (!param.optional)
+                    requestBody.put("required", true);
                 final JSONObject schema = getObject(getObject(getObject(
                     requestBody, "content"), "application/json"), "schema");
                 addStructParam(schema, param);
