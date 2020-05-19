@@ -2,7 +2,6 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.*;
 import com.nx.util.SourceCode;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +11,14 @@ import java.util.List;
  */
 public final class SourceCodeParser
 {
+    private final class Replacement
+    {
+        public String target;
+        public String replacement;
+    }
+
     private int mainLine;
-    private ArrayList<Pair<String, String>> replacements = new ArrayList<Pair<String, String>>();
+    private ArrayList<Replacement> replacements = new ArrayList<Replacement>();
 
     public final class Error
         extends Exception
@@ -35,22 +40,23 @@ public final class SourceCodeParser
         this.sourceCode = sourceCode;
         if (urlPrefixReplacements.isEmpty())
             return;
-        for (final String replacement: urlPrefixReplacements.split(","))
+        for (final String item: urlPrefixReplacements.split(","))
         {
-            final String[] pair = replacement.split(":");
+            final String[] pair = item.split(":");
             if (pair.length != 2)
             {
                 throw new IllegalArgumentException(
                     "Invalid urlPrefixReplacements parameter, see help for valid format.");
             }
-            final String target = pair[0].trim();
-            final String replace = pair[1].trim();
-            if (target.isEmpty() || replace.isEmpty())
+            final Replacement replacement = new Replacement();
+            replacement.target = pair[0].trim();
+            replacement.replacement = pair[1].trim();
+            if (replacement.target.isEmpty() || replacement.replacement.isEmpty())
             {
                 throw new IllegalArgumentException(
                     "Invalid urlPrefixReplacements parameter, see help for valid format.");
             }
-            replacements.add(new Pair<String, String>(target, replace));
+            replacements.add(replacement);
         }
     }
 
@@ -83,10 +89,10 @@ public final class SourceCodeParser
                 {
                     for (ApidocCommentParser.FunctionDescription description: functions)
                     {
-                        for (Pair<String, String> replacement: replacements)
+                        for (Replacement r: replacements)
                         {
-                            description.urlPrefix = description.urlPrefix.replace(
-                                replacement.getKey(), replacement.getValue());
+                            description.urlPrefix =
+                                description.urlPrefix.replace(r.target, r.replacement);
                         }
                     }
                     final String urlPrefix = functions.get(0).urlPrefix;
