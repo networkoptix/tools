@@ -68,6 +68,13 @@ public final class VmsCodeToApiXmlExecutor
             params.handlerRegistrationCpp(),
             new HandlerRegistrationMatcher(),
             typeManager);
+        final RegistrationMatcher matcher = new MethodCommentMatcher();
+        for (final String token: params.methodCommentSources().split(","))
+        {
+            final String source = token.trim();
+            if (!source.isEmpty())
+                processedFunctionsCount += processCppFile(source, matcher, typeManager);
+        }
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");

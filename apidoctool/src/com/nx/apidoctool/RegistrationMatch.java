@@ -16,6 +16,8 @@ public class RegistrationMatch
 
     public final String method;
 
+    public int mainLineCorrection = 0;
+
     public RegistrationMatch(
         String functionName,
         String inputDataType,
