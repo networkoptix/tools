@@ -28,9 +28,10 @@ public class Params
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");
 
-    public String urlPrefixReplacement() { return urlPrefixReplacement.toString(); }
-    private final StringBuilder urlPrefixReplacement = regStringParam("urlPrefixReplacement",
+    public String urlPrefixReplacements() { return urlPrefixReplacements.toString(); }
+    private final StringBuilder urlPrefixReplacements = regStringParam("urlPrefixReplacements",
         "",
-        "The method URL prefix replacement string pair if specified. " +
-            "The first string is the target, the second string is the replacement.");
+        "A comma-separated list of the method URL prefix replacement string pairs if specified. " +
+            "A string replacement pair is separated by ':' symbol. " +
+            "The first part is the target, the second part is the replacement.");
 }

@@ -2,7 +2,9 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.*;
 import com.nx.util.SourceCode;
+import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,8 +13,7 @@ import java.util.List;
 public final class SourceCodeParser
 {
     private int mainLine;
-    private String target = null;
-    private String replacement = null;
+    private ArrayList<Pair<String, String>> replacements = new ArrayList<Pair<String, String>>();
 
     public final class Error
         extends Exception
@@ -28,17 +29,29 @@ public final class SourceCodeParser
         }
     }
 
-    public SourceCodeParser(boolean verbose, SourceCode sourceCode, String urlPrefixReplacement)
+    public SourceCodeParser(boolean verbose, SourceCode sourceCode, String urlPrefixReplacements)
     {
         this.verbose = verbose;
         this.sourceCode = sourceCode;
-        if (urlPrefixReplacement.isEmpty())
+        if (urlPrefixReplacements.isEmpty())
             return;
-        final String[] tokens = urlPrefixReplacement.split(" ");
-        if (tokens.length != 0 && tokens.length != 2)
-            throw new IllegalArgumentException("urlPrefixReplacement must be zero or two words");
-        target = tokens[0];
-        replacement = tokens[1];
+        for (final String replacement: urlPrefixReplacements.split(","))
+        {
+            final String[] pair = replacement.split(":");
+            if (pair.length != 2)
+            {
+                throw new IllegalArgumentException(
+                    "Invalid urlPrefixReplacements parameter, see help for valid format.");
+            }
+            final String target = pair[0].trim();
+            final String replace = pair[1].trim();
+            if (target.isEmpty() || replace.isEmpty())
+            {
+                throw new IllegalArgumentException(
+                    "Invalid urlPrefixReplacements parameter, see help for valid format.");
+            }
+            replacements.add(new Pair<String, String>(target, replace));
+        }
     }
 
     /**
@@ -68,12 +81,12 @@ public final class SourceCodeParser
                     createFunctionsFromComment(typeManager);
                 if (functions != null && !functions.isEmpty())
                 {
-                    if (target != null && replacement != null)
+                    for (ApidocCommentParser.FunctionDescription description: functions)
                     {
-                        for (ApidocCommentParser.FunctionDescription description: functions)
+                        for (Pair<String, String> replacement: replacements)
                         {
-                            description.urlPrefix =
-                                    description.urlPrefix.replace(target, replacement);
+                            description.urlPrefix = description.urlPrefix.replace(
+                                replacement.getKey(), replacement.getValue());
                         }
                     }
                     final String urlPrefix = functions.get(0).urlPrefix;
