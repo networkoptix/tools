@@ -15,7 +15,7 @@ public class Params
 
     public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
     private final StringBuilder handlerRegistrationCpp = regStringParam("handlerRegistrationCpp",
-        "/mediaserver_core/src/media_server_process.cpp",
+        "",
         "A cpp file where \"handler\" methods are registered.");
 
     public String methodCommentSources() { return methodCommentSources.toString(); }

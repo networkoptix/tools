@@ -64,10 +64,13 @@ public final class VmsCodeToApiXmlExecutor
                 new HandlerRegistrationMatcher(),
                 typeManager);
         }
-        processedFunctionsCount += processCppFile(
-            params.handlerRegistrationCpp(),
-            new HandlerRegistrationMatcher(),
-            typeManager);
+        if (!params.handlerRegistrationCpp().isEmpty())
+        {
+            processedFunctionsCount += processCppFile(
+                params.handlerRegistrationCpp(),
+                new HandlerRegistrationMatcher(),
+                typeManager);
+        }
         final RegistrationMatcher matcher = new MethodCommentMatcher();
         for (final String token: params.methodCommentSources().split(","))
         {
