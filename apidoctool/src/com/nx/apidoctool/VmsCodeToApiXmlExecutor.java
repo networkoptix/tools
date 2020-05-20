@@ -20,7 +20,7 @@ public final class VmsCodeToApiXmlExecutor
     public File outputApiXmlFile;
     public File optionalOutputApiJsonFile; //< Can be null if not needed.
     public File optionalOutputOpenApiJsonFile; //< Can be null if not needed.
-    public String urlPrefixReplacements = "";
+    public List<Replacement> urlPrefixReplacements;
 
     protected Apidoc apidoc;
 
@@ -51,7 +51,7 @@ public final class VmsCodeToApiXmlExecutor
             typeManager.processFiles(typeHeaders);
         }
 
-        urlPrefixReplacements = params.urlPrefixReplacements();
+        urlPrefixReplacements = Replacement.parse(params.urlPrefixReplacement());
         int processedFunctionsCount = 0;
         if (!params.templateRegistrationCpp().isEmpty())
         {

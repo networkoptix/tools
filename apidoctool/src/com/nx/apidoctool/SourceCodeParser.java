@@ -11,14 +11,8 @@ import java.util.List;
  */
 public final class SourceCodeParser
 {
-    private final class Replacement
-    {
-        public String target;
-        public String replacement;
-    }
-
     private int mainLine;
-    private ArrayList<Replacement> replacements = new ArrayList<Replacement>();
+    private final List<Replacement> urlPrefixReplacements;
 
     public final class Error
         extends Exception
@@ -34,30 +28,17 @@ public final class SourceCodeParser
         }
     }
 
-    public SourceCodeParser(boolean verbose, SourceCode sourceCode, String urlPrefixReplacements)
+    public SourceCodeParser(
+        boolean verbose, SourceCode sourceCode, List<Replacement> urlPrefixReplacements)
     {
         this.verbose = verbose;
         this.sourceCode = sourceCode;
-        if (urlPrefixReplacements.isEmpty())
-            return;
-        for (final String item: urlPrefixReplacements.split(","))
-        {
-            final String[] pair = item.split(":");
-            if (pair.length != 2)
-            {
-                throw new IllegalArgumentException(
-                    "Invalid urlPrefixReplacements parameter, see help for valid format.");
-            }
-            final Replacement replacement = new Replacement();
-            replacement.target = pair[0].trim();
-            replacement.replacement = pair[1].trim();
-            if (replacement.target.isEmpty() || replacement.replacement.isEmpty())
-            {
-                throw new IllegalArgumentException(
-                    "Invalid urlPrefixReplacements parameter, see help for valid format.");
-            }
-            replacements.add(replacement);
-        }
+        this.urlPrefixReplacements = urlPrefixReplacements;
+    }
+
+    public SourceCodeParser(boolean verbose, SourceCode sourceCode)
+    {
+        this(verbose, sourceCode, new ArrayList<Replacement>());
     }
 
     /**
@@ -89,7 +70,7 @@ public final class SourceCodeParser
                 {
                     for (ApidocCommentParser.FunctionDescription description: functions)
                     {
-                        for (Replacement r: replacements)
+                        for (Replacement r: urlPrefixReplacements)
                         {
                             description.urlPrefix =
                                 description.urlPrefix.replace(r.target, r.replacement);
