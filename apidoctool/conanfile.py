@@ -5,6 +5,7 @@ from conans import ConanFile, tools
 class ApiDocToolConan(ConanFile):
     name = "apidoctool"
     version = "2.1"
+    settings = None
     description = "Parses Apidoc comments in C++ code and generates api.xml"
     exports_sources = "*"
 
