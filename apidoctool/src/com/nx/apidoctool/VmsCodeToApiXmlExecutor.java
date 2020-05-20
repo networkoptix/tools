@@ -70,7 +70,7 @@ public final class VmsCodeToApiXmlExecutor
             if (!source.isEmpty())
             {
                 processedFunctionsCount +=
-                    processCppFile(token.trim(), new HandlerRegistrationMatcher(), typeManager);
+                    processCppFile(source, new HandlerRegistrationMatcher(), typeManager);
             }
         }
         for (final String token: params.functionCommentSources().split(","))
