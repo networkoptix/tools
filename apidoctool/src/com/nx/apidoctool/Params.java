@@ -9,9 +9,10 @@ public class Params
     extends ParamsBase
 {
     public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
+
     private final StringBuilder templateRegistrationCpp = regStringParam("templateRegistrationCpp",
         "",
-        "A cpp file where \"template\" methods are registered.");
+        "A cpp file where \"template\" API functions are registered.");
 
     public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
     private final StringBuilder handlerRegistrationCpp = regStringParam("handlerRegistrationCpp",
