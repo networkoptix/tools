@@ -5,12 +5,12 @@ import com.nx.util.SourceCode;
 import java.util.regex.Pattern;
 
 /**
- * Parses source comments for multiline apidoc method comments.
+ * Parses source comments for multiline apidoc API function comments.
  */
 public final class FunctionCommentMatcher implements RegistrationMatcher
 {
     /**
-     * @return Null if line is not a next line after a multiline apidoc method comment end.
+     * @return Null if line is not a next line after a multiline apidoc API function comment end.
      */
     public RegistrationMatch createRegistrationMatch(SourceCode sourceCode, int line)
     {
