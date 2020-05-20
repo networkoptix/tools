@@ -19,10 +19,11 @@ public class Params
         "",
         "A cpp file where \"handler\" methods are registered.");
 
-    public String methodCommentSources() { return methodCommentSources.toString(); }
-    private final StringBuilder methodCommentSources = regStringParam("methodCommentSources",
+    public String functionCommentSources() { return functionCommentSources.toString(); }
+
+    private final StringBuilder functionCommentSources = regStringParam("functionCommentSources",
         "",
-        "A comma-separated list of source files where apidoc comments for methods are specified.");
+        "A comma-separated list of source files with apidoc comments for API functions.");
 
     public String typeHeaderPaths() { return typeHeaderPaths.toString(); }
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",

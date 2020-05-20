@@ -63,7 +63,6 @@ public final class SourceCodeParser
             RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                mainLine += match.mainLineCorrection;
                 final List<ApidocCommentParser.FunctionDescription> functions =
                     createFunctionsFromComment(typeManager);
                 if (functions != null && !functions.isEmpty())
