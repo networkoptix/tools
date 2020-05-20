@@ -113,7 +113,7 @@ public final class VmsCodeToApiXmlExecutor
                 {
                     openApi = new JSONObject();
                     System.out.println(
-                            "    WARNING: Open API schema template is not provided");
+                        "    WARNING: Open API schema template is not provided.");
                 }
             }
             catch (Exception e)
