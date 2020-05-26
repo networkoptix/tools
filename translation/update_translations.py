@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -106,7 +106,7 @@ def update(project, language):
         log += ' '.join(command)
         log += '\n'
 
-    log += subprocess.check_output(command, stderr=subprocess.STDOUT)
+    log += subprocess.check_output(command, stderr=subprocess.STDOUT).decode('utf-8')
     global results
     results[project] = log
 
