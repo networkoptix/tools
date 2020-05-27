@@ -27,7 +27,8 @@ def get_validation_rules(filename):
         yield AtLeastOneAlphaRule()
     if 'de_DE' not in filename and 'ja_JP' not in filename:
         yield LowercaseRule()
-    yield UntranslatedStringRule()
+    if 'en_US' not in filename:
+        yield UntranslatedStringRule()
 
 
 if __name__ == "__main__":
