@@ -133,7 +133,7 @@ public final class OpenApiSerializer
                 getArray(method, "parameters").put(parameter);
                 continue;
             }
-            if (param.isGeneratedFromStruct)
+            if (param.isGeneratedFromStruct && function.isBodyAllowed())
             {
                 final JSONObject requestBody = getObject(method, "requestBody");
                 if (!param.optional)

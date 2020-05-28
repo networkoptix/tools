@@ -198,6 +198,12 @@ public final class Apidoc extends Serializable
             unusedParams = new ArrayList<Param>();
         }
 
+        public boolean isBodyAllowed()
+        {
+            return !method.equals("GET") && !method.equals("HEAD") && !method.equals("DELETE")
+                && !method.equals("CONNECT");
+        }
+
         protected void readFromParser(Parser p) throws Parser.Error
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
