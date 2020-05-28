@@ -14,9 +14,10 @@ public final class TypeManager
         public Error(String message) { super(message); }
     }
 
-    public TypeManager(boolean verbose)
+    public TypeManager(boolean verbose, boolean invalidChronoFieldSuffixIsError)
     {
         this.verbose = verbose;
+        this.invalidChronoFieldSuffixIsError = invalidChronoFieldSuffixIsError;
     }
 
     public final void processFiles(List<File> files)
@@ -33,7 +34,8 @@ public final class TypeManager
             final FlagParser flagParser = new FlagParser(sourceCode, verbose);
             flags.putAll(flagParser.parseFlags());
 
-            final StructParser structParser = new StructParser(sourceCode, verbose);
+            final StructParser structParser =
+                new StructParser(sourceCode, verbose, invalidChronoFieldSuffixIsError);
             structs.putAll(structParser.parseStructs());
 
         }
@@ -421,7 +423,8 @@ public final class TypeManager
         return null;
     }
 
-    private boolean verbose;
+    private final boolean verbose;
+    private final boolean invalidChronoFieldSuffixIsError;
 
     private final Map<String, EnumParser.EnumInfo> enums =
         new HashMap<String, EnumParser.EnumInfo>();

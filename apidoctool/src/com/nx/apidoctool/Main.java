@@ -83,6 +83,7 @@ public class Main
             {
                 final VmsCodeToApiXmlExecutor executor = new VmsCodeToApiXmlExecutor();
                 executor.verbose = arg.isVerbose();
+                executor.invalidChronoFieldSuffixIsError = arg.invalidChronoFieldSuffixIsError();
                 executor.vmsPath = arg.getFile("-vms-path");
                 executor.templateApiXmlFile = arg.getFile("-template-xml");
                 executor.outputApiXmlFile = arg.getFile("-output-xml");

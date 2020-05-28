@@ -172,7 +172,8 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeManager typeManager = new TypeManager(/*verbose*/ true);
+        TypeManager typeManager =
+            new TypeManager(/*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
         List<File> files = new ArrayList<File>();
         files.add(templateFunctionsCppFile);
         typeManager.processFiles(files);
@@ -206,7 +207,8 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeManager typeManager = new TypeManager(/*verbose*/ true);
+        TypeManager typeManager =
+            new TypeManager(/*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
         List<File> files = new ArrayList<File>();
         files.add(handlerFunctionsCppFile);
         typeManager.processFiles(files);
@@ -263,7 +265,8 @@ public final class Tests extends TestBase
 
         description += "-----------------------------------------------------------------------\n";
         description += "- Structs\n\n";
-        final StructParser structParser = new StructParser(reader, true);
+        final StructParser structParser =
+            new StructParser(reader, /*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
         final Map<String, StructParser.StructInfo> structs = structParser.parseStructs();
         List<StructParser.StructInfo> structList =
             new ArrayList<StructParser.StructInfo>(structs.values());

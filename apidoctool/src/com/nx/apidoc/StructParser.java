@@ -67,10 +67,12 @@ public final class StructParser
         }
     }
 
-    public StructParser(SourceCode sourceCode, boolean verbose)
+    public StructParser(
+        SourceCode sourceCode, boolean verbose, boolean invalidChronoFieldSuffixIsError)
     {
         this.verbose = verbose;
         this.sourceCode = sourceCode;
+        this.invalidChronoFieldSuffixIsError = invalidChronoFieldSuffixIsError;
     }
 
     public final Map<String, StructInfo> parseStructs()
@@ -120,7 +122,7 @@ public final class StructParser
     }
 
     private List<StructInfo.Field> parseStructFields()
-        throws ApidocTagParser.Error
+        throws ApidocTagParser.Error, Error
     {
         final List<StructInfo.Field> fields = new ArrayList<StructInfo.Field>();
         while (line <= sourceCode.getLineCount())
@@ -137,12 +139,52 @@ public final class StructParser
         return fields;
     }
 
+    private void checkChronoFieldSuffix(String type, String name, String suffix) throws Error
+    {
+        if (!invalidChronoFieldSuffixIsError)
+            return;
+        if (name.endsWith(suffix))
+            return;
+        final boolean deprecated =
+            line > 1 && sourceCode.getLine(line - 1).trim().startsWith("/**%deprecated ");
+        if (deprecated)
+            return;
+        throw new Error(
+            "Parameter `" + type + " " + name + "` must end with '" + suffix + "' suffix.");
+    }
+
+    private boolean isChronoField(String type, String name) throws Error
+    {
+        if (!type.startsWith("std::chrono::"))
+            return false;
+        if (type.endsWith("::seconds"))
+            checkChronoFieldSuffix(type, name, "S");
+        else if (type.endsWith("::milliseconds"))
+            checkChronoFieldSuffix(type, name, "Ms");
+        else if (type.endsWith("::microseconds"))
+            checkChronoFieldSuffix(type, name, "Us");
+        else if (type.endsWith("::nanoseconds"))
+            checkChronoFieldSuffix(type, name, "Ns");
+        else if (type.endsWith("::minutes"))
+            checkChronoFieldSuffix(type, name, "M");
+        else if (type.endsWith("::hours"))
+            checkChronoFieldSuffix(type, name, "H");
+        else
+            return false;
+        return true;
+    }
+
     private StructInfo.Field parseField(String type, String name)
-        throws ApidocTagParser.Error
+        throws ApidocTagParser.Error, Error
     {
         final StructInfo.Field field = new StructInfo.Field();
         field.name = name;
-        if (integerAliases.contains(type))
+
+        if (isChronoField(type, name))
+        {
+            field.type = Apidoc.Type.INTEGER;
+        }
+        else if (integerAliases.contains(type))
         {
             field.type = Apidoc.Type.INTEGER;
         }
@@ -200,6 +242,7 @@ public final class StructParser
 
     private final SourceCode sourceCode;
     private final boolean verbose;
+    private final boolean invalidChronoFieldSuffixIsError;
     private int line;
 
     private static final List<String> integerAliases = Arrays.asList(
