@@ -203,7 +203,7 @@ public final class StructParser
     private int line;
 
     private static final List<String> integerAliases = Arrays.asList(
-        "int", "qint32", "qint16", "qint8", "qint64");
+        "int", "qint32", "qint16", "qint8", "qint64", "size_t");
     private static final List<String> stringAliases = Arrays.asList(
         "QString", "QnLatin1Array", "QByteArray");
     private static final List<String> booleanAliases = Arrays.asList("bool");
