@@ -2,6 +2,8 @@ package com.nx.apidoc;
 
 import com.nx.util.Utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -254,8 +256,15 @@ public final class ApidocCommentParser
         result.urlPrefix = values[1];
         result.function = new Apidoc.Function();
 
-        result.function.name = values[2];
         result.function.method = values[0].trim();
+        try
+        {
+            result.function.name = URLDecoder.decode(values[2], "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            result.function.name = values[2];
+        }
         result.function.description = values[3].trim();
         if (LABEL_ARRAY_PARAMS.equals(item.getLabel()))
             result.function.arrayParams = true;
@@ -610,7 +619,7 @@ public final class ApidocCommentParser
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
-        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w[\\w\\{\\}/\\?-]*)(.*)", Pattern.DOTALL);
-    //       0HttpMthd        1UrlPre   2FnNm                 3Txt
-    //       GET              /ec2      getRe                 \nRe
+        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w[\\w%\\{\\}/\\?-]*)(.*)", Pattern.DOTALL);
+    //       0HttpMthd        1UrlPre   2FnNm                  3Txt
+    //       GET              /ec2      getRe                  \nRe
 }
