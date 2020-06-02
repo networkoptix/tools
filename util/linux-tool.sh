@@ -739,10 +739,6 @@ do_copyright_file() # <file> <prefix> [add]
     local -r NOTICE\
 ="Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/"
 
-    local -r CPP_PREFIX="// "
-    local -r SH_PREFIX="## "
-    local -r BAT_PREFIX=":: "
-
     local SHEBANG_LINE=""
     local FIRST_LINE=$(head -n 1 "$FILE")
     local NEWLINE_PREFIX=""
@@ -1848,7 +1844,7 @@ main()
             local -r SLN=$(nx_path "$BUILD_DIR\vms.sln")
             [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
             local -r VS_EXE="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
-            [ ! -f "$VS_EXE" ] && nx_fail "Cannot find VS executable: $VS_EXE"
+            [[ ! -f $VS_EXE ]] && nx_fail "Cannot find VS executable: $VS_EXE"
             # Empty arg of `start` stands for window title - needed to allow exe name in quotes.
             nx_verbose cmd /c start "" "$VS_EXE" "$SLN" "$@"
             ;;
