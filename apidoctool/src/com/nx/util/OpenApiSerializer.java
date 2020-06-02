@@ -104,8 +104,6 @@ public final class OpenApiSerializer
         boolean filled = false;
         for (final Apidoc.Function function: group.functions)
         {
-            if (function.method.isEmpty())
-                continue;
             final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
             final JSONObject method = fillPath(path, function, refParameters);
             final JSONArray tags = getArray(method, "tags");
@@ -118,7 +116,7 @@ public final class OpenApiSerializer
     private static JSONObject fillPath(
         JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
     {
-        final JSONObject method = getObject(path, function.method.toLowerCase());
+        final JSONObject method = getObject(path, function.knownMethod());
         if (!function.description.isEmpty())
             method.put("description", function.description);
         for (final Apidoc.Param param: function.params)

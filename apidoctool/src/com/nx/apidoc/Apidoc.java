@@ -1,6 +1,7 @@
 package com.nx.apidoc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.nx.util.Serializable;
@@ -202,6 +203,16 @@ public final class Apidoc extends Serializable
         {
             return !method.equals("GET") && !method.equals("HEAD") && !method.equals("DELETE")
                 && !method.equals("CONNECT");
+        }
+
+        public String knownMethod()
+        {
+            if (method.isEmpty())
+                return "options";
+            final List<String> knownMethods = Arrays.asList(
+                "get", "post", "put", "patch", "delete", "head", "options", "trace");
+            final String result = method.toLowerCase();
+            return knownMethods.contains(result) ? result : "trace";
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
