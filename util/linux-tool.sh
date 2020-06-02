@@ -269,10 +269,11 @@ setup_vars()
             nx_fail "Cannot find $CMAKE_LISTS_TXT" "$HELP"
         fi
 
-        if ! grep "project(vms " "$CMAKE_LISTS_TXT" >/dev/null
-        then
-            nx_fail "The parent repo is not \"vms\" project." "$HELP"
-        fi
+# Commented out to allow working on non-VMS projects (not all commands may work).
+#        if ! grep "project(vms " "$CMAKE_LISTS_TXT" >/dev/null
+#        then
+#            nx_fail "The parent repo is not \"vms\" project." "$HELP"
+#        fi
 
         get_TARGET_and_CUSTOMIZATION_and_QT_DIR
         get_BUILD_DIR
@@ -1592,7 +1593,12 @@ doRsync() # "$@"
     
     nx_echo "Rsyncing to" $(nx_lcyan)"$sshVmsDir/"$(nx_nocolor)
     # ATTENTION: Trailing slashes are essential for rsync to work properly.
-    nx_rsync --delete --exclude "$changesetTxt" --exclude "/.git" --exclude="*.orig" \
+    nx_rsync --delete \
+        --exclude="/changeset.txt" \
+        --exclude="/.git" \
+        --exclude="*.orig" \
+        --exclude="/.vs" \
+        --exclude="/_ReSharper.Caches" \
         "$VMS_DIR/" "$sshVmsDir/" || exit $?
 
     if (($# > 0))
@@ -1841,12 +1847,17 @@ main()
             ;;
         vs)
             nx_is_cygwin || nx_fail "This is a Windows-only command."
-            local -r SLN=$(nx_path "$BUILD_DIR\vms.sln")
-            [ ! -f "$SLN" ] && nx_fail "Cannot find VS solution file: $SLN"
+            if [[ -f $VMS_DIR/CMakeSettings.json ]]
+            then #< ninja
+                local -r VS_OPEN_PATH=$(nx_path "$VMS_DIR")
+            else #< msbuild
+                local -r VS_OPEN_PATH=$(nx_path "$BUILD_DIR\vms.sln")
+                [[ ! -f $VS_OPEN_PATH ]] && nx_fail "Cannot find VS solution file: $VS_OPEN_PATH"
+            fi
             local -r VS_EXE="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
             [[ ! -f $VS_EXE ]] && nx_fail "Cannot find VS executable: $VS_EXE"
             # Empty arg of `start` stands for window title - needed to allow exe name in quotes.
-            nx_verbose cmd /c start "" "$VS_EXE" "$SLN" "$@"
+            nx_verbose cmd /c start "" "$VS_EXE" "$VS_OPEN_PATH" "$@"
             ;;
         thg)
             nx_is_cygwin || nx_fail "Linux support not implemented yet."
