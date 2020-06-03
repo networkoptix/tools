@@ -204,7 +204,12 @@ public final class StructParser
         {
             field.type = Apidoc.Type.UUID;
         }
-        else if (type.endsWith("List"))
+        else if (type.equals("QStringList"))
+        {
+            field.type = Apidoc.Type.STRING_ARRAY;
+            field.typeName = "QString";
+        }
+        else if (type.endsWith("List") && !type.equals("QStringList"))
         {
             field.type = Apidoc.Type.ARRAY;
             field.typeName = type.substring(0, type.length() - "List".length());
@@ -215,9 +220,12 @@ public final class StructParser
         }
         else if (type.startsWith("std::vector<"))
         {
-            field.type = Apidoc.Type.ARRAY;
             field.typeName = type.substring(
                 "std::vector<".length(), type.length() - ">".length()).trim();
+            if (stringAliases.contains(field.typeName))
+                field.type = Apidoc.Type.STRING_ARRAY;
+            else
+                field.type = Apidoc.Type.ARRAY;
         }
         else if (type.startsWith("std::optional<"))
         {
