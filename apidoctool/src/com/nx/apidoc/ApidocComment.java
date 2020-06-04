@@ -18,6 +18,7 @@ public abstract class ApidocComment
     protected static final String TAG_PARAM = "%param";
     protected static final String TAG_VALUE = "%value";
     protected static final String TAG_RETURN = "%return";
+    protected static final String TAG_DEPRECATED = "%deprecated";
 
     protected static final String ATTR_PROPRIETARY = "[proprietary]";
     protected static final String ATTR_READONLY = "[readonly]";

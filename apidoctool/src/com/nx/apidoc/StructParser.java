@@ -139,39 +139,16 @@ public final class StructParser
         return fields;
     }
 
-    private void checkChronoFieldSuffix(String type, String name, String suffix) throws Error
+    private static boolean hasDeprecatedTag(List<ApidocTagParser.Item> items)
     {
-        if (!invalidChronoFieldSuffixIsError)
-            return;
-        if (name.endsWith(suffix))
-            return;
-        final boolean deprecated =
-            line > 1 && sourceCode.getLine(line - 1).trim().startsWith("/**%deprecated ");
-        if (deprecated)
-            return;
-        throw new Error(
-            "Parameter `" + type + " " + name + "` must end with '" + suffix + "' suffix.");
-    }
-
-    private boolean isChronoField(String type, String name) throws Error
-    {
-        if (!type.startsWith("std::chrono::"))
+        if (items == null)
             return false;
-        if (type.endsWith("::seconds"))
-            checkChronoFieldSuffix(type, name, "S");
-        else if (type.endsWith("::milliseconds"))
-            checkChronoFieldSuffix(type, name, "Ms");
-        else if (type.endsWith("::microseconds"))
-            checkChronoFieldSuffix(type, name, "Us");
-        else if (type.endsWith("::nanoseconds"))
-            checkChronoFieldSuffix(type, name, "Ns");
-        else if (type.endsWith("::minutes"))
-            checkChronoFieldSuffix(type, name, "M");
-        else if (type.endsWith("::hours"))
-            checkChronoFieldSuffix(type, name, "H");
-        else
-            return false;
-        return true;
+        for (final ApidocTagParser.Item item: items)
+        {
+            if (ApidocCommentParser.TAG_DEPRECATED.equals(item.getTag()))
+                return true;
+        }
+        return false;
     }
 
     private StructInfo.Field parseField(String type, String name)
@@ -179,9 +156,17 @@ public final class StructParser
     {
         final StructInfo.Field field = new StructInfo.Field();
         field.name = name;
+        field.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
 
-        if (isChronoField(type, name))
+        final String chronoSuffix = requiredChronoSuffixes.get(Utils.removeCppNamespaces(type));
+        if (chronoSuffix != null)
         {
+            if (invalidChronoFieldSuffixIsError && !name.endsWith(chronoSuffix)
+                && !hasDeprecatedTag(field.items))
+            {
+                throw new Error(
+                    "`" + type + " " + name + "` must end with '" + chronoSuffix + "' suffix.");
+            }
             field.type = Apidoc.Type.INTEGER;
         }
         else if (integerAliases.contains(type))
@@ -244,7 +229,6 @@ public final class StructParser
         if (field.typeName != null)
             field.typeName = Utils.removeCppNamespaces(field.typeName);
 
-        field.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);;
         return field;
     }
 
@@ -276,4 +260,17 @@ public final class StructParser
     private static final Pattern fieldRegex = Pattern.compile(
         " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(?:\\s=\\s.*)?(?:\\s*\\{.*}\\s*)?;.*");
       //     0Type-----------------------------^    1Name Equals------^ Text-in-braces---^
+
+    private static final Map<String, String> requiredChronoSuffixes = new HashMap<String, String>()
+    {
+        {
+            put("seconds", "S");
+            put("milliseconds", "Ms");
+            put("microseconds", "Us");
+            put("nanoseconds", "Ns");
+            put("minutes", "M");
+            put("hours", "H");
+            put("time_point", "Ms");
+        }
+    };
 }

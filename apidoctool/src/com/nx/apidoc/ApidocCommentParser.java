@@ -114,6 +114,7 @@ public final class ApidocCommentParser
     {
         List<Apidoc.Value> values;
         String structName;
+        String deprecatedDescription = "";
     }
 
     //---------------------------------------------------------------------------------------------
@@ -314,6 +315,8 @@ public final class ApidocCommentParser
         Param paramDescription = parseParamTags(tagIterator);
         param.values.addAll(paramDescription.values);
         param.structName = paramDescription.structName;
+        if (!paramDescription.deprecatedDescription.isEmpty())
+            param.description = paramDescription.deprecatedDescription + "\n" + param.description;
 
         if (paramDirection == ParamDirection.Output)
             parseFunctionResultParamAttr(item, param);
@@ -391,6 +394,10 @@ public final class ApidocCommentParser
             else if (TAG_STRUCT.equals(tag.getTag()))
             {
                 paramDescription.structName = tag.getFullText(indentLevel);
+            }
+            else if (TAG_DEPRECATED.equals(tag.getTag()))
+            {
+                paramDescription.deprecatedDescription = tag.getFullText(indentLevel);
             }
             else if (!tag.getTag().startsWith(TAG_COMMENTED_OUT))
             {
