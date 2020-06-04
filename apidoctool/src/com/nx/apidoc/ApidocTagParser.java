@@ -288,7 +288,7 @@ public final class ApidocTagParser
         if (lines == null)
             return null;
 
-        String[] values = Utils.matchRegex(apidpocCommentStartRegex, lines.get(0));
+        String[] values = Utils.matchRegex(apidocCommentStartRegex, lines.get(0));
         if (values == null)
             return null;
 
@@ -335,6 +335,6 @@ public final class ApidocTagParser
     public static final Pattern commentStartRegex = Pattern.compile(
         "\\s*/\\*.*");
 
-    public static final Pattern apidpocCommentStartRegex = Pattern.compile(
+    public static final Pattern apidocCommentStartRegex = Pattern.compile(
         "\\s*/\\*\\*(<)?\\s*%apidoc.*");
 }
