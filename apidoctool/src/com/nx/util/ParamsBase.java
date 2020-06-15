@@ -88,7 +88,10 @@ public abstract class ParamsBase
         public final void printValue(PrintStream output, String linePrefix)
         {
             if (!description.isEmpty())
-                output.println(linePrefix + "# " + description);
+            {
+                for (final String line: description.split("\n"))
+                    output.println(linePrefix + "# " + line);
+            }
             output.println(linePrefix + name + "=" + valueStr());
         }
 

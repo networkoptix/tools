@@ -36,8 +36,7 @@ public class Params
 
     private final StringBuilder urlPrefixReplacement = regStringParam("urlPrefixReplacement",
         "",
-        "A comma-separated list of API function URL prefix replacement string pairs," +
-            "if specified. " +
-            "Each string replacement pair must be separated by space. " +
-            "The first part is the target, the second part is the replacement.");
+        "A comma-separated list of API function URL prefix replacement string pairs, if\n" +
+        "specified. Each string replacement pair must be separated by space. The first part is\n" +
+        "the target, the second part is the replacement.");
 }
