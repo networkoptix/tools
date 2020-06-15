@@ -24,12 +24,6 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
 : ${VEGA_BACKGROUND_RRGGBB="300000"}
-if nx_is_cygwin
-then
-    : ${CMAKE_GEN="Visual Studio 16 2019"}
-else
-    : ${CMAKE_GEN="Ninja"}
-fi
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx".
 : ${SSH_MEDIATOR_HOST="la.hdw.mx"}
 : ${SSH_MEDIATOR_USER="$USER"}
@@ -315,46 +309,60 @@ do_gen() # [cache] "$@"
 
     nx_cd "$BUILD_DIR" || return $?
     case "$TARGET" in
-        linux) local -r TARGET_ARG="";;
-        windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
-        macos) local -r TARGET_ARG="";;
-        *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
+        linux) local -r TARGET_ARGS=();;
+        windows) local -r TARGET_ARGS=();;
+        macos) local -r TARGET_ARGS=();;
+        *) local -r TARGET_ARGS=( -DtargetDevice="$TARGET" );;
     esac
 
-    local GENERATOR_ARG=""
-    if [ ! -z "$CMAKE_GEN" ]
+    if nx_is_cygwin
     then
-        GENERATOR_ARG="-G$CMAKE_GEN"
+        if [[ -f "$VMS_DIR/CMakeSettings.json" ]] #< The branch supports Ninha, use it.
+        then
+            local -r GENERATOR_ARGS=( -GNinja -DMSVC_TOOLSET_VERSION=141 -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" )
+        else
+            local -r GENERATOR_ARGS=( -G "Visual Studio 16 2019" -Ax64 -Thost=x64 )
+        fi
+    else
+        local -r GENERATOR_ARGS=( -GNinja )
     fi
 
-    local CUSTOMIZATION_ARG=""
-    [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
+    if [[ ! -z "$CUSTOMIZATION" ]]
+    then
+        local -r CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
+    else
+        local -r CUSTOMIZATION_ARG=""
+    fi
 
     local COMPOSITION_ARG=()
 
     case "$TARGET" in
         edge1) `# Currently, unit tests cannot compile without camera vendor plugins. #`;;
-        *) COMPOSITION_ARG+=( "-DwithTests=ON" "-DwithUnitTestsArchive=ON" )
+        *) COMPOSITION_ARG+=( -DwithTests=ON -DwithUnitTestsArchive=ON )
     esac
 
     if [[ $DISTRIB = 1 ]]
     then
-        COMPOSITION_ARG+=( "-DwithDistributions=ON" )
+        COMPOSITION_ARG+=( -DwithDistributions=ON )
     else
         if [[ $SDK = 1 ]]
         then
-            COMPOSITION_ARG+=( "-DwithSdk=ON" )
+            COMPOSITION_ARG+=( -DwithSdk=ON )
         fi
     fi
-    [[ $TARGET = windows ]] && COMPOSITION_ARG+=( "-DwithMiniLauncher=ON" )
+    [[ $TARGET = windows ]] && COMPOSITION_ARG+=( -DwithMiniLauncher=ON )
 
-    local DEV_ARG=""
-    [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
+    if [[ $DEV = 0 ]]
+    then
+        local -r DEV_ARG="-DdeveloperBuild=OFF"
+    else
+        local -r DEV_ARG=""
+    fi
 
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
-        ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
-        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@"
+        "${GENERATOR_ARGS[@]}" \
+        $CUSTOMIZATION_ARG "${TARGET_ARGS[@]}" $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@"
 }
 
 do_build()
