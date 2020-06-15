@@ -832,8 +832,8 @@ do_benchmark() # "$@"
     then
         nx_verbose rm -rf "$BUILD_DIR/distrib"/*vms_benchmark*.zip
         nx_verbose rm -rf "$BUILD_DIR/vms/vms_benchmark"
-        do_gen "$@" || exit $?
-        do_build --target vms_benchmark || exit $?
+        do_gen -DwithDistributions=ON "$@" || exit $?
+        do_build --target distribution_vms_benchmark || exit $?
     fi
     
     local -r parentDir="$BUILD_DIR/distrib"
@@ -842,12 +842,12 @@ do_benchmark() # "$@"
         -name "*vms_benchmark*.zip"
         
     local -r unzipDir="${ZIP_FILE%.zip}"
-    local -r toolDir="$unzipDir/vms_benchmark"
+    local -r benchmarkDir="$unzipDir/vms_benchmark"
 
     # Back up configuration.    
     for ext in .conf .ini
     do
-        local file="$toolDir/vms_benchmark$ext"
+        local file="$benchmarkDir/vms_benchmark$ext"
         if [[ -f $file ]]
         then
             nx_verbose cp "$file" "$parentDir/"
@@ -862,21 +862,23 @@ do_benchmark() # "$@"
         local file="$parentDir/vms_benchmark$ext"
         if [[ -f $file ]]
         then
-            nx_verbose mv "$file" "$toolDir/"
+            nx_verbose mv "$file" "$benchmarkDir/"
         fi
     done
     
     if nx_is_cygwin
     then
-        nx_log_command chmod +x "$toolDir/testcamera/*" #< Avoid "*" expanding in output.
-        chmod +x "$toolDir/testcamera"/* #< Needed on Windows after unzipping.
+        # Set the executable permissions after unzipping - otherwise, .exe files will not start.
+        local -r binDir="$benchmarkDir/tools/bin"
+        nx_log_command chmod +x "$binDir/*" #< Avoid `*` expansion when logging the command.
+        chmod +x "$binDir"/*
     fi
     
     nx_echo "SUCCESS: vms_benchmark rebuilt and unpacked to $DIR"
 
     if [[ $buildOnly == 0 ]]
     then
-        nx_cd "$toolDir"
+        nx_cd "$benchmarkDir"
 
         # Run the tool.
         if nx_is_cygwin
