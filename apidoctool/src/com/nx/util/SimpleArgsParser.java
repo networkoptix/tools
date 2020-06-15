@@ -40,12 +40,6 @@ public abstract class SimpleArgsParser
             ++i;
         }
 
-        if ("-invalidChronoFieldSuffixIsError".equals(args[i]))
-        {
-            invalidChronoFieldSuffixIsError = true;
-            ++i;
-        }
-
         while (i < args.length)
         {
             final String arg = args[i];
@@ -89,11 +83,6 @@ public abstract class SimpleArgsParser
     public final boolean isVerbose()
     {
         return verbose;
-    }
-
-    public final boolean invalidChronoFieldSuffixIsError()
-    {
-        return invalidChronoFieldSuffixIsError;
     }
 
     /**
@@ -198,14 +187,13 @@ public abstract class SimpleArgsParser
             " " + command + " -version|--version\n" +
             "\n" +
             "Usage:\n" +
-            " " + command + " [-verbose] [-invalidChronoFieldSuffixIsError]");
+            " " + command + " [-verbose] ");
         printUsageHelp();
     }
 
     //--------------------------------------------------------------------------
 
     private boolean verbose = false;
-    private boolean invalidChronoFieldSuffixIsError = false;
     private String action;
     private Map<String, String> map = new HashMap<String, String>();
     private List<String> valuelessArgs = new ArrayList<String>();

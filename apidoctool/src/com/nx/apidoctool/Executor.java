@@ -9,7 +9,6 @@ import java.io.File;
 public abstract class Executor
 {
     public boolean verbose = false;
-    public boolean invalidChronoFieldSuffixIsError = false;
     public Params params;
 
     /**

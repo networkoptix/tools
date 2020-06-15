@@ -8,6 +8,22 @@ import com.nx.util.ParamsBase;
 public class Params
     extends ParamsBase
 {
+    public boolean invalidChronoFieldSuffixIsError() throws Exception
+    {
+        final String value = invalidChronoFieldSuffixIsError.toString().trim();
+        if (value.equalsIgnoreCase("true") || value.equals("1"))
+            return true;
+        if (value.equalsIgnoreCase("false") || value.equals("0"))
+            return false;
+        throw new Exception(
+            "Param \"invalidChronoFieldSuffixIsError\" must be true, 1, false or 0.");
+    }
+
+    private final StringBuilder invalidChronoFieldSuffixIsError = regStringParam(
+        "invalidChronoFieldSuffixIsError",
+        "false",
+        "If true, produce an error on invalid measurement unit suffix of `std::chrono` type field.");
+
     public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
 
     private final StringBuilder templateRegistrationCpp = regStringParam("templateRegistrationCpp",

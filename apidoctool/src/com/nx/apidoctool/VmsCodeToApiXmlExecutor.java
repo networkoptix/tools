@@ -47,7 +47,7 @@ public final class VmsCodeToApiXmlExecutor
         if (!params.typeHeaderPaths().isEmpty())
         {
             List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
-            typeManager = new TypeManager(verbose, invalidChronoFieldSuffixIsError);
+            typeManager = new TypeManager(verbose, params.invalidChronoFieldSuffixIsError());
             typeManager.processFiles(typeHeaders);
         }
 
