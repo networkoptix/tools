@@ -319,7 +319,7 @@ do_gen() # [cache] "$@"
     then
         if [[ -f "$VMS_DIR/CMakeSettings.json" ]] #< The branch supports Ninha, use it.
         then
-            local -r GENERATOR_ARGS=( -GNinja -DMSVC_TOOLSET_VERSION=141 -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" )
+            local -r GENERATOR_ARGS=( -GNinja -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" )
         else
             local -r GENERATOR_ARGS=( -G "Visual Studio 16 2019" -Ax64 -Thost=x64 )
         fi
