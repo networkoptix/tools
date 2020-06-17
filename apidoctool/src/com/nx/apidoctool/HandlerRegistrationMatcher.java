@@ -43,11 +43,11 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
 
     /**
      * Allow a function registration with a name that is defined as a non-literal string or a
-     * string literal with the special symbols (:?). Such name is not intended to match its
+     * string literal with the special symbols (*:?). Such name is not intended to match its
      * function name in the apidoc comment.
      */
     private static final Pattern regHandlerRegexForFunctorWithSpecialName = Pattern.compile(
-        "\\s*reg\\((?:[^\"]|\"[\\w\\?\\:\\/]+\").*");
+        "\\s*reg\\((?:[^\"]|\"[\\w\\?\\:\\*\\/]+\").*");
 
     private static final Pattern regHandlerRegexForFunctorWithInvalidName = Pattern.compile(
         "\\s*reg\\(.*");
