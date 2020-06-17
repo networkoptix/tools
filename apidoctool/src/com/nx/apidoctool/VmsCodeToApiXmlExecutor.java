@@ -30,6 +30,8 @@ public final class VmsCodeToApiXmlExecutor
         System.out.println("apidoctool: parsing apidoc in C++ and inserting into XML");
 
         System.out.println("    Input: " + templateApiXmlFile);
+        if (openApiTemplateJsonFile != null)
+            System.out.println("    Input: " + openApiTemplateJsonFile);
         System.out.println("    Input: " + vmsPath + vmsPath.separatorChar);
         try
         {
