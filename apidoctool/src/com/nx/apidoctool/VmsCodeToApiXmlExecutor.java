@@ -49,7 +49,8 @@ public final class VmsCodeToApiXmlExecutor
         if (!params.typeHeaderPaths().isEmpty())
         {
             List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
-            typeManager = new TypeManager(verbose, params.invalidChronoFieldSuffixIsError());
+            typeManager = new TypeManager(verbose, params.invalidChronoFieldSuffixIsError(),
+                params.unknownParamTypeIsError());
             typeManager.processFiles(typeHeaders);
         }
 
@@ -153,7 +154,8 @@ public final class VmsCodeToApiXmlExecutor
             System.out.println("    Parsing API functions from " + sourceCppFile);
 
         SourceCode reader = new SourceCode(sourceCppFile);
-        SourceCodeParser parser = new SourceCodeParser(verbose, reader, urlPrefixReplacements);
+        SourceCodeParser parser = new SourceCodeParser(
+            verbose, params.unknownParamTypeIsError(), reader, urlPrefixReplacements);
         return parser.parseApidocComments(apidoc, matcher, typeManager);
     }
 }

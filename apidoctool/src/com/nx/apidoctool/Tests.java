@@ -216,8 +216,7 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeManager typeManager =
-            new TypeManager(/*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
+        TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(templateFunctionsCppFile);
         typeManager.processFiles(files);
@@ -251,8 +250,7 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        TypeManager typeManager =
-            new TypeManager(/*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
+        TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(handlerFunctionsCppFile);
         typeManager.processFiles(files);

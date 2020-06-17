@@ -31,7 +31,8 @@ public final class Apidoc extends Serializable
         OBJECT_JSON, //< String with JSON object inside.
         ARRAY_JSON, //< String with JSON array inside.
         TEXT, //< Raw text in result.
-        BINARY; //< Raw binary data in result.
+        BINARY, //< Raw binary data in result.
+        ANY; //< Arbitrary type
 
         public static Type fromString(String value)
         {

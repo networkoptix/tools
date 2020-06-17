@@ -24,6 +24,18 @@ public class Params
         "false",
         "If true, produce an error on invalid measurement unit suffix of `std::chrono` type field.");
 
+    public boolean unknownParamTypeIsError()
+    {
+        final String value = unknownParamTypeIsError.toString().trim();
+        return !value.equalsIgnoreCase("false") && !value.equals("0");
+    }
+
+    private final StringBuilder unknownParamTypeIsError = regStringParam(
+        "unknownParamTypeIsError",
+        "false",
+        "Produce an error if a parameter type is unspecified and cannot be deduced from the " +
+            "struct field.");
+
     public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
 
     private final StringBuilder templateRegistrationCpp = regStringParam("templateRegistrationCpp",

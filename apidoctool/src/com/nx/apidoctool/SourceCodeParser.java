@@ -29,16 +29,20 @@ public final class SourceCodeParser
     }
 
     public SourceCodeParser(
-        boolean verbose, SourceCode sourceCode, List<Replacement> urlPrefixReplacements)
+        boolean verbose,
+        boolean unknownParamTypeIsError,
+        SourceCode sourceCode,
+        List<Replacement> urlPrefixReplacements)
     {
         this.verbose = verbose;
+        this.unknownParamTypeIsError = unknownParamTypeIsError;
         this.sourceCode = sourceCode;
         this.urlPrefixReplacements = urlPrefixReplacements;
     }
 
     public SourceCodeParser(boolean verbose, SourceCode sourceCode)
     {
-        this(verbose, sourceCode, new ArrayList<Replacement>());
+        this(verbose, /*unknownParamTypeIsError*/ false, sourceCode, new ArrayList<Replacement>());
     }
 
     /**
@@ -121,6 +125,14 @@ public final class SourceCodeParser
                                 ", method: " + description.function.method);
                         }
 
+                        if (unknownParamTypeIsError)
+                        {
+                            for (Apidoc.Param param: description.function.params)
+                                throwErrorIfUnknownParam(description, param, /*isResult*/ false);
+                            for (Apidoc.Param param: description.function.result.params)
+                                throwErrorIfUnknownParam(description, param, /*isResult*/ true);
+                        }
+
                         ++processedFunctionCount;
                         group.functions.add(description.function);
                     }
@@ -142,6 +154,18 @@ public final class SourceCodeParser
             System.out.println("        Functions count: " + processedFunctionCount);
 
         return processedFunctionCount;
+    }
+
+    private void throwErrorIfUnknownParam(
+        ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
+        throws Error
+    {
+        if (!param.isRef && param.type == Apidoc.Type.UNKNOWN)
+        {
+            throw new Error(description.function.method + " " + description.urlPrefix + "/" +
+                description.function.name + ": unknown type of " + (isResult ? "result " : "") +
+                "parameter \"" + param.name + "\".");
+        }
     }
 
     //---------------------------------------------------------------------------------------------
@@ -194,6 +218,7 @@ public final class SourceCodeParser
     //---------------------------------------------------------------------------------------------
 
     private final boolean verbose;
+    private final boolean unknownParamTypeIsError;
     private final SourceCode sourceCode;
 
     //---------------------------------------------------------------------------------------------

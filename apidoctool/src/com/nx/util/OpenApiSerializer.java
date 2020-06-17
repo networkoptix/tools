@@ -33,6 +33,8 @@ public final class OpenApiSerializer
 
     private static JSONObject getParamByPath(JSONObject schema, String path)
     {
+        if (!schema.has("type"))
+            schema.put("type", "object");
         schema = getObject(schema, "properties");
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
@@ -168,10 +170,10 @@ public final class OpenApiSerializer
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         default_.put("description", Utils.cleanupDescription(result.caption));
-        if (result.type == Apidoc.Type.UNKNOWN)
-            return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
+        if (result.type == Apidoc.Type.ANY)
+            return;
         String type = toString(result.type);
         schema.put("type", type);
         if (type.equals("array"))
@@ -191,6 +193,8 @@ public final class OpenApiSerializer
 
     private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
     {
+        if (param.type == Apidoc.Type.ANY)
+            return;
         final String type = toString(param.type);
         schema.put("type", type);
         if (type.equals("array"))

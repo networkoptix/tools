@@ -14,10 +14,17 @@ public final class TypeManager
         public Error(String message) { super(message); }
     }
 
-    public TypeManager(boolean verbose, boolean invalidChronoFieldSuffixIsError)
+    public TypeManager(
+        boolean verbose, boolean invalidChronoFieldSuffixIsError, boolean unknownParamTypeIsError)
     {
         this.verbose = verbose;
         this.invalidChronoFieldSuffixIsError = invalidChronoFieldSuffixIsError;
+        this.unknownParamTypeIsError = unknownParamTypeIsError;
+    }
+
+    public TypeManager(boolean verbose)
+    {
+        this(verbose, /*invalidChronoFieldSuffixIsError*/ false, /*unknownParamTypeIsError*/ false);
     }
 
     public final void processFiles(List<File> files)
@@ -89,11 +96,9 @@ public final class TypeManager
         StructParser.StructInfo structInfo = structs.get(structName);
         if (structInfo == null)
         {
-            if (verbose)
-            {
-                System.out.println(
-                    "            WARNING: Struct \"" + structName + "\" not found");
-            }
+            if (unknownParamTypeIsError)
+                throw new Error("Struct `" + structName + "` not found.");
+            System.out.println("WARNING: Struct `" + structName + "` not found.");
             return null;
         }
         final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
@@ -122,11 +127,9 @@ public final class TypeManager
             }
             else
             {
-                if (verbose)
-                {
-                    System.out.println(
-                        "            WARNING: Struct \"" + structName + "\" not found");
-                }
+                if (unknownParamTypeIsError)
+                    throw new Error("Struct `" + structName + "` not found.");
+                System.out.println("WARNING: Struct `" + structName + "` not found.");
             }
             return functionParams;
         }
@@ -425,6 +428,7 @@ public final class TypeManager
 
     private final boolean verbose;
     private final boolean invalidChronoFieldSuffixIsError;
+    private final boolean unknownParamTypeIsError;
 
     private final Map<String, EnumParser.EnumInfo> enums =
         new HashMap<String, EnumParser.EnumInfo>();
