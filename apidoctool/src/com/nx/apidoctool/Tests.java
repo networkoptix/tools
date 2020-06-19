@@ -123,18 +123,26 @@ public final class Tests extends TestBase
         assertEquals(cleanedDescription, Utils.cleanupDescription(description));
         assertEquals("<pre>ab</pre>",
             Utils.cleanupDescription("<pre><![CDATA[a]]><![CDATA[b]]></pre>"));
-        assertEquals(
-            "<pre>a<![CDATA[b</pre>",
-            Utils.cleanupDescription("<pre><![CDATA[a]]><![CDATA[b</pre>"));
-        final String test = "<pre><![CDATA[a]]></pre><![CDATA[b]]>";
+        final String test1 = "<pre><![CDATA[a]]><![CDATA[b</pre>";
         try
         {
-            Utils.cleanupDescription(test);
+            Utils.cleanupDescription(test1);
         }
         catch (Exception e)
         {
             assertEquals(e.getMessage(),
-                "Found CDATA not inside <pre></pre> block in here: `" + test + "`.");
+                "Unterminated CDATA section in description:\n```\n" + test1 + "\n```\n");
+        }
+        final String test2 = "<pre><![CDATA[a]]></pre><![CDATA[b]]>";
+        try
+        {
+            Utils.cleanupDescription(test2);
+        }
+        catch (Exception e)
+        {
+            assertEquals(e.getMessage(),
+                "Found CDATA not inside <pre></pre> element in description:\n```\n"
+                    + test2 + "\n```\n");
         }
     }
 

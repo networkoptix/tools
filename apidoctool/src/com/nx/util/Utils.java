@@ -137,15 +137,16 @@ public final class Utils
             final int endCdata = result.indexOf("]]>", beginCdata + "<![CDATA[".length());
             if (endCdata == -1)
             {
-                System.out.println("WARNING: Unfinished CDATA in here: `" + description + "`.");
-                break;
+                throw new Exception(
+                    "Unterminated CDATA section in description:\n```\n" + description + "\n```\n");
             }
             final int beginPre = result.indexOf("<pre>", 0);
             final int endPre = result.indexOf("</pre>", endCdata + "]]>".length());
             if (beginPre == -1 || beginPre > beginCdata || endPre == -1)
             {
                 throw new Exception(
-                    "Found CDATA not inside <pre></pre> block in here: `" + description + "`.");
+                    "Found CDATA not inside <pre></pre> element in description:\n```\n"
+                        + description + "\n```\n");
             }
             result = result.substring(0, beginCdata)
                 + result.substring(beginCdata + "<![CDATA[".length(), endCdata)
