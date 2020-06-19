@@ -124,6 +124,36 @@ public final class Utils
         return (length == value.length()) ? value : value.substring(0, length);
     }
 
+    public static String cleanupDescription(String description) throws Exception
+    {
+        if (description == null)
+            return "";
+        String result = description.trim();
+        while (true)
+        {
+            final int beginCdata = result.indexOf("<![CDATA[", 0);
+            if (beginCdata == -1)
+                break;
+            final int endCdata = result.indexOf("]]>", beginCdata + "<![CDATA[".length());
+            if (endCdata == -1)
+            {
+                System.out.println("WARNING: Unfinished CDATA in here: `" + description + "`.");
+                break;
+            }
+            final int beginPre = result.indexOf("<pre>", 0);
+            final int endPre = result.indexOf("</pre>", endCdata + "]]>".length());
+            if (beginPre == -1 || beginPre > beginCdata || endPre == -1)
+            {
+                throw new Exception(
+                    "Found CDATA not inside <pre></pre> block in here: `" + description + "`.");
+            }
+            result = result.substring(0, beginCdata)
+                + result.substring(beginCdata + "<![CDATA[".length(), endCdata)
+                + result.substring(endCdata + "]]>".length());
+        }
+        return result;
+    }
+
     /**
      * @return Matched groups (strings may be empty but never null), or null if the line does not
      * match lineRegex.

@@ -102,6 +102,42 @@ public final class Tests extends TestBase
             throw new Exception("Invalid arg [" + arg + "] accepted by Params.");
     }
 
+    private void ckeanupDescription() throws Exception
+    {
+        final String description =
+"    <br/>Example:\n" +
+"    <pre><![CDATA[\n" +
+"http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z" +
+"&caption=CreditCardUsed&metadata={\"cameraRefs\":[\"3A4AD4EA-9269-4B1F-A7AA" +
+"-2CEC537D0248\",\"3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240\"]}\n" +
+"]]></pre>\n" +
+"    This example triggers a generic event informing the system that a\n";
+        final String cleanedDescription =
+"<br/>Example:\n" +
+"    <pre>\n" +
+"http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z" +
+"&caption=CreditCardUsed&metadata={\"cameraRefs\":[\"3A4AD4EA-9269-4B1F-A7AA" +
+"-2CEC537D0248\",\"3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240\"]}\n" +
+"</pre>\n" +
+"    This example triggers a generic event informing the system that a";
+        assertEquals(cleanedDescription, Utils.cleanupDescription(description));
+        assertEquals("<pre>ab</pre>",
+            Utils.cleanupDescription("<pre><![CDATA[a]]><![CDATA[b]]></pre>"));
+        assertEquals(
+            "<pre>a<![CDATA[b</pre>",
+            Utils.cleanupDescription("<pre><![CDATA[a]]><![CDATA[b</pre>"));
+        final String test = "<pre><![CDATA[a]]></pre><![CDATA[b]]>";
+        try
+        {
+            Utils.cleanupDescription(test);
+        }
+        catch (Exception e)
+        {
+            assertEquals(e.getMessage(),
+                "Found CDATA not inside <pre></pre> block in here: `" + test + "`.");
+        }
+    }
+
     private void testParamsBase()
         throws Exception
     {
@@ -350,6 +386,9 @@ public final class Tests extends TestBase
         sourceCodeParserOutputTestPath.mkdir();
 
         readTestProperties();
+
+        run("CleanupDescription", new Run() { public void run() throws Exception {
+            ckeanupDescription(); } });
 
         run("ParamsBase", new Run() { public void run() throws Exception {
             testParamsBase(); } });
