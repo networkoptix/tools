@@ -91,7 +91,7 @@ public final class OpenApiSerializer
                 usedTags.add(group.groupName);
                 JSONObject tag = new JSONObject();
                 tag.put("name", group.groupName);
-                tag.put("description", group.groupDescription);
+                tag.put("description", group.groupDescription.trim());
                 tags.put(tag);
             }
         }
@@ -117,8 +117,10 @@ public final class OpenApiSerializer
         JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.knownMethod());
-        if (!function.description.isEmpty())
-            method.put("description", function.description);
+        final String description = (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
+            + function.description.trim();
+        if (!description.isEmpty())
+            method.put("description", description);
         for (final Apidoc.Param param: function.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
@@ -165,7 +167,7 @@ public final class OpenApiSerializer
     private static void fillResult(JSONObject path, Apidoc.Result result)
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
-        default_.put("description", result.caption);
+        default_.put("description", result.caption.trim());
         if (result.type == Apidoc.Type.UNKNOWN)
             return;
         JSONObject schema = getObject(getObject(getObject(
@@ -213,13 +215,23 @@ public final class OpenApiSerializer
         }
     }
 
+    private static void putDescription(boolean isProprietary, String description, JSONObject param)
+    {
+        String result = isProprietary ? "<b>Proprietary.</b>" : "";
+        if (description != null)
+        {
+            description = description.trim();
+            if (!description.isEmpty())
+                result += " " + description;
+        }
+        if (!result.isEmpty())
+            param.put("description", result);
+    }
+
     private static void addStructParam(JSONObject schema, Apidoc.Param param)
     {
-        if (param.proprietary)
-            return;
         final JSONObject parameter = getParamByPath(schema, param.name);
-        if (param.description != null && !param.description.isEmpty())
-            parameter.put("description", param.description);
+        putDescription(param.proprietary, param.description, parameter);
         if (param.readonly)
             parameter.put("readOnly", true);
         if (!param.optional)
@@ -229,12 +241,9 @@ public final class OpenApiSerializer
 
     private static JSONObject toJson(Apidoc.Param param)
     {
-        if (param.proprietary)
-            return null;
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
-        if (param.description != null && !param.description.isEmpty())
-            result.put("description", param.description);
+        putDescription(param.proprietary, param.description, result);
         if (param.readonly)
             result.put("readOnly", true);
         else if (!param.optional)
