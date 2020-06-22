@@ -108,11 +108,8 @@ public final class SourceCodeParser
                             {
                                 for (Apidoc.Param param: description.function.params)
                                 {
-                                    if (param.isGeneratedFromStruct &&
-                                        param.structName.equals(inputStructName))
-                                    {
+                                    if (param.isGeneratedFromStruct)
                                         param.optional = true;
-                                    }
                                 }
                             }
                         }
