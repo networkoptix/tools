@@ -173,7 +173,7 @@ public final class StructParser
         {
             field.type = Apidoc.Type.INTEGER;
         }
-        else if (stringAliases.contains(type))
+        else if (typesRepresentedAsJsonString.contains(type))
         {
             field.type = Apidoc.Type.STRING;
         }
@@ -207,7 +207,7 @@ public final class StructParser
         {
             field.typeName = type.substring(
                 "std::vector<".length(), type.length() - ">".length()).trim();
-            if (stringAliases.contains(field.typeName))
+            if (typesRepresentedAsJsonString.contains(field.typeName))
                 field.type = Apidoc.Type.STRING_ARRAY;
             else
                 field.type = Apidoc.Type.ARRAY;
@@ -238,9 +238,9 @@ public final class StructParser
     private int line;
 
     private static final List<String> integerAliases = Arrays.asList(
-        "int", "qint32", "qint16", "qint8", "qint64", "size_t");
-    private static final List<String> stringAliases = Arrays.asList(
-        "QString", "QnLatin1Array", "QByteArray");
+        "int", "qint32", "qint16", "qint8");
+    private static final List<String> typesRepresentedAsJsonString = Arrays.asList(
+        "QString", "QnLatin1Array", "QByteArray", "qint64", "size_t", "int64_t");
     private static final List<String> booleanAliases = Arrays.asList("bool");
     private static final List<String> uuidAliases = Arrays.asList("QnUuid");
     private static final List<String> floatAliases = Arrays.asList("float", "qreal");
