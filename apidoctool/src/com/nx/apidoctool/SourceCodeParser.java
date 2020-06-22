@@ -128,9 +128,9 @@ public final class SourceCodeParser
                         if (unknownParamTypeIsError)
                         {
                             for (Apidoc.Param param: description.function.params)
-                                throwErrorIfUnknownParam(description, param, /*isResult*/ false);
+                                throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ false);
                             for (Apidoc.Param param: description.function.result.params)
-                                throwErrorIfUnknownParam(description, param, /*isResult*/ true);
+                                throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ true);
                         }
 
                         ++processedFunctionCount;
@@ -156,16 +156,29 @@ public final class SourceCodeParser
         return processedFunctionCount;
     }
 
-    private void throwErrorIfUnknownParam(
+    private void throwErrorIfUnknownOrUnsupportedParam(
         ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
         throws Error
     {
-        if (!param.isRef && param.type == Apidoc.Type.UNKNOWN)
+        if (param.isRef)
+            return;
+        String error = null;
+        switch (param.type)
         {
-            throw new Error(description.function.method + " " + description.urlPrefix + "/" +
-                description.function.name + ": unknown type of " + (isResult ? "result " : "") +
-                "parameter \"" + param.name + "\".");
+            case UNKNOWN:
+                error = "unknown type";
+                break;
+            case OBJECT_JSON:
+            case ARRAY_JSON:
+            case TEXT:
+                error = "unsupported type \"" + param.type.toString() + "\"";
+                break;
+            default:
+                return;
         }
+        throw new Error(description.function.method + " " + description.urlPrefix + "/" +
+            description.function.name + ": " + error + " of " + (isResult ? "result " : "") +
+            "parameter \"" + param.name + "\".");
     }
 
     //---------------------------------------------------------------------------------------------

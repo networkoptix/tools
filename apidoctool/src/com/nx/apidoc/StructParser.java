@@ -167,7 +167,7 @@ public final class StructParser
                 throw new Error(
                     "`" + type + " " + name + "` must end with '" + chronoSuffix + "' suffix.");
             }
-            field.type = Apidoc.Type.INTEGER;
+            field.type = Apidoc.Type.STRING;
         }
         else if (integerAliases.contains(type))
         {

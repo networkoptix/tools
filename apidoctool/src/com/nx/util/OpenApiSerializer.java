@@ -174,50 +174,81 @@ public final class OpenApiSerializer
         default_.put("description", Utils.cleanupDescription(result.caption));
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
-        if (result.type == Apidoc.Type.ANY)
-            return;
-        String type = toString(result.type);
-        schema.put("type", type);
-        if (type.equals("array"))
+        fillSchemaType(schema, result.type);
+        if (result.type == Apidoc.Type.ARRAY || result.type == Apidoc.Type.OBJECT)
         {
-            schema = getObject(schema, "items");
-            type = (result.type == Apidoc.Type.ARRAY) ? "object" : "string";
-            schema.put("type", type);
-            if (result.type == Apidoc.Type.UUID_ARRAY)
-                schema.put("format", "uuid");
-        }
-        if (type.equals("object"))
-        {
+            if (result.type == Apidoc.Type.ARRAY)
+                schema = schema.getJSONObject("items");
             for (final Apidoc.Param param: result.params)
                 addStructParam(schema, param);
         }
     }
 
+    private static void fillSchemaType(JSONObject schema, Apidoc.Type type)
+    {
+        switch (type)
+        {
+            case UNKNOWN:
+            case OBJECT_JSON:
+            case ARRAY_JSON:
+            case TEXT:
+            case ANY:
+                break;
+            case STRING:
+            case ENUM:
+            case FLAGS:
+                schema.put("type", "string");
+                break;
+            case BOOLEAN:
+            case OPTION:
+                schema.put("type", "boolean");
+                break;
+            case INTEGER:
+                schema.put("type", "integer");
+                break;
+            case FLOAT:
+                schema.put("type", "number");
+                break;
+            case UUID:
+                schema.put("type", "string");
+                schema.put("format", "uuid");
+                break;
+            case OBJECT:
+                schema.put("type", "object");
+                break;
+            case ARRAY:
+                schema.put("type", "array");
+                getObject(schema, "items").put("type", "object");
+                break;
+            case STRING_ARRAY:
+                schema.put("type", "array");
+                getObject(schema, "items").put("type", "string");
+                break;
+            case UUID_ARRAY:
+                schema.put("type", "array");
+                schema = getObject(schema, "items");
+                schema.put("type", "string");
+                schema.put("format", "uuid");
+                break;
+            case BINARY:
+                schema.put("type", "string");
+                schema.put("format", "base64");
+                break;
+            default:
+                assert false: "Unspecified schema type.";
+        }
+    }
+
     private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
     {
-        if (param.type == Apidoc.Type.ANY)
-            return;
-        final String type = toString(param.type);
-        schema.put("type", type);
-        if (type.equals("array"))
+        fillSchemaType(schema, param.type);
+        if (param.type == Apidoc.Type.ENUM || param.type == Apidoc.Type.FLAGS)
         {
-            final JSONObject items = getObject(schema, "items");
-            items.put("type", (param.type == Apidoc.Type.ARRAY) ? "object" : "string");
-            if (param.type == Apidoc.Type.UUID_ARRAY)
-                items.put("format", "uuid");
-        }
-        if (param.type == Apidoc.Type.ENUM)
-        {
-            if (!param.values.isEmpty())
-            {
-                final JSONArray enum_ = getArray(schema, "enum");
-                for (final Apidoc.Value value: param.values)
-                    enum_.put(value.name);
-            }
-        }
-        else if (param.type == Apidoc.Type.UUID)
-        {
-            schema.put("format", "uuid");
+            if (param.values.isEmpty())
+                return;
+            final JSONArray enum_ = getArray(schema, "enum");
+            for (final Apidoc.Value value: param.values)
+                enum_.put(value.name);
         }
     }
 
@@ -253,28 +284,8 @@ public final class OpenApiSerializer
         else if (!param.optional)
             result.put("required", true);
         fillSchemaType(getObject(result, "schema"), param);
+        if (param.type == Apidoc.Type.OPTION)
+            result.put("allowEmptyValue", "true");
         return result;
-    }
-
-    private static String toString(Apidoc.Type type)
-    {
-        if (type == Apidoc.Type.FLOAT)
-            return "number";
-        if (type == Apidoc.Type.FLAGS)
-            return "integer";
-        if (type == Apidoc.Type.STRING_ARRAY
-            || type == Apidoc.Type.UUID_ARRAY
-            || type == Apidoc.Type.ARRAY_JSON)
-        {
-            return "array";
-        }
-        if (type != Apidoc.Type.BOOLEAN
-            && type != Apidoc.Type.INTEGER
-            && type != Apidoc.Type.OBJECT
-            && type != Apidoc.Type.ARRAY)
-        {
-            return "string";
-        }
-        return type.toString();
     }
 }
