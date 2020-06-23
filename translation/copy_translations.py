@@ -67,7 +67,7 @@ def migrate_file(source_path, target_path):
     result = migrate_xml(source, target)
     logging.info("{0} items processed".format(result.total))
     if result.migrated > 0:
-        logging.warning("{0} items migrated".format(result.migrated))
+        logging.info("{0} items migrated".format(result.migrated))
         target.flush()
     else:
         logging.debug("{0} items migrated".format(result.migrated))
