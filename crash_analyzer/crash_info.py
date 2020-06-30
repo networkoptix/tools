@@ -19,7 +19,7 @@ REPORT_NAME_REGEXP = re.compile(r'''
     (?P<binary> (?: (?!--). )+)
     --
     (?P<version> [0-9]+ \. [0-9]+ \. [0-9]+) \. (?P<build> [0-9]+)
-        - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<beta> (?: -beta)?)
+        - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<publication> (?: -[a-z]+)?)
     --
     .* (?P<platform> (?: windows | linux | arm) - [a-z0-9]+) .*
     \.
@@ -66,24 +66,19 @@ class Report:
         if not match:
             raise ReportNameError('Unable to parse name: ' + self.name)
 
-        self.binary, version, self.build, self.changeset, customization, beta, \
+        self.binary, version, self.build, self.changeset, customization, publication, \
             self.platform, self.extension = REPORT_NAME_REGEXP.match(name).groups()
-
-        if customization:
-            self.customization = customization[1:]
-        else:
-            self.customization = 'unknown'
 
         if len(self.extension) > 10:
             raise ReportNameError('Invalid extension in: ' + name)
 
         self.version = version[:-2] if version.endswith('.0') else version
+        self.component = 'Server' if ('server' in self.binary) else 'Client'
+        self.publication = publication[1:] if publication else 'public'
+
+        self.customization = customization[1:] if customization else 'unknown'
         if self.customization == 'unknown' and self.version >= '2.4':
             raise ReportNameError('Customization is not specified: ' + name)
-
-        self.component = 'Server' if ('server' in self.binary) else 'Client'
-        if beta:
-            self.beta = True
 
     def __repr__(self):
         return 'Report({})'.format(repr(self.name))
