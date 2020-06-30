@@ -297,10 +297,10 @@ class Monitor:
 
 
 def main():
+    import subprocess
     try:
-        import subprocess
-        change_set, *_ = subprocess.check_output(['hg', 'id']).decode().split()
-    except (ImportError, OSError):
+        change_set = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode()
+    except (OSError, subprocess.SubprocessError):
         change_set = 'UNKNOWN'
 
     parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
