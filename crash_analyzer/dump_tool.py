@@ -43,12 +43,12 @@ DIST_URLS = [
 
 DIST_SUFFIXES = [
     r'x64[a-z-_]+%s(-only)?\.(msi|exe)',
-    r'%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)',
+    r'%s-[0-9\.-_]+-(win|windows_x)(86|64)[a-z-_]*\.(exe|msi)',
 ]
 
 PDB_SUFFIXES = [
     r'x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip',
-    r'(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip',
+    r'(%(module)s|libs)_debug-[0-9\.-_]+-(win|windows_x)(86|64)[a-z-_]*\.zip',
 ]
 
 CUSTOMIZATIONS = (
@@ -247,7 +247,7 @@ class DumpAnalyzer:
     def __init__(
             self, cache_directory: str, dump_path: str,
             customization: str = '', version: str = '', build: str = None, branch: str = '',
-            subprocess_timeout_s: int = 10, debug_mode: bool = False,
+            subprocess_timeout_s: int = 20, debug_mode: bool = False,
             visual_studio: bool = False):
         """Initializes analyzer with dump :path and :customization;
         :version, :build, :branch - optionals to speed up process.

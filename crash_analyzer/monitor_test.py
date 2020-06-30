@@ -117,7 +117,6 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
         stage_checkpoint()
 
     actual = {k: v for k, v in monitor_fixture.issues.items()}
-    expected = {k: v for k, v in utils.Resource('expected_issues.yaml').parse().items()
-                if v['extension'].endswith(extension)}
-
+    possible = utils.Resource('expected_issues.yaml').parse()
+    expected = {k: v for k, v in possible.items() if v['extension'].endswith(extension)}
     assert expected == actual

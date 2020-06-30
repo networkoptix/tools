@@ -17,7 +17,6 @@
   - EZ_Pro--3.1.0.16975-77ebc0608e38-ionetworks--2018-03-12_01-34-59_windows-x64-winxp-Windows-10_7902efb0027d57441e3cb8d6805ee40364c43fbf.cdb-bt
   - EZ_Pro--3.1.0.16975-77ebc0608e38-ionetworks--2018-03-14_02-47-55_windows-x64-winxp-Windows-10_7902efb0027d57441e3cb8d6805ee40364c43fbf.cdb-bt
   - EZ_Pro--3.1.0.16975-77ebc0608e38-ionetworks--2018-03-14_12-43-07_windows-x64-winxp-Windows-10_0bcd6158e0b8288e01cd015a041bf32f08c99c6d.cdb-bt
-  - HD_Witness--3.1.0.16975-77ebc0608e38-default--2018-04-13_04-35-01_windows-x64-winxp-Windows-10_9147b913e3be1ab3243117a97513b7c5e7d05c05.cdb-bt
   code: c0000005 (Access violation)
   extension: cdb-bt
   stack:
