@@ -180,9 +180,15 @@ class Jira:
         stack_lines_to_analyze = "\n".join(reason.full_stack[:3])  # Only first 3 lines should be checked for autoclose
 
         close_reason = None
-        for keyphrase, reason in self._autoclose_indicators.items():
+        for keyphrase, description in self._autoclose_indicators["stack_top"].items():
             if keyphrase in stack_lines_to_analyze:
-                close_reason = reason
+                close_reason = description
+
+        if not close_reason:
+            for keyphrase, description in self._autoclose_indicators["full_stack"].items():
+                if keyphrase in reason.full_stack:
+                    close_reason = description
+
         if not close_reason:
             logger.debug('Issue {} should not be autoclosed'.format(key))
             return
@@ -294,6 +300,7 @@ class Jira:
         """
         for report in reports[-self._file_limit:]:
             try:
+                logger.info('Key {} path {} with name {}'.format(key, report.path, report.name))
                 self._jira.add_attachment(key, attachment=report.path, filename=report.name)
 
             except jira.exceptions.JIRAError as jira_error:

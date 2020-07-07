@@ -208,3 +208,9 @@ def test_jira_autoclose():
         assert {'a'} == jira.attachments()
         assert 1 == len(jira.issue.fields.comment.comments)
         assert "Rejected" == jira.issue.fields.resolution.name
+
+        jira.api._transition(jira.issue.key, 'Reopen')
+        jira.autoclose_issue(
+            crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2', 'f3', 'f4', 'Qt5Core!qBadAlloc', 'f5']))
+        assert 'Closed' == jira.issue.fields.status.name
+        assert "Rejected" == jira.issue.fields.resolution.name
