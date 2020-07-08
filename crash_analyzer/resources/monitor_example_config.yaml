@@ -57,10 +57,6 @@ upload:
 issue_autoclose_indicators:
     stack_top:
         '::create_sys': "Handles overflow"
-        'RtlAllocateHeap': "Memory overflow"
-        'QByteArray::QByteArray': "Memory overflow"
-        'QVector::reallocData': "Memory overflow"
-        'QVector::append': "Memory overflow"
         'Qt5WebKit!': "Webkit issue"
         'atio6axx': "Graphics driver issue"
         'nvoglv64': "Graphics driver issue"
@@ -70,4 +66,8 @@ issue_autoclose_indicators:
         'initializeOpenGLFunctions': "OpenGL issue"
     full_stack:
         'Qt5Core!qBadAlloc': "Memory overflow"
+        'RtlAllocateHeap': "Memory overflow"
+        'QByteArray::QByteArray': "Memory overflow"
+        'QVector::reallocData': "Memory overflow"
+        'QVector::append': "Memory overflow"
 
