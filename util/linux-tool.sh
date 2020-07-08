@@ -676,26 +676,35 @@ do_kit() # "$@"
     fi
 }
 
-insert_copyright_notice() # <file> <notice-line> <shebang-line> <newline-prefix>
+insert_copyright_notice() # <file> <notice-line> <shebang-line> <header-line> <newline-prefix>
 {
     local -r FILE="$1"; shift
     local -r NOTICE_LINE="$1"; shift
     local -r SHEBANG_LINE="$1"; shift
+    local -r HEADER_LINE="$1"; shift
     local -r NEWLINE_PREFIX="$1"; shift
 
     local -r BAK="$FILE.bak"
     mv "$FILE" "$BAK" || return $?
-    if [[ -z $SHEBANG_LINE ]]
-    then #< No shebang - insert the copyright notice as the first line.
-        echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
-        echo "$NEWLINE_PREFIX" `# Will be followed by '\n'. #` >>"$FILE" #< Add an empty line.
-        cat "$BAK" >>"$FILE"
-    else #< Shebang - insert the copyright notice as the second line, and add "x" permission.
+    if [[ -n $SHEBANG_LINE ]]
+    then #< Shebang - insert the copyright notice as the third line, and add "x" permission.
         echo "$SHEBANG_LINE" >>"$FILE"
+        echo "" >>"$FILE"
         echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
         # No need to add an empty line - assuming there already is an empty line after the shebang.
         tail -n +2 "$BAK" >>"$FILE" #< Add original lines starting with the second line.
         chmod +x "$FILE"
+    elif [[ -n $HEADER_LINE ]]
+    then #< Header line - must be a markdown file - insert the copyright notice as the third line.
+        echo "$HEADER_LINE" >>"$FILE"
+        echo "" >>"$FILE"
+        echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
+        # No need to add an empty line - assuming there already is an empty line after the header.
+        tail -n +2 "$BAK" >>"$FILE" #< Add original lines starting with the second line.
+    else #< No shebang and no header line - insert the copyright notice as the first line.
+        echo "$NOTICE_LINE$NEWLINE_PREFIX" >>"$FILE"
+        echo "$NEWLINE_PREFIX" `# Will be followed by '\n'. #` >>"$FILE" #< Add an empty line.
+        cat "$BAK" >>"$FILE"
     fi
 
     nx_echo
@@ -749,6 +758,7 @@ do_copyright_file() # <file> <prefix> [add]
 ="Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/"
 
     local SHEBANG_LINE=""
+    local HEADER_LINE=""
     local FIRST_LINE=$(head -n 1 "$FILE")
     local NEWLINE_PREFIX=""
     if [[ ${FIRST_LINE:(-1)} == $'\r' ]] #< First line ends with '\r' - Windows newlines are used.
@@ -756,10 +766,14 @@ do_copyright_file() # <file> <prefix> [add]
         NEWLINE_PREFIX=$'\r'
         FIRST_LINE=${FIRST_LINE: : (-1)} #< Trim the last char which is '\r'.
     fi
-    if [[ $FIRST_LINE == '#!'* ]] #< Shell shebang - the copyright notice should come next.
+    if [[ $FIRST_LINE == '#!'* ]] #< Shell shebang - the copyright notice should be the third line.
     then
         SHEBANG_LINE="$FIRST_LINE"
-        FIRST_LINE=$(head -n 2 "$FILE" |tail -n 1)
+        FIRST_LINE=$(head -n 3 "$FILE" |tail -n 1)
+    elif [[ $FILE == *'.md' ]] #< Markdown file - the copyright notice should be the third line.
+    then
+        HEADER_LINE="$FIRST_LINE"
+        FIRST_LINE=$(head -n 3 "$FILE" |tail -n 1)
     fi
 
     if [[ $FIRST_LINE == $PREFIX$NOTICE ]] #< Copyright notice is in place and is correct.
@@ -772,7 +786,7 @@ do_copyright_file() # <file> <prefix> [add]
     # The file has missing copyright notice.
     if [[ $ADD == 1 ]]
     then
-        insert_copyright_notice "$FILE" "$PREFIX$NOTICE" "$SHEBANG_LINE" "$NEWLINE_PREFIX"
+        insert_copyright_notice "$FILE" "$PREFIX$NOTICE" "$SHEBANG_LINE" "$HEADER_LINE" "$NEWLINE_PREFIX"
     else
         nx_echo "Missing copyright notice in $FILE"
     fi
@@ -790,8 +804,8 @@ do_copyright() # "$@"
     for FILE in "${FILES[@]}"
     do
         case "$(basename "$FILE")" in
-            CMakeLists.txt|*.cmake) `# should come first #` do_copyright_file "$FILE" "## " "$@";;
-            *.h|*.cpp|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
+            CMakeLists.txt|*.cmake|*.cmake.in) `# should come first #` do_copyright_file "$FILE" "## " "$@";;
+            *.h|*.cpp|*.inc|*.inc.in|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
             *.sh|*.py|Doxyfile) do_copyright_file "$FILE" "## " "$@";;
             *.bat) do_copyright_file "$FILE" ":: " "$@";;
             .gitignore|.hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
