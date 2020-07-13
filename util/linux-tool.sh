@@ -1595,30 +1595,70 @@ doGoCd() # "$@"
     nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
 }
 
+generateRemoteGitInfo()
+{
+    local -r remoteGitInfoTxt=$1
+
+    local -r getChangesetCommand=( git -C "$VMS_DIR" rev-parse --short=12 HEAD )
+    local changeset #< Separate declaration is needed to capture the command exit status.
+    if ! changeset=$("${getChangesetCommand[@]}")
+    then
+        nx_echo "WARNING: Unable to obtain changeSet via: ${getChangesetCommand[@]}"
+        return 1
+    fi
+
+    if ! git -C "$VMS_DIR" diff-index --quiet HEAD
+    then
+        changeset="${changeset}+"
+    fi
+
+    local -r getBranchCommand=( git -C "$VMS_DIR" symbolic-ref --short HEAD )
+    local branch #< Separate declaration is needed to capture the command exit status.
+    if ! branch=$("${getBranchCommand[@]}")
+    then
+       branch="DETACHED_HEAD"
+    fi
+
+    local -r getCurrentRefsCommand=( git -C "$VMS_DIR" log --decorate -n1 --format=format:"%D" )
+    local currentRefsFromGit #< Separate declaration is needed to capture the command exit status.
+    if ! currentRefsFromGit=$("${getCurrentRefsCommand[@]}")
+    then
+        nx_echo "WARNING: Unable to obtain currentRefs via: ${getCurrentRefsCommand[@]}"
+        return 1
+    fi
+
+    currentRefsFromGit="${currentRefsFromGit/HEAD, /}"
+    currentRefsFromGit="${currentRefsFromGit/HEAD -> /}"
+
+    local -r currentRefs="\"${currentRefsFromGit}\""
+    nx_go_verbose echo "$(cat <<EOF
+changeSet=${changeset}
+branch=${branch}
+currentRefs=${currentRefs}
+EOF
+)" "[>\"${remoteGitInfoTxt}\"]"
+
+    return 0 #< To ensure right "$?" variable value.
+}
+
 doRsync() # "$@"
 {
     local -r relativeVmsDir=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
     local -r sshVmsDir="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$relativeVmsDir"
 
-    # Generate changeset.txt for the remote cmake to use instead of taking from the repo.
-    local -r changesetTxt="changeset.txt"
-    local -r remoteChangesetTxt="$VEGA_DEVELOP_DIR/$relativeVmsDir/$changesetTxt"
-    local -r getChangesetCommand=( git -C "$VMS_DIR" rev-parse --short=12 HEAD )
+    # Generate git_info.txt for the remote cmake to use instead of taking info from the repo.
+    local -r gitInfoTxt="git_info.txt"
+    local -r remoteGitInfoTxt="$VEGA_DEVELOP_DIR/$relativeVmsDir/$gitInfoTxt"
 
-    local changeset #< Separate declaration is needed to capture the command exit status.
-    changeset=$("${getChangesetCommand[@]}")
-    if (( $? > 0 ))
+    if ! generateRemoteGitInfo "$remoteGitInfoTxt"
     then
-        nx_echo "WARNING: Unable to obtain changeset via: ${getChangesetCommand[@]}"
-        nx_go_verbose rm -rf "$remoteChangesetTxt"
-    else
-        nx_go_verbose echo "$changeset" "[>]" "$remoteChangesetTxt"
+        nx_go_verbose rm -rf "$remoteGitInfoTxt"
     fi
 
     nx_echo "Rsyncing to" $(nx_lcyan)"$sshVmsDir/"$(nx_nocolor)
     # ATTENTION: Trailing slashes are essential for rsync to work properly.
     nx_rsync --delete \
-        --exclude="/changeset.txt" \
+        --exclude="/$gitInfoTxt" \
         --exclude="/.git" \
         --exclude="*.orig" \
         --exclude="/.vs" \
