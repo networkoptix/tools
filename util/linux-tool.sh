@@ -62,7 +62,7 @@ Here <command> can be one of the following:
  apidoc-rdep <ver> # Run dev apidoctool tests, deploy to packages/any/ and upload via "rdep -u".
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
- sdk # Rebuild nx_*_sdk.
+ sdk [metadata] # Rebuild nx_*_sdk zip archives - all, or only Metadata SDK.
  benchmark [run|build] # Rebuild (if 'run' is not specified), unzip and run (if 'build' is not
      specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
@@ -1669,12 +1669,27 @@ main()
             do_kit "$@"
             ;;
         sdk)
-            nx_verbose rm -rf "$BUILD_DIR/distrib"/*_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/vms/server/nx_*_sdk"
+            if [[ $# > 0 && $1 == "metadata" ]]
+            then
+                shift
+                local -r -i METADATA_ONLY=1
+                local -r SPECIFIER="metadata"
+            else
+                local -r -i METADATA_ONLY=0
+                local -r SPECIFIER=""
+            fi
+
+
+            nx_verbose rm -rf "$BUILD_DIR/distrib"/*${SPECIFIER}_sdk*.zip
+            nx_verbose rm -rf "$BUILD_DIR/vms/server"/nx_*${SPECIFIER}_sdk
             SDK=1 do_gen "$@" || exit $?
+
             do_build --target nx_metadata_sdk || exit $?
-            do_build --target nx_video_source_sdk || exit $?
-            do_build --target nx_storage_sdk || exit $?
+            if [[ $METADATA_ONLY == 0 ]]
+            then
+                do_build --target nx_video_source_sdk || exit $?
+                do_build --target nx_storage_sdk || exit $?
+            fi
             ;;
         benchmark)
             do_benchmark "$@"
