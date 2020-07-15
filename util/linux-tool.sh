@@ -557,7 +557,7 @@ do_apidoc_rdep() # "$@"
 {
     local -r VER="$1"
     [[ $VER == "" ]] && nx_fail "Artifact version must be specified."
-    
+
     local -r DEV_DIR="$DEVELOP_DIR/devtools/apidoctool"
     local -r JAR_DEV="$DEV_DIR/out/apidoctool.jar"
     local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool-$VER"
@@ -729,13 +729,13 @@ check_for_copyright() # <file> <actual-notice-line>
         nx_echo
         return 1
     fi
-    
+
     if grep -i "copyright" "$FILE" >/dev/null
     then
         nx_echo "ATTENTION: Suspicious copyright-related content in $FILE"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -849,16 +849,16 @@ do_benchmark() # "$@"
         do_gen -DwithDistributions=ON "$@" || exit $?
         do_build --target distribution_vms_benchmark || exit $?
     fi
-    
+
     local -r parentDir="$BUILD_DIR/distrib"
-    
+
     nx_find_file ZIP_FILE "vms_benchmark zip" "$parentDir" \
         -name "*vms_benchmark*.zip"
-        
+
     local -r unzipDir="${ZIP_FILE%.zip}"
     local -r benchmarkDir="$unzipDir/vms_benchmark"
 
-    # Back up configuration.    
+    # Back up configuration.
     for ext in .conf .ini
     do
         local file="$benchmarkDir/vms_benchmark$ext"
@@ -867,10 +867,10 @@ do_benchmark() # "$@"
             nx_verbose cp "$file" "$parentDir/"
         fi
     done
-            
+
     nx_verbose nx_unpack_archive_DIR "$ZIP_FILE" || exit $? #< Deletes the old dir if it exists.
 
-    # Restore configuration.    
+    # Restore configuration.
     for ext in .conf .ini
     do
         local file="$parentDir/vms_benchmark$ext"
@@ -879,7 +879,7 @@ do_benchmark() # "$@"
             nx_verbose mv "$file" "$benchmarkDir/"
         fi
     done
-    
+
     if nx_is_cygwin
     then
         # Set the executable permissions after unzipping - otherwise, .exe files will not start.
@@ -887,7 +887,7 @@ do_benchmark() # "$@"
         nx_log_command chmod +x "$binDir/*" #< Avoid `*` expansion when logging the command.
         chmod +x "$binDir"/*
     fi
-    
+
     nx_echo "SUCCESS: vms_benchmark rebuilt and unpacked to $DIR"
 
     if [[ $buildOnly == 0 ]]
@@ -1604,7 +1604,7 @@ doRsync() # "$@"
     local -r changesetTxt="changeset.txt"
     local -r remoteChangesetTxt="$VEGA_DEVELOP_DIR/$relativeVmsDir/$changesetTxt"
     local -r getChangesetCommand=( git -C "$VMS_DIR" rev-parse --short=12 HEAD )
-    
+
     local changeset #< Separate declaration is needed to capture the command exit status.
     changeset=$("${getChangesetCommand[@]}")
     if (( $? > 0 ))
@@ -1614,7 +1614,7 @@ doRsync() # "$@"
     else
         nx_go_verbose echo "$changeset" "[>]" "$remoteChangesetTxt"
     fi
-    
+
     nx_echo "Rsyncing to" $(nx_lcyan)"$sshVmsDir/"$(nx_nocolor)
     # ATTENTION: Trailing slashes are essential for rsync to work properly.
     nx_rsync --delete \
