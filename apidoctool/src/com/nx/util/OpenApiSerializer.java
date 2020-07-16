@@ -123,6 +123,8 @@ public final class OpenApiSerializer
             + Utils.cleanupDescription(function.description);
         if (!description.isEmpty())
             method.put("description", description);
+        if (function.permissions != null && !function.permissions.isEmpty())
+            method.put("x-permissions", function.permissions);
         for (final Apidoc.Param param: function.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
