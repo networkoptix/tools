@@ -20,10 +20,10 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 : ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
-: ${VEGA_USER="$USER"}
-: ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
-: ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
-: ${VEGA_BACKGROUND_RRGGBB="300000"}
+: ${GO_USER="$USER"}
+: ${GO_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
+: ${GO_DEVELOP_DIR="/home/$GO_USER/develop"}
+: ${GO_BACKGROUND_RRGGBB="300000"}
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx".
 : ${SSH_MEDIATOR_HOST="la.hdw.mx"}
 : ${SSH_MEDIATOR_USER="$USER"}
@@ -67,9 +67,9 @@ Here <command> can be one of the following:
      specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
- go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
- go-cd command [args] # Execute a command at vega via ssh, changing dir to match the current dir.
- rsync [command] # Rsync current vms source dir to vega, run command in the respective current dir.
+ go [command args] # Execute a command at remote host via ssh, or log in to remote host via ssh.
+ go-cd command [args] # Execute a command at remote host via ssh, changing dir to match the current dir.
+ rsync [command] # Rsync current vms source dir to remote host, run command in the respective current dir.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
@@ -107,7 +107,7 @@ EOF
 go_callback()
 {
     nx_ssh_without_password \
-        "$VEGA_USER" "$VEGA_HOST" "$VEGA_USER@$VEGA_HOST" "$VEGA_BACKGROUND_RRGGBB" "$@"
+        "$GO_USER" "$GO_HOST" "$GO_USER@$GO_HOST" "$GO_BACKGROUND_RRGGBB" "$@"
 }
 
 # [out] TARGET
@@ -1644,11 +1644,11 @@ EOF
 doRsync() # "$@"
 {
     local -r relativeVmsDir=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
-    local -r sshVmsDir="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$relativeVmsDir"
+    local -r sshVmsDir="$GO_USER@$GO_HOST:$GO_DEVELOP_DIR/$relativeVmsDir"
 
     # Generate git_info.txt for the remote cmake to use instead of taking info from the repo.
     local -r gitInfoTxt="git_info.txt"
-    local -r remoteGitInfoTxt="$VEGA_DEVELOP_DIR/$relativeVmsDir/$gitInfoTxt"
+    local -r remoteGitInfoTxt="$GO_DEVELOP_DIR/$relativeVmsDir/$gitInfoTxt"
 
     if ! generateRemoteGitInfo "$remoteGitInfoTxt"
     then
