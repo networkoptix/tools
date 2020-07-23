@@ -153,17 +153,20 @@ class Jira:
                 raise ('Unsupported JIRA dump extension:' + extension)
 
         try:
+            fixVersions = self._fix_versions_for(report.version)
+            if not fixVersions:
+                raise ValueError("No fix version for this report")
             issue = self._jira.create_issue(
                 project='VMS',
                 issuetype={'name': 'Crash'},
                 summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
                     r=reason, os=operation_system(report.extension)),
                 versions=[{'name': report.version}],
-                fixVersions=[{'name': v} for v in self._fix_versions_for(report.version)],
+                fixVersions=[{'name': v} for v in fixVersions],
                 components=[{'name': reason.component}],
                 customfield_10009=self._epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
-        except jira.exceptions.JIRAError as error:
+        except (jira.exceptions.JIRAError, ValueError) as error:
             raise JiraError('Unable to create issue for "{}"'.format(report.name), error)
 
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
@@ -280,7 +283,9 @@ class Jira:
         return issues
 
     def _fix_versions_for(self, version: str) -> Set[str]:
-        return {v for v in self._fix_versions if v >= version}
+        versions = {v for v in self._fix_versions if v >= version}
+        logger.debug("Fix versions for {}: {!r}".format(version, versions))
+        return versions
 
     @staticmethod
     def _cut_off_older_versions(new_versions: Set[str], current_versions: Set[str]) -> Set[str]:

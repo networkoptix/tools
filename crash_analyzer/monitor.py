@@ -271,12 +271,16 @@ class Monitor:
 
         logger.info('Cleanup is started for ' + directory_message())
         removed_count = 0
-        for d in directory.content():
-            if not is_important(d):
-                removed_count += 1
-                d.remove()
+        try:
+            for d in directory.content():
+                if not is_important(d):
+                    d.remove()
+                    removed_count += 1
+        except PermissionError as error:
+            logger.warning('Cleanup stopped: {}'.format(error));
+        else:
+            logger.info('Cleanup has removed {} items in {}'.format(removed_count, directory))
 
-        logger.info('Cleanup has removed {} items in {}'.format(removed_count, directory))
         size = directory.size()
         if size < size_limit:
             logger.info('Cleanup success for ' + directory_message())
