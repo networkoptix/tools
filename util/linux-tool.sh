@@ -297,7 +297,6 @@ do_gen() # [cache] "$@"
 
     if [ -d "$BUILD_DIR" ]
     then
-        nx_echo "WARNING: Dir $BUILD_DIR already exists."
         if [ $CACHE_ARG = 0 ]
         then
             local -r CMAKE_CACHE="$BUILD_DIR/CMakeCache.txt"
