@@ -677,6 +677,34 @@ do_kit() # "$@"
     fi
 }
 
+do_sdk() # [metadata] "$@"
+{
+    if [[ $# > 0 && $1 == "metadata" ]]
+    then
+        shift
+        local -r SPECIFIER="metadata"
+        local -r TARGETS=( nx_metadata_sdk )
+    else
+        local -r SPECIFIER=""
+        local -r TARGETS=( nx_metadata_sdk nx_video_source_sdk nx_storage_sdk )
+    fi
+
+    local -r DISTRIB_DIR="$BUILD_DIR/distrib"
+
+    nx_verbose rm -rf "$DISTRIB_DIR"/*${SPECIFIER}_sdk* `#< Delete zips and unpacked SDKs. #`
+    nx_verbose rm -rf "$BUILD_DIR/vms/server"/nx_*${SPECIFIER}_sdk `#< Ensure clean build. #`
+
+    SDK=1 do_gen "$@" || exit $?
+
+    do_build --target "${TARGETS[@]}" || exit $?
+
+    local ZIP
+    for ZIP in "$DISTRIB_DIR"/*${SPECIFIER}_sdk*.zip
+    do
+        unzip "$ZIP" -d "${ZIP%.zip}"
+    done
+}
+
 insert_copyright_notice() # <file> <notice-line> <shebang-line> <header-line> <newline-prefix>
 {
     local -r FILE="$1"; shift
@@ -1714,27 +1742,7 @@ main()
             do_kit "$@"
             ;;
         sdk)
-            if [[ $# > 0 && $1 == "metadata" ]]
-            then
-                shift
-                local -r -i METADATA_ONLY=1
-                local -r SPECIFIER="metadata"
-            else
-                local -r -i METADATA_ONLY=0
-                local -r SPECIFIER=""
-            fi
-
-
-            nx_verbose rm -rf "$BUILD_DIR/distrib"/*${SPECIFIER}_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/vms/server"/nx_*${SPECIFIER}_sdk
-            SDK=1 do_gen "$@" || exit $?
-
-            do_build --target nx_metadata_sdk || exit $?
-            if [[ $METADATA_ONLY == 0 ]]
-            then
-                do_build --target nx_video_source_sdk || exit $?
-                do_build --target nx_storage_sdk || exit $?
-            fi
+            do_sdk "$@"
             ;;
         benchmark)
             do_benchmark "$@"
