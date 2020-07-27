@@ -172,6 +172,8 @@ public final class OpenApiSerializer
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         default_.put("description", Utils.cleanupDescription(result.caption));
+        if (result.type == Apidoc.Type.UNKNOWN)
+            return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
         fillSchemaType(schema, result.type);
