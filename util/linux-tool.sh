@@ -63,13 +63,15 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
  sdk [metadata] # Rebuild nx_*_sdk zip archives - all, or only Metadata SDK.
- benchmark [run|build] # Rebuild (if 'run' is not specified), unzip and run (if 'build' is not
+ benchmark [run|build] # Rebuild (if "run" is not specified), unzip and run (if "build" is not
      specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
  copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
 
- go [command args] # Execute a command at remote host via ssh, or log in to remote host via ssh.
- go-cd command [args] # Execute a command at remote host via ssh, changing dir to match the current dir.
- rsync [command] # Rsync current vms source dir to remote host, run command in the respective current dir.
+#--------------------------------------------------------------------------------------------------
+ go [command args] # Log in to remote host via ssh, changing dir to match the current dir, and
+     execute the command (if specified).
+ rsync [command] # Rsync the VMS source dir to the remote host, and run the command in the dir
+     matching the current dir.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
@@ -1583,16 +1585,20 @@ doMountRepo() # win-repo [mnt-point]
     ls --color=always "$MNT"
 }
 
-doGoCd() # "$@"
+doGo() # "$@"
 {
     local -r CURRENT_DIR=$(pwd)
     [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
     local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
 
-    # TODO: Find a way to start an interactive session after `cd`.
-    (($# > 0)) || nx_fail "Command to execute remotely not specified."
-
-    nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
+    if (($# > 0))
+    then
+        nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
+    else
+        # If there is no path on the remote host corresponding to the local path, use the default
+        # directory ($HOME, if it isn't overridden by some shell init script).
+        nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" "[>/dev/null 2>&1; \"$SHELL\" --login]"
+    fi
 }
 
 generateRemoteGitInfo()
@@ -1667,7 +1673,7 @@ doRsync() # "$@"
 
     if (($# > 0))
     then
-        doGoCd "$@"
+        doGo "$@"
     fi
 }
 
@@ -1739,10 +1745,7 @@ main()
             ;;
         #..........................................................................................
         go)
-            nx_go "$@"
-            ;;
-        go-cd)
-            doGoCd "$@"
+            doGo "$@"
             ;;
         rsync)
             doRsync "$@"
