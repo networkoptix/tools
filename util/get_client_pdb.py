@@ -46,7 +46,7 @@ def download_files(package_url, target_directory):
 
     r = requests.get(package_url)
     for filename in CLIENT_FILENAMES:
-        pattern = r'"([^"]*{}-[\.\d]*-win64[\.\w-]*zip)'.format(filename)
+        pattern = r'"([^"]*{}-[\.\d]*-win[\.\w-]*zip)'.format(filename)
         match = re.search(pattern, r.text)
         if not match:
             print("File {} could not be found".format(filename))
