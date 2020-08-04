@@ -50,6 +50,7 @@ public class Main
 
     public static void main(String[] args)
     {
+        ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
         try
         {
             final Params params = new Params();
