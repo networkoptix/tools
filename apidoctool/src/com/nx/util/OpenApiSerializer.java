@@ -168,6 +168,49 @@ public final class OpenApiSerializer
         return method;
     }
 
+    private static JSONObject orderByTemplate()
+    {
+        JSONObject result = new JSONObject();
+        result.put("name", "_orderBy");
+        JSONObject schema = getObject(result, "schema");
+        schema.put("type", "array");
+        getObject(schema, "items").put("type", "string");
+        result.put("in", "query");
+        return result;
+    }
+
+    private static JSONObject fillOrderBy(JSONObject orderBy, Apidoc.Param param)
+    {
+        if (param.type == Apidoc.Type.ARRAY
+            || param.type == Apidoc.Type.STRING_ARRAY
+            || param.type == Apidoc.Type.UUID_ARRAY
+            || param.type == Apidoc.Type.OBJECT)
+        {
+            return orderBy;
+        }
+        final int lastCharOfArrayName = param.name.lastIndexOf("[]");
+        if (orderBy != null || lastCharOfArrayName != -1)
+        {
+            if (orderBy == null)
+                orderBy = orderByTemplate();
+            final String arrayName = (lastCharOfArrayName == -1)
+                ? ""
+                : param.name.substring(0, lastCharOfArrayName);
+            final JSONObject schema = orderBy.getJSONObject("schema");
+            final JSONArray enum_ = getArray(schema.getJSONObject("items"), "enum");
+            boolean isFirstArrayItem = true;
+            for (int i = enum_.length() - 1; i >= 0 && isFirstArrayItem; --i)
+            {
+                if (enum_.getString(i).startsWith(arrayName))
+                    isFirstArrayItem = false;
+            }
+            enum_.put(param.name);
+            if (isFirstArrayItem)
+                getArray(schema, "default").put(param.name);
+        }
+        return orderBy;
+    }
+
     private static void fillResult(JSONObject path, Apidoc.Result result) throws Exception
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
@@ -179,10 +222,19 @@ public final class OpenApiSerializer
         fillSchemaType(schema, result.type);
         if (result.type == Apidoc.Type.ARRAY || result.type == Apidoc.Type.OBJECT)
         {
+            JSONObject orderBy = null;
             if (result.type == Apidoc.Type.ARRAY)
+            {
                 schema = schema.getJSONObject("items");
+                orderBy = orderByTemplate();
+            }
             for (final Apidoc.Param param: result.params)
+            {
                 addStructParam(schema, param);
+                orderBy = fillOrderBy(orderBy, param);
+            }
+            if (orderBy != null)
+                getArray(path, "parameters").put(orderBy);
         }
     }
 
