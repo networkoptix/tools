@@ -10,7 +10,7 @@ from pathlib import Path
 
 FETCH_BY_TYPE = 'type'
 FETCH_BY_ID = 'id'
-DEFAULT_INSTANCE = "https://cloud-test.hdw.mx"
+DEFAULT_INSTANCE = "https://nxvms.com"
 FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
 
 
