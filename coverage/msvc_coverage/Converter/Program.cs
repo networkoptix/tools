@@ -25,7 +25,7 @@ namespace CodeCoverage.CoverterConsoleApp
             List<string> sourceFiles = new List<string>();
 
             // Get all the file names EXCEPT the first one.
-            for (int i = 1; i < args.Length; i++)
+            for (int i = 1; i < args.Length; ++i)
             {
                 sourceFiles.Add(args[i]);
             }
@@ -41,12 +41,14 @@ namespace CodeCoverage.CoverterConsoleApp
                 return 1;
             }
 
-            if (destinationFile.ToLower().EndsWith(".info"))
+            if (!destinationFile.ToLower().EndsWith(".xml"))
             {
-                using (var sw = new StreamWriter(
-                    File.Open(destinationFile, FileMode.Create), Encoding.UTF8))
+                Encoding utf8WithoutBom = new UTF8Encoding(false);
+
+                using (var stream = new StreamWriter(
+                    File.Open(destinationFile, FileMode.Create), utf8WithoutBom))
                 {
-                    WriteLcov(mergedCoverage, sw);
+                    WriteLcov(mergedCoverage, stream);
                     return 0;
                 }
             }
@@ -71,14 +73,14 @@ namespace CodeCoverage.CoverterConsoleApp
             if (files == null)
                 throw new ArgumentNullException("files");
 
-            // This will represent the joined coverage files
+            // This will represent the joined coverage files.
             CoverageInfo returnItem = null;
 
             try
             {
                 foreach (string sourceFile in files)
                 {
-                    // Create from the current file
+                    // Create from the current file.
 
                     string path = System.IO.Path.GetDirectoryName(sourceFile);
 
@@ -88,12 +90,12 @@ namespace CodeCoverage.CoverterConsoleApp
 
                     if (returnItem == null)
                     {
-                        // First time through, assign to result
+                        // First time through, assign to result.
                         returnItem = current;
                         continue;
                     }
 
-                    // Not the first time through, join the result with the current
+                    // Not the first time through, join the result with the current.
                     CoverageInfo joined = null;
                     try
                     {
@@ -101,7 +103,7 @@ namespace CodeCoverage.CoverterConsoleApp
                     }
                     finally
                     {
-                        // Dispose current and result
+                        // Dispose current and result.
                         current.Dispose();
                         current = null;
                         returnItem.Dispose();
@@ -123,72 +125,69 @@ namespace CodeCoverage.CoverterConsoleApp
             return returnItem;
         }
 
-        private static Dictionary<BlockLineRange, CoverageStatus> BuildCoveredRangeMap(
-            IList<BlockLineRange> lines,
-            byte[] coverageBuffer)
-        {
-            var dictionary = new Dictionary<BlockLineRange, CoverageStatus>(lines.Count);
-            int length = coverageBuffer.Length;
-            foreach (BlockLineRange line in (IEnumerable<BlockLineRange>)lines)
-            {
-                if (line.IsValid)
-                {
-                    if ((long)line.BlockIndex >= (long)length)
-                        continue;
-                    CoverageStatus coverageStatus1 =
-                        coverageBuffer[(int)line.BlockIndex] == (byte)0
-                        ? CoverageStatus.NotCovered
-                        : CoverageStatus.Covered;
-                    CoverageStatus coverageStatus2;
-                    dictionary[line] = 
-                        !dictionary.TryGetValue(line, out coverageStatus2)
-                        ? coverageStatus1
-                        : (coverageStatus2 == coverageStatus1
-                            ? coverageStatus2
-                            : CoverageStatus.PartiallyCovered);
-                }
-            }
-            return dictionary;
-        }
         class CoverageRecord
         {
             public Dictionary<uint, string> functions = new Dictionary<uint, string>();
             public Dictionary<uint, CoverageStatus> coveredLines =
                 new Dictionary<uint, CoverageStatus>();
 
-            public void Dump(StreamWriter sw, string sourceFile)
+            public void Dump(StreamWriter stream, string sourceFile)
             {
-                sw.WriteLine("SF:{0}", sourceFile);
+                stream.WriteLine("SF:{0}", sourceFile);
                 foreach (KeyValuePair<uint, string> keyValuePair in functions)
-                    sw.WriteLine("FN:{0},{1}", keyValuePair.Key, keyValuePair.Value);
+                    stream.WriteLine("FN:{0},{1}", keyValuePair.Key, keyValuePair.Value);
                 int lineHit = 0;
                 foreach (KeyValuePair<uint, CoverageStatus> keyValuePair in coveredLines)
                 {
                     int executionCount = keyValuePair.Value == CoverageStatus.NotCovered ? 0 : 1;
                     if (executionCount > 0)
-                        lineHit++;
-                    sw.WriteLine("DA:{0},{1}", keyValuePair.Key, executionCount);
+                        ++lineHit;
+                    stream.WriteLine("DA:{0},{1}", keyValuePair.Key, executionCount);
                 }
-                sw.WriteLine("LH:{0}", lineHit);
-                sw.WriteLine("LF:{0}", coveredLines.Count);
-                sw.WriteLine("end_of_record");
+                stream.WriteLine("LH:{0}", lineHit);
+                stream.WriteLine("LF:{0}", coveredLines.Count);
+                stream.WriteLine("end_of_record");
             }
 
-            public void AddLineCoverage(
+            public void AddBlocksCoverage(
+                IList<BlockLineRange> blocks,
+                byte[] coverageBuffer)
+            {
+                int length = coverageBuffer.Length;
+                foreach (BlockLineRange block in blocks)
+                {
+                    if (!block.IsValid)
+                        continue;
+
+                    if ((long) block.BlockIndex >= (long) length)
+                        continue;
+
+                    CoverageStatus status = coverageBuffer[(int) block.BlockIndex] == (byte) 0
+                        ? CoverageStatus.NotCovered
+                        : CoverageStatus.Covered;
+
+                    AddBlockLinesCoverage(block, status);
+                }
+            }
+
+            private void AddBlockLinesCoverage(
                 BlockLineRange range,
                 CoverageStatus status)
             {
-                for (uint startLine = range.StartLine; startLine <= range.EndLine; ++startLine)
+                for (uint line = range.StartLine; line <= range.EndLine; ++line)
                 {
-                    if (startLine == 0xFeeFee) //< Hidden line.
+                    if (line == 0xFeeFee) //< Hidden line.
                         continue;
-                    CoverageStatus coverageStatus;
-                    coveredLines[startLine] =
-                        !coveredLines.TryGetValue(startLine, out coverageStatus)
-                        ? status
-                        : (coverageStatus == status
-                            ? coverageStatus
-                            : CoverageStatus.PartiallyCovered);
+                    CoverageStatus prevStatus;
+                    if (!coveredLines.TryGetValue(line, out prevStatus))
+                    {
+                        // First time this line is counted.
+                        coveredLines[line] = status;
+                        continue;
+                    }
+                    // If the same line is Covered and NotCovered then it's PartiallyCovered.
+                    if (prevStatus != status)
+                        coveredLines[line] = CoverageStatus.PartiallyCovered;
                 }
             }
 
@@ -198,9 +197,9 @@ namespace CodeCoverage.CoverterConsoleApp
             }
         };
 
-        static void WriteLcov(CoverageInfo info, StreamWriter sw)
+        static void WriteLcov(CoverageInfo info, StreamWriter stream)
         {
-            List<BlockLineRange> lines = new List<BlockLineRange>();
+            List<BlockLineRange> blocks = new List<BlockLineRange>();
 
             Dictionary<string, CoverageRecord> files = new Dictionary<string, CoverageRecord>();
 
@@ -222,12 +221,12 @@ namespace CodeCoverage.CoverterConsoleApp
                         out undecoratedMethodName,
                         out className,
                         out namespaceName,
-                        lines))
+                        blocks))
                     {
-                        if (lines.Count == 0)
+                        if (blocks.Count == 0)
                             continue;
 
-                        string sourceFile = lines.First().SourceFile;
+                        string sourceFile = blocks.First().SourceFile;
 
                         CoverageRecord record = null;
                         if (!files.TryGetValue(sourceFile, out record))
@@ -236,19 +235,17 @@ namespace CodeCoverage.CoverterConsoleApp
                             files[sourceFile] = record;
                         }
 
-                        record.AddFunction(lines.First().StartLine, methodName);
+                        record.AddFunction(blocks.First().StartLine, methodName);
+                        record.AddBlocksCoverage(blocks, coverageBuffer);
 
-                        var dictionary = BuildCoveredRangeMap(lines, coverageBuffer);
-                        foreach (KeyValuePair<BlockLineRange, CoverageStatus> keyValuePair in dictionary)
-                            record.AddLineCoverage(keyValuePair.Key, keyValuePair.Value);
-
-                        lines.Clear();
+                        blocks.Clear();
                     }
-                } // ISymbolReader
+                }
             }
-            // Dump coverage of all files
-            foreach (KeyValuePair<string, CoverageRecord> keyValuePair in files)
-                keyValuePair.Value.Dump(sw, keyValuePair.Key);
+
+            // Dump coverage of all files.
+            foreach (var funcCoveragePair in files)
+                funcCoveragePair.Value.Dump(stream, funcCoveragePair.Key);
         }
     }
 }

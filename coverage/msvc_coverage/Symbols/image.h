@@ -17,7 +17,7 @@ class Image
 public:
     Image(Session* parent, const std::wstring& path);
 
-    bool SymbolsLoaded() const { return m_pGlobal; }
+    bool SymbolsLoaded() const { return m_global; }
     void GetCoverageBlockMap(VSCOVER_BLOCK_MAP_ENTRY*& map, uint32_t& entries);
 
     bool NextMethod(
@@ -40,7 +40,7 @@ public:
 private:
     bool LoadCoverBlockMap(const IMAGE_SECTION_HEADER& header);
     void LoadMethods();
-    void AddMethod(IDiaSymbol* pFunction);
+    void AddMethod(IDiaSymbol* function);
 
     struct Method
     {
@@ -53,8 +53,8 @@ private:
 
     Session* m_parent;
     std::wstring m_path;
-    CComPtr<IDiaSession> m_pSession;
-    CComPtr<IDiaSymbol> m_pGlobal;
+    CComPtr<IDiaSession> m_session;
+    CComPtr<IDiaSymbol> m_global;
 
     std::vector<Method> m_methods;
     int m_nextMethod = -1;

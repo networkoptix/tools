@@ -30,8 +30,8 @@ void CloseSessionImage(Session* session, int32_t image)
 
 BOOL ImageSymbolsLoaded(Session* session, int32_t image)
 {
-    auto pImage = session->GetImage(image);
-    return pImage && pImage->SymbolsLoaded();
+    const auto sessionImage = session->GetImage(image);
+    return sessionImage && sessionImage->SymbolsLoaded();
 }
 
 void GetCoverageBlockMap(
@@ -40,10 +40,10 @@ void GetCoverageBlockMap(
     VSCOVER_BLOCK_MAP_ENTRY*& map,
     uint32_t& entries)
 {
-    auto pImage = session->GetImage(image);
-    if (!pImage)
+    auto sessionImage = session->GetImage(image);
+    if (!sessionImage)
         return;
-    pImage->GetCoverageBlockMap(map, entries);
+    sessionImage->GetCoverageBlockMap(map, entries);
 }
 
 BOOL LookupNextImageMethod(
@@ -57,13 +57,14 @@ BOOL LookupNextImageMethod(
     uint32_t& rva,
     uint32_t& length)
 {
-    auto pImage = session->GetImage(image);
-    if (!pImage)
+    auto sessionImage = session->GetImage(image);
+    if (!sessionImage)
         return false;
 
     namespaceName = nullptr;
 
-    return pImage->NextMethod(methodId, methodName, undecoratedMethodName, className, rva, length);
+    return sessionImage->NextMethod(
+        methodId, methodName, undecoratedMethodName, className, rva, length);
 }
 
 bool LookupLineNumbers(
@@ -77,8 +78,8 @@ bool LookupLineNumbers(
     BSTR& fileName,
     BOOL& truncated)
 {
-    auto pImage = session->GetImage(image);
-    if (!pImage)
+    auto sessionImage = session->GetImage(image);
+    if (!sessionImage)
         return false;
-    return pImage->LookupLineNumbers(rva, length, lines, size, count, fileName, truncated);
+    return sessionImage->LookupLineNumbers(rva, length, lines, size, count, fileName, truncated);
 }

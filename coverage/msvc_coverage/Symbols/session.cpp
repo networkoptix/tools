@@ -3,20 +3,20 @@
 
 Session* Session::Create()
 {
-    CComPtr<IDiaDataSource> pSource;
+    CComPtr<IDiaDataSource> source;
     const HRESULT hr = CoCreateInstance(CLSID_DiaSource,
         nullptr,
         CLSCTX_INPROC_SERVER,
         __uuidof(IDiaDataSource),
-        (void**)&pSource);
+        (void**) &source);
 
     if (FAILED(hr))
         return nullptr;
 
-    return new Session(std::move(pSource));
+    return new Session(std::move(source));
 }
 
-int Session::OpenImage(std::wstring path, const std::wstring& symbolPath)
+int Session::OpenImage(const std::wstring& path, const std::wstring& symbolPath)
 {
     auto image = std::make_unique<Image>(this, path);
     if (!image->SymbolsLoaded())

@@ -1,17 +1,96 @@
-
 #include "image.h"
 
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 #include "session.h"
 
 namespace {
 
-static void Fatal(std::wstring msg)
+static void Fatal(const std::wstring& msg)
 {
     std::wcerr << msg;
     exit(1);
+}
+
+static std::wstring getSourceFile(IDiaLineNumber* line)
+{
+    CComPtr<IDiaSourceFile> source;
+    std::wstring result;
+
+    if (line->get_sourceFile(&source) == S_OK)
+    {
+        BSTR sourceName = nullptr;
+
+        if (source->get_fileName(&sourceName) == S_OK)
+        {
+            result = sourceName;
+            SysFreeString(sourceName);
+        }
+    }
+
+    return result;
+}
+
+static DWORD getEndRva(IDiaEnumLineNumbers* lines)
+{
+    IDiaLineNumber* line;
+    DWORD count;
+
+    DWORD endRva = 0;
+
+    std::wstring fileName;
+
+    while (SUCCEEDED(lines->Next(1, &line, &count)) && count == 1)
+    {
+        DWORD rva;
+        DWORD lineNumber;
+        DWORD length;
+
+        if (line->get_relativeVirtualAddress(&rva) == S_OK
+            && line->get_lineNumber(&lineNumber) == S_OK
+            && line->get_length(&length) == S_OK)
+        {
+            const DWORD newEnd = rva + length;
+            if (newEnd > endRva)
+                endRva = newEnd;
+
+            if (fileName.empty())
+            {
+                fileName = getSourceFile(line);
+
+                // Skip STL files to reduce method count.
+                if (fileName.rfind(L"C:\\Program Files (x86)\\Microsoft Visual Studio\\", 0) == 0)
+                {
+                    line->Release();
+                    return 0;
+                }
+            }
+        }
+        line->Release();
+    }
+
+    #if defined(DEBUG_OUT)
+        if (!fileName.empty())
+            std::wcout << "    Source: " << fileName << "\n";
+    #endif
+
+    return endRva;
+}
+
+static std::wstring getName(IDiaSymbol* symbol)
+{
+    BSTR name = nullptr;
+    std::wstring result;
+
+    if (symbol->get_name(&name) == S_OK)
+    {
+        result = name;
+        SysFreeString(name);
+    }
+
+    return result;
 }
 
 } // namespace
@@ -28,13 +107,13 @@ Image::Image(Session* parent, const std::wstring& path):
         return;
     }
 
-    if (FAILED(m_parent->DataSource()->openSession(&m_pSession)))
+    if (FAILED(m_parent->DataSource()->openSession(&m_session)))
     {
         Fatal(L"openSession");
         return;
     }
 
-    if (FAILED(m_pSession->get_globalScope(&m_pGlobal)))
+    if (FAILED(m_session->get_globalScope(&m_global)))
     {
         Fatal(L"get_globalScope");
         return;
@@ -43,14 +122,14 @@ Image::Image(Session* parent, const std::wstring& path):
 
 bool Image::LoadCoverBlockMap(const IMAGE_SECTION_HEADER& header)
 {
-    std::ifstream pefile(m_path, std::ios::binary);
-    if (!pefile)
+    std::ifstream peFile(m_path, std::ios::binary);
+    if (!peFile)
     {
         std::wcerr << L"Cannot open " << m_path << L"\n";
         return false;
     }
 
-    if (!pefile.seekg(header.PointerToRawData))
+    if (!peFile.seekg(header.PointerToRawData))
     {
         std::wcerr << L"Cannot seek to " << header.PointerToRawData << L"\n";
         return false;
@@ -58,13 +137,13 @@ bool Image::LoadCoverBlockMap(const IMAGE_SECTION_HEADER& header)
 
     m_map.resize(header.Misc.VirtualSize / sizeof(VSCOVER_BLOCK_MAP_ENTRY));
 
-    const size_t toRead = min(header.SizeOfRawData, m_map.size() * sizeof(VSCOVER_BLOCK_MAP_ENTRY));
-    if (!pefile.read((char*)m_map.data(), toRead))
+    const size_t toRead = std::min(header.SizeOfRawData, header.Misc.VirtualSize);
+    if (!peFile.read((char*)m_map.data(), toRead))
     {
         std::wcerr << L"Read error " << toRead << L" bytes\n";
         return false;
     }
-    pefile.close();
+    peFile.close();
 
     return true;
 }
@@ -77,41 +156,41 @@ void Image::GetCoverageBlockMap(VSCOVER_BLOCK_MAP_ENTRY*& map, uint32_t& entries
         entries = m_map.size();
         return;
     }
-    CComPtr<IDiaEnumDebugStreams> pEnumStreams;
+    CComPtr<IDiaEnumDebugStreams> streams;
 
-    // Retrieve an enumerated sequence of debug data streams
-    if (FAILED(m_pSession->getEnumDebugStreams(&pEnumStreams)))
+    // Retrieve an enumerated sequence of debug data streams.
+    if (FAILED(m_session->getEnumDebugStreams(&streams)))
         return;
 
     // Find SECTIONHEADERS debug stream.
     for (;;)
     {
-        CComPtr<IDiaEnumDebugStreamData> pStream;
-        ULONG celt = 0;
+        CComPtr<IDiaEnumDebugStreamData> stream;
+        ULONG count = 0;
 
-        if (FAILED(pEnumStreams->Next(1, &pStream, &celt)) || celt != 1)
+        if (FAILED(streams->Next(1, &stream, &count)) || count != 1)
             break;
 
-        BSTR bstrName = nullptr;
-        if (FAILED(pStream->get_name(&bstrName)))
+        BSTR name = nullptr;
+        if (FAILED(stream->get_name(&name)))
             continue;
 
         static const std::wstring HEADERS = L"SECTIONHEADERS";
-        const bool found = bstrName && HEADERS == bstrName;
-        SysFreeString(bstrName);
+        const bool found = name && HEADERS == name;
+        SysFreeString(name);
         if (!found)
             continue;
 
-        // Find .vscovmp section header
+        // Find .vscovmp section header.
         IMAGE_SECTION_HEADER header;
-        DWORD cbData;
-        while (pStream->Next(1, sizeof(IMAGE_SECTION_HEADER), &cbData, (BYTE*)&header, &celt) == S_OK && celt == 1)
+        static constexpr auto headerSize = sizeof(IMAGE_SECTION_HEADER);
+        DWORD dataLength;
+        while (stream->Next(1, headerSize, &dataLength, (BYTE*) &header, &count) == S_OK
+            && count == 1)
         {
-            std::string name((char*)header.Name, 8);
-
-            // Read section data
-            if (name == ".vscovmp")
+            if (strncmp((char*) header.Name, ".vscovmp", 8) == 0)
             {
+                // Read section data.
                 if (LoadCoverBlockMap(header))
                 {
                     entries = m_map.size();
@@ -124,143 +203,68 @@ void Image::GetCoverageBlockMap(VSCOVER_BLOCK_MAP_ENTRY*& map, uint32_t& entries
     }
 }
 
-std::wstring getSourceFile(IDiaLineNumber* pLine)
-{
-    CComPtr<IDiaSourceFile> pSource;
-    std::wstring result;
-
-    if (pLine->get_sourceFile(&pSource) == S_OK) {
-        BSTR bstrSourceName = nullptr;
-
-        if (pSource->get_fileName(&bstrSourceName) == S_OK) {
-            result = bstrSourceName;
-            SysFreeString(bstrSourceName);
-        }
-    }
-    return result;
-}
-
-static DWORD getEndRva(IDiaEnumLineNumbers* pLines)
-{
-    IDiaLineNumber* pLine;
-    DWORD celt;
-
-    DWORD endRVA = 0;
-
-    std::wstring fileName;
-
-    while (SUCCEEDED(pLines->Next(1, &pLine, &celt)) && (celt == 1))
-    {
-        DWORD dwRVA;
-        DWORD dwLinenum;
-        DWORD dwLength;
-
-        if ((pLine->get_relativeVirtualAddress(&dwRVA) == S_OK) &&
-            (pLine->get_lineNumber(&dwLinenum) == S_OK) &&
-            (pLine->get_length(&dwLength) == S_OK))
-        {
-            const DWORD newEnd = dwRVA + dwLength;
-            if (newEnd > endRVA)
-                endRVA = newEnd;
-
-            if (fileName.empty())
-            {
-                fileName = getSourceFile(pLine);
-
-                // Skip STL files to reduce method count.
-                if (fileName.find(L"C:\\Program Files (x86)\\Microsoft Visual Studio\\") == 0)
-                {
-                    pLine->Release();
-                    return 0;
-                }
-            }
-        }
-        pLine->Release();
-    }
-
-    #ifdef DEBUG_OUT
-        if (!fileName.empty())
-            std::wcout << "    Source: " << fileName << "\n";
-    #endif
-
-    return endRVA;
-}
-
-std::wstring getName(IDiaSymbol* pSymbol)
-{
-    BSTR bstrName = nullptr;
-    std::wstring result;
-
-    if (pSymbol->get_name(&bstrName) == S_OK)
-    {
-        result = bstrName;
-        SysFreeString(bstrName);
-    }
-    return result;
-}
-
-void Image::AddMethod(IDiaSymbol* pFunction)
+void Image::AddMethod(IDiaSymbol* function)
 {
     Method method;
 
-    BSTR bstrName = nullptr;
+    BSTR name = nullptr;
 
-    if (pFunction->get_name(&bstrName) == S_OK)
+    if (function->get_name(&name) == S_OK)
     {
-        method.name = bstrName;
-        SysFreeString(bstrName);
-        bstrName = nullptr;
+        method.name = name;
+        SysFreeString(name);
+        name = nullptr;
     }
 
-    if (pFunction->get_undecoratedName(&bstrName) == S_OK)
+    if (function->get_undecoratedName(&name) == S_OK)
     {
-        method.undecoratedName = bstrName;
-        SysFreeString(bstrName);
-        bstrName = nullptr;
+        method.undecoratedName = name;
+        SysFreeString(name);
+        name = nullptr;
     }
 
-    ULONGLONG ulLength;
+    ULONGLONG length;
 
-    if (FAILED(pFunction->get_length(&ulLength)))
+    if (FAILED(function->get_length(&length)))
         return;
 
-    DWORD dwRVA;
-    CComPtr<IDiaEnumLineNumbers> pLines;
+    DWORD rva;
+    CComPtr<IDiaEnumLineNumbers> lines;
 
-    if (FAILED(pFunction->get_relativeVirtualAddress(&dwRVA)))
+    if (FAILED(function->get_relativeVirtualAddress(&rva)))
         return;
 
-    if (FAILED(m_pSession->findLinesByRVA(dwRVA, static_cast<DWORD>(ulLength), &pLines)))
+    if (FAILED(m_session->findLinesByRVA(rva, (DWORD) length, &lines)))
         return;
 
-    DWORD endRVA = getEndRva(pLines);
+    DWORD endRva = getEndRva(lines);
 
-    if (endRVA <= dwRVA)
+    if (endRva <= rva)
         return;
 
-    method.rva = dwRVA;
-    method.length = endRVA - dwRVA;
+    method.rva = rva;
+    method.length = endRva - rva;
 
     CComPtr<IDiaSymbol> parent;
-    if (SUCCEEDED(pFunction->get_classParent(&parent)) && parent)
+    if (SUCCEEDED(function->get_classParent(&parent)) && parent)
     {
-        if (SUCCEEDED(parent->get_name(&bstrName)))
+        if (SUCCEEDED(parent->get_name(&name)))
         {
-            method.className = bstrName;
-            SysFreeString(bstrName);
-            bstrName = nullptr;
+            method.className = name;
+            SysFreeString(name);
+            name = nullptr;
         }
     }
 
-    #ifdef DEBUG_OUT
+    #if defined(DEBUG_OUT)
         wprintf(L"METHOD %s RVA %08x\n", method.name.c_str(), dwRVA);
         if (!method.className.empty())
-            wprintf(L"    CLASS %s\n", method.className.c_str(), dwRVA);
+            wprintf(L"    CLASS %s\n", method.className.c_str());
 
         BOOL generated = false;
-        if (SUCCEEDED(pFunction->get_compilerGenerated(&generated)))
+        if (SUCCEEDED(function->get_compilerGenerated(&generated)))
         {
-            printf("    Generated: %s\n", (generated ? "true":"false"));
+            printf("    Generated: %s\n", generated ? "true":"false");
         }
     #endif
 
@@ -269,42 +273,43 @@ void Image::AddMethod(IDiaSymbol* pFunction)
 
 void Image::LoadMethods()
 {
-    #ifdef DEBUG_OUT
+    #if defined(DEBUG_OUT)
         std::cout << "Loading methods...\n";
     #endif
 
-    // First retrieve the compilands/modules
+    // First retrieve the compilands/modules.
 
-    CComPtr<IDiaEnumSymbols> pEnumSymbols;
+    CComPtr<IDiaEnumSymbols> symbols;
 
-    if (FAILED(m_pGlobal->findChildren(SymTagCompiland, nullptr, nsNone, &pEnumSymbols)))
+    if (FAILED(m_global->findChildren(SymTagCompiland, nullptr, nsNone, &symbols)))
         return;
 
-    IDiaSymbol* pCompiland;
-    ULONG celt = 0;
+    IDiaSymbol* compiland;
+    ULONG count = 0;
 
-    while (SUCCEEDED(pEnumSymbols->Next(1, &pCompiland, &celt)) && (celt == 1))
+    while (SUCCEEDED(symbols->Next(1, &compiland, &count)) && count == 1)
     {
-        CComPtr<IDiaEnumSymbols> pEnumFunction;
-        #ifdef DEBUG_OUT
-            std::wcout << "Compiland: " << getName(pCompiland).c_str() << "\n";
+        CComPtr<IDiaEnumSymbols> functions;
+        #if defined(DEBUG_OUT)
+            std::wcout << "Compiland: " << getName(compiland).c_str() << "\n";
         #endif
-        // For every function symbol defined in the compiland, retrieve and print the line numbering info
+        // For every function symbol defined in the compiland,
+        // retrieve and print the line numbering info.
 
-        if (SUCCEEDED(pCompiland->findChildren(SymTagFunction, NULL, nsNone, &pEnumFunction)))
+        if (SUCCEEDED(compiland->findChildren(SymTagFunction, nullptr, nsNone, &functions)))
         {
-            IDiaSymbol* pFunction;
+            IDiaSymbol* function;
 
-            while (SUCCEEDED(pEnumFunction->Next(1, &pFunction, &celt)) && (celt == 1))
+            while (SUCCEEDED(functions->Next(1, &function, &count)) && count == 1)
             {
-                AddMethod(pFunction);
-                pFunction->Release();
+                AddMethod(function);
+                function->Release();
             }
         }
 
-        pCompiland->Release();
+        compiland->Release();
     }
-    #ifdef DEBUG_OUT
+    #if defined(DEBUG_OUT)
         std::cout << "Methods count: " << m_methods.size() << "\n";
     #endif
 }
@@ -355,42 +360,42 @@ bool Image::LookupLineNumbers(
 {
     fileName = nullptr;
 
-    CComPtr<IDiaEnumLineNumbers> pLines;
-    if (FAILED(m_pSession->findLinesByRVA(rva, length, &pLines)))
+    CComPtr<IDiaEnumLineNumbers> linesEnum;
+    if (FAILED(m_session->findLinesByRVA(rva, length, &linesEnum)))
     {
         std::cerr << "Failed to get lines for RVA" << rva << " length " << length << "\n";
         return false;
     }
 
-    LONG lCount = 0;
-    if (FAILED(pLines->get_Count(&lCount)))
+    LONG lineCount = 0;
+    if (FAILED(linesEnum->get_Count(&lineCount)))
         return false;
-    count = lCount;
+    count = lineCount;
 
     truncated = count > size;
 
-    IDiaLineNumber* pLine;
-    DWORD celt;
+    IDiaLineNumber* line;
+    DWORD elementCount;
 
-    DWORD dwSrcIdLast = (DWORD)(-1);
+    DWORD sourceIdLast = std::numeric_limits<uint32_t>::max();
 
     SLineNumbers* current = lines;
 
-    while (SUCCEEDED(pLines->Next(1, &pLine, &celt)) && (celt == 1))
+    while (SUCCEEDED(linesEnum->Next(1, &line, &elementCount)) && elementCount == 1)
     {
         DWORD lineBegin;
         DWORD colBegin;
         DWORD lineEnd;
         DWORD colEnd;
 
-        DWORD dwSrcId;
+        DWORD sourceId;
 
-        if (size > 0 &&
-            (pLine->get_lineNumber(&lineBegin) == S_OK) &&
-            (pLine->get_lineNumberEnd(&lineEnd) == S_OK) &&
-            (pLine->get_columnNumber(&colBegin) == S_OK) &&
-            (pLine->get_columnNumberEnd(&colEnd) == S_OK) &&
-            (pLine->get_sourceFileId(&dwSrcId) == S_OK))
+        if (size > 0
+            && line->get_lineNumber(&lineBegin) == S_OK
+            && line->get_lineNumberEnd(&lineEnd) == S_OK
+            && line->get_columnNumber(&colBegin) == S_OK
+            && line->get_columnNumberEnd(&colEnd) == S_OK
+            && line->get_sourceFileId(&sourceId) == S_OK)
         {
             current->ln_begin = lineBegin;
             current->ln_end = lineEnd;
@@ -398,22 +403,22 @@ bool Image::LookupLineNumbers(
             current->col_end = colEnd;
             --size;
             ++current;
-            if (dwSrcId != dwSrcIdLast && !fileName)
+            if (sourceId != sourceIdLast && !fileName)
             {
-                CComPtr<IDiaSourceFile> pSource;
+                CComPtr<IDiaSourceFile> source;
 
-                if (pLine->get_sourceFile(&pSource) == S_OK)
+                if (line->get_sourceFile(&source) == S_OK)
                 {
-                    BSTR bstrSourceName;
+                    BSTR sourceName;
 
-                    if (pSource->get_fileName(&bstrSourceName) == S_OK)
-                        fileName = bstrSourceName;
+                    if (source->get_fileName(&sourceName) == S_OK)
+                        fileName = sourceName;
 
-                    dwSrcIdLast = dwSrcId;
+                    sourceIdLast = sourceId;
                 }
             }
         }
-        pLine->Release();
+        line->Release();
     }
 
     return true;
