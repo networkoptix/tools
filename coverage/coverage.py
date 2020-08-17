@@ -10,6 +10,8 @@ from itertools import chain
 import sys
 import multiprocessing
 import functools
+import json
+
 
 def msvs_coverage(tempdir, args):
     # Binaries to instrument
@@ -58,7 +60,6 @@ class Lcov:
     def __init__(self):
         self.files = {}
 
-    # TODO: Intermediate format has changed in GCC 9!
     def append_gcov(self, path, build_dir):
         with open(path) as f:
             lines = [line.rstrip() for line in f]
@@ -74,6 +75,18 @@ class Lcov:
             elif line.startswith('lcount:'):
                 data = line[7:].split(',', 3)
                 current_file.add_line(line=int(data[0]), hits=int(data[1]))
+
+    def append_gcov_json(self, data):
+        for file_data in data.get('files'):
+            name = file_data['file']
+            current_file = self.files.get(name, FileCoverage(name))
+            self.files[name] = current_file
+            for func_data in file_data.get('functions'):
+                current_file.add_func(
+                    line=func_data.get('start_line'), func=func_data.get('name'))
+            for line_data in file_data.get('lines'):
+                current_file.add_line(
+                    line=line_data.get('line_number'), hits=line_data.get('count'))
 
     def merge(self, lcov):
         for source, cov in lcov.files.items():
@@ -97,13 +110,29 @@ class Lcov:
                 print(f'LF:{len(file.lines.keys())}', file=f)
                 print('end_of_record', file=f)
 
-# For multiprocessing this function must be at top level
-def run_gcov(gcov_path, dirname, gcda_files, build_dir):
+# For multiprocessing run_gcov_text and run_gcov_json functions must be at top level
+def run_gcov_text(gcov_path, dirname, gcda_files, build_dir):
     subprocess.run([gcov_path, '-i'] + gcda_files, cwd=dirname, stdout=subprocess.DEVNULL, check=True)
     result = Lcov()
     for gcov_file in [str(dirname / f)+'.gcov' for f in gcda_files]:
         result.append_gcov(gcov_file, build_dir)
     return result
+
+def run_gcov_json(gcov_path, dirname, gcda_files, build_dir):
+    ret = subprocess.run([gcov_path, '--json-format', '--stdout'] + gcda_files,
+                   cwd=dirname, stdout=subprocess.PIPE, check=True)
+
+    data = json.loads(ret.stdout.decode('utf-8'))
+
+    result = Lcov()
+    result.append_gcov_json(data)
+    return result
+
+def get_gcov_version(gcov):
+    result = subprocess.run([gcov, '-v'], capture_output=True, check=True)
+    output = result.stdout.decode('utf-8')
+    first_line = output.split('\n', maxsplit=1)[0]
+    return tuple(map(int, first_line.split()[-1].split('.')))
 
 def gcc_coverage(tempdir, args):
     gcov_env = os.environ.copy()
@@ -133,12 +162,19 @@ def gcc_coverage(tempdir, args):
     # Need at least gcov 7.1.0 because of bug not allowing -i in conjunction with multiple files
     # See: https://github.com/gcc-mirror/gcc/commit/41da7513d5aaaff3a5651b40edeccc1e32ea785a
 
+    gcov_version = get_gcov_version(args.gcov)
+    if gcov_version < (7, 1, 0):
+        raise NotImplementedError(f'GCOV version {gcov_version}')
+
     # Gather dirs with their *.gcda files for multiprocessing with gcov
     dirs_gcda = []
     for dirname, _, files in os.walk(tempdir):
         gcda_files = [f for f in files if f.endswith('.gcda')]
         if gcda_files:
             dirs_gcda.append((args.gcov, Path(dirname), gcda_files, build_dir))
+
+    # Intermediate format has changed in GCC 9.
+    run_gcov = run_gcov_text if gcov_version < (9, 0, 0) else run_gcov_json
 
     # Generage and parse *.gcov in each directory
     with multiprocessing.Pool() as pool:
