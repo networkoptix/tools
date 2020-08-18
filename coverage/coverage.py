@@ -11,7 +11,7 @@ import sys
 import multiprocessing
 import functools
 import json
-
+import re
 
 def msvs_coverage(tempdir, args):
     # Binaries to instrument
@@ -134,6 +134,11 @@ def get_gcov_version(gcov):
     first_line = output.split('\n', maxsplit=1)[0]
     return tuple(map(int, first_line.split()[-1].split('.')))
 
+def get_gcov_from_cmake(cmake_cache_file):
+    r = re.compile('CMAKE_ADDR2LINE:FILEPATH=(.+)addr2line$')
+    with open(cmake_cache_file, 'r') as f:
+        return next((m.group(1) for m in map(r.search, f) if m), '')+'gcov'
+
 def gcc_coverage(tempdir, args):
     gcov_env = os.environ.copy()
     gcov_env['GCOV_PREFIX'] = tempdir
@@ -159,10 +164,12 @@ def gcc_coverage(tempdir, args):
             gcno_link.symlink_to(gcno_file)
         build_dir = build_dir or find_parent_dir(gcno_file, file='CMakeCache.txt')
 
+    gcov = args.gcov or get_gcov_from_cmake(build_dir / 'CMakeCache.txt')
+
     # Need at least gcov 7.1.0 because of bug not allowing -i in conjunction with multiple files
     # See: https://github.com/gcc-mirror/gcc/commit/41da7513d5aaaff3a5651b40edeccc1e32ea785a
 
-    gcov_version = get_gcov_version(args.gcov)
+    gcov_version = get_gcov_version(gcov)
     if gcov_version < (7, 1, 0):
         raise NotImplementedError(f'GCOV version {gcov_version}')
 
@@ -171,7 +178,7 @@ def gcc_coverage(tempdir, args):
     for dirname, _, files in os.walk(tempdir):
         gcda_files = [f for f in files if f.endswith('.gcda')]
         if gcda_files:
-            dirs_gcda.append((args.gcov, Path(dirname), gcda_files, build_dir))
+            dirs_gcda.append((gcov, Path(dirname), gcda_files, build_dir))
 
     # Intermediate format has changed in GCC 9.
     run_gcov = run_gcov_text if gcov_version < (9, 0, 0) else run_gcov_json
@@ -218,7 +225,7 @@ if __name__ == '__main__':
             help='Path to Visual Studio install directory.')
     else:
         parser.add_argument('--gcov', metavar='PATH', type=str,
-            default='gcov',
+            default=None, # Autodetect from CMakeCache.txt
             help='Path to GCOV executable (for GCC only).')
 
     parser.add_argument('-b', '--binary', type=str, action='append', nargs=1, default=[],
