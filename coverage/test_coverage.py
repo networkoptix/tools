@@ -17,7 +17,10 @@ def shell_join(args):
 class TestStringMethods(unittest.TestCase):
 
     def test_program_coverage(self):
+        # TODO: Test with ['-GVisual Studio 16 2019, '-A', 'x64', '-T', 'ClangCl']
+
         with tempfile.TemporaryDirectory(suffix='-coverage_test') as tempdir:
+            # Compile test program.
             coverage_dir = Path(__file__).absolute().parent
             program_src = coverage_dir / 'tests' / 'program'
             subprocess.run(shell_join(['cmake', '-S', program_src, '-B',

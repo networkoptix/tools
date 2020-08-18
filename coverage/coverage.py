@@ -12,6 +12,20 @@ import multiprocessing
 import functools
 import json
 import re
+from enum import Enum
+
+class Compiler(Enum):
+    CLANG = 'clang'
+    GCC = 'gcc'
+    MSVC = 'msvc'
+
+    def __str__(self):
+        return self.name.lower()
+
+    def __repr__(self):
+        return str(self)
+
+EXESUFFIX = '.exe' if platform.system() == 'Windows' else ''
 
 def msvs_coverage(tempdir, args):
     # Binaries to instrument
@@ -135,9 +149,10 @@ def get_gcov_version(gcov):
     return tuple(map(int, first_line.split()[-1].split('.')))
 
 def get_tool_prefix(cmake_cache_file):
-    r = re.compile('CMAKE_AR:FILEPATH=(.+)ar$')
+    r = re.compile(f'(?:CMAKE_AR|CMAKE_C_COMPILER_AR):FILEPATH=(.+)?ar{re.escape(EXESUFFIX)}$')
+    strip_llvm = lambda s: s[:-5] if s.endswith('/llvm-') else s
     with open(cmake_cache_file, 'r') as f:
-        return next((m.group(1) for m in map(r.search, f) if m), '')
+        return strip_llvm(next((m.group(1) for m in map(r.search, f) if m), ''))
 
 def find_parent_dir(path, file):
     root = Path(path.root).resolve()
@@ -168,7 +183,7 @@ def gcc_coverage(tempdir, args):
                 gcno_link.symlink_to(gcno_file)
             build_dir = build_dir or find_parent_dir(gcno_file, file='CMakeCache.txt')
 
-    gcov = args.gcov or get_tool_prefix(build_dir / 'CMakeCache.txt') + 'gcov'
+    gcov = args.gcov or get_tool_prefix(build_dir / 'CMakeCache.txt') + f'gcov{EXESUFFIX}'
 
     # Need at least gcov 7.1.0 because of bug not allowing -i in conjunction with multiple files
     # See: https://github.com/gcc-mirror/gcc/commit/41da7513d5aaaff3a5651b40edeccc1e32ea785a
@@ -204,12 +219,12 @@ def llvm_coverage(tempdir, args):
 
     build_dir = next(d for d in map(find_build_dir, binaries) if d)
     tool_prefix = get_tool_prefix(build_dir / 'CMakeCache.txt')
-    llvm_profdata = [tool_prefix + 'llvm-profdata']
-    llvm_cov = [tool_prefix + 'llvm-cov']
+    llvm_profdata = [tool_prefix + f'llvm-profdata{EXESUFFIX}']
+    llvm_cov = [tool_prefix + f'llvm-cov{EXESUFFIX}']
 
     profraw = Path(tempdir) / 'coverage-%p.profraw'
     prof_env = os.environ.copy()
-    prof_env['LLVM_PROFILE_FILE'] = profraw
+    prof_env['LLVM_PROFILE_FILE'] = str(profraw)
 
     subprocess.run(args.args, env=prof_env)
 
@@ -226,24 +241,39 @@ def llvm_coverage(tempdir, args):
     with open(args.output, 'wb') as f:
         f.write(complete.stdout)
 
-if __name__ == '__main__':
-    plat = platform.system()
+COMPILERS = {
+    Compiler.MSVC: msvs_coverage,
+    Compiler.GCC: gcc_coverage,
+    Compiler.CLANG: llvm_coverage,
+}
 
+DEFAULT_COMPILER = {
+    'Windows': Compiler.MSVC,
+    'Linux': Compiler.GCC,
+    'Darwin': Compiler.CLANG,
+}
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', metavar='FILE', type=str,
         default='lcov.info',
         help='Write coverage info to file.')
-    if plat == 'Windows':
+
+    if platform.system() == 'Windows':
+        # TODO: Autodetect from CMakeCache.txt
         parser.add_argument('--vs-install-dir', metavar='PATH', type=str,
             default='C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community',
             help='Path to Visual Studio install directory.')
-    else:
-        parser.add_argument('--gcov', metavar='PATH', type=str,
-            default=None, # Autodetect from CMakeCache.txt
-            help='Path to GCOV executable (for GCC only).')
+
+    parser.add_argument('--gcov', metavar='PATH', type=str,
+        default=None, # Autodetect from CMakeCache.txt
+        help='Path to GCOV executable (for GCC only).')
 
     parser.add_argument('-b', '--binary', type=str, action='append', nargs=1, default=[],
         help='Get coverage information for specified executable or library')
+
+    parser.add_argument('-c', '--compiler', type=Compiler, choices=list(Compiler),
+        default=DEFAULT_COMPILER.get(platform.system()), help='Specify compiler type.')
 
     parser.add_argument('args', nargs='+',
         help='Launch program with arguments')
@@ -251,11 +281,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with tempfile.TemporaryDirectory(suffix='-coverage') as tempdir:
-        if plat == 'Windows':
-            msvs_coverage(tempdir, args)
-        elif plat == 'Linux':
-            gcc_coverage(tempdir, args)
-        elif plat == 'Darwin':
-            llvm_coverage(tempdir, args)
-        else:
-            raise Exception('Unknown platform')
+        COMPILERS.get(args.compiler)(tempdir, args)
