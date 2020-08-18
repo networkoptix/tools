@@ -134,10 +134,18 @@ def get_gcov_version(gcov):
     first_line = output.split('\n', maxsplit=1)[0]
     return tuple(map(int, first_line.split()[-1].split('.')))
 
-def get_gcov_from_cmake(cmake_cache_file):
-    r = re.compile('CMAKE_ADDR2LINE:FILEPATH=(.+)addr2line$')
+def get_tool_prefix(cmake_cache_file):
+    r = re.compile('CMAKE_AR:FILEPATH=(.+)ar$')
     with open(cmake_cache_file, 'r') as f:
-        return next((m.group(1) for m in map(r.search, f) if m), '')+'gcov'
+        return next((m.group(1) for m in map(r.search, f) if m), '')
+
+def find_parent_dir(path, file):
+    root = Path(path.root).resolve()
+    # Let's hope no one compiles at root directory.
+    while path.resolve() != root:
+        if Path(path / file).exists():
+            return path
+        path = path.parent
 
 def gcc_coverage(tempdir, args):
     gcov_env = os.environ.copy()
@@ -146,14 +154,6 @@ def gcc_coverage(tempdir, args):
     subprocess.run(args.args, env=gcov_env)
 
     build_dir = None
-
-    def find_parent_dir(path, file):
-        root = Path(path.root).resolve()
-        # Let's hope no one compiles at root directory.
-        while path.resolve() != root:
-            if Path(path / file).exists():
-                return path
-            path = path.parent
 
     # Symlink *.gcno files near *.gcda files
     cut_len = len(tempdir)
@@ -164,7 +164,7 @@ def gcc_coverage(tempdir, args):
             gcno_link.symlink_to(gcno_file)
         build_dir = build_dir or find_parent_dir(gcno_file, file='CMakeCache.txt')
 
-    gcov = args.gcov or get_gcov_from_cmake(build_dir / 'CMakeCache.txt')
+    gcov = args.gcov or get_tool_prefix(build_dir / 'CMakeCache.txt') + 'gcov'
 
     # Need at least gcov 7.1.0 because of bug not allowing -i in conjunction with multiple files
     # See: https://github.com/gcc-mirror/gcc/commit/41da7513d5aaaff3a5651b40edeccc1e32ea785a
@@ -195,17 +195,27 @@ def gcc_coverage(tempdir, args):
 def llvm_coverage(tempdir, args):
     binaries = [b[0] for b in args.binary]
 
-    profraw = Path(tempdir) / 'default.profraw'
+    def find_build_dir(path):
+        return find_parent_dir(Path(path), file='CMakeCache.txt')
+
+    build_dir = next(d for d in map(find_build_dir, binaries) if d)
+    tool_prefix = get_tool_prefix(build_dir / 'CMakeCache.txt')
+    llvm_profdata = [tool_prefix + 'llvm-profdata']
+    llvm_cov = [tool_prefix + 'llvm-cov']
+
+    profraw = Path(tempdir) / 'coverage-%p.profraw'
     prof_env = os.environ.copy()
     prof_env['LLVM_PROFILE_FILE'] = profraw
 
     subprocess.run(args.args, env=prof_env)
 
-    profdata = Path(tempdir) / 'default.profdata'
-    subprocess.run(['xcrun', 'llvm-profdata', 'merge', '-sparse', profraw, '-o', profdata])
+    profraw_list = list(Path(tempdir).glob('coverage-*.profraw'))
+
+    profdata = Path(tempdir) / 'coverage.profdata'
+    subprocess.run(llvm_profdata + ['merge', '-sparse'] + profraw_list + ['-o', profdata])
     obj_args = list(chain.from_iterable(('-object', b) for b in binaries[1:]))
     complete = subprocess.run(
-        ['xcrun', 'llvm-cov', 'export', '-format=lcov', f'-instr-profile={profdata}', binaries[0]] + obj_args,
+        llvm_cov + ['export', '-format=lcov', f'-instr-profile={profdata}', binaries[0]] + obj_args,
         stdout=subprocess.PIPE)
 
     # Save LCOV data
