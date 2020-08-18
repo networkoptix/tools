@@ -148,21 +148,25 @@ def find_parent_dir(path, file):
         path = path.parent
 
 def gcc_coverage(tempdir, args):
+    # Coverage for each process goes to its own directory.
     gcov_env = os.environ.copy()
-    gcov_env['GCOV_PREFIX'] = tempdir
+    gcov_env['GCOV_PREFIX'] = str(Path(tempdir) / 'cov-%p')
 
     subprocess.run(args.args, env=gcov_env)
 
     build_dir = None
 
-    # Symlink *.gcno files near *.gcda files
-    cut_len = len(tempdir)
-    for path in Path(tempdir).rglob('*.gcda'):
-        gcno_file = Path(str(path)[cut_len:]).with_suffix('.gcno')
-        gcno_link = path.with_suffix('.gcno')
-        if not gcno_link.exists():
-            gcno_link.symlink_to(gcno_file)
-        build_dir = build_dir or find_parent_dir(gcno_file, file='CMakeCache.txt')
+    # Iterate over all process directories and
+    # symlink *.gcno files near *.gcda files
+    for dirname in Path(tempdir).glob('cov-*'):
+        strip_len = len(str(dirname))
+        for path in dirname.rglob('*.gcda'):
+            # Strip GCOV_PREFIX and get the path to .gcno file.
+            gcno_file = Path(str(path)[strip_len:]).with_suffix('.gcno')
+            gcno_link = path.with_suffix('.gcno')
+            if not gcno_link.exists():
+                gcno_link.symlink_to(gcno_file)
+            build_dir = build_dir or find_parent_dir(gcno_file, file='CMakeCache.txt')
 
     gcov = args.gcov or get_tool_prefix(build_dir / 'CMakeCache.txt') + 'gcov'
 
