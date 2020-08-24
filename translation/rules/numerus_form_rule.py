@@ -17,7 +17,8 @@ exceptions = [
     'QnWorkbenchWearableHandler',
     'CameraLicensePanelWidget',
     'CameraSettingsLicenseWatcher',
-    'TileInteractionHandler'
+    'TileInteractionHandler',
+    'LicenseDeactivationDialogs',
 ]
 
 template = '%n'
