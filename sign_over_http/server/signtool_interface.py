@@ -71,40 +71,31 @@ Other options:
             slightly more information on error.
 """
 
-import os
 from environment import execute_command_async
-
-
-def _signtool_executable(signtool_directory):
-    return os.path.join(signtool_directory, 'signtool.exe')
 
 
 def _timestamp_options(timestamp_server):
     return ['/td', 'sha256', '/tr', timestamp_server]
 
 
-def _common_signtool_options():
-    return ['/fd', 'sha256', '/v']
-
-
-def _common_sign_command(signtool_directory, timestamp_server):
-    command = [_signtool_executable(signtool_directory), 'sign']
-    command += _common_signtool_options()
+def _common_sign_command(timestamp_server):
+    command = [
+        'signtool',
+        'sign',
+        '/fd', 'sha256',
+        '/v']
     if timestamp_server:
         command += _timestamp_options(timestamp_server)
     return command
 
 
 def _sign_software_command(
-    signtool_directory,
     target_file,
     certificate,
     sign_password,
     timestamp_server
 ):
-    command = _common_sign_command(signtool_directory, timestamp_server)
-    # if sign_description:
-    #    command += ['/d', sign_description]
+    command = _common_sign_command(timestamp_server)
     command += ['/f', certificate]
     command += ['/p', sign_password]
     command += [target_file]
@@ -112,43 +103,38 @@ def _sign_software_command(
 
 
 def _sign_hardware_command(
-    signtool_directory,
     target_file,
     timestamp_server
 ):
-    command = _common_sign_command(signtool_directory, timestamp_server)
+    command = _common_sign_command(timestamp_server)
     command += ['/a']
     command += [target_file]
     return command
 
 
 async def sign_software(
-    signtool_directory,
     target_file,
     certificate,
     sign_password,
     timestamp_server,
-    timeout
+    timeout_sec
 ):
     return await execute_command_async(
         _sign_software_command(
-            signtool_directory=signtool_directory,
             target_file=target_file,
             certificate=certificate,
             sign_password=sign_password,
             timestamp_server=timestamp_server),
-        timeout=timeout)
+        timeout_sec=timeout_sec)
 
 
 async def sign_hardware(
-    signtool_directory,
     target_file,
     timestamp_server,
-    timeout
+    timeout_sec
 ):
     return await execute_command_async(
         _sign_hardware_command(
-            signtool_directory=signtool_directory,
             target_file=target_file,
             timestamp_server=timestamp_server),
-        timeout=timeout)
+        timeout_sec=timeout_sec)

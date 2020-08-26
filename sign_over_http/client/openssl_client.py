@@ -86,8 +86,9 @@ def main():
         default=DEFAULT_REQUEST_TIMEOUT)
     args = parser.parse_args()
 
+    actual_url = args.url + '/openssl'
     return sign_binary(
-        url=args.url,
+        url=actual_url,
         file=args.file,
         output=args.output,
         request_timeout=args.request_timeout,
