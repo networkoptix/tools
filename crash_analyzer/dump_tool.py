@@ -281,6 +281,8 @@ class DumpAnalyzer:
             logger.warning('Selected customization [%s] does not match deduced [%s] for: %s' % (
                 self.customization, deduced, dump_path))
 
+        logger.debug("Init alalyzer " + repr(self.__dict__))
+
     def get_dump_information(self):
         """Gets initial information from dump.
         """
@@ -453,6 +455,9 @@ class DumpAnalyzer:
     def download_dists(self):
         """Downloads required distributions.
         """
+        if not self.cache_directory:
+            raise UserError('Cache directory is required for: ' + self.dump_path)
+
         try:
             urls = self.fetch_urls()
         except (http.client.HTTPException, urllib.error.URLError) as e:
@@ -549,6 +554,7 @@ def analyse_dump(generate: bool = True, *args, **kwargs) -> str:
             with open(report_path, 'r') as f:
                 return f.read()
 
+        logger.debug('Analysis result does not exist: ' + report_path)
         dump.get_dump_information()
         dump.download_dists()
         return dump.generate_report(report_path)

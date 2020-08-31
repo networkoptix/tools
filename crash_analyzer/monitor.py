@@ -47,6 +47,7 @@ class Options:
         for key, value in extra.items():
             assert isinstance(value, type(getattr(self, key)))
             setattr(self, key, value)
+        logger.info("Options: " + repr(self.__dict__))
 
 
 class Monitor:
@@ -241,17 +242,22 @@ class Monitor:
         jira = api(**options)
         issue, reports = crash_tuple
         if not issue:
-            report = reports[0]  # < Any will do.
-            try:
-                reason = crash_info.analyze_report(
-                    report, directory, cache_directory=None)  # < Newer use dump tool.
-            except crash_info.AnalyzeError as error:
-                # This may happen when stack is considered to be useless after a logic change.
-                logger.warning(utils.format_error(error, include_stack=True))
+            reason = None
+            for report in reports: # < Any will do.
+                try:
+                    reason = crash_info.analyze_report(
+                        report, directory, cache_directory=None)  # < Newer use dump tool.
+                    issue = jira.create_issue(report, reason)
+                    break
+                except (crash_info.AnalyzeError, dump_tool.Error) as error:
+                    # This may happen when stack is considered to be useless after a logic change,
+                    # or somethin went wrong on file system and analysis result was lost...
+                    logger.warning(utils.format_error(error, include_stack=True))
+
+            if not reason or not issue:
                 logger.error('Skip creating issue for reports with useless stack')
                 return USELESS_STACK_KEY, reports
 
-            issue = jira.create_issue(report, reason)
             jira.update_issue(issue, reports, directory=directory)
             jira.autoclose_issue_if_required(issue, reason)
         else:
