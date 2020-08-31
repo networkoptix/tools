@@ -19,7 +19,7 @@ REPORT_NAME_REGEXP = re.compile(r'''
     (?P<binary> (?: (?!--). )+)
     --
     (?P<version> [0-9]+ \. [0-9]+ \. [0-9]+) \. (?P<build> [0-9]+)
-        - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<publication> (?: -[a-z]+)?)
+        - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<publication> (?: -[a-z_]+)?)
     --
     .* (?P<platform> (?: windows | linux | arm) - [a-z0-9]+) .*
     \.

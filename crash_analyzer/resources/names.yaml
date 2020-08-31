@@ -225,3 +225,15 @@
   full_version: 4.2.0.31109
   version: '4.2'
   platform: 'windows-x64'
+
+? Wisenet_WAVE--4.1.0.31654-2945984faa1a-hanwha-private_patch--2020-08-30_18-48-42_windows-x64-winxp-Windows-10_b74adcbc8ef24c468aebc03a4e11eacb.dmp
+: publication: private_patch
+  binary: Wisenet_WAVE
+  build: '31654'
+  changeset: 2945984faa1a
+  component: Client
+  customization: hanwha
+  extension: dmp
+  full_version: 4.1.0.31654
+  version: '4.1'
+  platform: 'windows-x64'
