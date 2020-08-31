@@ -391,7 +391,15 @@ class DumpAnalyzer:
         """Returns executable module directory (performs search if needed).
         """
         if not hasattr(self, '_module_dir'):
-            self._module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
+            try:
+                exe_dir = self.find_file(self.module + '.exe')
+            except DistError:
+                if self.dist != 'client': raise
+                # Some client installers keep the client exe by it's original name
+                # and rename it during installation.
+                exe_dir = self.find_file('client.exe')
+
+            self._module_dir = os.path.dirname(exe_dir)
 
         return self._module_dir
 
