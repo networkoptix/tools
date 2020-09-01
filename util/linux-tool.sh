@@ -58,7 +58,7 @@ Here <command> can be one of the following:
 
  ini # Create empty .ini files in $INI_FILES_DIR (to be filled with defauls).
 
- apidoc dev|prod [<action>|run] [args] # Run apidoctool from devtools or packages/any.
+ apidoc dev|prod [<action>|run] [args] # Run apidoctool from tools/ or packages/any.
  apidoc-rdep <ver> # Run dev apidoctool tests, deploy to packages/any/ and upload via "rdep -u".
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
@@ -469,7 +469,7 @@ do_apidoc() # dev|prod [action] "$@"
     local -r TOOL="$1" && shift
     if [ "$TOOL" = "dev" ]
     then
-        local -r JAR=$(nx_path "$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar")
+        local -r JAR=$(nx_path "$DEVELOP_DIR/tools/apidoctool/out/apidoctool.jar")
     elif [ "$TOOL" = "prod" ]
     then
         local APIDOCTOOL_JAR
@@ -505,7 +505,7 @@ do_apidoc() # dev|prod [action] "$@"
     else #< Run apidoctool with appropriate args for the action, adding the remaining args, if any.
         local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
         local -i OUTPUT_DIR_NEEDED=0
-        local -r TEST_DIR="$DEVELOP_DIR/devtools/apidoctool/test"
+        local -r TEST_DIR="$DEVELOP_DIR/tools/apidoctool/test"
         case "$ACTION" in
             code-to-xml)
                 local -r ARGS=(
@@ -559,7 +559,7 @@ do_apidoc_rdep() # "$@"
     local -r VER="$1"
     [[ $VER == "" ]] && nx_fail "Artifact version must be specified."
 
-    local -r DEV_DIR="$DEVELOP_DIR/devtools/apidoctool"
+    local -r DEV_DIR="$DEVELOP_DIR/tools/apidoctool"
     local -r JAR_DEV="$DEV_DIR/out/apidoctool.jar"
     local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool-$VER"
     local -r JAR_PROD="$PACKAGE_DIR/apidoctool.jar"
@@ -1896,7 +1896,7 @@ main()
             local -r DMP_FILE="$1" && shift
 
             nx_verbose win-python3 \
-                "$(nx_path "$DEVELOP_DIR/devtools/crash_analyzer/dump_tool.py")" \
+                "$(nx_path "$DEVELOP_DIR/tools/crash_analyzer/dump_tool.py")" \
                 "$(nx_path "$DMP_FILE")" "$@"
             ;;
         #..........................................................................................
