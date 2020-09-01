@@ -80,6 +80,9 @@ Here <command> can be one of the following:
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
  log-s [installed] [find] # Tail or find server main log file for the developed or installed VMS.
 
+ gs [args] # Git: Execute: git status [args]
+ gu [branch] # Git: Pull everything from the remote repo, checking out `branch` if specified.
+
  dmp file.dmp [args] # Cygwin-only: Analyze .dmp with crash_analyzer. Requires win-python3.
 
  cd # Change current dir: source dir <-> build dir.
@@ -427,6 +430,45 @@ do_run_ut() # all|TestName "$@"
         fi
     fi
     return $RESULT
+}
+
+doGitUpdate() # [branch]
+{
+    nx_verbose git fetch --all --tags `# Delete stale remote-tracking branches #` --prune
+    
+    (( $# > 1 )) && nx_fail "Too many arguments."
+    if (( $# > 0 ))
+    then
+        nx_verbose git checkout "$1"
+    fi
+    
+    nx_verbose git pull --rebase
+    
+    # Find stale local branches, suggesting commands to delete them.
+    local -i staleBranchFound=0
+    local -r gitBranchesCommand=(
+        git for-each-ref --format '%(refname) %(upstream:track)' refs/heads
+    )
+    nx_log_command "${gitBranchesCommand[@]}"
+    for branch in $("${gitBranchesCommand[@]}" \
+        | awk '$2 == "[gone]" {sub("refs/heads/", "", $1); print $1}')
+    do
+        if (( staleBranchFound == 0 ))
+        then
+            staleBranchFound=1
+            echo "To delete stale local branches, execute the commands:"
+            echo ""
+        fi
+        echo "git branch -D $branch" #< Suggested command to delete the stale local branch.
+    done
+    if (( staleBranchFound == 0 ))
+    then
+        echo "No stale local branches found."
+    else
+        echo "" #< Empty line after the command list.
+    fi
+    
+    nx_verbose git status
 }
 
 copy_if_exists_and_different() # source_file target_file
@@ -1882,6 +1924,13 @@ main()
             else
                 nx_verbose tail -F "$LOG_FILE"
             fi
+            ;;
+        #..........................................................................................
+        gs)
+            nx_verbose git status "$@"
+            ;;
+        gu)
+            doGitUpdate "$@"
             ;;
         #..........................................................................................
         dmp)
