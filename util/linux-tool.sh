@@ -14,8 +14,6 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$RDEP_PACKAGES_DIR"}
-: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.3"}
-: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.3"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
@@ -117,7 +115,7 @@ go_callback()
 
 # [out] TARGET
 # [in,out] CUSTOMIZATION
-# [out] QT_DIR
+# [out] QT_DIR Is set only if TARGET is non-cross-compiling: the var is used only for launching.
 # [in] VMS_DIR
 get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 {
@@ -133,9 +131,22 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 
     local DEFAULT_CUSTOMIZATION=""
 
+    local -r QT_VERSION=$(
+        cat "$VMS_DIR/sync_dependencies.py" |grep '"qt":' |sed 's/.*"\([0-9.]*\)",/\1/'
+    )
+    
+    local -r TARGET_DEVICE=$(
+        cat "$VMS_DIR/cmake/default_target.cmake" \
+            |grep "set(default_target_device" \
+            |grep "$TARGET" |sed 's/.*"\(.*\)")/\1/'
+    )
+    
+    # QT_DIR will be set to an empty string for 
+    QT_DIR="$PACKAGES_DIR/$TARGET_DEVICE/qt-$QT_VERSION"
+
     case "$TARGET" in
-        windows) QT_DIR="$WINDOWS_QT_DIR";;
-        linux) QT_DIR="$LINUX_QT_DIR";;
+        windows) ;;
+        linux) ;;
         linux_arm32|linux_arm64|bpi|android-arm|macosx) `# Do nothing #`;;
         edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
