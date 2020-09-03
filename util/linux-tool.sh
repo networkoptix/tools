@@ -754,7 +754,7 @@ do_sdk() # [metadata] "$@"
     local ZIP
     for ZIP in "$DISTRIB_DIR"/*${SPECIFIER}_sdk*.zip
     do
-        unzip "$ZIP" -d "${ZIP%.zip}"
+        nx_verbose unzip `# quiet #` -q "$ZIP" -d "${ZIP%.zip}"
     done
 }
 
