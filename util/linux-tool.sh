@@ -1717,14 +1717,17 @@ generateRemoteGitInfo()
     currentRefsFromGit="${currentRefsFromGit/HEAD -> /}"
 
     local -r currentRefs="\"${currentRefsFromGit}\""
-    nx_go_verbose echo "$(cat <<EOF
-changeSet=${changeset}
-branch=${branch}
-currentRefs=${currentRefs}
+    
+    nx_go_verbose \
+        mkdir -p "$(dirname "$remoteGitInfoTxt")" \
+        "[&&]" echo "$(cat <<EOF
+changeSet=$changeset
+branch=$branch
+currentRefs=$currentRefs
 EOF
-)" "[>\"${remoteGitInfoTxt}\"]"
+)" "[>\"$remoteGitInfoTxt\"]"
 
-    return 0 #< To ensure right "$?" variable value.
+    return 0 #< To ensure the successful exit status.
 }
 
 doRsync() # "$@"
