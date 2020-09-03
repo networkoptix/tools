@@ -1,0 +1,11 @@
+jira:
+    url: https://networkoptix.atlassian.net/
+    login: service@networkoptix.com
+    password: PASSWORD_HERE 
+    timeout: 5
+    retries: 1
+repo:
+    path: /tmp/nx
+    url: "git@gitlab.lan.hdw.mx:dev/nx.git"
+polling_period_min: 5 
+last_check_file: /tmp/last_check
