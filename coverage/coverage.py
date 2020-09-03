@@ -191,7 +191,7 @@ def get_tool_prefix(cmake_cache_file):
 
 
 def find_parent_dir(path, file):
-    root = Path(path.root).resolve()
+    root = Path(path.absolute().root).resolve()
     # Let's hope no one compiles at root directory.
     while path.resolve() != root:
         if Path(path / file).exists():
