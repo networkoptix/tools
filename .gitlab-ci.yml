@@ -1,0 +1,49 @@
+#
+# Build various staffs
+#
+
+image:
+  name: gcr.io/kaniko-project/executor:debug-v1.0.0
+  entrypoint: [""]
+
+variables:
+  DOCKER_REGISTRY: docker.artifactory.lan.hdw.mx:80
+
+stages:
+  - build
+    
+# ref: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+.docker:build: &docker_build
+  script:
+    - set -e
+    - ln -sf /vault/secrets/config.json /kaniko/.docker/config.json
+    - source $CI_PROJECT_DIR/$DOCKER_DIR/Dockerimage.properties
+    - /kaniko/executor --context $CI_PROJECT_DIR/$DOCKER_DIR/
+        --insecure
+        --destination $DOCKER_REGISTRY/$TARGET_IMAGE:$TARGET_IMAGE_TAG
+        "$BUILD_OPTIONS"
+
+# build workflow_police docker image and push and to registry
+docker:workflow_police:build:
+  stage: build
+  variables:
+    DOCKER_DIR: workflow_police
+  script:
+  <<: *docker_build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master' 
+      changes:
+        - workflow_police/*
+
+# check build of workflow_police docker image, do not push to registry in merge request context
+docker:workflow_police:check:
+  stage: build
+  variables:
+    DOCKER_DIR: workflow_police
+    BUILD_OPTIONS: --no-push
+  script:
+  <<: *docker_build
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - workflow_police/*
