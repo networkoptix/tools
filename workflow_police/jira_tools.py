@@ -52,12 +52,16 @@ class JiraAccessor:
         return self._jira.search_issues(issues_filter)
 
     def reopen_issue(self, issue: jira.Issue, reason: str, dry_run: bool):
+        docs_link = "https://networkoptix.atlassian.net/wiki/spaces/SD/pages/1486749741/Automation+Workflow+Police+bot"
+
         try:
             logger.debug(f'Reopening issue {issue.key}: {reason}')
             if dry_run:
                 return
             self._jira.transition_issue(issue, "Reopen")
-            self._jira.add_comment(issue, f"Workflow violation, issue reopened: {reason}\n\nh5. 🚔 Workflow Police")
+            self._jira.add_comment(issue,
+                (f"Workflow violation, issue reopened: {reason}.\n"
+                 f"More info: [{docs_link}|{docs_link}|smart-link] \n\nh5. 🚔 Workflow Police"))
 
         except jira.exceptions.JIRAError as error:
             raise JiraError(f"Unable to reopen issue {issue.key}: {error}")
