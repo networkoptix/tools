@@ -7,6 +7,8 @@ In order to proper use, several host directories have to be mounted inside conta
 * .ssh directory with keys for access to the repo:/home/workflow-police/.ssh
 * directory with config file for workflow_police:/etc/workflow-police/
 
+Releases should be mapped to repository permanent branches at https://networkoptix.atlassian.net/projects/VMS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page
+
 # Parameters
 * *config_file* yaml file with configuration options, example: https://gitlab.lan.hdw.mx/dev/tools/-/blob/master/workflow_police/config.yaml
 * *--log-level* {CRITICAL,FATAL,ERROR,WARN,WARNING,INFO,DEBUG,NOTSET} level for logging, default INFO
