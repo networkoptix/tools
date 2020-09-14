@@ -1,0 +1,84 @@
+# Default values for workflow_police.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nx/workflow_police
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# comment the line below to set default INFO level
+logLevel: DEBUG
+
+# jira login api token
+jiraPassword: 
+
+# gitlab ssh private key
+gitSshKey: 
+
+# workflow police config file
+config: |
+  jira:
+    url: https://networkoptix.atlassian.net/
+    login: service@networkoptix.com
+    password: {{ .Values.jiraPassword }}
+    timeout: 5
+    retries: 1
+  repo:
+    path: /var/workflow_police/nx
+    url: "git@gitlab.lan.hdw.mx:dev/nx.git"
+  polling_period_min: 5 
+  last_check_file: /var/workflow_police/last_check
+
+persistence:
+  existingClaim: '{{ .Release.Name }}'
+  hostPath: /srv/workflow_police-{{ .Release.Name }}
+  size: 1G
+  # clean data volume on start: remove last_check file, repository
+  wipeData: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: 
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector:
+  workflow-police: deploy
+
+tolerations: []
+
+affinity: {}

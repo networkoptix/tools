@@ -10,8 +10,23 @@ variables:
   DOCKER_REGISTRY: docker.artifactory.lan.hdw.mx:80
 
 stages:
+  - check
   - build
+  - deploy
     
+.helmchart.check: &helmchart_check
+  script:
+    - set -e
+    - helm template test-chart $CI_PROJECT_DIR/$HELMCHART_DIR/
+
+.helmchart.deploy: &helmchart_deploy
+  script:
+    - set -e
+    - "HELMCHART=$(helm package $CI_PROJECT_DIR/$HELMCHART_DIR | awk -F ': ' '{print $2}')"
+    - curl -s -u "jenkins:${ARTIFACTORY_TOKEN}"
+        -T "${HELMCHART}"
+        "http://artifactory.lan.hdw.mx/artifactory/helm-local/$(basename $HELMCHART)"
+
 # ref: https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
 .docker:build: &docker_build
   script:
@@ -23,21 +38,21 @@ stages:
         --destination $DOCKER_REGISTRY/$TARGET_IMAGE:$TARGET_IMAGE_TAG
         "$BUILD_OPTIONS"
 
-# build workflow_police docker image and push and to registry
-docker:workflow_police:build:
-  stage: build
-  variables:
-    DOCKER_DIR: workflow_police
+.k8s:deploy: &k8s_deploy
   script:
-  <<: *docker_build
-  rules:
-    - if: $CI_COMMIT_BRANCH == 'master' 
-      changes:
-        - workflow_police/*
+    - set -e
+    - cd /home/groovy/scripts/
+    - groovy runJenkinsJob.groovy $DEPLOY_JOB
+        BUILD_DESCRIPTION="Triggered by gitlab user $GITLAB_USER_LOGIN"
+        CHECK_MODE=false
+        GITLAB_JOB_ID=$CI_JOB_ID
+        GITLAB_JOB_PROJECT=$CI_PROJECT_PATH
+        GITLAB_PIPELINE_URL=$CI_PIPELINE_URL
+        GITLAB_JOB_URL=$CI_JOB_URL
 
-# check build of workflow_police docker image, do not push to registry in merge request context
+# check build of workflow_police docker image
 docker:workflow_police:check:
-  stage: build
+  stage: check
   variables:
     DOCKER_DIR: workflow_police
     BUILD_OPTIONS: --no-push
@@ -47,3 +62,55 @@ docker:workflow_police:check:
     - if: $CI_MERGE_REQUEST_ID
       changes:
         - workflow_police/*
+
+# validate workflow_police helm chart
+helmchart:workflow_police:check:
+  image: nx/deploy-pod:1.0
+  stage: check
+  variables:
+    HELMCHART_DIR: workflow_police/chart
+  script:
+  <<: *helmchart_check
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - workflow_police/chart/*
+
+# build workflow_police docker image and push to registry
+docker:workflow_police:build:
+  stage: build
+  variables:
+    DOCKER_DIR: workflow_police
+  script:
+  <<: *docker_build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/*
+
+# package workflow_police helm chart an push to repository
+helmchart:workflow_police:build:
+  image: nx/deploy-pod:1.0
+  stage: build
+  variables:
+    HELMCHART_DIR: workflow_police/chart
+  script:
+  <<: *helmchart_deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/chart/*
+
+# deploy workflow_police to kubernetes
+k8s:workflow_police:deploy:
+  image: nx/ci:1.1
+  stage: deploy
+  variables:
+    DEPLOY_JOB: ansible.deploy.k8s.workflow_police
+  script:
+  <<: *k8s_deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/*
+        - workflow_police/chart/*

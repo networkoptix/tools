@@ -1,0 +1,97 @@
+{{- $volumeName := print .Chart.Name "-" (tpl .Values.persistence.existingClaim .) -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "workflow_police.fullname" . }}
+  labels:
+    {{- include "workflow_police.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy: 
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "workflow_police.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "workflow_police.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "workflow_police.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: fix-volume-permissions
+          image: "webuni/openssh"
+          securityContext:
+            runAsUser: 0
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              if [ "{{ .Values.persistence.wipeData }}" == 'true' ]; then
+                echo 'Wiping data as wipeData is {{ .Values.persistence.wipeData }}'
+                rm -rf /tmp/data/*
+              fi
+              chmod 700 /tmp/.ssh
+              install -m 600 -o {{ .Values.podSecurityContext.runAsUser }} -g {{ .Values.podSecurityContext.runAsGroup }} /tmp/.ssh-secret/id_rsa /tmp/.ssh
+              ssh-keyscan gitlab.lan.hdw.mx > /tmp/.ssh/known_hosts
+              chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.runAsGroup }} /tmp/.ssh
+              chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.runAsGroup }} /tmp/data
+      
+          volumeMounts:
+            - name: data
+              mountPath: /tmp/data
+            - name: ssh-key
+              mountPath: /tmp/.ssh
+            - name: ssh-secret
+              mountPath: /tmp/.ssh-secret
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          args:
+            - /etc/workflow_police/config.yaml
+            - '--log-level={{ .Values.logLevel | default "INFO" }}'
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: data
+            mountPath: /var/workflow_police
+          - name: config
+            mountPath: /etc/workflow_police 
+          - name: ssh-key
+            mountPath: /home/workflow-police/.ssh
+      volumes:
+      - name: config
+        secret:
+          secretName: {{ .Chart.Name }}-{{ .Release.Name }}-config
+      - name: ssh-secret
+        secret:
+          secretName: {{ .Chart.Name }}-{{ .Release.Name }}-key
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ $volumeName }}
+      - name: ssh-key
+        emptyDir: {}
+        
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
