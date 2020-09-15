@@ -47,7 +47,7 @@ class JiraAccessor:
     def get_recently_closed_issues(self, period_min: int):
         issues_filter = (f"project = {self.project} "
                          f"AND status = Closed "
-                         f"AND updated >= -{period_min}m ")
+                         f"AND resolved >= -{period_min}m ")
         logger.debug(f'Searching issues with filter [{issues_filter}]')
         return self._jira.search_issues(issues_filter, maxResults=None)
 
