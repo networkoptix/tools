@@ -32,7 +32,7 @@ class RepoAccessor():
         self.repo.remotes.origin.fetch()
 
     def grep_recent_commits(self, substring: str, branch: str) -> List:
-        return list(self.repo.iter_commits(f"origin/{branch}", grep=substring, since='6 month ago'))
+        return list(self.repo.iter_commits(f"origin/{branch}", grep=substring, since='18 month ago'))
 
 
 class WorkflowViolationChecker:
