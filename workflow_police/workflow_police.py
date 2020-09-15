@@ -91,6 +91,12 @@ class VersionMissingIssueCommitChecker:
         return
 
 
+def check_issue_type(issue: jira.Issue) -> Optional[str]:
+    if issue.fields.issuetype.name in ["New Feature", "Epic"]:
+        return f"issue type [{issue.fields.issuetype}]"
+    return
+
+
 def check_issue_not_fixed(issue: jira.Issue) -> Optional[str]:
     if str(issue.fields.resolution) in ["Fixed", "Done"]:
         return
@@ -109,7 +115,8 @@ class WorkflowEnforcer:
 
         self._workflow_checker = WorkflowViolationChecker()
         self._workflow_checker.register_ignore_checker(
-            lambda i: f"[{IGNORE_LABEL}] is set" if IGNORE_LABEL in i.fields.labels else None)
+            lambda i: f"{IGNORE_LABEL} is set" if IGNORE_LABEL in i.fields.labels else None)
+        self._workflow_checker.register_ignore_checker(check_issue_type)
         self._workflow_checker.register_ignore_checker(check_issue_not_fixed)
 
         self._workflow_checker.register_reopen_checker(WrongVersionChecker(self._jira))
