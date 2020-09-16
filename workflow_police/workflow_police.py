@@ -5,6 +5,7 @@ import jira
 
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
+from collections import namedtuple
 
 import time
 import datetime
@@ -65,16 +66,38 @@ class WorkflowViolationChecker:
 
 
 class WrongVersionChecker:
+    Version = namedtuple('Version', ['number', 'is_patch'])
+
     def __init__(self, jira_accessor: JiraAccessor):
         self._jira = jira_accessor
 
     def __call__(self, issue: jira.Issue) -> Optional[str]:
         if VERSION_SPECIFIC_LABEL in issue.fields.labels:
             return
-        valid_versions = self._jira.version_to_branch_mapping().valid_versions
-        if [v.name for v in issue.fields.fixVersions] in valid_versions:
-            return
-        return f"wrong fixVersions field value, valid versions are: {valid_versions}"
+
+        versions = sorted([self._parse_version(v.name) for v in issue.fields.fixVersions], reverse=True)
+        if self.Version("Future", False) in versions and len(versions) > 1:
+            return f"wrong fixVersions field value: 'Future' can't be set along with other versions"
+
+        if sum(not v.is_patch for v in versions) != 1:
+            return f"wrong fixVersions field value: exactly one release version allowed"
+
+        if versions[0].is_patch:
+            return f"wrong fixVersions field value: major version [{versions[0]}] shouldn't be a patch"
+
+        # NOTE: A string with versions without gaps. E.g. 'Future 4.3 4.2 4.1 4.0'
+        versions_sequence = " ".join(sorted(
+            {self._parse_version(v).number for v in self._jira.version_to_branch_mapping().keys()}, reverse=True))
+        if " ".join(sorted({v.number for v in versions}, reverse=True)) not in versions_sequence:
+            return f"wrong fixVersions field value: there shouldn't be gaps between versions"
+
+        return
+
+    @classmethod
+    def _parse_version(cls, jira_version: str):
+        version_splitted = jira_version.split('_')
+        assert len(version_splitted) == 2 and version_splitted[1] == "patch" or len(version_splitted) == 1
+        return cls.Version(version_splitted[0], len(version_splitted) == 2)
 
 
 class VersionMissingIssueCommitChecker:
@@ -85,10 +108,21 @@ class VersionMissingIssueCommitChecker:
     def __call__(self, issue: jira.Issue) -> Optional[str]:
         for version in issue.fields.fixVersions:
             # NOTE: checking only recent commits as an optimization
-            branch = self._jira.version_to_branch_mapping().mapping[version.name]
+            branch = self._jira.version_to_branch_mapping()[version.name]
             if len(self._repo.grep_recent_commits(issue.key, branch)) == 0:
-                return f"no commits in [{version.name}] version"
+                return f"no commits in {version.name} version (branch: {branch})"
         return
+
+
+class MasterMissingIssueCommitChecker:
+    def __init__(self, repo: RepoAccessor):
+        self._repo = repo
+
+    def __call__(self, issue: jira.Issue) -> Optional[str]:
+        if VERSION_SPECIFIC_LABEL in issue.fields.labels:
+            return
+        if len(self._repo.grep_recent_commits(issue.key, "master")) == 0:
+            return f"no commits in master"
 
 
 def check_issue_type(issue: jira.Issue) -> Optional[str]:
@@ -121,6 +155,7 @@ class WorkflowEnforcer:
 
         self._workflow_checker.register_reopen_checker(WrongVersionChecker(self._jira))
         self._workflow_checker.register_reopen_checker(VersionMissingIssueCommitChecker(self._jira, self._repo))
+        self._workflow_checker.register_reopen_checker(MasterMissingIssueCommitChecker(self._repo))
 
     def get_recent_issues_interval_min(self):
         try:

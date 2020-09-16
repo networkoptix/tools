@@ -36,7 +36,6 @@ def next_version_to_release(version_mapping: Dict):
 
 class JiraAccessor:
     project = "VMS"
-    VersionMapping = namedtuple('VersionMapping', ['mapping', 'valid_versions'])
 
     def __init__(self, url: str, login: str, password: str, timeout: int, retries: int):
         try:
@@ -78,19 +77,9 @@ class JiraAccessor:
                     logger.warning(f"Version {v.name} doesn't have branch in description")
                 else:
                     mapping[v.name] = branch
-            mapping = {k: mapping[k] for k in sorted(mapping)}
 
+            mapping = {k: mapping[k] for k in sorted(mapping)}
             logger.debug(f"Got mapping from jira releases: {mapping}")
-            return JiraAccessor.VersionMapping(mapping, self._valid_versions_sets(mapping))
+            return mapping
         except jira.exceptions.JIRAError as error:
             raise JiraError(f"Unable to get release versions", error)
-
-    def _valid_versions_sets(self, versions_mapping: Dict):
-        # Single version mapped to master branch are valid.
-        result = [[v] for v, b in versions_mapping.items() if b == "master"]
-
-        # Versions range without any gaps are valid.
-        versions = list(versions_mapping.keys())
-        all_versions = versions[0:versions.index(next_version_to_release(versions_mapping))+1]
-        result += [all_versions[i:] for i in range(len(all_versions)-1)]
-        return result
