@@ -44,22 +44,29 @@ class JiraAccessor:
             raise JiraError(f"Unable to connect to {url} with {login}", error)
 
     def get_recently_closed_issues(self, period_min: int):
-        issues_filter = (f"project = {self.project} "
-                         f"AND status = Closed "
-                         f"AND resolved >= -{period_min}m ")
+        issues_filter = (f'project = {self.project} '
+                         f'AND (status = Closed AND resolved >= -{period_min}m '
+                         f'OR status = "Waiting for QA" AND updated >= -{period_min}m)')
         logger.debug(f'Searching issues with filter [{issues_filter}]')
         return self._jira.search_issues(issues_filter, maxResults=None)
 
-    def reopen_issue(self, issue: jira.Issue, reason: str, dry_run: bool):
+    def return_issue(self, issue: jira.Issue, reason: str, dry_run: bool):
         docs_link = "https://networkoptix.atlassian.net/wiki/spaces/SD/pages/1486749741/Automation+Workflow+Police+bot"
 
         try:
             logger.debug(f'Reopening issue {issue.key}: {reason}')
             if dry_run:
                 return
-            self._jira.transition_issue(issue, "Reopen")
+
+            if issue.fields.status.name == "Closed":
+                self._jira.transition_issue(issue, "Reopen")
+            elif issue.fields.status.name == "Waiting for QA":
+                self._jira.transition_issue(issue, "Back to Development")
+            else:
+                assert False, f"Unexpected issue {issue} status {issue.fields.status}"
+
             self._jira.add_comment(issue, (
-                f"Workflow violation, issue reopened: {reason}.\n"
+                f"Workflow violation, issue returned: {reason}.\n"
                 f"More info: [{docs_link}|{docs_link}|smart-link] \n\nh5. 🚔 Workflow Police"))
 
         except jira.exceptions.JIRAError as error:

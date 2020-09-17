@@ -5,7 +5,6 @@ import jira
 
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
-from collections import namedtuple
 
 import time
 import datetime
@@ -20,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 IGNORE_LABEL = "hide_from_police"
 VERSION_SPECIFIC_LABEL = "version_specific"
+DONE_EXTERNALLY_LABEL = "done_externally"
 
 
 class RepoAccessor():
@@ -66,7 +66,18 @@ class WorkflowViolationChecker:
 
 
 class WrongVersionChecker:
-    Version = namedtuple('Version', ['number', 'is_patch'])
+    class Version:
+        def __init__(self, jira_version: str):
+            version_splitted = jira_version.split('_')
+            assert len(version_splitted) == 2 and version_splitted[1] == "patch" or len(version_splitted) == 1
+            self.number = version_splitted[0]
+            self.is_patch = len(version_splitted) == 2
+
+        def __gt__(self, other):
+            return (self.number, self.is_patch) > (other.number, other.is_patch)
+
+        def __repr__(self):
+            return self.number + ("_patch" if self.is_patch else "")
 
     def __init__(self, jira_accessor: JiraAccessor):
         self._jira = jira_accessor
@@ -75,29 +86,23 @@ class WrongVersionChecker:
         if VERSION_SPECIFIC_LABEL in issue.fields.labels:
             return
 
-        versions = sorted([self._parse_version(v.name) for v in issue.fields.fixVersions], reverse=True)
-        if self.Version("Future", False) in versions and len(versions) > 1:
-            return f"wrong fixVersions field value: 'Future' can't be set along with other versions"
+        versions = sorted([self.Version(v.name) for v in issue.fields.fixVersions], reverse=True)
+        if self.Version("Future") in versions and len(versions) > 1:
+            return f"wrong fixVersions field value, 'Future' can't be set along with other versions"
 
         if sum(not v.is_patch for v in versions) != 1:
-            return f"wrong fixVersions field value: exactly one release version allowed"
+            return f"wrong fixVersions field value, exactly one release version allowed"
 
         if versions[0].is_patch:
-            return f"wrong fixVersions field value: major version [{versions[0]}] shouldn't be a patch"
+            return f"wrong fixVersions field value, major version [{versions[0]}] shouldn't be a patch"
 
         # NOTE: A string with versions without gaps. E.g. 'Future 4.3 4.2 4.1 4.0'
         versions_sequence = " ".join(sorted(
-            {self._parse_version(v).number for v in self._jira.version_to_branch_mapping().keys()}, reverse=True))
+            {self.Version(v).number for v in self._jira.version_to_branch_mapping().keys()}, reverse=True))
         if " ".join(sorted({v.number for v in versions}, reverse=True)) not in versions_sequence:
-            return f"wrong fixVersions field value: there shouldn't be gaps between versions"
+            return f"wrong fixVersions field value, there shouldn't be gaps between versions"
 
         return
-
-    @classmethod
-    def _parse_version(cls, jira_version: str):
-        version_splitted = jira_version.split('_')
-        assert len(version_splitted) == 2 and version_splitted[1] == "patch" or len(version_splitted) == 1
-        return cls.Version(version_splitted[0], len(version_splitted) == 2)
 
 
 class VersionMissingIssueCommitChecker:
@@ -126,15 +131,17 @@ class MasterMissingIssueCommitChecker:
 
 
 def check_issue_type(issue: jira.Issue) -> Optional[str]:
-    if issue.fields.issuetype.name in ["New Feature", "Epic"]:
+    if issue.fields.issuetype.name in ["New Feature", "Epic", "Func Spec", "Tech Spec"]:
         return f"issue type [{issue.fields.issuetype}]"
     return
 
 
 def check_issue_not_fixed(issue: jira.Issue) -> Optional[str]:
+    if issue.fields.status.name == "Waiting for QA" and DONE_EXTERNALLY_LABEL not in issue.fields.labels:
+        return
     if str(issue.fields.resolution) in ["Fixed", "Done"]:
         return
-    return f"issue resolution [{issue.fields.resolution}]"
+    return f"issue resolution [{issue.fields.resolution}], issue status [{issue.fields.status}]"
 
 
 class WorkflowEnforcer:
@@ -187,11 +194,12 @@ class WorkflowEnforcer:
                 if reason:
                     logger.debug(f"Ignoring {issue}: {reason}")
                     continue
-                logger.debug(f"Checking issue: {issue} with versions {[v.name for v in issue.fields.fixVersions]}")
+                logger.debug(f"Checking issue: {issue} ({issue.fields.status}) "
+                             f"with versions {[v.name for v in issue.fields.fixVersions]}")
                 reason = self._workflow_checker.should_reopen_issue(issue)
                 if not reason:
                     continue
-                self._jira.reopen_issue(issue, reason, self.dry_run)
+                self._jira.return_issue(issue, reason, self.dry_run)
 
             logger.info(f"All {len(issues)} issues handled")
             self.update_last_check_timestamp()
