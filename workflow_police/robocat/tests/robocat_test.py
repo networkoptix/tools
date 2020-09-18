@@ -3,7 +3,7 @@ import pytest
 import gitlab
 from dataclasses import dataclass, field
 
-import merge_request_handler
+import robocat.merge_request_handler
 
 
 COMMIT = ("11", "msg1")
@@ -58,7 +58,7 @@ class MergeRequestStub():
 
 @pytest.fixture
 def mr_handler(monkeypatch):
-    handler = merge_request_handler.MergeRequestHandler(None)
+    handler = robocat.merge_request_handler.MergeRequestHandler(None)
 
     def stub_get_commit_message(sha):
         return COMMIT[1]

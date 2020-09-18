@@ -1,5 +1,4 @@
-import comments
-
+import robocat.comments
 import logging
 import gitlab
 
@@ -69,7 +68,7 @@ class MergeRequest():
     def add_comment(self, title, message, emoji=""):
         logger.debug(f"{self}: Adding comment with title: {title}")
         if not self._dry_run:
-            self._gitlab_mr.notes.create({'body':  comments.template.format(**locals())})
+            self._gitlab_mr.notes.create({'body':  robocat.comments.template.format(**locals())})
 
     def set_wip(self):
         logger.debug(f"{self}: Set WIP")
@@ -163,10 +162,10 @@ class MergeRequestHandler():
         logger.info(f"MR!{mr.id}: moving to WIP: {reason}")
         if reason == cls.ReturnToDevelopmentReason.failed_pipeline:
             title = "Failed pipeline"
-            message = comments.failed_pipeline_message
+            message = robocat.comments.failed_pipeline_message
         elif reason == cls.ReturnToDevelopmentReason.conflicts:
             title = "Conflicts with target branch"
-            message = comments.conflicts_message
+            message = robocat.comments.conflicts_message
         else:
             assert False, f"Uknown reason: {reason}"
 
@@ -178,7 +177,6 @@ class MergeRequestHandler():
     def merge(cls, mr):
         try:
             logger.info(f"MR!{mr.id}: rebasing and merging")
-
             mr.merge()
             message = comments.merged_message.format(branch=mr.target_branch)
             mr.add_comment("MR merged", message, ":white_check_mark:")
@@ -192,7 +190,7 @@ class MergeRequestHandler():
         logger.info(f"MR!{mr.id}: rebasing and running latest pipeline")
 
         pipeline_id = mr.play_latest_pipeline()
-        message = comments.run_pipeline_message.format(pipeline=pipeline_id)
+        message = robocat.comments.run_pipeline_message.format(pipeline=pipeline_id)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
     @lru_cache(maxsize=512)

@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-
 import gitlab
 
 import time
 import logging
 import argparse
 
-import merge_request_handler
+import robocat.merge_request_handler as handler
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +13,7 @@ class Bot:
     def __init__(self, project_id, dry_run):
         self._gitlab = gitlab.Gitlab.from_config("nx_gitlab")
         self._project = self._gitlab.projects.get(project_id)
-        self._handler = merge_request_handler.MergeRequestHandler(self._project)
+        self._handler = handler.MergeRequestHandler(self._project)
 
         self._gitlab.auth()
         self._username = self._gitlab.user.username
@@ -41,7 +39,7 @@ class Bot:
                     continue
                 if not mr.assignee or mr.assignee["username"] != self._username:
                     continue
-                yield merge_request_handler.MergeRequest(mr, self._dry_run)
+                yield handler.MergeRequest(mr, self._dry_run)
 
             sleep_time = max(0, start_time + mr_poll_rate - time.time())
             time.sleep(sleep_time)
