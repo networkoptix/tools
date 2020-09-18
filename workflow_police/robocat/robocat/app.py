@@ -48,10 +48,10 @@ class Bot:
 
 def main():
     parser = argparse.ArgumentParser("workflow_robocat")
-    parser.add_argument('-p', '--project-id', help="ID of project in gitlab", required=True)
-    parser.add_argument('--mr-poll-rate', help="Merge requests polling rate in seconds ", type=int, default=30)
+    parser.add_argument('-p', '--project-id', help="ID of project in gitlab (2 for dev/nx)", required=True)
     parser.add_argument('--log-level', help="Logs level", choices=logging._nameToLevel.keys(), default=logging.INFO)
-    parser.add_argument('--dry-run', help="Run single iteration, don't change any states", action="store_true")
+    parser.add_argument('--dry-run', help="Don't change any MR states", action="store_true")
+    parser.add_argument('--mr-poll-rate', help="Merge Requests poll rate, seconds (default: 30)", type=int, default=30)
     arguments = parser.parse_args()
 
     logging.basicConfig(

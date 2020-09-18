@@ -1,0 +1,10 @@
+[global]
+default = nx_gitlab
+ssl_verify = true
+timeout = 7
+
+[nx_gitlab]
+url = https://gitlab.lan.hdw.mx/
+private_token = TOKEN_HERE 
+api_version = 4
+
