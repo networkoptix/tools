@@ -28,7 +28,7 @@ class Bot:
         for mr in self.get_merge_requests(mr_poll_rate):
             ignore_reason = self._handler.handle(merge_request_handler.MergeRequest(mr, self._dry_run))
             if ignore_reason:
-                logger.info(f"MR!{mr.id}: Ignored because {ignore_reason}")
+                logger.info(f"MR!{mr.iid}: Ignored because {ignore_reason}")
 
     def get_merge_requests(self, mr_poll_rate):
         while True:

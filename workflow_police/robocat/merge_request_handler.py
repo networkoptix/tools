@@ -38,6 +38,8 @@ class MergeRequest():
 
     def approvals_left(self):
         approvals = self._gitlab_mr.approvals.get()
+        return approvals.approvals_left  # TODO: should be remove once approval logic is fully implemented.
+
         if approvals.approvals_left == 0:
             return 0
 
