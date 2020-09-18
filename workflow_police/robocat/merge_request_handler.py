@@ -1,5 +1,7 @@
 import comments
+
 import logging
+import gitlab
 
 import time
 import enum
@@ -83,11 +85,6 @@ class MergeRequest():
         if self._dry_run:
             return False
         self._gitlab_mr.rebase()
-
-        # NOTE: Gitlab API sucks, this sleep helps to distinguish real rebase from empty one.
-        time.sleep(1)
-        self.refetch(include_rebase_in_progress=True)
-        return self._gitlab_mr.rebase_in_progress
 
     def merge(self):
         logger.debug(f"{self}: Merging")
@@ -179,34 +176,20 @@ class MergeRequestHandler():
     # TODO: should approve here and add emoji to MR
     @classmethod
     def merge(cls, mr):
-        logger.info(f"MR!{mr.id}: rebasing and merging")
-        rebase_in_progress = mr.rebase()
-        # NOTE: gitlab API sucks and there is no other way to know if rebase required.
-        if rebase_in_progress:
-            logger.info(f"Seems {mr} rebase is in progress. Will merge next time...")
-            return
-        if mr.has_conflicts:
-            cls.return_to_development(mr, cls.ReturnToDevelopmentReason.conflicts)
-            return
-        if mr.merge_status != "can_be_merged":
-            logger.info(f"Can't merge {mr} now, status: {mr.merge_status}")
-            return
+        try:
+            logger.info(f"MR!{mr.id}: rebasing and merging")
 
-        mr.merge()
-        message = comments.merged_message.format(branch=mr.target_branch)
-        mr.add_comment("MR merged", message, ":white_check_mark:")
+            mr.merge()
+            message = comments.merged_message.format(branch=mr.target_branch)
+            mr.add_comment("MR merged", message, ":white_check_mark:")
+        except gitlab.exceptions.GitlabMRClosedError as e:
+            # NOTE: gitlab API sucks and there is no other way to know if rebase required.
+            logger.info(f"Got error during merge, most probably just rebase required: {e}")
+            mr.rebase()
 
     @classmethod
     def run_pipeline(cls, mr):
         logger.info(f"MR!{mr.id}: rebasing and running latest pipeline")
-        rebase_in_progress = mr.rebase()
-        # NOTE: gitlab API sucks and there is no other way to know if rebase required.
-        if rebase_in_progress:
-            logger.info(f"Seems {mr} rebase is in progress. Will run pipeline next time...")
-            return
-        if mr.has_conflicts:
-            cls.return_to_development(mr, cls.ReturnToDevelopmentReason.conflicts)
-            return
 
         pipeline_id = mr.play_latest_pipeline()
         message = comments.run_pipeline_message.format(pipeline=pipeline_id)

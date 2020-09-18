@@ -1,5 +1,6 @@
 import pytest
 
+import gitlab
 from dataclasses import dataclass, field
 
 import merge_request_handler
@@ -12,7 +13,7 @@ COMMIT = ("11", "msg1")
 class MergeRequestStub():
     approved: bool = True
     has_conflicts: bool = False
-    has_conflicts_after_rebase: bool = False
+    needs_rebase: bool = False
     no_commits: bool = False
     pipeline_status: str = "success"
 
@@ -45,10 +46,10 @@ class MergeRequestStub():
 
     def rebase(self):
         self.rebased = True
-        if self.has_conflicts_after_rebase:
-            self.has_conflicts = True
 
     def merge(self):
+        if self.needs_rebase:
+            raise gitlab.exceptions.GitlabMRClosedError()
         self.merged = True
 
     def play_latest_pipeline(self):
@@ -84,21 +85,21 @@ testdata = [
         {"pipeline_status": "running"},
         {"wip": False, "comments": 0, "rebased": False, "merged": False, "pipeline_status": "running"}),
     (
-        # No pipelines, conflicts after rebase -> wip, comment, no pipelines, rebased
-        {"has_conflicts_after_rebase": True, "pipeline_status": None},
-        {"wip": True, "comments": 1, "rebased": True, "merged": False, "pipeline_status": None}),
+        # No pipelines, needs rebase -> pipeline started, comment
+        {"needs_rebase": True, "pipeline_status": None},
+        {"wip": False, "comments": 1, "rebased": False, "merged": False, "pipeline_status": "running"}),
     (
-        # No pipelines, no conflicts -> pipeline started, comment, rebased
+        # No pipelines, no conflicts -> pipeline started, comment
         {"pipeline_status": None},
-        {"wip": False, "comments": 1, "rebased": True, "merged": False, "pipeline_status": "running"}),
+        {"wip": False, "comments": 1, "rebased": False, "merged": False, "pipeline_status": "running"}),
     (
-        # Pipeline successfull, conflicts after rebase -> wip, comment, rebased
-        {"has_conflicts_after_rebase": True, "pipeline_status": "success"},
-        {"wip": True, "comments": 1, "rebased": True, "merged": False, "pipeline_status": "success"}),
+        # Pipeline successfull, needs rebase -> rebased, not merged
+        {"needs_rebase": True, "pipeline_status": "success"},
+        {"wip": False, "comments": 0, "rebased": True, "merged": False, "pipeline_status": "success"}),
     (
-        # Pipeline successfull, no conflicts -> merged, comment, rebased
+        # Pipeline successfull, no conflicts -> merged, comment
         {"pipeline_status": "success"},
-        {"wip": False, "comments": 1, "rebased": True, "merged": True, "pipeline_status": "success"}),
+        {"wip": False, "comments": 1, "rebased": False, "merged": True, "pipeline_status": "success"}),
     (
         # Pipeline failed -> wip, comment
         {"pipeline_status": "failed"},
