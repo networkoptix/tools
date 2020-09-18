@@ -26,9 +26,12 @@ class Bot:
                     + (" (--dry-run)" if self._dry_run else ""))
 
         for mr in self.get_merge_requests(mr_poll_rate):
-            ignore_reason = self._handler.handle(merge_request_handler.MergeRequest(mr, self._dry_run))
-            if ignore_reason:
-                logger.info(f"MR!{mr.iid}: Ignored because {ignore_reason}")
+            try:
+                ignore_reason = self._handler.handle(mr)
+                if ignore_reason:
+                    logger.info(f"{mr}: Ignored because {ignore_reason}")
+            except gitlab.exceptions.GitlabOperationError as e:
+                logger.warning(f"{mr}: Gitlab error: {e}")
 
     def get_merge_requests(self, mr_poll_rate):
         while True:
@@ -38,7 +41,7 @@ class Bot:
                     continue
                 if not mr.assignee or mr.assignee["username"] != self._username:
                     continue
-                yield mr
+                yield merge_request_handler.MergeRequest(mr, self._dry_run)
 
             sleep_time = max(0, start_time + mr_poll_rate - time.time())
             time.sleep(sleep_time)
