@@ -27,7 +27,7 @@ class Bot:
             try:
                 ignore_reason = self._handler.handle(mr)
                 if ignore_reason:
-                    logger.info(f"{mr}: Ignored because {ignore_reason}")
+                    logger.debug(f"{mr}: Ignored because {ignore_reason}")
             except gitlab.exceptions.GitlabOperationError as e:
                 logger.warning(f"{mr}: Gitlab error: {e}")
 

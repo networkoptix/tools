@@ -100,7 +100,7 @@ class MergeRequest():
         latest_pipeline_id = max(p['id'] for p in self.pipelines())
         latest_pipeline = project.pipelines.get(latest_pipeline_id, lazy=True)
 
-        logger.debug(f"{self}: Playing pipeline {latest_pipeline_id}")
+        logger.info(f"{self}: Playing pipeline {latest_pipeline_id}")
         if not self._dry_run:
             for job in latest_pipeline.jobs.list():
                 if job.status == "manual":
@@ -120,7 +120,7 @@ class MergeRequestHandler():
         self._project = project
 
     def handle(self, mr):
-        logger.info(f"Handling MR {mr.id}: '{mr.title}'")
+        logger.debug(f"Handling MR {mr.id}: '{mr.title}'")
 
         approvals_left = mr.approvals_left()
         if approvals_left > 0:
@@ -176,9 +176,9 @@ class MergeRequestHandler():
     @classmethod
     def merge(cls, mr):
         try:
-            logger.info(f"MR!{mr.id}: rebasing and merging")
+            logger.info(f"{mr}: rebasing and merging")
             mr.merge()
-            message = comments.merged_message.format(branch=mr.target_branch)
+            message = robocat.comments.merged_message.format(branch=mr.target_branch)
             mr.add_comment("MR merged", message, ":white_check_mark:")
         except gitlab.exceptions.GitlabMRClosedError as e:
             # NOTE: gitlab API sucks and there is no other way to know if rebase required.
@@ -187,7 +187,7 @@ class MergeRequestHandler():
 
     @classmethod
     def run_pipeline(cls, mr):
-        logger.info(f"MR!{mr.id}: rebasing and running latest pipeline")
+        logger.info(f"{mr}: running latest pipeline")
 
         pipeline_id = mr.play_latest_pipeline()
         message = robocat.comments.run_pipeline_message.format(pipeline=pipeline_id)
