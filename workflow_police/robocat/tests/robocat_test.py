@@ -30,8 +30,8 @@ class MergeRequestStub():
     def approvals_left(self):
         return 0 if self.approved else 1
 
-    def last_commit_message(self):
-        return COMMIT[1] if not self.no_commits else None
+    def last_commit(self):
+        return COMMIT if not self.no_commits else None
 
     def pipelines(self):
         if not self.pipeline_status:

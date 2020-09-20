@@ -56,11 +56,11 @@ class MergeRequest():
     def merge_status(self):
         return self._gitlab_mr.merge_status
 
-    def last_commit_message(self):
+    def last_commit(self):
         last_commit = next(self._gitlab_mr.commits(), None)
         if not last_commit:
             return None
-        return last_commit.message
+        return (last_commit.id, last_commit.message)
 
     def pipelines(self):
         return self._gitlab_mr.pipelines()
@@ -130,13 +130,13 @@ class MergeRequestHandler():
             self.return_to_development(mr, self.ReturnToDevelopmentReason.conflicts)
             return
 
-        last_commit_message = mr.last_commit_message()
-        if not last_commit_message:
+        last_commit = mr.last_commit()
+        if not last_commit:
             return "no commits in MR"
 
         # NOTE: Comparing by commit message, because SHA changes after rebase.
         last_commit_pipelines = (
-            p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit_message)
+            p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1])
         last_ran_pipeline = next(
             (p for p in last_commit_pipelines if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
 
@@ -152,7 +152,10 @@ class MergeRequestHandler():
             return
 
         if last_ran_pipeline["status"] in PIPELINE_STATUSES["failed"]:
-            self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline)
+            if last_ran_pipeline["sha"] == last_commit[0]:
+                self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline)
+            else:
+                self.run_pipeline(mr)  # NOTE: pipeline might be fixed after rebase
             return
 
         assert False, f"Unexpected status {last_ran_pipeline['status']}"
