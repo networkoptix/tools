@@ -37,7 +37,8 @@ class Bot:
             for mr in self._project.mergerequests.list(state='opened', order_by='updated_at'):
                 if mr.work_in_progress:
                     continue
-                if not mr.assignee or mr.assignee["username"] != self._username:
+
+                if self._username not in (assignee["username"] for assignee in mr.assignees):
                     continue
                 yield handler.MergeRequest(mr, self._dry_run)
 
