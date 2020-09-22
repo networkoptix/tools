@@ -34,7 +34,7 @@ class Bot:
     def get_merge_requests(self, mr_poll_rate):
         while True:
             start_time = time.time()
-            for mr in self._project.mergerequests.list(state='opened', order_by='updated_at'):
+            for mr in self._project.mergerequests.list(state='opened', order_by='updated_at', as_list=False):
                 if mr.work_in_progress:
                     continue
 
