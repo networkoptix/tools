@@ -59,10 +59,7 @@ If the tools is run with "-h" or "--help" option, it prints this message and exi
         verifier->loadCmakeFile();
 
         if (verifier->hasChangedGlobs())
-        {
             verifier->setGlobMismatchFileFlag();
-            return 1;
-        }
     }
     catch (const ParseException& e)
     {
@@ -88,4 +85,6 @@ If the tools is run with "-h" or "--help" option, it prints this message and exi
         std::cerr << kUtilityName << ": INTERNAL ERROR: Unknown exception raised." << std::endl;
         return 1;
     }
+
+    return 0;
 }
