@@ -29,6 +29,7 @@ class CaseStatus(Enum):
     IN_REVIEW = 1
     READY = 2
     NOT_ACTUAL = 3
+    DUPLICATE = 4
 
 
 class AutoTestStatus(Enum):
