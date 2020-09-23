@@ -76,7 +76,7 @@ class MergeRequest():
             self._gitlab_mr.notes.create({'body': "/wip"})
 
     def refetch(self, include_rebase_in_progress=False):
-        project = self._get_project()
+        project = self._get_project(self._gitlab_mr.project_id)
         self._gitlab_mr = project.mergerequests.get(self.id, include_rebase_in_progress=include_rebase_in_progress)
 
     def rebase(self):
@@ -96,7 +96,8 @@ class MergeRequest():
         self._gitlab_mr.merge(squash_commit_message=squash_commit_message)
 
     def play_latest_pipeline(self):
-        project = self._get_project()
+        # NOTE: It seams pipelines live in source project in case of forks.
+        project = self._get_project(self._gitlab_mr.source_project_id)
         latest_pipeline_id = max(p['id'] for p in self.pipelines())
         latest_pipeline = project.pipelines.get(latest_pipeline_id, lazy=True)
 
@@ -107,8 +108,8 @@ class MergeRequest():
                     project.jobs.get(job.id, lazy=True).play()
         return latest_pipeline_id
 
-    def _get_project(self):
-        return self._gitlab_mr.manager.gitlab.projects.get(self._gitlab_mr.project_id, lazy=True)
+    def _get_project(self, project_id):
+        return self._gitlab_mr.manager.gitlab.projects.get(project_id, lazy=True)
 
 
 class MergeRequestHandler():
