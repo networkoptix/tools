@@ -4,6 +4,9 @@ _wip_url = ("https://docs.gitlab.com/ee/user/project/merge_requests/work_in_prog
 merged_message = "Merge request was successfully merged into `{branch}` branch."
 run_pipeline_message = "Running pipeline {pipeline_id}."
 
+unresolved_threads_message = f"""Merge request returned to development.
+Please, resolve all discussions and [remove WIP]({_wip_url}) to continue merging process."""
+
 conflicts_message = f"""Merge request returned to development.
 Please, do manual rebase and [remove WIP]({_wip_url}) to continue merging process."""
 

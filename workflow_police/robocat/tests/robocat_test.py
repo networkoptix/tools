@@ -14,6 +14,7 @@ COMMITS = dict()
 class MergeRequestStub():
     approved: bool = True
     has_conflicts: bool = False
+    blocking_discussions_resolved: bool = True
     needs_rebase: bool = False
     commits: bool = field(default_factory=lambda: {DEFAULT_COMMIT["sha"]: DEFAULT_COMMIT["message"]})
     pipelines_list: str = field(default_factory=lambda: [(DEFAULT_COMMIT["sha"], "success")])
@@ -92,12 +93,16 @@ testdata = [
         {"comments": 1, "pipeline_status": "running"}),
     (
         # No pipelines, no conflicts -> pipeline started, comment
-        {"pipelines_list": [(DEFAULT_COMMIT["sha"], "skipped")]},
+        {"blocking_discussions_resolved": False, "pipelines_list": [(DEFAULT_COMMIT["sha"], "skipped")]},
         {"comments": 1, "pipeline_status": "running"}),
     (
         # Pipeline successfull, needs rebase -> rebased, not merged
         {"needs_rebase": True},
         {"actions": ["rebased"], "pipeline_status": "success"}),
+    (
+        # Pipeline successfull, blocking discussions -> wip, comment
+        {"blocking_discussions_resolved": False},
+        {"actions": ["wip"], "comments": 1, "pipeline_status": "success"}),
     (
         # Pipeline successfull, no conflicts -> merged, comment
         {},

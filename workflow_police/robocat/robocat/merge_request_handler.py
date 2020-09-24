@@ -53,6 +53,10 @@ class MergeRequest():
         return self._gitlab_mr.has_conflicts
 
     @property
+    def blocking_discussions_resolved(self):
+        return self._gitlab_mr.blocking_discussions_resolved
+
+    @property
     def merge_status(self):
         return self._gitlab_mr.merge_status
 
@@ -116,6 +120,7 @@ class MergeRequestHandler():
     class ReturnToDevelopmentReason(enum.Enum):
         conflicts = enum.auto()
         failed_pipeline = enum.auto()
+        unresolved_threads = enum.auto()
 
     def __init__(self, project):
         self._project = project
@@ -148,6 +153,11 @@ class MergeRequestHandler():
         if last_ran_pipeline["status"] in PIPELINE_STATUSES["running"]:
             return f'pipeline {last_ran_pipeline["id"]} (status: {last_ran_pipeline["status"]}) is in progress'
 
+        # NOTE: Let's check it only if pipeline was ran before.
+        if not mr.blocking_discussions_resolved:
+            self.return_to_development(mr, self.ReturnToDevelopmentReason.unresolved_threads)
+            return
+
         if last_ran_pipeline["status"] in PIPELINE_STATUSES["success"]:
             self.merge(mr)
             return
@@ -172,6 +182,9 @@ class MergeRequestHandler():
         elif reason == cls.ReturnToDevelopmentReason.conflicts:
             title = "Conflicts with target branch"
             message = robocat.comments.conflicts_message
+        elif reason == cls.ReturnToDevelopmentReason.unresolved_threads:
+            title = "Unresolved threads"
+            message = robocat.comments.unresolved_threads_message
         else:
             assert False, f"Uknown reason: {reason}"
 
