@@ -38,7 +38,7 @@ class MergeRequestStub():
         return next(iter(self.commits.items()), None)
 
     def pipelines(self):
-        return [{"id": p[0], "sha": p[1][0], "status": p[1][1]} for p in enumerate(self.pipelines_list)]
+        return [{"id": p[0], "sha": p[1][0], "status": p[1][1], "web_url": ""} for p in enumerate(self.pipelines_list)]
 
     def add_comment(self, title, message, emoji=""):
         self.comments.append((title, message, emoji))

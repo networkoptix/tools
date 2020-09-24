@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 PIPELINE_STATUSES = {
-    "skipped": ["canceled", "skipped", "created"],
-    "running": ["waiting_for_resource", "preparing", "pending", "running", "scheduled", "manual"],
+    "skipped": ["canceled", "skipped", "created", "manual"],
+    "running": ["waiting_for_resource", "preparing", "pending", "running", "scheduled"],
     "success": ["success"],
     "failed": ["failed"]
 }
@@ -154,7 +154,9 @@ class MergeRequestHandler():
 
         if last_ran_pipeline["status"] in PIPELINE_STATUSES["failed"]:
             if last_ran_pipeline["sha"] == last_commit[0]:
-                self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline)
+                self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline,
+                                           pipeline_id=last_ran_pipeline["id"],
+                                           pipeline_url=last_ran_pipeline["web_url"])
             else:
                 self.run_pipeline(mr)  # NOTE: pipeline might be fixed after rebase
             return
@@ -162,10 +164,10 @@ class MergeRequestHandler():
         assert False, f"Unexpected status {last_ran_pipeline['status']}"
 
     @classmethod
-    def return_to_development(cls, mr, reason):
+    def return_to_development(cls, mr, reason, **kwargs):
         logger.info(f"MR!{mr.id}: moving to WIP: {reason}")
         if reason == cls.ReturnToDevelopmentReason.failed_pipeline:
-            title = "Failed pipeline"
+            title = f"Pipeline [{kwargs['pipeline_id']}]({kwargs['pipeline_url']}) failed"
             message = robocat.comments.failed_pipeline_message
         elif reason == cls.ReturnToDevelopmentReason.conflicts:
             title = "Conflicts with target branch"
@@ -194,7 +196,7 @@ class MergeRequestHandler():
         logger.info(f"{mr}: running latest pipeline")
 
         pipeline_id = mr.play_latest_pipeline()
-        message = robocat.comments.run_pipeline_message.format(pipeline=pipeline_id)
+        message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
     @lru_cache(maxsize=512)
