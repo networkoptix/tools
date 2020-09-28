@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <filesystem>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -21,28 +22,38 @@ std::set<std::string> DirectoryScanner::ScanDirectory(
             : fs::directory_options::none);
     const fs::path directoryPath = fs::absolute(fs::path(directory)).lexically_normal();
 
-    for (auto directoryEntryIt = fs::recursive_directory_iterator(directoryPath, options);
-        directoryEntryIt != fs::recursive_directory_iterator();
-        ++directoryEntryIt)
+    try
     {
-        if (!m_recursive)
-            directoryEntryIt.disable_recursion_pending();
-
-        const fs::path path = directoryEntryIt->path();
-        if (!fileNameMatchesPattern(path.filename().generic_string(), pattern))
-            continue;
-
-        if (!m_relativeDirectory.empty())
+        for (auto directoryEntryIt = fs::recursive_directory_iterator(directoryPath, options);
+            directoryEntryIt != fs::recursive_directory_iterator();
+            ++directoryEntryIt)
         {
-            const fs::path relativePath = path.lexically_relative(m_relativeDirectory);
-            result.emplace(relativePath.generic_string());
-        }
-        else
-        {
-            result.emplace(path.generic_string());
+            if (!m_recursive)
+                directoryEntryIt.disable_recursion_pending();
+
+            const fs::path path = directoryEntryIt->path();
+            if (!fileNameMatchesPattern(path.filename().generic_string(), pattern))
+                continue;
+
+            if (!m_relativeDirectory.empty())
+            {
+                const fs::path relativePath = path.lexically_relative(m_relativeDirectory);
+                result.emplace(relativePath.generic_string());
+            }
+            else
+            {
+                result.emplace(path.generic_string());
+            }
         }
     }
-
+    catch (const fs::filesystem_error& e)
+    {
+        if (e.code() == std::errc::no_such_file_or_directory)
+            std::cerr << "verify_globs: WARNING: Can't find directory " << e.path1()
+                << "; possible error in CMake file." << std::endl;
+        else
+            throw;
+    }
     return result;
 }
 

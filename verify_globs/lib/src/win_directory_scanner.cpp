@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <filesystem>
+#include <iostream>
 
 #include <windows.h>
 #include <tchar.h>
@@ -30,6 +31,12 @@ std::set<std::string> DirectoryScanner::ScanDirectory(
         const DWORD lastError = GetLastError();
         if (lastError == ERROR_FILE_NOT_FOUND)
             return result;
+        if (lastError == ERROR_PATH_NOT_FOUND)
+        {
+            std::cerr << "verify_globs: WARNING: Can't find directory \""
+                << directory.string() << "\"" << "; possible error in CMake file." << std::endl;
+            return result;
+        }
         throw IOException(std::string("Error ") + std::to_string(lastError) +
             " while trying to find the first file in directory " + directory.string());
     }
