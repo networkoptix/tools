@@ -23,7 +23,7 @@ class TestMergeRequest:
         assert not mr.is_wip
         assert mr.rebased
         assert not mr.merged
-        assert 0 == len(mr.comments)
+        assert 0 == len(mr.comments), f"Got comments: {mr.comments}"
         assert "success" == mr.pipelines_list[0][1]
 
     def test_merge(self, mr_handler):
@@ -33,10 +33,15 @@ class TestMergeRequest:
         assert not mr.is_wip
         assert not mr.rebased
         assert mr.merged
-        assert 1 == len(mr.comments)
+        assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
         assert "success" == mr.pipelines_list[0][1]
 
     @pytest.mark.parametrize("mr_state", [
+            # Pipeline started ignoring approve because there was no pipelines ran at all.
+            {
+                "approved": False,
+                "pipelines_list": [(tests.merge_request_stub.DEFAULT_COMMIT["sha"], "skipped")]
+            },
             # Pipeline started without rebase
             {
                 "needs_rebase": True,
@@ -64,12 +69,21 @@ class TestMergeRequest:
         assert not mr.is_wip
         assert not mr.rebased
         assert not mr.merged
-        assert 1 == len(mr.comments)
+        assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
         assert "running" == mr.pipelines_list[0][1]
 
     @pytest.mark.parametrize("mr_state", [
             # MR not approved
             {"approved": False},
+            # MR not approved, there was already ran pipeline at another commit
+            {
+                "approved": False,
+                "commits": {
+                    "11": "same_msg",
+                    "22": "another_msg"},
+                "pipelines_list": [
+                    ("11", "skipped"),
+                    ("22", "failed")]},
             # MR don't have commits
             {"commits": {}},
             # Pipeline in progress
@@ -83,12 +97,12 @@ class TestMergeRequest:
         assert not mr.is_wip
         assert not mr.rebased
         assert not mr.merged
-        assert 0 == len(mr.comments)
+        assert 0 == len(mr.comments), f"Got comments: {mr.comments}"
         assert pipelines_before == mr.pipelines_list
 
     @pytest.mark.parametrize("mr_state", [
-            # MR has conflicts
-            {"has_conflicts": True},
+            # MR has conflicts, should return even if not approved
+            {"has_conflicts": True, "approved": False},
             # Pipeline successfull, blocking discussions
             {"blocking_discussions_resolved": False},
             # Failed pipeline
@@ -109,5 +123,5 @@ class TestMergeRequest:
         assert mr.is_wip
         assert not mr.rebased
         assert not mr.merged
-        assert 1 == len(mr.comments)
+        assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
         assert pipelines_before == mr.pipelines_list

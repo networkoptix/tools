@@ -128,23 +128,24 @@ class MergeRequestHandler():
     def handle(self, mr):
         logger.debug(f"Handling MR {mr.id}: '{mr.title}'")
 
-        approvals_left = mr.approvals_left()
-        if approvals_left > 0:
-            return f"not enough non-bot approvals, {approvals_left} more required"
+        last_commit = mr.last_commit()
+        if not last_commit:
+            return "no commits in MR"
 
         if mr.has_conflicts:
             self.return_to_development(mr, self.ReturnToDevelopmentReason.conflicts)
             return
 
-        last_commit = mr.last_commit()
-        if not last_commit:
-            return "no commits in MR"
+        approvals_left = mr.approvals_left()
+        if approvals_left > 0:
+            if not mr.has_conflicts and not self._last_ran_pipeline(mr.pipelines()):
+                self.run_pipeline(mr)  # TODO: type another reason
+
+            return f"not enough non-bot approvals, {approvals_left} more required"
 
         # NOTE: Comparing by commit message, because SHA changes after rebase.
-        last_commit_pipelines = (
-            p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1])
-        last_ran_pipeline = next(
-            (p for p in last_commit_pipelines if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
+        last_commit_pipelines = (p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1])
+        last_ran_pipeline = self._last_ran_pipeline(last_commit_pipelines)
 
         if last_ran_pipeline is None:
             self.run_pipeline(mr)
@@ -169,6 +170,7 @@ class MergeRequestHandler():
                                            pipeline_url=last_ran_pipeline["web_url"])
             else:
                 self.run_pipeline(mr)  # NOTE: pipeline might be fixed after rebase
+                # TODO: type another reason
             return
 
         assert False, f"Unexpected status {last_ran_pipeline['status']}"
@@ -212,6 +214,11 @@ class MergeRequestHandler():
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
+    # TODO: suboptimal! should use common cache for all MRs
     @lru_cache(maxsize=512)
     def _get_commit_message(self, sha):
         return self._project.commits.get(sha).message
+
+    @staticmethod
+    def _last_ran_pipeline(pipelines):
+        return next((p for p in pipelines if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
