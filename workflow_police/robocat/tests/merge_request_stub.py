@@ -50,5 +50,5 @@ class MergeRequestStub():
             raise gitlab.exceptions.GitlabMRClosedError()
         self.merged = True
 
-    def play_latest_pipeline(self):
-        self.pipelines_list[0] = (self.pipelines_list[0][0], "running")
+    def run_pipeline(self):
+        self.pipelines_list.insert(0, (self.last_commit()[0], "running"))

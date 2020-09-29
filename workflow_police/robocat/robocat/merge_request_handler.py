@@ -99,18 +99,12 @@ class MergeRequest():
             squash_commit_message = f"{self._gitlab_mr.title}\n\n{self._gitlab_mr.description}"
         self._gitlab_mr.merge(squash_commit_message=squash_commit_message)
 
-    def play_latest_pipeline(self):
-        # NOTE: It seams pipelines live in source project in case of forks.
+    def run_pipeline(self):
         project = self._get_project(self._gitlab_mr.source_project_id)
-        latest_pipeline_id = max(p['id'] for p in self.pipelines())
-        latest_pipeline = project.pipelines.get(latest_pipeline_id, lazy=True)
-
-        logger.info(f"{self}: Playing pipeline {latest_pipeline_id}")
-        if not self._dry_run:
-            for job in latest_pipeline.jobs.list():
-                if job.status == "manual":
-                    project.jobs.get(job.id, lazy=True).play()
-        return latest_pipeline_id
+        # TODO: should be changed to detached pipeline once gitlab API supports it
+        pipeline = project.pipelines.create({'ref': self._gitlab_mr.source_branch})
+        logger.debug(f"Pipeline {pipeline.id} created for {self._gitlab_mr.source_branch}")
+        return pipeline.id
 
     def _get_project(self, project_id):
         return self._gitlab_mr.manager.gitlab.projects.get(project_id, lazy=True)
@@ -138,46 +132,46 @@ class MergeRequestHandler():
 
         approvals_left = mr.approvals_left()
         if approvals_left > 0:
-            if not mr.has_conflicts and not self._last_ran_pipeline(mr.pipelines()):
+            if not mr.has_conflicts and not mr.pipelines():
                 self.run_pipeline(mr)  # TODO: type another reason
+                return
 
             return f"not enough non-bot approvals, {approvals_left} more required"
 
         # NOTE: Comparing by commit message, because SHA changes after rebase.
-        last_commit_pipelines = (p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1])
-        last_ran_pipeline = self._last_ran_pipeline(last_commit_pipelines)
-
-        if last_ran_pipeline is None:
+        last_pipeline = next((p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1]), None)
+        if last_pipeline is None or last_pipeline["status"] in PIPELINE_STATUSES["skipped"]:
             self.run_pipeline(mr)
             return
 
-        if last_ran_pipeline["status"] in PIPELINE_STATUSES["running"]:
-            return f'pipeline {last_ran_pipeline["id"]} (status: {last_ran_pipeline["status"]}) is in progress'
+        if last_pipeline["status"] in PIPELINE_STATUSES["running"]:
+            return f'pipeline {last_pipeline["id"]} (status: {last_pipeline["status"]}) is in progress'
 
         # NOTE: Let's check it only if pipeline was ran before.
         if not mr.blocking_discussions_resolved:
             self.return_to_development(mr, self.ReturnToDevelopmentReason.unresolved_threads)
             return
 
-        if last_ran_pipeline["status"] in PIPELINE_STATUSES["success"]:
+        if last_pipeline["status"] in PIPELINE_STATUSES["success"]:
             self.merge(mr)
             return
 
-        if last_ran_pipeline["status"] in PIPELINE_STATUSES["failed"]:
-            if last_ran_pipeline["sha"] == last_commit[0]:
+        if last_pipeline["status"] in PIPELINE_STATUSES["failed"]:
+            if last_pipeline["sha"] == last_commit[0]:
                 self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline,
-                                           pipeline_id=last_ran_pipeline["id"],
-                                           pipeline_url=last_ran_pipeline["web_url"])
+                                           pipeline_id=last_pipeline["id"],
+                                           pipeline_url=last_pipeline["web_url"])
             else:
                 self.run_pipeline(mr)  # NOTE: pipeline might be fixed after rebase
                 # TODO: type another reason
             return
 
-        assert False, f"Unexpected status {last_ran_pipeline['status']}"
+        assert False, f"Unexpected status {last_pipeline['status']}"
 
     @classmethod
     def return_to_development(cls, mr, reason, **kwargs):
         logger.info(f"MR!{mr.id}: moving to WIP: {reason}")
+
         if reason == cls.ReturnToDevelopmentReason.failed_pipeline:
             title = f"Pipeline [{kwargs['pipeline_id']}]({kwargs['pipeline_url']}) failed"
             message = robocat.comments.failed_pipeline_message
@@ -197,7 +191,7 @@ class MergeRequestHandler():
     @classmethod
     def merge(cls, mr):
         try:
-            logger.info(f"{mr}: rebasing and merging")
+            logger.info(f"{mr}: merging or rebasing")
             mr.merge()
             message = robocat.comments.merged_message.format(branch=mr.target_branch)
             mr.add_comment("MR merged", message, ":white_check_mark:")
@@ -210,7 +204,7 @@ class MergeRequestHandler():
     def run_pipeline(cls, mr):
         logger.info(f"{mr}: running latest pipeline")
 
-        pipeline_id = mr.play_latest_pipeline()
+        pipeline_id = mr.run_pipeline()
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
@@ -218,7 +212,3 @@ class MergeRequestHandler():
     @lru_cache(maxsize=512)
     def _get_commit_message(self, sha):
         return self._project.commits.get(sha).message
-
-    @staticmethod
-    def _last_ran_pipeline(pipelines):
-        return next((p for p in pipelines if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
