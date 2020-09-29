@@ -116,6 +116,11 @@ class MergeRequestHandler():
         failed_pipeline = enum.auto()
         unresolved_threads = enum.auto()
 
+    class RunPipelineReason(enum.Enum):
+        no_pipelines_before = enum.auto()
+        ci_errors_fixed = enum.auto()
+        review_finished = enum.auto()
+
     def __init__(self, project):
         self._project = project
 
@@ -133,7 +138,7 @@ class MergeRequestHandler():
         approvals_left = mr.approvals_left()
         if approvals_left > 0:
             if not mr.has_conflicts and not mr.pipelines():
-                self.run_pipeline(mr)  # TODO: type another reason
+                self.run_pipeline(mr, self.RunPipelineReason.no_pipelines_before)
                 return
 
             return f"not enough non-bot approvals, {approvals_left} more required"
@@ -141,7 +146,7 @@ class MergeRequestHandler():
         # NOTE: Comparing by commit message, because SHA changes after rebase.
         last_pipeline = next((p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1]), None)
         if last_pipeline is None or last_pipeline["status"] in PIPELINE_STATUSES["skipped"]:
-            self.run_pipeline(mr)
+            self.run_pipeline(mr, self.RunPipelineReason.review_finished)
             return
 
         if last_pipeline["status"] in PIPELINE_STATUSES["running"]:
@@ -162,8 +167,7 @@ class MergeRequestHandler():
                                            pipeline_id=last_pipeline["id"],
                                            pipeline_url=last_pipeline["web_url"])
             else:
-                self.run_pipeline(mr)  # NOTE: pipeline might be fixed after rebase
-                # TODO: type another reason
+                self.run_pipeline(mr, self.RunPipelineReason.ci_errors_fixed)
             return
 
         assert False, f"Unexpected status {last_pipeline['status']}"
@@ -201,11 +205,20 @@ class MergeRequestHandler():
             mr.rebase()
 
     @classmethod
-    def run_pipeline(cls, mr):
+    def run_pipeline(cls, mr, reason):
         logger.info(f"{mr}: running latest pipeline")
-
         pipeline_id = mr.run_pipeline()
-        message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id)
+
+        if reason == cls.RunPipelineReason.ci_errors_fixed:
+            reason_msg = "checking if rebase fixed previous fails"
+        elif reason == cls.RunPipelineReason.review_finished:
+            reason_msg = "checking last commit state"
+        elif reason == cls.RunPipelineReason.no_pipelines_before:
+            reason_msg = "making preliminary CI check"
+        else:
+            assert False, f"Uknown reason: {reason}"
+
+        message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id, reason=reason_msg)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
     # TODO: suboptimal! should use common cache for all MRs

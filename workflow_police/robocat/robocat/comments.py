@@ -2,7 +2,7 @@ _wip_url = ("https://docs.gitlab.com/ee/user/project/merge_requests/work_in_prog
             "#removing-the-draft-flag-from-a-merge-request")
 
 merged_message = "Merge request was successfully merged into `{branch}` branch."
-run_pipeline_message = "Running pipeline {pipeline_id}."
+run_pipeline_message = "Running pipeline {pipeline_id}: {reason}."
 
 unresolved_threads_message = f"""Merge request returned to development.
 Please, resolve all discussions and [remove WIP]({_wip_url}) to continue merging process."""
