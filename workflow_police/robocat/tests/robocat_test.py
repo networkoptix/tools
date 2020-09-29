@@ -42,6 +42,16 @@ class TestMergeRequest:
             "approved": False,
             "pipelines_list": []
         },
+        # Pipeline started even if not approved when requested
+        {
+            "approved": False,
+            "emojis": ["construction_site"]
+        },
+        # Pipeline started even if build failed when requested
+        {
+            "emojis": ["construction_site"],
+            "pipelines_list": [(tests.merge_request_stub.DEFAULT_COMMIT["sha"], "failed")]
+        },
         # Pipeline started without rebase
         {
             "needs_rebase": True,

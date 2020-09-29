@@ -37,6 +37,10 @@ class MergeRequest():
     def target_branch(self):
         return self._gitlab_mr.target_branch
 
+    @property
+    def award_emoji(self):
+        return self._gitlab_mr.awardemojis
+
     def approvals_left(self):
         approvals = self._gitlab_mr.approvals.get()
         return approvals.approvals_left  # TODO: should be remove once approval logic is fully implemented.
@@ -102,9 +106,10 @@ class MergeRequest():
     def run_pipeline(self):
         project = self._get_project(self._gitlab_mr.source_project_id)
         # TODO: should be changed to detached pipeline once gitlab API supports it
-        pipeline = project.pipelines.create({'ref': self._gitlab_mr.source_branch})
-        logger.debug(f"Pipeline {pipeline.id} created for {self._gitlab_mr.source_branch}")
-        return pipeline.id
+        if not self._dry_run:
+            pipeline_id = project.pipelines.create({'ref': self._gitlab_mr.source_branch}).id
+        logger.debug(f"Pipeline {pipeline_id} created for {self._gitlab_mr.source_branch}")
+        return pipeline_id
 
     def _get_project(self, project_id):
         return self._gitlab_mr.manager.gitlab.projects.get(project_id, lazy=True)
@@ -120,6 +125,7 @@ class MergeRequestHandler():
         no_pipelines_before = enum.auto()
         ci_errors_fixed = enum.auto()
         review_finished = enum.auto()
+        requested_by_user = enum.auto()
 
     def __init__(self, project):
         self._project = project
@@ -130,6 +136,8 @@ class MergeRequestHandler():
         last_commit = mr.last_commit()
         if not last_commit:
             return "no commits in MR"
+
+        self.handle_award_emoji(mr)
 
         if mr.has_conflicts:
             self.return_to_development(mr, self.ReturnToDevelopmentReason.conflicts)
@@ -163,18 +171,30 @@ class MergeRequestHandler():
 
         if last_pipeline["status"] in PIPELINE_STATUSES["failed"]:
             if last_pipeline["sha"] == last_commit[0]:
-                self.return_to_development(mr, self.ReturnToDevelopmentReason.failed_pipeline,
-                                           pipeline_id=last_pipeline["id"],
-                                           pipeline_url=last_pipeline["web_url"])
+                self.return_to_development(
+                    mr, self.ReturnToDevelopmentReason.failed_pipeline,
+                    pipeline_id=last_pipeline["id"], pipeline_url=last_pipeline["web_url"])
             else:
                 self.run_pipeline(mr, self.RunPipelineReason.ci_errors_fixed)
             return
 
         assert False, f"Unexpected status {last_pipeline['status']}"
 
+    # TODO: should wrap emoji manager and handle dry-run option
+    def handle_award_emoji(cls, mr):
+        emojis = mr.award_emoji.list()
+        if "construction_site" in (e.name for e in emojis):
+            cls.run_pipeline(mr, cls.RunPipelineReason.requested_by_user)
+            for emoji_id in (e.id for e in emojis if e.name == "construction_site"):
+                mr.award_emoji.delete(emoji_id)
+
+        if "eyes" not in (e.name for e in emojis):
+            mr.award_emoji.create({'name': 'eyes'})
+            logger.info(f"{mr}: Found new merge request to take care of: {mr.title}")
+
     @classmethod
     def return_to_development(cls, mr, reason, **kwargs):
-        logger.info(f"MR!{mr.id}: moving to WIP: {reason}")
+        logger.info(f"{mr}: Moving to WIP: {reason}")
 
         if reason == cls.ReturnToDevelopmentReason.failed_pipeline:
             title = f"Pipeline [{kwargs['pipeline_id']}]({kwargs['pipeline_url']}) failed"
@@ -186,7 +206,7 @@ class MergeRequestHandler():
             title = "Unresolved threads"
             message = robocat.comments.unresolved_threads_message
         else:
-            assert False, f"Uknown reason: {reason}"
+            assert False, f"Unknown reason: {reason}"
 
         mr.set_wip()
         mr.add_comment(title, message, ":exclamation:")
@@ -195,18 +215,18 @@ class MergeRequestHandler():
     @classmethod
     def merge(cls, mr):
         try:
-            logger.info(f"{mr}: merging or rebasing")
+            logger.info(f"{mr}: Merging or rebasing")
             mr.merge()
             message = robocat.comments.merged_message.format(branch=mr.target_branch)
             mr.add_comment("MR merged", message, ":white_check_mark:")
         except gitlab.exceptions.GitlabMRClosedError as e:
             # NOTE: gitlab API sucks and there is no other way to know if rebase required.
-            logger.info(f"Got error during merge, most probably just rebase required: {e}")
+            logger.info(f"{mr}: Got error during merge, most probably just rebase required: {e}")
             mr.rebase()
 
     @classmethod
     def run_pipeline(cls, mr, reason):
-        logger.info(f"{mr}: running latest pipeline")
+        logger.info(f"{mr}: Running pipeline ({reason})")
         pipeline_id = mr.run_pipeline()
 
         if reason == cls.RunPipelineReason.ci_errors_fixed:
@@ -215,8 +235,10 @@ class MergeRequestHandler():
             reason_msg = "checking last commit state"
         elif reason == cls.RunPipelineReason.no_pipelines_before:
             reason_msg = "making preliminary CI check"
+        elif reason == cls.RunPipelineReason.requested_by_user:
+            reason_msg = "CI check requested by user"
         else:
-            assert False, f"Uknown reason: {reason}"
+            assert False, f"Unknown reason: {reason}"
 
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id, reason=reason_msg)
         mr.add_comment("Pipeline started", message, ":construction_site:")

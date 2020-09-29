@@ -6,13 +6,33 @@ COMMITS = dict()
 
 
 @dataclass
+class AwardEmojiManager:
+    emojis: field(default_factory=lambda: [])
+
+    @dataclass
+    class AwardEmoji:
+        id: str = field(default=False)
+        name: str = field(default=False)
+
+    def delete(self, emoji_id):
+        pass
+
+    def list(self):
+        return [self.AwardEmoji(e[0], e[1]) for e in enumerate(self.emojis)]
+
+    def create(self, data):
+        pass
+
+
+@dataclass
 class MergeRequestStub():
     approved: bool = True
     has_conflicts: bool = False
     blocking_discussions_resolved: bool = True
     needs_rebase: bool = False
-    commits: bool = field(default_factory=lambda: {DEFAULT_COMMIT["sha"]: DEFAULT_COMMIT["message"]})
-    pipelines_list: str = field(default_factory=lambda: [(DEFAULT_COMMIT["sha"], "success")])
+    commits: dict = field(default_factory=lambda: {DEFAULT_COMMIT["sha"]: DEFAULT_COMMIT["message"]})
+    pipelines_list: list = field(default_factory=lambda: [(DEFAULT_COMMIT["sha"], "success")])
+    emojis: list = field(default_factory=list)
 
     id: int = 7
     title: str = "Do Zorz at work"
@@ -26,6 +46,10 @@ class MergeRequestStub():
 
     def __post_init__(self):
         COMMITS.update(self.commits)
+
+    @property
+    def award_emoji(self):
+        return AwardEmojiManager(emojis=self.emojis)
 
     def approvals_left(self):
         return 0 if self.approved else 1
