@@ -13,7 +13,7 @@ stages:
   - check
   - build
   - deploy
-    
+
 .helmchart.check: &helmchart_check
   script:
     - set -e
@@ -63,6 +63,19 @@ docker:workflow_police:check:
       changes:
         - workflow_police/*
 
+# check build of workflow_police/robocat docker image
+docker:workflow_police_robocat:check:
+  stage: check
+  variables:
+    DOCKER_DIR: workflow_police/robocat
+    BUILD_OPTIONS: --no-push
+  script:
+  <<: *docker_build
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - workflow_police/robocat/*
+
 # validate workflow_police helm chart
 helmchart:workflow_police:check:
   image: nx/deploy-pod:1.0
@@ -76,6 +89,19 @@ helmchart:workflow_police:check:
       changes:
         - workflow_police/chart/*
 
+# validate workflow_police/robocat helm chart
+helmchart:workflow_police_robocat:check:
+  image: nx/deploy-pod:1.0
+  stage: check
+  variables:
+    HELMCHART_DIR: workflow_police/robocat/chart
+  script:
+  <<: *helmchart_check
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - workflow_police/robocat/chart/*
+
 # build workflow_police docker image and push to registry
 docker:workflow_police:build:
   stage: build
@@ -87,6 +113,18 @@ docker:workflow_police:build:
     - if: $CI_COMMIT_BRANCH == 'master'
       changes:
         - workflow_police/*
+
+# build workflow_police/robocat docker image and push to registry
+docker:workflow_police_robocat:build:
+  stage: build
+  variables:
+    DOCKER_DIR: workflow_police/robocat
+  script:
+  <<: *docker_build
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/robocat/*
 
 # package workflow_police helm chart an push to repository
 helmchart:workflow_police:build:
@@ -101,7 +139,20 @@ helmchart:workflow_police:build:
       changes:
         - workflow_police/chart/*
 
-# deploy workflow_police to kubernetes
+# package workflow_police/robocat helm chart an push to repository
+helmchart:workflow_police:build:
+  image: nx/deploy-pod:1.0
+  stage: build
+  variables:
+    HELMCHART_DIR: workflow_police/robocat/chart
+  script:
+  <<: *helmchart_deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/robocat/chart/*
+
+# deploy workflow_police and catz to kubernetes
 k8s:workflow_police:deploy:
   image: nx/ci:1.1
   stage: deploy
@@ -114,3 +165,5 @@ k8s:workflow_police:deploy:
       changes:
         - workflow_police/*
         - workflow_police/chart/*
+        - workflow_police/robocat/*
+        - workflow_police/robocat/chart/*
