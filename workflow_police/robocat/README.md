@@ -4,7 +4,8 @@ More info: https://networkoptix.atlassian.net/wiki/spaces/SD/pages/1486749741/Au
 
 # Requirements
 `python-gitlab.cfg` should be mounted to `/etc/python-gitlab.cfg` in container.
-Example maybe found at workflow_police/robocat/python-gitlab.cfg.example.
+Example maybe found at workflow_police/robocat/python-gitlab.cfg.example. 
+NOTE: Field `private_token` must be set to the token of user whom issues will be assigned to.
 
 The directories must have proper UID & GID, default 1000:1000,
 the UID & GID can be configured at image build time.

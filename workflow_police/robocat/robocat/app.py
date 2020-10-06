@@ -1,8 +1,11 @@
 import gitlab
 
+import sys
 import time
-import logging
+
 import argparse
+import logging
+import graypy
 
 import robocat.merge_request_handler as handler
 
@@ -48,18 +51,27 @@ class Bot:
 
 def main():
     parser = argparse.ArgumentParser("workflow_robocat")
-    parser.add_argument('-p', '--project-id', help="ID of project in gitlab (2 for dev/nx)", required=True)
+    parser.add_argument('-p', '--project-id', help="ID of project in gitlab (2 for dev/nx)", type=int, required=True)
     parser.add_argument('--log-level', help="Logs level", choices=logging._nameToLevel.keys(), default=logging.INFO)
     parser.add_argument('--dry-run', help="Don't change any MR states", action="store_true")
     parser.add_argument('--mr-poll-rate', help="Merge Requests poll rate, seconds (default: 30)", type=int, default=30)
+    parser.add_argument('--graylog', help="Hostname of Graylog service")
     arguments = parser.parse_args()
 
     logging.basicConfig(
         level=arguments.log_level,
         format='%(asctime)s %(levelname)s %(name)s\t%(message)s')
 
-    bot = Bot(arguments.project_id, arguments.dry_run)
-    bot.start(arguments.mr_poll_rate)
+    if arguments.graylog:
+        logging.getLogger().addHandler(graypy.GELFTCPHandler(arguments.graylog, level_names=True))
+        logger.debug(f"Logging to Graylog at {arguments.graylog}")
+
+    try:
+        bot = Bot(arguments.project_id, arguments.dry_run)
+        bot.start(arguments.mr_poll_rate)
+    except Exception as e:
+        logger.warning(f'Crashed with exception: {e}', exc_info=1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
