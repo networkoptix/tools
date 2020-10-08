@@ -36,7 +36,6 @@ then
 else
     : ${INI_FILES_DIR="$HOME/.config/nx_ini"}
 fi
-: ${NINJA_CLEAN_TOOL="$(dirname "$0")/../ninja_clean/ninja_clean.py"}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -1002,14 +1001,6 @@ log_build_vars()
 do_cmake() # "$@"
 {
     do_gen "$@" || return $?
-
-    if ! nx_is_cygwin && [[ -f $BUILD_DIR/known_files.txt ]]
-    then
-        ( cd "$BUILD_DIR"
-            nx_verbose "$NINJA_CLEAN_TOOL"
-        ) || return $?
-    fi
-
     do_build
 }
 
