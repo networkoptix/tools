@@ -27,6 +27,9 @@ dryRun: true
 # Merge requests poll rate
 gitlabMrPollRate: 30
 
+# Address of Graylog service to send GELF logs to
+gelfServer: graylog.lan.hdw.mx:12201
+
 # workflow police robocat config file
 config: |
   [global]

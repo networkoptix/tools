@@ -30,6 +30,9 @@ spec:
             - '--log-level={{ .Values.logLevel | default "INFO" }}'
             - '--project-id={{ .Values.gitlabProjectId }}'
             - '--mr-poll-rate={{ .Values.gitlabMrPollRate }}'
+            {{- if .Values.gelfServer }}
+            - '--graylog={{ .Values.gelfServer }}'
+            {{- end }}
             {{- if .Values.dryRun }}
             - '--dry-run'
             {{- end }}

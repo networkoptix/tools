@@ -15,6 +15,9 @@ fullnameOverride: ""
 # comment the line below to set default INFO level
 logLevel: DEBUG
 
+# Address of Graylog service to send GELF logs to
+gelfServer: graylog.lan.hdw.mx:12201
+
 # jira login api token
 jiraPassword: 
 

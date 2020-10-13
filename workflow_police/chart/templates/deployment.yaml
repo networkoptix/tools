@@ -60,6 +60,9 @@ spec:
           args:
             - /etc/workflow_police/config.yaml
             - '--log-level={{ .Values.logLevel | default "INFO" }}'
+            {{- if .Values.gelfServer }}
+            - '--graylog={{ .Values.gelfServer }}'
+            {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

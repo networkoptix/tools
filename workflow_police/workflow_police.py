@@ -223,7 +223,8 @@ def main():
         level=arguments.log_level,
         format='%(asctime)s %(levelname)s %(name)s\t%(message)s')
     if arguments.graylog:
-        logging.getLogger().addHandler(graypy.GELFTCPHandler(arguments.graylog, level_names=True))
+        host, port = arguments.graylog.split(":")
+        logging.getLogger().addHandler(graypy.GELFTCPHandler(host, port, level_names=True))
         logger.debug(f"Logging to Graylog at {arguments.graylog}")
 
     try:
