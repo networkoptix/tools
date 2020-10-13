@@ -140,7 +140,7 @@ helmchart:workflow_police:build:
         - workflow_police/chart/*
 
 # package workflow_police/robocat helm chart an push to repository
-helmchart:workflow_police:build:
+helmchart:workflow_police_robocat:build:
   image: nx/deploy-pod:1.0
   stage: build
   variables:
