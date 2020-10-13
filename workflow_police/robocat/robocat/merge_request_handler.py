@@ -4,7 +4,7 @@ import gitlab
 
 import time
 import enum
-from functools import lru_cache
+from functools import lru_cache, total_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class MergeRequest():
 
     def approvals_left(self):
         approvals = self._gitlab_mr.approvals.get()
-        return approvals.approvals_left  # TODO: should be remove once approval logic is fully implemented.
+        return approvals.approvals_left  # TODO: should be removed once approval logic is fully implemented.
 
         if approvals.approvals_left == 0:
             return 0
@@ -64,11 +64,12 @@ class MergeRequest():
     def merge_status(self):
         return self._gitlab_mr.merge_status
 
-    def last_commit(self):
-        last_commit = next(self._gitlab_mr.commits(), None)
-        if not last_commit:
-            return None
-        return (last_commit.id, last_commit.message)
+    @property
+    def sha(self):
+        return self._gitlab_mr.sha
+
+    def commits(self):
+        return [commit.id for commit in self.commits()]
 
     def pipelines(self):
         return self._gitlab_mr.pipelines()
@@ -122,19 +123,43 @@ class MergeRequestHandler():
         unresolved_threads = enum.auto()
 
     class RunPipelineReason(enum.Enum):
-        no_pipelines_before = enum.auto()
-        ci_errors_fixed = enum.auto()
-        review_finished = enum.auto()
-        requested_by_user = enum.auto()
+        """Reasons why pipeline run requested. The value is a description message"""
+        no_pipelines_before = "making preliminary CI check"
+        ci_errors_fixed = "checking if rebase fixed previous fails"
+        review_finished = "checking new MR state"
+        requested_by_user = "CI check requested by user"
+
+    @total_ordering
+    class PipelineInspectionResult(enum.Enum):
+        no_runs = (1, "no ran pipelines before")
+        commits_count_changed = (2, "commits count changed")
+        commit_message_changed = (3, "last commit name changed")
+        hash_changed = (4, "commit diff changed")
+        sha_changed = (5, "commit sha changed")
+        same_sha = (6, "nothing changed")
+
+        def __str__(self):
+            return self.value[1]
+
+        def __eq__(self, other):
+            return other.value[0] == self.value[0]
+
+        def __lt__(self, other):
+            return self.value[0] < other.value[0]
 
     def __init__(self, project):
         self._project = project
 
+        self._pipelines_commits_count = {}
+
+    # NOTE: required for lru_cache.
+    def __hash__(self):
+        return self._project.id
+
     def handle(self, mr):
         logger.debug(f"Handling MR {mr.id}: '{mr.title}'")
 
-        last_commit = mr.last_commit()
-        if not last_commit:
+        if not mr.sha:
             return "no commits in MR"
 
         self.handle_award_emoji(mr)
@@ -151,10 +176,11 @@ class MergeRequestHandler():
 
             return f"not enough non-bot approvals, {approvals_left} more required"
 
-        # NOTE: Comparing by commit message, because SHA changes after rebase.
-        last_pipeline = next((p for p in mr.pipelines() if self._get_commit_message(p["sha"]) == last_commit[1]), None)
-        if last_pipeline is None or last_pipeline["status"] in PIPELINE_STATUSES["skipped"]:
-            self.run_pipeline(mr, self.RunPipelineReason.review_finished)
+        last_pipeline = next((p for p in mr.pipelines() if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
+        inspection_result = self.inspect_pipeline(mr, last_pipeline)
+
+        if inspection_result <= self.PipelineInspectionResult.hash_changed:
+            self.run_pipeline(mr, self.RunPipelineReason.review_finished, inspection_result)
             return
 
         if last_pipeline["status"] in PIPELINE_STATUSES["running"]:
@@ -166,19 +192,39 @@ class MergeRequestHandler():
             return
 
         if last_pipeline["status"] in PIPELINE_STATUSES["success"]:
+            assert inspection_result >= self.PipelineInspectionResult.sha_changed
             self.merge(mr)
             return
 
         if last_pipeline["status"] in PIPELINE_STATUSES["failed"]:
-            if last_pipeline["sha"] == last_commit[0]:
+            if inspection_result == self.PipelineInspectionResult.sha_changed:
+                self.run_pipeline(mr, self.RunPipelineReason.ci_errors_fixed)
+                return
+            if inspection_result == self.PipelineInspectionResult.same_sha:
                 self.return_to_development(
                     mr, self.ReturnToDevelopmentReason.failed_pipeline,
                     pipeline_id=last_pipeline["id"], pipeline_url=last_pipeline["web_url"])
-            else:
-                self.run_pipeline(mr, self.RunPipelineReason.ci_errors_fixed)
-            return
-
+                return
+            assert False, f"Unexpected pipeline inspection result {inspection_result}"
         assert False, f"Unexpected status {last_pipeline['status']}"
+
+    def inspect_pipeline(self, mr, pipeline):
+        if pipeline is None:
+            return self.PipelineInspectionResult.no_runs
+
+        if pipeline["sha"] == mr.sha:
+            return self.PipelineInspectionResult.same_sha
+
+        if pipeline["id"] in self._pipelines_commits_count:
+            if self._pipelines_commits_count[pipeline["id"]] != len(mr.commits()):
+                return self.PipelineInspectionResult.commits_count_changed
+
+        if self._get_commit_message(pipeline["sha"]) != self._get_commit_message(mr.sha):
+            return self.PipelineInspectionResult.commit_message_changed
+
+        if self._get_commit_diff_hash(pipeline["sha"]) != self._get_commit_diff_hash(mr.sha):
+            return self.PipelineInspectionResult.hash_changed
+        return self.PipelineInspectionResult.sha_changed
 
     # TODO: should wrap emoji manager and handle dry-run option
     def handle_award_emoji(cls, mr):
@@ -224,26 +270,25 @@ class MergeRequestHandler():
             logger.info(f"{mr}: Got error during merge, most probably just rebase required: {e}")
             mr.rebase()
 
-    @classmethod
-    def run_pipeline(cls, mr, reason):
+    def run_pipeline(self, mr, reason, details=None):
         logger.info(f"{mr}: Running pipeline ({reason})")
         pipeline_id = mr.run_pipeline()
+        self._pipelines_commits_count[pipeline_id] = len(mr.commits())
 
-        if reason == cls.RunPipelineReason.ci_errors_fixed:
-            reason_msg = "checking if rebase fixed previous fails"
-        elif reason == cls.RunPipelineReason.review_finished:
-            reason_msg = "checking last commit state"
-        elif reason == cls.RunPipelineReason.no_pipelines_before:
-            reason_msg = "making preliminary CI check"
-        elif reason == cls.RunPipelineReason.requested_by_user:
-            reason_msg = "CI check requested by user"
+        if reason == self.RunPipelineReason.review_finished:
+            reason_msg = reason.value + ("" if not details else f" ({details})")
         else:
-            assert False, f"Unknown reason: {reason}"
+            reason_msg = reason.value
 
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id, reason=reason_msg)
         mr.add_comment("Pipeline started", message, ":construction_site:")
 
-    # TODO: suboptimal! should use common cache for all MRs
+    # TODO: Create own commit entity?
     @lru_cache(maxsize=512)
     def _get_commit_message(self, sha):
         return self._project.commits.get(sha).message
+
+    @lru_cache(maxsize=512)
+    def _get_commit_diff_hash(self, sha):
+        diff = self._project.commits.get(sha).diff
+        return hash(json.dumps(diff, sort_keys=True))
