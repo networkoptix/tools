@@ -2,6 +2,7 @@
 
 import git
 import jira
+import graypy
 
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
@@ -10,6 +11,7 @@ import time
 import datetime
 import logging
 import argparse
+import sys
 
 import utils
 from jira_tools import JiraAccessor, JiraError
@@ -91,7 +93,7 @@ class WrongVersionChecker:
             return f"wrong fixVersions field value, 'Future' can't be set along with other versions"
 
         if sum(not v.is_patch for v in versions) != 1:
-            return f"wrong fixVersions field value, exactly one release version allowed"
+            return f"wrong fixVersions field value, exactly one release version required"
 
         if versions[0].is_patch:
             return f"wrong fixVersions field value, major version [{versions[0]}] shouldn't be a patch"
@@ -214,15 +216,23 @@ def main():
     parser.add_argument('config_file', help="Config file with all options")
     parser.add_argument('--log-level', help="Logs level", choices=logging._nameToLevel.keys(), default=logging.INFO)
     parser.add_argument('--dry-run', help="Run single iteration, don't change any states", action="store_true")
+    parser.add_argument('--graylog', help="Hostname of Graylog service")
     arguments = parser.parse_args()
 
     logging.basicConfig(
         level=arguments.log_level,
         format='%(asctime)s %(levelname)s %(name)s\t%(message)s')
-    config = utils.parse_config_file(Path(arguments.config_file))
+    if arguments.graylog:
+        logging.getLogger().addHandler(graypy.GELFTCPHandler(arguments.graylog, level_names=True))
+        logger.debug(f"Logging to Graylog at {arguments.graylog}")
 
-    enforcer = WorkflowEnforcer(config, arguments.dry_run)
-    enforcer.run()
+    try:
+        config = utils.parse_config_file(Path(arguments.config_file))
+        enforcer = WorkflowEnforcer(config, arguments.dry_run)
+        enforcer.run()
+    except Exception as e:
+        logger.warning(f'Crashed with exception: {e}', exc_info=1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
