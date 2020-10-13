@@ -3,6 +3,7 @@ import robocat.comments
 import logging
 import gitlab
 
+import json
 import time
 import enum
 from functools import lru_cache, total_ordering
@@ -192,5 +193,5 @@ class MergeRequestHandler():
 
     @lru_cache(maxsize=512)
     def _get_commit_diff_hash(self, sha):
-        diff = self._project.commits.get(sha).diff
+        diff = self._project.commits.get(sha).diff()
         return hash(json.dumps(diff, sort_keys=True))

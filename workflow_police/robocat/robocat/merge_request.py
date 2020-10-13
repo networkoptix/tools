@@ -95,6 +95,7 @@ class MergeRequest():
     def run_pipeline(self):
         project = self._get_project(self._gitlab_mr.source_project_id)
         # TODO: should be changed to detached pipeline once gitlab API supports it
+        pipeline_id = None
         if not self._dry_run:
             pipeline_id = project.pipelines.create({'ref': self._gitlab_mr.source_branch}).id
         logger.debug(f"Pipeline {pipeline_id} created for {self._gitlab_mr.source_branch}")
