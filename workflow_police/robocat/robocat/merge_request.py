@@ -55,7 +55,7 @@ class MergeRequest():
         return self._gitlab_mr.sha
 
     def commits(self):
-        return [commit.id for commit in self.commits()]
+        return [commit.id for commit in self._gitlab_mr.commits()]
 
     def pipelines(self):
         return self._gitlab_mr.pipelines()
