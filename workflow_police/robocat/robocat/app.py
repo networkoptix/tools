@@ -13,6 +13,13 @@ import robocat.merge_request
 logger = logging.getLogger(__name__)
 
 
+class ServiceNameFilter(logging.Filter):
+    @staticmethod
+    def filter(record):
+        record.service_name = "Workflow Robocat"
+        return True
+
+
 class Bot:
     def __init__(self, project_id, dry_run):
         self._gitlab = gitlab.Gitlab.from_config("nx_gitlab")
@@ -51,7 +58,7 @@ class Bot:
 
 
 def main():
-    parser = argparse.ArgumentParser("workflow_robocat")
+    parser = argparse.ArgumentParser(sys.argv[0])
     parser.add_argument('-p', '--project-id', help="ID of project in gitlab (2 for dev/nx)", type=int, required=True)
     parser.add_argument('--log-level', help="Logs level", choices=logging._nameToLevel.keys(), default=logging.INFO)
     parser.add_argument('--dry-run', help="Don't change any MR states", action="store_true")
@@ -62,10 +69,11 @@ def main():
     logging.basicConfig(
         level=arguments.log_level,
         format='%(asctime)s %(levelname)s %(name)s\t%(message)s')
-
     if arguments.graylog:
         host, port = arguments.graylog.split(":")
-        logging.getLogger().addHandler(graypy.GELFTCPHandler(host, port, level_names=True))
+        graylog_handler = graypy.GELFTCPHandler(host, port, level_names=True)
+        graylog_handler.addFilter(ServiceNameFilter())
+        logging.getLogger().addHandler(graylog_handler)
         logger.debug(f"Logging to Graylog at {arguments.graylog}")
 
     try:

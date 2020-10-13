@@ -24,6 +24,13 @@ VERSION_SPECIFIC_LABEL = "version_specific"
 DONE_EXTERNALLY_LABEL = "done_externally"
 
 
+class ServiceNameFilter(logging.Filter):
+    @staticmethod
+    def filter(record):
+        record.service_name = "Workflow Police"
+        return True
+
+
 class RepoAccessor():
     def __init__(self, path: Path, url: str):
         try:
@@ -212,7 +219,7 @@ class WorkflowEnforcer:
 
 
 def main():
-    parser = argparse.ArgumentParser("workflow_police")
+    parser = argparse.ArgumentParser(sys.argv[0])
     parser.add_argument('config_file', help="Config file with all options")
     parser.add_argument('--log-level', help="Logs level", choices=logging._nameToLevel.keys(), default=logging.INFO)
     parser.add_argument('--dry-run', help="Run single iteration, don't change any states", action="store_true")
@@ -224,7 +231,9 @@ def main():
         format='%(asctime)s %(levelname)s %(name)s\t%(message)s')
     if arguments.graylog:
         host, port = arguments.graylog.split(":")
-        logging.getLogger().addHandler(graypy.GELFTCPHandler(host, port, level_names=True))
+        graylog_handler = graypy.GELFTCPHandler(host, port, level_names=True)
+        graylog_handler.addFilter(ServiceNameFilter())
+        logging.getLogger().addHandler(graylog_handler)
         logger.debug(f"Logging to Graylog at {arguments.graylog}")
 
     try:
