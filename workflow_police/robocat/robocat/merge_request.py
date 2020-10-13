@@ -1,3 +1,5 @@
+import robocat.comments
+
 import logging
 
 logger = logging.getLogger(__name__)
