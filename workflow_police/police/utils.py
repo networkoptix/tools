@@ -13,6 +13,30 @@ class Error(Exception):
     pass
 
 
+class Version:
+    def __init__(self, jira_version: str):
+        version_splitted = jira_version.split('_')
+        assert len(version_splitted) == 2 and version_splitted[1] == "patch" or len(version_splitted) == 1
+        self.number = version_splitted[0]
+        self.is_patch = len(version_splitted) == 2
+
+    def __gt__(self, other):
+        if "Future" == self.number:
+            return True
+        if "Future" == other.number:
+            return False
+        return (self.number, self.is_patch) > (other.number, other.is_patch)
+
+    def __eq__(self, other):
+        return (self.number, self.is_patch) == (other.number, other.is_patch)
+
+    def __hash__(self):
+        return hash((self.number, self.is_patch))
+
+    def __repr__(self):
+        return self.number + ("_patch" if self.is_patch else "")
+
+
 class RepoAccessor:
     def __init__(self, path: Path, url: str):
         try:

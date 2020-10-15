@@ -83,9 +83,9 @@ class JiraAccessor:
                 if not branch:
                     logger.warning(f"Version {v.name} doesn't have branch in description")
                 else:
-                    mapping[v.name] = branch
+                    mapping[police.utils.Version(v.name)] = branch
 
-            mapping = {k: mapping[k] for k in sorted(mapping)}
+            mapping = {k: mapping[k] for k in sorted(mapping, reverse=True)}
             logger.debug(f"Got mapping from jira releases: {mapping}")
             return mapping
         except jira.exceptions.JIRAError as error:

@@ -44,19 +44,6 @@ class WorkflowViolationChecker:
 
 
 class WrongVersionChecker:
-    class Version:
-        def __init__(self, jira_version: str):
-            version_splitted = jira_version.split('_')
-            assert len(version_splitted) == 2 and version_splitted[1] == "patch" or len(version_splitted) == 1
-            self.number = version_splitted[0]
-            self.is_patch = len(version_splitted) == 2
-
-        def __gt__(self, other):
-            return (self.number, self.is_patch) > (other.number, other.is_patch)
-
-        def __repr__(self):
-            return self.number + ("_patch" if self.is_patch else "")
-
     def __init__(self, jira_accessor: JiraAccessor):
         self._jira = jira_accessor
 
@@ -64,8 +51,8 @@ class WrongVersionChecker:
         if VERSION_SPECIFIC_LABEL in issue.fields.labels:
             return
 
-        versions = sorted([self.Version(v.name) for v in issue.fields.fixVersions], reverse=True)
-        if self.Version("Future") in versions and len(versions) > 1:
+        versions = sorted([police.utils.Version(v.name) for v in issue.fields.fixVersions], reverse=True)
+        if police.utils.Version("Future") in versions and len(versions) > 1:
             return f"wrong fixVersions field value, 'Future' can't be set along with other versions"
 
         if sum(not v.is_patch for v in versions) != 1:
@@ -74,10 +61,9 @@ class WrongVersionChecker:
         if versions[0].is_patch:
             return f"wrong fixVersions field value, major version [{versions[0]}] shouldn't be a patch"
 
-        # NOTE: A string with versions without gaps. E.g. 'Future 4.3 4.2 4.1 4.0'
-        versions_sequence = " ".join(sorted(
-            {self.Version(v).number for v in self._jira.version_to_branch_mapping().keys()}, reverse=True))
-        if " ".join(sorted({v.number for v in versions}, reverse=True)) not in versions_sequence:
+        # NOTE: A string with versions (not counting patches) without gaps. E.g. 'Future 4.3 4.2 4.1 4.0'
+        versions_sequence = " ".join(v.number for v in self._jira.version_to_branch_mapping().keys() if not v.is_patch)
+        if " ".join(v.number for v in versions) not in versions_sequence:
             return f"wrong fixVersions field value, there shouldn't be gaps between versions"
 
         return
@@ -91,7 +77,7 @@ class VersionMissingIssueCommitChecker:
     def __call__(self, issue: jira.Issue) -> Optional[str]:
         for version in issue.fields.fixVersions:
             # NOTE: checking only recent commits as an optimization
-            branch = self._jira.version_to_branch_mapping()[version.name]
+            branch = self._jira.version_to_branch_mapping()[police.utils.Version(version.name)]
             if len(self._repo.grep_recent_commits(issue.key, branch)) == 0:
                 return f"no commits in {version.name} version (branch: {branch})"
         return
