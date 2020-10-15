@@ -54,7 +54,7 @@ class JiraAccessor:
         docs_link = "https://networkoptix.atlassian.net/wiki/spaces/SD/pages/1486749741/Automation+Workflow+Police+bot"
 
         try:
-            logger.debug(f'Reopening issue {issue.key}: {reason}')
+            logger.info(f'Reopening issue {issue.key}: {reason}')
             if dry_run:
                 return
 

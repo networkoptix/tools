@@ -56,7 +56,7 @@ class WorkflowEnforcer:
 
     def update_last_check_timestamp(self):
         if self.dry_run:
-            logger.debug(f"Skipping update of {self._last_check_file} (dry-run)")
+            logger.info(f"Skipping update of {self._last_check_file} (dry-run)")
             return
 
         with open(self._last_check_file, "w") as f:
@@ -65,7 +65,7 @@ class WorkflowEnforcer:
     def run(self):
         while True:
             recent_issues_interval_min = self.get_recent_issues_interval_min()
-            logger.info(f"Verifying issues updated for last {recent_issues_interval_min} minutes")
+            logger.debug(f"Verifying issues updated for last {recent_issues_interval_min} minutes")
             issues = self._jira.get_recently_closed_issues(recent_issues_interval_min)
             self._repo.update_repository()
 
@@ -74,14 +74,14 @@ class WorkflowEnforcer:
                 if reason:
                     logger.debug(f"Ignoring {issue}: {reason}")
                     continue
-                logger.debug(f"Checking issue: {issue} ({issue.fields.status}) "
-                             f"with versions {[v.name for v in issue.fields.fixVersions]}")
+                logger.info(f"Checking issue: {issue} ({issue.fields.status}) "
+                            f"with versions {[v.name for v in issue.fields.fixVersions]}")
                 reason = self._workflow_checker.should_reopen_issue(issue)
                 if not reason:
                     continue
                 self._jira.return_issue(issue, reason, self.dry_run)
 
-            logger.info(f"All {len(issues)} issues handled")
+            logger.debug(f"All {len(issues)} issues handled")
             self.update_last_check_timestamp()
 
             if self.dry_run:

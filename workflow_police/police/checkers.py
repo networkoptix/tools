@@ -39,7 +39,7 @@ class WorkflowViolationChecker:
                 if reason:
                     return reason
             except Exception as error:
-                logger.warning(f"Checker for {issue.name} failed with error: {error}")
+                logger.error(f"Checker for {issue.name} failed with error: {error}")
         return None
 
 
