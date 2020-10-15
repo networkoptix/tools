@@ -129,7 +129,6 @@ class MergeRequestHandler():
             return self.PipelineInspectionResult.hash_changed
         return self.PipelineInspectionResult.sha_changed
 
-    # TODO: should wrap emoji manager and handle dry-run option
     def handle_award_emoji(cls, mr):
         emojis = mr.award_emoji.list()
         if "construction_site" in (e.name for e in emojis):

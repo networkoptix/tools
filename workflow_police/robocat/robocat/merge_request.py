@@ -5,6 +5,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class AwardEmojiManager():
+    def __init__(self, gitlab_award_emoji_manager, dry_run=False):
+        self._gitlab_manager = gitlab_award_emoji_manager
+        self._dry_run = dry_run
+
+    def list(self):
+        return self._gitlab_manager.list()
+
+    def list_own(self):
+        raise NotImplementedError
+
+    def create(self, data=None, **kwargs):
+        if self._dry_run:
+            return
+        return self._gitlab_manager.create(data, **kwargs)
+
+    def delete(self, emoji_id, **kwargs):
+        if self._dry_run:
+            return
+        return self._gitlab_manager.delete(emoji_id, **kwargs)
+
+
 class MergeRequest():
     def __init__(self, gitlab_mr, dry_run=False):
         self._gitlab_mr = gitlab_mr
@@ -27,7 +49,7 @@ class MergeRequest():
 
     @property
     def award_emoji(self):
-        return self._gitlab_mr.awardemojis
+        return AwardEmojiManager(self._gitlab_mr.awardemojis, self._dry_run)
 
     def approvals_left(self):
         approvals = self._gitlab_mr.approvals.get()
