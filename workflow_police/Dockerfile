@@ -17,4 +17,4 @@ USER workflow-police
 
 COPY ./ /workdir/
 
-ENTRYPOINT ["/sbin/tini", "--", "/workdir/workflow_police.py"]
+ENTRYPOINT ["/sbin/tini", "--", "/workdir/police.app"]

@@ -7,13 +7,13 @@ import logging
 import datetime
 import re
 
-import utils
+import police.utils
 
 
 logger = logging.getLogger(__name__)
 
 
-class JiraError(utils.Error):
+class JiraError(police.utils.Error):
     def __init__(self, message: str, jira_error: jira.exceptions.JIRAError = None):
         super().__init__(message + (': ' + str(jira_error) if jira_error else ""))
 
@@ -72,7 +72,7 @@ class JiraAccessor:
         except jira.exceptions.JIRAError as error:
             raise JiraError(f"Unable to reopen issue {issue.key}: {error}")
 
-    @utils.cached(datetime.timedelta(minutes=10))
+    @police.utils.cached(datetime.timedelta(minutes=10))
     def version_to_branch_mapping(self):
         try:
             mapping = {}
