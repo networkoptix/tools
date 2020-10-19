@@ -13,3 +13,6 @@
 
 # Helm chart tgz files
 workflow_police/**/*.tgz
+sign_over_http/dist/**
+sign_over_http/*.egg-info/**
+sign_over_http/build/**
