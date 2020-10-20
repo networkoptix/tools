@@ -105,6 +105,33 @@ class TestMergeRequest:
         assert (mr.sha, "running") == mr.pipelines_list[0]
 
     @pytest.mark.parametrize("mr_state", [
+        # Non approved MR -> leave comment waiting for approves
+        {
+            "approved": False,
+            "emojis_list": [merge_request_handler.WATCH_EMOJI]
+        },
+        # Pipeline in progress -> leave comment waiting for pipeline
+        {
+            "pipelines_list": [(tests.merge_request_stub.DEFAULT_COMMIT["sha"], "running")],
+            "emojis_list": [merge_request_handler.WATCH_EMOJI]
+        },
+    ])
+    def test_wait_comments(self, mr_handler, mr_state):
+        mr = tests.merge_request_stub.MergeRequestStub(**mr_state)
+        pipelines_before = mr.pipelines_list
+
+        # NOTE: make sure comments aren't written each time
+        for i in range(3):
+            mr_handler.handle(mr)
+
+            assert not mr.is_wip
+            assert not mr.rebased
+            assert not mr.merged
+            assert merge_request_handler.WAIT_EMOJI in mr.emojis_list
+            assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
+            assert pipelines_before == mr.pipelines_list
+
+    @pytest.mark.parametrize("mr_state", [
         # MR not approved
         {"approved": False},
         # MR not approved, pipeline not started
