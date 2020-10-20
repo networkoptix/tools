@@ -1,5 +1,6 @@
 import gitlab
 from dataclasses import dataclass, field
+import robocat.merge_request_handler
 
 DEFAULT_COMMIT = {"sha": "11", "message": "msg1"}
 COMMITS = dict()
@@ -14,14 +15,17 @@ class AwardEmojiManager:
         id: str = field(default=False)
         name: str = field(default=False)
 
-    def delete(self, emoji_id):
-        pass
+    def delete(self, name, own):
+        emojis = [e for e in self.emojis if e != name]
 
-    def list(self):
+    def find(self, name, own):
+        return [e for e in self.emojis if e == name]
+
+    def list(self, own):
         return [self.AwardEmoji(e[0], e[1]) for e in enumerate(self.emojis)]
 
-    def create(self, data):
-        pass
+    def create(self, name):
+        self.emojis.append(name)
 
 
 @dataclass
@@ -32,7 +36,7 @@ class MergeRequestStub():
     needs_rebase: bool = False
     commits_list: dict = field(default_factory=lambda: {DEFAULT_COMMIT["sha"]: DEFAULT_COMMIT["message"]})
     pipelines_list: list = field(default_factory=lambda: [(DEFAULT_COMMIT["sha"], "success")])
-    emojis: list = field(default_factory=list)
+    emojis_list: list = field(default_factory=lambda: [robocat.merge_request_handler.WAIT_EMOJI])
 
     id: int = 7
     title: str = "Do Zorz at work"
@@ -46,10 +50,7 @@ class MergeRequestStub():
 
     def __post_init__(self):
         COMMITS.update(self.commits_list)
-
-    @property
-    def award_emoji(self):
-        return AwardEmojiManager(emojis=self.emojis)
+        self.award_emoji = AwardEmojiManager(self.emojis_list)
 
     @property
     def sha(self):

@@ -1,12 +1,12 @@
 import pytest
 
 import tests.merge_request_stub
-import robocat.merge_request_handler
+import robocat.merge_request_handler as merge_request_handler
 
 
 @pytest.fixture
 def mr_handler(monkeypatch):
-    handler = robocat.merge_request_handler.MergeRequestHandler(None)
+    handler = merge_request_handler.MergeRequestHandler(None)
 
     def stub_get_commit_message(sha):
         return tests.merge_request_stub.COMMITS[sha]
@@ -62,11 +62,11 @@ class TestMergeRequest:
         # Pipeline started even if not approved when requested
         {
             "approved": False,
-            "emojis": ["construction_site"]
+            "emojis_list": [merge_request_handler.PIPELINE_EMOJI, merge_request_handler.WAIT_EMOJI]
         },
         # Pipeline started even if build failed when requested
         {
-            "emojis": ["construction_site"],
+            "emojis_list": [merge_request_handler.PIPELINE_EMOJI, merge_request_handler.WAIT_EMOJI],
             "pipelines_list": [(tests.merge_request_stub.DEFAULT_COMMIT["sha"], "failed")]
         },
         # Pipeline started without rebase

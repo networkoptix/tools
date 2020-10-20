@@ -6,30 +6,39 @@ logger = logging.getLogger(__name__)
 
 
 class AwardEmojiManager():
-    def __init__(self, gitlab_award_emoji_manager, dry_run=False):
+    def __init__(self, gitlab_award_emoji_manager, current_user, dry_run=False):
         self._gitlab_manager = gitlab_award_emoji_manager
+        self._current_user = current_user
         self._dry_run = dry_run
 
-    def list(self):
-        return self._gitlab_manager.list()
+    def list(self, own):
+        if own:
+            return [e for e in self._gitlab_manager.list(as_list=False) if e.user['username'] == self._current_user]
+        else:
+            return self._gitlab_manager.list()
 
-    def list_own(self):
-        raise NotImplementedError
+    def find(self, name, own):
+        return [e for e in self.list(own) if e.name == name]
 
-    def create(self, data=None, **kwargs):
+    def create(self, name, **kwargs):
+        logger.debug(f"Creating emoji {name}")
         if self._dry_run:
             return
-        return self._gitlab_manager.create(data, **kwargs)
+        return self._gitlab_manager.create({'name': name}, **kwargs)
 
-    def delete(self, emoji_id, **kwargs):
+    def delete(self, name, own, **kwargs):
+        logger.debug(f"Removing {name} emoji")
         if self._dry_run:
             return
-        return self._gitlab_manager.delete(emoji_id, **kwargs)
+
+        for emoji in self.find(name, own):
+            self._gitlab_manager.delete(emoji.id, **kwargs)
 
 
 class MergeRequest():
-    def __init__(self, gitlab_mr, dry_run=False):
+    def __init__(self, gitlab_mr, current_user, dry_run=False):
         self._gitlab_mr = gitlab_mr
+        self._current_user = current_user
         self._dry_run = dry_run
 
     def __str__(self):
@@ -49,7 +58,7 @@ class MergeRequest():
 
     @property
     def award_emoji(self):
-        return AwardEmojiManager(self._gitlab_mr.awardemojis, self._dry_run)
+        return AwardEmojiManager(self._gitlab_mr.awardemojis, self._current_user, self._dry_run)
 
     def approvals_left(self):
         approvals = self._gitlab_mr.approvals.get()

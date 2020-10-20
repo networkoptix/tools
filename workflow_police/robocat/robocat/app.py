@@ -36,9 +36,7 @@ class Bot:
 
         for mr in self.get_merge_requests(mr_poll_rate):
             try:
-                ignore_reason = self._handler.handle(mr)
-                if ignore_reason:
-                    logger.debug(f"{mr}: Ignored because {ignore_reason}")
+                self._handler.handle(mr)
             except gitlab.exceptions.GitlabOperationError as e:
                 logger.warning(f"{mr}: Gitlab error: {e}")
 
@@ -51,7 +49,7 @@ class Bot:
 
                 if self._username not in (assignee["username"] for assignee in mr.assignees):
                     continue
-                yield robocat.merge_request.MergeRequest(mr, self._dry_run)
+                yield robocat.merge_request.MergeRequest(mr, self._username, self._dry_run)
 
             sleep_time = max(0, start_time + mr_poll_rate - time.time())
             time.sleep(sleep_time)
