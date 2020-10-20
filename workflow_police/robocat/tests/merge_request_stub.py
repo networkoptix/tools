@@ -1,6 +1,6 @@
 import gitlab
 from dataclasses import dataclass, field
-import robocat.merge_request_handler
+import robocat.merge_request_handler as mr_handler
 
 DEFAULT_COMMIT = {"sha": "11", "message": "msg1"}
 COMMITS = dict()
@@ -34,9 +34,10 @@ class MergeRequestStub():
     has_conflicts: bool = False
     blocking_discussions_resolved: bool = True
     needs_rebase: bool = False
+    work_in_progress: bool = False
     commits_list: dict = field(default_factory=lambda: {DEFAULT_COMMIT["sha"]: DEFAULT_COMMIT["message"]})
     pipelines_list: list = field(default_factory=lambda: [(DEFAULT_COMMIT["sha"], "success")])
-    emojis_list: list = field(default_factory=lambda: [robocat.merge_request_handler.WAIT_EMOJI])
+    emojis_list: list = field(default_factory=lambda: [mr_handler.WAIT_EMOJI, mr_handler.WATCH_EMOJI])
 
     id: int = 7
     title: str = "Do Zorz at work"

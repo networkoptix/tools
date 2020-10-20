@@ -57,6 +57,10 @@ class MergeRequest():
         return self._gitlab_mr.target_branch
 
     @property
+    def work_in_progress(self):
+        return self._gitlab_mr.work_in_progress
+
+    @property
     def award_emoji(self):
         return AwardEmojiManager(self._gitlab_mr.awardemojis, self._current_user, self._dry_run)
 

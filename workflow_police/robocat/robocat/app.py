@@ -44,9 +44,6 @@ class Bot:
         while True:
             start_time = time.time()
             for mr in self._project.mergerequests.list(state='opened', order_by='updated_at', as_list=False):
-                if mr.work_in_progress:
-                    continue
-
                 if self._username not in (assignee["username"] for assignee in mr.assignees):
                     continue
                 yield robocat.merge_request.MergeRequest(mr, self._username, self._dry_run)

@@ -62,11 +62,17 @@ class TestMergeRequest:
         # Pipeline started even if not approved when requested
         {
             "approved": False,
-            "emojis_list": [merge_request_handler.PIPELINE_EMOJI, merge_request_handler.WAIT_EMOJI]
+            "emojis_list": [
+                merge_request_handler.PIPELINE_EMOJI,
+                merge_request_handler.WAIT_EMOJI,
+                merge_request_handler.WATCH_EMOJI]
         },
         # Pipeline started even if build failed when requested
         {
-            "emojis_list": [merge_request_handler.PIPELINE_EMOJI, merge_request_handler.WAIT_EMOJI],
+            "emojis_list": [
+                merge_request_handler.PIPELINE_EMOJI,
+                merge_request_handler.WAIT_EMOJI,
+                merge_request_handler.WATCH_EMOJI],
             "pipelines_list": [(tests.merge_request_stub.DEFAULT_COMMIT["sha"], "failed")]
         },
         # Pipeline started without rebase

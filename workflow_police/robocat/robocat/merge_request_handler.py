@@ -21,6 +21,7 @@ PIPELINE_STATUSES = {
 WATCH_EMOJI = "eyes"
 WAIT_EMOJI = "hourglass_flowing_sand"
 PIPELINE_EMOJI = "construction_site"
+INITIAL_EMOJI = "cat2"
 
 
 # TODO: Move out Reasons and make them storing their context and messages.
@@ -32,7 +33,7 @@ class ReturnToDevelopmentReason(enum.Enum):
 
 class RunPipelineReason(enum.Enum):
     """Reasons why pipeline run requested. The value is a description message"""
-    no_pipelines_before = "making preliminary CI check"
+    no_pipelines_before = "making initial CI check"
     ci_errors_fixed = "checking if rebase fixed previous fails"
     review_finished = "checking new MR state"
     requested_by_user = "CI check requested by the user"
@@ -80,48 +81,43 @@ class MergeRequestHandler():
             return self.handle_wait(mr, WaitReason.no_commits)
 
         self.handle_award_emoji(mr)
+        if mr.work_in_progress:
+            mr.award_emoji.delete(WAIT_EMOJI, own=True)
+            return
 
         if mr.has_conflicts:
-            self.return_to_development(mr, ReturnToDevelopmentReason.conflicts)
-            return
+            return self.return_to_development(mr, ReturnToDevelopmentReason.conflicts)
 
         approvals_left = mr.approvals_left()
         if approvals_left > 0:
             if not mr.has_conflicts and not mr.pipelines():
-                self.run_pipeline(mr, RunPipelineReason.no_pipelines_before)
-                return
-
+                return self.run_pipeline(mr, RunPipelineReason.no_pipelines_before)
             return self.handle_wait(mr, WaitReason.not_approved, approvals_left=approvals_left)
 
         last_pipeline = next((p for p in mr.pipelines() if p["status"] not in PIPELINE_STATUSES["skipped"]), None)
         inspection_result = self.inspect_pipeline(mr, last_pipeline)
 
         if inspection_result <= PipelineInspectionResult.hash_changed:
-            self.run_pipeline(mr, RunPipelineReason.review_finished, inspection_result)
-            return
+            return self.run_pipeline(mr, RunPipelineReason.review_finished, inspection_result)
 
         if last_pipeline["status"] in PIPELINE_STATUSES["running"]:
             return self.handle_wait(mr, WaitReason.pipeline_running, pipeline=last_pipeline)
 
         # NOTE: Let's check it only if pipeline was ran before.
         if not mr.blocking_discussions_resolved:
-            self.return_to_development(mr, ReturnToDevelopmentReason.unresolved_threads)
-            return
+            return self.return_to_development(mr, ReturnToDevelopmentReason.unresolved_threads)
 
         if last_pipeline["status"] in PIPELINE_STATUSES["success"]:
             assert inspection_result >= PipelineInspectionResult.sha_changed
-            self.merge(mr)
-            return
+            return self.merge(mr)
 
         if last_pipeline["status"] in PIPELINE_STATUSES["failed"]:
             if inspection_result == PipelineInspectionResult.sha_changed:
-                self.run_pipeline(mr, RunPipelineReason.ci_errors_fixed)
-                return
+                return self.run_pipeline(mr, RunPipelineReason.ci_errors_fixed)
             if inspection_result == PipelineInspectionResult.same_sha:
-                self.return_to_development(
+                return self.return_to_development(
                     mr, ReturnToDevelopmentReason.failed_pipeline,
                     pipeline_id=last_pipeline["id"], pipeline_url=last_pipeline["web_url"])
-                return
             assert False, f"Unexpected pipeline inspection result {inspection_result}"
         assert False, f"Unexpected status {last_pipeline['status']}"
 
@@ -145,13 +141,14 @@ class MergeRequestHandler():
 
     def handle_award_emoji(cls, mr):
         if mr.award_emoji.find(PIPELINE_EMOJI, own=False):
-            cls.run_pipeline(mr, RunPipelineReason.requested_by_user)  # TODO: add username
+            cls.run_pipeline(mr, RunPipelineReason.requested_by_user)
             mr.award_emoji.delete(PIPELINE_EMOJI, own=False)
 
-        # TODO: Add init message
         if not mr.award_emoji.find(WATCH_EMOJI, own=True):
-            mr.award_emoji.create(WATCH_EMOJI)
             logger.info(f"{mr}: Found new merge request to take care of: {mr.title}")
+            mr.award_emoji.create(WATCH_EMOJI)
+            message = robocat.comments.initial_message.format(approvals_left=mr.approvals_left())
+            mr.add_comment("Looking after this MR", message, f":{INITIAL_EMOJI}:")
 
     def handle_wait(cls, mr, reason, **kwargs):
         if mr.award_emoji.find(WAIT_EMOJI, own=True):
@@ -216,6 +213,7 @@ class MergeRequestHandler():
 
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id, reason=reason_msg)
         mr.add_comment("Pipeline started", message, f":{PIPELINE_EMOJI}:")
+        mr.award_emoji.create(WAIT_EMOJI)
 
     # TODO: Create own commit entity?
     @lru_cache(maxsize=512)
