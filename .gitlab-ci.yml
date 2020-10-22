@@ -8,11 +8,29 @@ image:
 
 variables:
   DOCKER_REGISTRY: docker.artifactory.lan.hdw.mx:80
+  ROBOCAT_DIR: workflow_police/robocat
 
 stages:
   - check
   - build
+  - test
   - deploy
+
+workflow_police_robocat:test:
+  image: python:3.8
+  stage: test
+  script:
+    - set -e
+    - pip3 install -r $ROBOCAT_DIR/requirements.txt
+    - pytest $ROBOCAT_DIR/tests/ --junitxml=./robocat_ut_result.xml
+  artifacts:
+    when: always
+    reports:
+      junit: robocat_ut_result.xml
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - workflow_police/robocat/**/*
 
 .helmchart.check: &helmchart_check
   script:
