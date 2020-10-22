@@ -141,8 +141,8 @@ class MergeRequestHandler():
 
     def handle_award_emoji(cls, mr):
         if mr.award_emoji.find(PIPELINE_EMOJI, own=False):
-            cls.run_pipeline(mr, RunPipelineReason.requested_by_user)
             mr.award_emoji.delete(PIPELINE_EMOJI, own=False)
+            cls.run_pipeline(mr, RunPipelineReason.requested_by_user)
 
         if not mr.award_emoji.find(WATCH_EMOJI, own=True):
             logger.info(f"{mr}: Found new merge request to take care of: {mr.title}")

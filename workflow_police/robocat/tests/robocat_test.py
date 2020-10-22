@@ -96,13 +96,14 @@ class TestMergeRequest:
     ])
     def test_run_pipeline(self, mr_handler, mr_state):
         mr = tests.merge_request_stub.MergeRequestStub(**mr_state)
-        mr_handler.handle(mr)
 
-        assert not mr.is_wip
-        assert not mr.rebased
-        assert not mr.merged
-        assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
-        assert (mr.sha, "running") == mr.pipelines_list[0]
+        for i in range(2):
+            mr_handler.handle(mr)
+            assert not mr.is_wip
+            assert not mr.rebased
+            assert not mr.merged
+            assert 1 == len(mr.comments), f"Got comments: {mr.comments}"
+            assert (mr.sha, "running") == mr.pipelines_list[0]
 
     @pytest.mark.parametrize("mr_state", [
         # Non approved MR -> leave comment waiting for approves

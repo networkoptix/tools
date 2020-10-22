@@ -16,7 +16,7 @@ class AwardEmojiManager:
         name: str = field(default=False)
 
     def delete(self, name, own):
-        emojis = [e for e in self.emojis if e != name]
+        self.emojis = [e for e in self.emojis if e != name]
 
     def find(self, name, own):
         return [e for e in self.emojis if e == name]
@@ -52,6 +52,9 @@ class MergeRequestStub():
     def __post_init__(self):
         COMMITS.update(self.commits_list)
         self.award_emoji = AwardEmojiManager(self.emojis_list)
+
+    def __str__(self):
+        return f"MR!{self.id}"
 
     @property
     def sha(self):
