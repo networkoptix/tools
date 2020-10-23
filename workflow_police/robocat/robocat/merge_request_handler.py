@@ -213,7 +213,8 @@ class MergeRequestHandler():
 
         message = robocat.comments.run_pipeline_message.format(pipeline_id=pipeline_id, reason=reason_msg)
         mr.add_comment("Pipeline started", message, f":{PIPELINE_EMOJI}:")
-        mr.award_emoji.create(WAIT_EMOJI)
+        if not mr.award_emoji.find(WAIT_EMOJI, own=True):
+            mr.award_emoji.create(WAIT_EMOJI)
 
     # TODO: Create own commit entity?
     @lru_cache(maxsize=512)

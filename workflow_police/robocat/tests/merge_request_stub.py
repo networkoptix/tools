@@ -16,6 +16,7 @@ class AwardEmojiManager:
         name: str = field(default=False)
 
     def delete(self, name, own):
+        assert name in self.emojis, f"Gitlab API would raise error (emoji: {name})"
         self.emojis = [e for e in self.emojis if e != name]
 
     def find(self, name, own):
@@ -25,6 +26,7 @@ class AwardEmojiManager:
         return [self.AwardEmoji(e[0], e[1]) for e in enumerate(self.emojis)]
 
     def create(self, name):
+        assert name not in self.emojis, f"Gitlab API would raise error (emoji: {name})"
         self.emojis.append(name)
 
 
