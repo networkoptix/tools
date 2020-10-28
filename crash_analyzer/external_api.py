@@ -129,7 +129,8 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 class Jira:
     def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list,
-                 autoclose_indicators: Dict[str, str], epic_link: str = '', prefix: str = ''):
+                 autoclose_indicators: Dict[str, str], fallback_versions: list = [],
+                 epic_link: str = '', prefix: str = ''):
         try:
             self._jira = jira.JIRA(server=url, basic_auth=(login, password))
         except jira.exceptions.JIRAError as error:
@@ -140,6 +141,7 @@ class Jira:
         self._epic_link = epic_link
         self._prefix = prefix + ' ' if prefix else ''
         self._autoclose_indicators = autoclose_indicators
+        self._fallback_versions = fallback_versions
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         """Creates JIRA issue by crash :report.
@@ -156,7 +158,7 @@ class Jira:
             fixVersions = self._fix_versions_for(report.version)
             if not fixVersions:
                 raise ValueError("No fix version for this report")
-            issue = self._jira.create_issue(
+            request = dict(
                 project='VMS',
                 issuetype={'name': 'Crash'},
                 summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
@@ -166,6 +168,15 @@ class Jira:
                 components=[{'name': reason.component}],
                 customfield_10009=self._epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
+            try:
+                issue = self._jira.create_issue(**request)
+            except jira.exceptions.JIRAError as error:
+                if 'Version name' not in error.text or not self._fallback_versions: raise
+                logger.debug('Unable to create issue with version {}, try fallback {}'.format(
+                    report.version, self._fallback_versions))
+                request.update(versions=[{'name': v} for v in self._fallback_versions])
+                issue = self._jira.create_issue(**request)
+
         except (jira.exceptions.JIRAError, ValueError) as error:
             raise JiraError('Unable to create issue for "{}"'.format(report.name), error)
 
@@ -245,7 +256,13 @@ class Jira:
                 raise JiraError('Unable to find files for {}'.format(r.name))
             self._attach_files(key, files)
 
-        self._update_field_values(issue, 'versions', {r.version for r in reports})
+        # TODO: Better to know the list of JIRA versions in advance and use only these.
+        for version in {r.version for r in reports}:
+            try:
+                self._update_field_values(issue, 'versions', [version])
+            except jira.exceptions.JIRAError as error:
+                if 'Version name' not in error.text: raise
+                logger.warning('Unabe to update version on JIRA issue {}: {}'.format(key, error.text))
 
         current_fix_versions = {v.name for v in issue.fields.fixVersions}
         new_fix_versions = self._cut_off_older_versions(fix_versions, current_fix_versions)
@@ -295,7 +312,7 @@ class Jira:
     @staticmethod
     def _update_field_values(issue: jira.Issue, name: str, values: Set):
         current_values = set(v.name for v in getattr(issue.fields, name))
-        new_values = current_values | values
+        new_values = current_values | set(values)
         if current_values != new_values:
             issue.update(fields={name: [{'name': v} for v in new_values]})
             logger.debug('JIRA issue {} is updated for {}: {}'.format(issue.key, name, ', '.join(new_values)))

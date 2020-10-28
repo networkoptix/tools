@@ -51,6 +51,7 @@ upload:
     thread_count: 10 #< Communication connections count.
     epic_link: VMS-2022 #< Epic name to link newly created issues.
     fix_versions: ['3.0_hotfix', '3.1_hotfix', '3.2'] # Fix versions for cases.
+    fallback_versions: ['master'] #< Optional: versions to use if there is a version error.
     prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.
 
 # The issue should be closed if stack contains any of those lines.
