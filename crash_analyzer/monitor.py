@@ -243,7 +243,7 @@ class Monitor:
         issue, reports = crash_tuple
         if not issue:
             reason = None
-            for report in reports: # < Any will do.
+            for report in reports:  # < Any will do.
                 try:
                     reason = crash_info.analyze_report(
                         report, directory, cache_directory=None)  # < Newer use dump tool.
@@ -283,7 +283,7 @@ class Monitor:
                     d.remove()
                     removed_count += 1
         except PermissionError as error:
-            logger.warning('Cleanup stopped: {}'.format(error));
+            logger.warning('Cleanup stopped: {}'.format(error))
         else:
             logger.info('Cleanup has removed {} items in {}'.format(removed_count, directory))
 
@@ -325,9 +325,8 @@ def main():
     for override in arguments.override:
         utils.update_dict(config, override)
 
-    utils.setup_logging(
-        **config.pop('logging'),
-        title=(parser.prog + ', config: ' + arguments.config_file))
+    utils.setup_logging(**config.pop('logging'), service_name=NAME,
+                        title=(parser.prog + ', config: ' + arguments.config_file))
 
     monitor = Monitor(**config)
     if arguments.cleanup_jira_issues:

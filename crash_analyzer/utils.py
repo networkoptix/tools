@@ -39,35 +39,52 @@ def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 
         base_name, 'a', Size(max_size).bytes, backup_count)
 
 
+def graylog_log_handler(service_name: str, host: str, port: int):
+    import graypy
+
+    class ServiceNameFilter(logging.Filter):
+        @staticmethod
+        def filter(record):
+            record.service_name = service_name
+            return True
+    handler = graypy.GELFTCPHandler(host, port, level_names=True)
+    if service_name:
+        handler.addFilter(ServiceNameFilter())
+    return handler
+
+
 def cloud_watch_log_handler(**kwargs):
     import watchtower
     return watchtower.CloudWatchLogHandler(**kwargs)
 
 
-def setup_logging(level: str = 'debug', title: str = '', botocore_level='warning',
-                  stream: dict = {}, rotating_file: dict = {}, cloud_watch: dict = {}):
+def setup_logging(level: str = 'debug', title: str = '', botocore_level='warning', service_name: str = None,
+                  stream: dict = {}, graylog: dict = {}, rotating_file: dict = {}, cloud_watch: dict = {}):
     """Sets up application log :level and :path.
     """
-    main_handlers = []
-    extra_handlers = []
     details = ['level: {}'.format(level)]
 
-    def add_handler(container, handler_maker, level=None, **args):
+    def create_handler(handler_maker, level=None, **args):
         handler = handler_maker(**args)
-        container.append(handler)
+        # container.append(handler)
         args['level'] = level
         details.append('{}: {}'.format(
             handler_maker.__name__,
             ', '.join('{}="{}"'.format(*i) for i in args.items())))
         if level:
             handler.setLevel(getattr(logging, level.upper()))
+        return handler
 
+    main_handlers = []
+    extra_handlers = []
     if stream:
-        add_handler(main_handlers, stream_log_handler, **stream)
+        main_handlers.append(create_handler(stream_log_handler, **stream))
     if rotating_file:
-        add_handler(main_handlers, rotating_log_handler, **rotating_file)
+        main_handlers.append(create_handler(rotating_log_handler, **rotating_file))
+    if graylog:
+        main_handlers.append(create_handler(graylog_log_handler, service_name=service_name, **graylog))
     if cloud_watch:
-        add_handler(extra_handlers, cloud_watch_log_handler, **cloud_watch)
+        extra_handlers.append(create_handler(cloud_watch_log_handler, **cloud_watch))
 
     logging.basicConfig(
         level=getattr(logging, level.upper(), None) or int(level),

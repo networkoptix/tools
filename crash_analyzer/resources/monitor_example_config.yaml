@@ -9,6 +9,9 @@ logging:
         base_name: C:/crash_analyzer/logs/ca.log # Optional: remove if file is not needed.
         max_size: 10M #< Maximum file size.
         backup_count: 20 #< Maximum file count.
+    # graylog:
+    #     host: graylog.lan.hdw.mx #< Hostname of graylog service
+    #     port: 12201 #< Port of graylog service
     # cloud_watch:
     #   level: debug #< For AWS Cloud Watch support.
     #   log_group: crash_analyzer
