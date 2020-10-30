@@ -24,7 +24,12 @@ def extract_records_from_issues(issues: List[jira.resources.Issue]):
             continue
 
         # Some of the issues could be edited or created manually. Ignoring them.
-        _, open_tag, *stack, close_tag = issue.fields.description.splitlines()
+        lines = issue.fields.description.splitlines()
+        if len(lines) < 3:
+            logger.warning("Skipping JIRA issue {}. Invalid description".format(issue.key))
+            continue
+
+        _, open_tag, *stack, close_tag = lines
         if not open_tag == close_tag == "{code}":
             logger.warning("Skipping JIRA issue {}. Invalid description".format(issue.key))
             continue
@@ -59,13 +64,7 @@ def restore_records_file(records_filename: str, thread_count: int, **options):
 
 
 def main():
-    try:
-        import subprocess
-        change_set, *_ = subprocess.check_output(["hg", "id"]).decode().split()
-    except (ImportError, OSError):
-        change_set = 'UNKNOWN'
-
-    parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
+    parser = argparse.ArgumentParser(f'{NAME} version {VERSION}')
     parser.add_argument('config_file', help="Same config as the one used for the Crash Monitor,"
                                             " only 'logging' and 'upload' groups are required")
     parser.add_argument('-f', '--records-file', default="records.json", help="File where all records should be written")
@@ -76,7 +75,8 @@ def main():
     for override in arguments.override:
         utils.update_dict(config, override)
 
-    utils.setup_logging(**config.pop('logging'), title=(parser.prog + ', config: ' + arguments.config_file))
+    utils.setup_logging(**config.pop('logging'), service_name=NAME,
+                        title=(parser.prog + ', config: ' + arguments.config_file))
     restore_records_file(arguments.records_file, **config["upload"])
 
 

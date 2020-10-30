@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import argparse
 import logging
 import time
@@ -328,11 +329,15 @@ def main():
     utils.setup_logging(**config.pop('logging'), service_name=NAME,
                         title=(parser.prog + ', config: ' + arguments.config_file))
 
-    monitor = Monitor(**config)
-    if arguments.cleanup_jira_issues:
-        monitor.cleanup_jira_issues()
-    else:
-        monitor.run_service()
+    try:
+        monitor = Monitor(**config)
+        if arguments.cleanup_jira_issues:
+            monitor.cleanup_jira_issues()
+        else:
+            monitor.run_service()
+    except Exception as e:
+        logger.error(f'Crashed with exception: {e}', exc_info=1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -48,6 +48,7 @@ def graylog_log_handler(service_name: str, host: str, port: int):
             record.service_name = service_name
             return True
     handler = graypy.GELFTCPHandler(host, port, level_names=True)
+    handler.setFormatter(logging.Formatter())
     if service_name:
         handler.addFilter(ServiceNameFilter())
     return handler
