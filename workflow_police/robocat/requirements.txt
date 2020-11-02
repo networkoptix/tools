@@ -1,3 +1,0 @@
-pytest>=3.5.0
-python-gitlab>=2.5.0
-graypy>=2.1.0
