@@ -10,13 +10,7 @@ public class Params
 {
     public boolean invalidChronoFieldSuffixIsError() throws Exception
     {
-        final String value = invalidChronoFieldSuffixIsError.toString().trim();
-        if (value.equalsIgnoreCase("true") || value.equals("1"))
-            return true;
-        if (value.equalsIgnoreCase("false") || value.equals("0"))
-            return false;
-        throw new Exception(
-            "Param \"invalidChronoFieldSuffixIsError\" must be true, 1, false or 0.");
+        return toBoolean(invalidChronoFieldSuffixIsError, "invalidChronoFieldSuffixIsError");
     }
 
     private final StringBuilder invalidChronoFieldSuffixIsError = regStringParam(
@@ -24,10 +18,9 @@ public class Params
         "false",
         "If true, produce an error on invalid measurement unit suffix of `std::chrono` type field.");
 
-    public boolean unknownParamTypeIsError()
+    public boolean unknownParamTypeIsError() throws Exception
     {
-        final String value = unknownParamTypeIsError.toString().trim();
-        return !value.equalsIgnoreCase("false") && !value.equals("0");
+        return toBoolean(unknownParamTypeIsError, "unknownParamTypeIsError");
     }
 
     private final StringBuilder unknownParamTypeIsError = regStringParam(
@@ -35,6 +28,29 @@ public class Params
         "false",
         "Produce an error if a parameter type is unspecified and cannot be deduced from the " +
             "struct field.");
+
+    public int requiredFunctionCaptionLenLimit() throws Exception
+    {
+        return toUnsignedInt(
+            requiredFunctionCaptionLenLimit, "requiredFunctionCaptionLenLimit", -1);
+    }
+
+    private final StringBuilder requiredFunctionCaptionLenLimit = regStringParam(
+        "requiredFunctionCaptionLenLimit",
+        "",
+        "Produce an error if there is no `caption` tag for the API function, or it is longer " +
+            "than this specified limit. Specify 0 to require unlimited captions.");
+
+    public int requiredGroupNameLenLimit() throws Exception
+    {
+        return toUnsignedInt(requiredGroupNameLenLimit, "requiredGroupNameLenLimit", -1);
+    }
+
+    private final StringBuilder requiredGroupNameLenLimit = regStringParam(
+        "requiredGroupNameLenLimit",
+        "",
+        "Produce an error if there is no `group` tag for the API function, or its name is " +
+            "longer than this specified limit. Specify 0 to require unlimited names.");
 
     public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
 
@@ -67,4 +83,32 @@ public class Params
         "A comma-separated list of API function URL prefix replacement string pairs, if\n" +
         "specified. Each string replacement pair must be separated by space. The first part is\n" +
         "the target, the second part is the replacement.");
+
+    private static boolean toBoolean(StringBuilder param, String paramName) throws Exception
+    {
+        final String value = param.toString().trim();
+        if (value.equalsIgnoreCase("true") || value.equals("1"))
+            return true;
+        if (value.equalsIgnoreCase("false") || value.equals("0"))
+            return false;
+        throw new Exception("Param \"" + paramName + "\" must be true, 1, false or 0.");
+    }
+
+    private static int toUnsignedInt(StringBuilder param, String paramName, int emptyValue)
+        throws Exception
+    {
+        final String value = param.toString().trim();
+        if (value.isEmpty())
+            return emptyValue;
+        try
+        {
+            final int result = Integer.parseInt(value);
+            if (result >= 0)
+                return result;
+        }
+        catch (NumberFormatException e)
+        {
+        }
+        throw new Exception("Param \"" + paramName + "\" must be a non-negative integer.");
+    }
 }

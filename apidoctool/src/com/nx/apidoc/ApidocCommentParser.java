@@ -96,16 +96,23 @@ public final class ApidocCommentParser
      * @return Empty list if the comment should not convert to an XML function.
      */
     public List<FunctionDescription> createFunctionsFromTags(
-        List<ApidocTagParser.Item> tags, TypeManager typeManager)
-        throws Error,
-        TypeManager.Error
+        List<ApidocTagParser.Item> tags,
+        TypeManager typeManager,
+        int requiredFunctionCaptionLenLimit,
+        int requiredGroupNameLenLimit)
+        throws
+            Error,
+            TypeManager.Error
 
     {
         final List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
 
         ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         while (tagIterator.hasNext())
-            functions.add(createFunctionFromTags(tagIterator, typeManager));
+        {
+            functions.add(createFunctionFromTags(
+                tagIterator, typeManager, requiredFunctionCaptionLenLimit, requiredGroupNameLenLimit));
+        }
 
         return functions;
     }
@@ -123,9 +130,13 @@ public final class ApidocCommentParser
      * @return Null if the comment should not convert to an XML function.
      */
     private FunctionDescription createFunctionFromTags(
-        ListIterator<ApidocTagParser.Item> tagIterator, TypeManager typeManager)
-        throws Error,
-        TypeManager.Error
+        ListIterator<ApidocTagParser.Item> tagIterator,
+        TypeManager typeManager,
+        int requiredFunctionCaptionLenLimit,
+        int requiredGroupNameLenLimit)
+        throws
+            Error,
+            TypeManager.Error
     {
         ApidocTagParser.Item item = tagIterator.next();
 
@@ -135,11 +146,12 @@ public final class ApidocCommentParser
                 "Comment should start with " + TAG_APIDOC + " tag.");
         }
 
-        FunctionDescription description = createFunctionFromApidocItem(item);
-
+        final String firstItemErrorPrefix = item.getErrorPrefix();
         boolean captionParsed = false;
         boolean permissionsParsed = false;
         boolean returnParsed = false;
+
+        FunctionDescription description = createFunctionFromApidocItem(item);
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
@@ -163,7 +175,27 @@ public final class ApidocCommentParser
             {
                 captionParsed = checkTagOnce(item, captionParsed, TAG_CAPTION);
                 checkNoAttribute(item);
-                description.function.caption = item.getFullText(indentLevel);
+                final String value = item.getFullText(indentLevel).trim();
+                if (value.isEmpty())
+                    throw new Error(item.getErrorPrefix() + "Empty " + TAG_CAPTION);
+                if (requiredFunctionCaptionLenLimit > 0 && value.length() > requiredFunctionCaptionLenLimit)
+                    throw new Error(item.getErrorPrefix() + TAG_CAPTION + " is too long.");
+                description.function.caption = value;
+            }
+            else if (TAG_INGROUP.equals(item.getTag()))
+            {
+                checkNoAttribute(item);
+                final String value = item.getFullText(indentLevel).trim();
+                if (value.isEmpty())
+                    throw new Error(item.getErrorPrefix() + "Empty " + TAG_INGROUP);
+                if (requiredGroupNameLenLimit > 0 && value.length() > requiredFunctionCaptionLenLimit)
+                    throw new Error(item.getErrorPrefix() + TAG_INGROUP + " is too long.");
+                if (description.function.groups.contains(value))
+                {
+                    throw new Error(item.getErrorPrefix() + "The " + TAG_INGROUP + " " + value +
+                        " is specified more than once.");
+                }
+                description.function.groups.add(value);
             }
             else if (TAG_PERMISSIONS.equals(item.getTag()))
             {
@@ -200,6 +232,11 @@ public final class ApidocCommentParser
                 throwUnknownTag(item);
             }
         }
+
+        if (requiredFunctionCaptionLenLimit >= 0 && description.function.caption.isEmpty())
+            throw new Error(firstItemErrorPrefix + TAG_CAPTION + " unspecified.");
+        if (requiredGroupNameLenLimit >= 0 && description.function.groups.isEmpty())
+            throw new Error(firstItemErrorPrefix + TAG_INGROUP + " unspecified.");
 
         return description;
     }

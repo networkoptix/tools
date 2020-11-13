@@ -85,12 +85,12 @@ public class Main
                 final VmsCodeToApiXmlExecutor executor = new VmsCodeToApiXmlExecutor();
                 executor.verbose = arg.isVerbose();
                 executor.vmsPath = arg.getFile("-vms-path");
-                executor.templateApiXmlFile = arg.getFile("-template-xml");
-                executor.outputApiXmlFile = arg.getFile("-output-xml");
-                executor.optionalOutputApiJsonFile = arg.getOptionalFile("-output-json");
-                executor.optionalOutputOpenApiJsonFile =
+                executor.templateApiXmlFile = arg.getOptionalFile("-template-xml");
+                executor.outputApiXmlFile = arg.getOptionalFile("-output-xml");
+                executor.outputApiJsonFile = arg.getOptionalFile("-output-json");
+                executor.outputOpenApiJsonFile =
                     arg.getOptionalFile("-output-openapi-json");
-                if (executor.optionalOutputOpenApiJsonFile != null)
+                if (executor.outputOpenApiJsonFile != null)
                 {
                     executor.openApiTemplateJsonFile =
                         arg.getOptionalFile("-openapi-template-json");

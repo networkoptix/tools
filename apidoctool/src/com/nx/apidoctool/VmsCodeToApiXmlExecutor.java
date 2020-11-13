@@ -15,11 +15,11 @@ public final class VmsCodeToApiXmlExecutor
     extends Executor
 {
     public File vmsPath;
-    public File templateApiXmlFile;
-    public File openApiTemplateJsonFile;
-    public File outputApiXmlFile;
-    public File optionalOutputApiJsonFile; //< Can be null if not needed.
-    public File optionalOutputOpenApiJsonFile; //< Can be null if not needed.
+    public File templateApiXmlFile; //< Can be null if not needed.
+    public File openApiTemplateJsonFile; //< Can be null if not needed.
+    public File outputApiXmlFile; //< Can be null if not needed.
+    public File outputApiJsonFile; //< Can be null if not needed.
+    public File outputOpenApiJsonFile; //< Can be null if not needed.
     public List<Replacement> urlPrefixReplacements;
 
     protected Apidoc apidoc;
@@ -29,20 +29,43 @@ public final class VmsCodeToApiXmlExecutor
     {
         System.out.println("apidoctool: parsing apidoc in C++ and inserting into XML");
 
-        System.out.println("    Input: " + templateApiXmlFile);
+        if (templateApiXmlFile != null)
+        {
+            System.out.println("    Input: " + templateApiXmlFile);
+        }
+        else
+        {
+            if (outputApiXmlFile != null)
+            {
+                throw new Exception("\"-output-xml\" parameter requires \"-template-xml\" " +
+                    "parameter specified");
+            }
+            if (outputApiJsonFile != null)
+            {
+                throw new Exception("\"-output-json\" parameter requires \"-template-xml\" " +
+                    "parameter specified");
+            }
+        }
         if (openApiTemplateJsonFile != null)
             System.out.println("    Input: " + openApiTemplateJsonFile);
         System.out.println("    Input: " + vmsPath + vmsPath.separatorChar);
-        try
+        if (templateApiXmlFile != null)
         {
-            apidoc = XmlSerializer.fromDocument(
-                Apidoc.class, XmlUtils.parseXmlFile(templateApiXmlFile));
-            ApidocUtils.checkNoFunctionDuplicates(apidoc);
+            try
+            {
+                apidoc = XmlSerializer.fromDocument(
+                    Apidoc.class, XmlUtils.parseXmlFile(templateApiXmlFile));
+                ApidocUtils.checkNoFunctionDuplicates(apidoc);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error loading API .xml file " + templateApiXmlFile + ": "
+                    + e.getMessage());
+            }
         }
-        catch (Exception e)
+        else
         {
-            throw new Exception("Error loading API xml file " + templateApiXmlFile + ": "
-                + e.getMessage());
+            apidoc = new Apidoc();
         }
 
         TypeManager typeManager = null;
@@ -96,17 +119,20 @@ public final class VmsCodeToApiXmlExecutor
         groupsToSort.add("Server API");
         ApidocUtils.sortGroups(apidoc, groupsToSort);
 
-        XmlUtils.writeXmlFile(outputApiXmlFile, XmlSerializer.toDocument(apidoc));
-        System.out.println("    Output: " + outputApiXmlFile);
-
-        if (optionalOutputApiJsonFile != null)
+        if (outputApiXmlFile != null)
         {
-            final String json = JsonSerializer.toJsonString(apidoc);
-            Utils.writeStringToFile(optionalOutputApiJsonFile, json);
-            System.out.println("    Output: " + optionalOutputApiJsonFile);
+            XmlUtils.writeXmlFile(outputApiXmlFile, XmlSerializer.toDocument(apidoc));
+            System.out.println("    Output: " + outputApiXmlFile);
         }
 
-        if (optionalOutputOpenApiJsonFile != null)
+        if (outputApiJsonFile != null)
+        {
+            final String json = JsonSerializer.toJsonString(apidoc);
+            Utils.writeStringToFile(outputApiJsonFile, json);
+            System.out.println("    Output: " + outputApiJsonFile);
+        }
+
+        if (outputOpenApiJsonFile != null)
         {
             JSONObject openApi;
             try
@@ -131,15 +157,16 @@ public final class VmsCodeToApiXmlExecutor
             String json;
             try
             {
-                json = OpenApiSerializer.toString(apidoc, openApi);
+                json = OpenApiSerializer.toString(
+                    apidoc, openApi, params.requiredGroupNameLenLimit());
             }
             catch (Exception e)
             {
                 throw new Exception("Error serializing with Open API template JSON file '"
                         + openApiTemplateJsonFile + "': " + e.getMessage());
             }
-            Utils.writeStringToFile(optionalOutputOpenApiJsonFile, json);
-            System.out.println("    Output: " + optionalOutputOpenApiJsonFile);
+            Utils.writeStringToFile(outputOpenApiJsonFile, json);
+            System.out.println("    Output: " + outputOpenApiJsonFile);
         }
 
         return processedFunctionsCount;
@@ -156,6 +183,7 @@ public final class VmsCodeToApiXmlExecutor
         SourceCode reader = new SourceCode(sourceCppFile);
         SourceCodeParser parser = new SourceCodeParser(
             verbose, params.unknownParamTypeIsError(), reader, urlPrefixReplacements);
-        return parser.parseApidocComments(apidoc, matcher, typeManager);
+        return parser.parseApidocComments(apidoc, matcher, typeManager,
+            params.requiredFunctionCaptionLenLimit(), params.requiredGroupNameLenLimit());
     }
 }

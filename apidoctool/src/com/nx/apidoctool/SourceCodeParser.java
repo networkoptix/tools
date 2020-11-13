@@ -50,16 +50,43 @@ public final class SourceCodeParser
      */
     public int parseApidocComments(
         Apidoc apidoc, RegistrationMatcher matcher, TypeManager typeManager)
-        throws Error,
-        ApidocUtils.Error,
-        SourceCode.Error,
-        ApidocTagParser.Error,
-        ApidocCommentParser.Error,
-        TypeManager.Error
+        throws
+            Error,
+            ApidocUtils.Error,
+            SourceCode.Error,
+            ApidocTagParser.Error,
+            ApidocCommentParser.Error,
+            TypeManager.Error
+    {
+        return parseApidocComments(
+            apidoc,
+            matcher,
+            typeManager,
+            /*requiredFunctionCaptionLenLimit*/ -1,
+            /*requiredGroupNameLenLimit*/ -1);
+    }
+
+    /**
+     * @return Number of API functions processed.
+     */
+    public int parseApidocComments(
+        Apidoc apidoc,
+        RegistrationMatcher matcher,
+        TypeManager typeManager,
+        int requiredFunctionCaptionLenLimit,
+        int requiredGroupNameLenLimit)
+        throws
+            Error,
+            ApidocUtils.Error,
+            SourceCode.Error,
+            ApidocTagParser.Error,
+            ApidocCommentParser.Error,
+            TypeManager.Error
     {
         if (verbose)
             System.out.println("        Processed API functions:");
 
+        final boolean isApidocWithGroups = !apidoc.groups.isEmpty();
         mainLine = 1;
         int processedFunctionCount = 0;
         while (mainLine <= sourceCode.getLineCount())
@@ -68,7 +95,10 @@ public final class SourceCodeParser
             if (match != null)
             {
                 final List<ApidocCommentParser.FunctionDescription> functions =
-                    createFunctionsFromComment(typeManager);
+                    createFunctionsFromComment(
+                        typeManager,
+                        requiredFunctionCaptionLenLimit,
+                        requiredGroupNameLenLimit);
                 if (functions != null && !functions.isEmpty())
                 {
                     for (ApidocCommentParser.FunctionDescription description: functions)
@@ -80,17 +110,18 @@ public final class SourceCodeParser
                         }
                     }
                     final String urlPrefix = functions.get(0).urlPrefix;
-                    final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
-
                     for (ApidocCommentParser.FunctionDescription description: functions)
                     {
-                        if (!urlPrefix.equals(description.urlPrefix))
+                        if (verbose)
+                            System.out.println("            " + description.function.name);
+
+                        if (description.function.groups.isEmpty()
+                            && isApidocWithGroups
+                            && !urlPrefix.equals(description.urlPrefix))
                         {
                             throw new Error("URL prefix is differ in one apidoc comment: ["
                                 + urlPrefix + "] and [" + description.urlPrefix + "]");
                         }
-                        if (verbose)
-                            System.out.println("            " + description.function.name);
 
                         checkFunctionProperties(match, description.function);
                         if (typeManager != null)
@@ -118,13 +149,6 @@ public final class SourceCodeParser
                             }
                         }
 
-                        if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
-                        {
-                            throw new Error(
-                                "Duplicate function found: " + description.function.name +
-                                ", method: " + description.function.method);
-                        }
-
                         if (unknownParamTypeIsError)
                         {
                             for (Apidoc.Param param: description.function.params)
@@ -133,8 +157,38 @@ public final class SourceCodeParser
                                 throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ true);
                         }
 
+                        if (description.function.groups.isEmpty())
+                        {
+                            final Apidoc.Group group =
+                                (requiredGroupNameLenLimit < 0)
+                                    ? ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix)
+                                    : ApidocUtils.getGroupByName(
+                                        apidoc, description.urlPrefix, description.urlPrefix);
+                            if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
+                            {
+                                throw new Error(
+                                    "Duplicate function found: " + description.function.name +
+                                        ", method: " + description.function.method);
+                            }
+                            group.functions.add(description.function);
+                        }
+                        else
+                        {
+                            for (final String groupName: description.function.groups)
+                            {
+                                final Apidoc.Group group = ApidocUtils.getGroupByName(
+                                    apidoc, groupName, description.urlPrefix);
+                                if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
+                                {
+                                    throw new Error(
+                                        "Duplicate function found: " + description.function.name +
+                                            ", method: " + description.function.method);
+                                }
+                                group.functions.add(description.function);
+                            }
+                        }
+
                         ++processedFunctionCount;
-                        group.functions.add(description.function);
                     }
                 }
                 else
@@ -187,7 +241,9 @@ public final class SourceCodeParser
      * @return Null if the comment should not convert to an XML function.
      */
     private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment(
-        TypeManager typeManager)
+        TypeManager typeManager,
+        int requiredFunctionCaptionLenLimit,
+        int requiredGroupNameLenLimit)
         throws ApidocCommentParser.Error, ApidocTagParser.Error, TypeManager.Error
     {
         final List<String> commentLines =
@@ -202,7 +258,9 @@ public final class SourceCodeParser
         functions = parser.createFunctionsFromTags(
             ApidocTagParser.getItems(
                 commentLines, sourceCode.getFilename(), commentStartLine, verbose),
-            typeManager);
+            typeManager,
+            requiredFunctionCaptionLenLimit,
+            requiredGroupNameLenLimit);
 
         return functions;
     }

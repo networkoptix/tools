@@ -77,25 +77,41 @@ public final class OpenApiSerializer
             getArray(schema, "required").put(item);
     }
 
-    public static String toString(Apidoc apidoc, JSONObject root) throws Exception
+    public static String toString(
+        Apidoc apidoc,
+        JSONObject root,
+        int requiredGroupNameLenLimit) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
         final JSONArray tags = getArray(root, "tags");
         final JSONObject refParameters = getObject(getObject(root, "components"), "parameters");
-        final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
             if (!fillPaths(getObject(root, "paths"), group, refParameters))
                 continue;
-            if (!usedTags.contains(group.groupName))
+            JSONObject tag = null;
+            for (int i = 0; i < tags.length(); ++i)
             {
-                usedTags.add(group.groupName);
-                JSONObject tag = new JSONObject();
+                tag = tags.optJSONObject(i);
+                if (tag != null && tag.optString("name", "").equals(group.groupName))
+                    break;
+                tag = null;
+            }
+            if (tag == null)
+            {
+                if (requiredGroupNameLenLimit >= 0)
+                {
+                    throw new Exception(
+                        "No predefined tag \"" + group.groupName + "\" in Open API template.");
+                }
+                tag = new JSONObject();
                 tag.put("name", group.groupName);
                 tag.put("description", Utils.cleanupDescription(group.groupDescription));
                 tags.put(tag);
             }
+            if (requiredGroupNameLenLimit > 0 && group.groupName.length() > requiredGroupNameLenLimit)
+                throw new Exception("Tag \"" + group.groupName + "\" is too long.");
         }
         return root.toString(2);
     }
@@ -119,6 +135,8 @@ public final class OpenApiSerializer
         JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.knownMethod());
+        if (!function.caption.isEmpty())
+            method.put("summary", function.caption);
         final String description = (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
             + Utils.cleanupDescription(function.description);
         if (!description.isEmpty())

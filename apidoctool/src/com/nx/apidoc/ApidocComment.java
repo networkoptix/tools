@@ -14,6 +14,7 @@ public abstract class ApidocComment
     protected static final String TAG_STRUCT = "%struct";
     protected static final String TAG_COMMENTED_OUT = "%//";
     protected static final String TAG_CAPTION = "%caption";
+    protected static final String TAG_INGROUP = "%ingroup";
     protected static final String TAG_PERMISSIONS = "%permissions";
     protected static final String TAG_PARAM = "%param";
     protected static final String TAG_VALUE = "%value";

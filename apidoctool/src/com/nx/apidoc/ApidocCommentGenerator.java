@@ -41,6 +41,9 @@ public final class ApidocCommentGenerator
         if (!function.caption.isEmpty())
             addTextToComment(lines, 0, INNER_INDENT, TAG_CAPTION + " " + function.caption);
 
+        for (final String groupName: function.groups)
+            addTextToComment(lines, 0, INNER_INDENT, TAG_INGROUP + " " + groupName);
+
         if (!function.permissions.isEmpty())
             addTextToComment(lines, 0, INNER_INDENT, TAG_PERMISSIONS + " " + function.permissions);
 

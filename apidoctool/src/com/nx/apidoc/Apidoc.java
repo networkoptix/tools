@@ -188,6 +188,7 @@ public final class Apidoc extends Serializable
         public boolean proprietary; ///< attribute; optional(false)
         public String name;
         public String caption; ///< optional
+        public List<String> groups;
         public String description; ///< optional
         public String permissions; ///< optional
         public String method; ///< optional
@@ -196,6 +197,7 @@ public final class Apidoc extends Serializable
 
         public Function()
         {
+            groups = new ArrayList<String>();
             params = new ArrayList<Param>();
             unusedParams = new ArrayList<Param>();
         }
@@ -259,7 +261,7 @@ public final class Apidoc extends Serializable
         {
             groupName = p.readString("groupName", Presence.REQUIRED);
             urlPrefix = p.readString("urlPrefix", Presence.OPTIONAL);
-            groupDescription = p.readString("groupDescription", Presence.REQUIRED);
+            groupDescription = p.readString("groupDescription", Presence.OPTIONAL);
             p.readObjectList("functions", functions, Function.class, Presence.OPTIONAL);
         }
 
@@ -267,7 +269,7 @@ public final class Apidoc extends Serializable
         {
             g.writeString("groupName", groupName, Emptiness.PROHIBIT);
             g.writeString("urlPrefix", urlPrefix, Emptiness.ALLOW);
-            g.writeString("groupDescription", groupDescription, Emptiness.PROHIBIT);
+            g.writeString("groupDescription", groupDescription, Emptiness.ALLOW);
             g.writeObjectList("functions", functions, Emptiness.OMIT);
         }
     }
