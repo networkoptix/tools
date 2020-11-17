@@ -86,6 +86,7 @@ public final class OpenApiSerializer
             return "";
         final JSONArray tags = getArray(root, "tags");
         final JSONObject refParameters = getObject(getObject(root, "components"), "parameters");
+        final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
             if (!fillPaths(getObject(root, "paths"), group, refParameters))
@@ -95,7 +96,10 @@ public final class OpenApiSerializer
             {
                 tag = tags.optJSONObject(i);
                 if (tag != null && tag.optString("name", "").equals(group.groupName))
+                {
+                    usedTags.add(group.groupName);
                     break;
+                }
                 tag = null;
             }
             if (tag == null)
@@ -112,6 +116,19 @@ public final class OpenApiSerializer
             }
             if (requiredGroupNameLenLimit > 0 && group.groupName.length() > requiredGroupNameLenLimit)
                 throw new Exception("Tag \"" + group.groupName + "\" is too long.");
+        }
+        if (requiredGroupNameLenLimit >= 0)
+        {
+            for (int i = 0; i < tags.length(); ++i)
+            {
+                final JSONObject tag = tags.optJSONObject(i);
+                if (tag != null)
+                {
+                    final String tagName = tag.optString("name", "");
+                    if (!tagName.isEmpty() && !usedTags.contains(tagName))
+                        throw new Exception("Unused tag \"" + tagName + "\" in Open API template.");
+                }
+            }
         }
         return root.toString(2);
     }
