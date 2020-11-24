@@ -1,6 +1,4 @@
-from __future__ import with_statement
 import requests
-import json
 import copy
 
 # todo: redo everything using map, split and filter functions
@@ -16,38 +14,51 @@ class StatServerData:
         multisensors = []
         encoders = []
         regulars = []
+        weirdos = []
         full_json = requests.get(url).json()
         for data in full_json:
             vendor = data['origVendor']
-            model = data['origModel']
-            if (data['isMultiSensor'] and
-                    not (vendor.startswith('Hanwha')
-                    or vendor.startswith('Samsung')
-                    or vendor.startswith('ArecontVision')
-                    or vendor.startswith('PelcoOptera')
-                    or vendor == 'Digital Watchdog')):
+            if vendor.lower().startswith("hangzhou hikvision digital technology co., ltd"):
+                vendor = "hikvision"
+            elif vendor.lower().startswith("hanwha"):
+                vendor = "hanwha"
+            elif vendor.lower().startswith("samsung"):
+                vendor = "samsung"
+            elif (vendor.lower().startswith("digital watchdog")
+                  or vendor.lower().startswith("digital_watchdog")
+                  or vendor.lower().startswith("digitalwatchdog")):
+                vendor = "dw"
+            else:
+                vendor = vendor.lower()
+            model = data['origModel'].lower()
+            # if vendor == 'general' and model.startswith('hen162'):
+            #    data_except = data
+            if '*' in vendor or '*' in model:
+                weirdos.append([vendor, model])
+                continue
+            if data['isMultiSensor']:
                 multisensors.append([vendor, model])
             if ((data['hardwareType'] == 'Encoder') or
                     (data['hardwareType'] == 'DVR')):
                 if not (data['hardwareType'] == 'DVR' and
-                        vendor.startswith('Hanwha')):
+                        vendor == 'hanwha'):
                     encoders.append([vendor, model])
             if ((data['hardwareType'] == 'Camera') and
                     (not data['isMultiSensor'])):
                 regulars.append([vendor, model])
-        for lists in [multisensors, encoders, regulars]:
-            fix_encoding(lists)
+        #todo: revise usage of the deepcopies
         encoders_copy = copy.deepcopy(encoders)
         encoders_regulars = compare_lists(encoders, regulars)
         encoders_multisensors = compare_lists(encoders_copy, multisensors)
         multisensors_regulars = compare_lists(multisensors, regulars)
         full_intresections_list = (encoders_regulars + encoders_multisensors +
-            multisensors_regulars)
+                                   multisensors_regulars + weirdos)
         self.intersections = list(set(tuple(i) for i
-            in full_intresections_list))
+                                      in full_intresections_list))
         self.multisensors = multisensors
         self.encoders = encoders
         self.regulars = regulars
+        # self.test = data_except
 
 
 """ResourceDataJsonList class downloads Nx json file with advanced options.
@@ -64,66 +75,34 @@ class ResourceDataJson:
         encoders_list = []
         full_json = requests.get(url).json()
         for data in full_json['data']:
-            if 'canShareLicenseGroup' in data:
+            if ('canShareLicenseGroup' in data) and (data['canShareLicenseGroup']):
                 for model in data['keys']:
                     if model not in multisensors_list_draft:
-                        multisensors_list_draft.append(model)
-            if 'analogEncoder' in data:
+                        multisensors_list_draft.append(model.lower())
+            if ('analogEncoder' in data) and (data['analogEncoder']):
                 for model in data['keys']:
                     if model not in encoders_list_draft:
-                        encoders_list_draft.append(model)
+                        encoders_list_draft.append(model.lower())
         for name in multisensors_list_draft:
             name = name.split('|')
-            if not (name[0].startswith('Hanwha') or
-                    name[0].startswith('Samsung')):
-                multisensors_list.append([name[0],name[1]])
+            multisensors_list.append([name[0], name[1]])
         for name in encoders_list_draft:
             name = name.split('|')
             encoders_list.append([name[0], name[1]])
-        fix_encoding(multisensors_list)
-        fix_encoding(encoders_list)
         for _list in (encoders_list, multisensors_list):
             for device in _list:
                 for i in range(len(device)):
                     if device[i].endswith('*'):
-                        device[i] = device[i][:len(device[i])-1]
-        self.multisensors = (multisensors_list)
-        self.encoders = (encoders_list)
+                        device[i] = device[i][:len(device[i]) - 1]
+        self.multisensors = multisensors_list
+        self.encoders = encoders_list
 
-
-"""fix_encoding function cuts off weirdly encoded characters in the strings
-and converts them from unicode to python lowercase strings
-"""
-
-
-def fix_encoding(input_list):
-    escape_list = [
-        '\r',
-        '\t',
-        '\n'
-    ]
-    for device in input_list:
-        try:
-            unicode(device[0], errors='strict')
-            device[0].lower()
-        except TypeError:
-            device[0] = device[0].encode('ascii', 'ignore').lower()
-        try:
-            unicode(device[1], errors='ignore')
-            device[1].lower()
-        except TypeError:
-            device[1] = device[1].encode('ascii', 'ignore').lower()
-    for updated_device in input_list:
-        for string in updated_device:
-            for escape_char in escape_list:
-                if escape_char in string:
-                    string = string.replace(escape_char, '')
 
 """compare_lists function compares two lists, removes matched elements from
 the initial lists and returns intersections for both input lists
 """
 
-
+#todo: refactore compare_lists function
 def compare_lists(input_list_1, input_list_2):
     bad_list = []
     check_list_1 = copy.deepcopy(input_list_1)
@@ -137,8 +116,9 @@ def compare_lists(input_list_1, input_list_2):
                 input_list_2.remove(y)
     return bad_list
 
+
 """write_list_to_file function writes nested lists to the
-file with output_file_name
+file with output_file_name in a format dictated by resource_data.json file.
 """
 
 
@@ -146,7 +126,8 @@ def write_list_to_file(input_list, output_file_name):
     with open(output_file_name, 'w') as _file:
         _file.write('Vendor|Model:\n')
         for item in input_list:
-            _file.write('"' + item[0]+'|'+item[1]+'",\n')
+            _file.write('"' + item[0] + '|' + item[1] + '",\n')
+
 
 """function filter_exceptions takes list of lists as
 an input and  filters out badly named devices
@@ -172,21 +153,21 @@ def filter_exceptions(input_list):
         'general',
         'onvif_encoder',
         'n/a'
-        ]
+    ]
     for device_name in reversed(input_list):
-        isFiltered = 0
+        isfiltered = 0
         for item in device_name:
             if not item:
                 input_list.remove(device_name)
                 continue
             for filter_str in exception_list:
                 if filter_str == item:
-                    isFiltered += 1
-        if isFiltered == 2:
-            print "too generic model is filtered: " + str(device_name)
+                    isfiltered += 1
+        if isfiltered == 2:
+            print(("too generic model is filtered: " + str(device_name)))
             input_list.remove(device_name)
 
-
+#todo: refactor main function
 def main():
     resource_data = ResourceDataJson()
     stat_data = StatServerData()
@@ -200,17 +181,18 @@ def main():
     ]
 
     def check_db_with_stat(resource_lists_input, stat_lists_input):
-        result = [[], []]
+        check_result = [[], []]
         resource_lists = copy.deepcopy(resource_lists_input)
         stat_lists = copy.deepcopy(stat_lists_input)
+        #todo: revise the loop, simplify the condition
         for i in range(0, 2):
             for stat_list in stat_lists[i]:
                 for resource_list in resource_lists[i]:
                     if (not (not stat_list[0].startswith(resource_list[0]) or not stat_list[1].startswith(
                             resource_list[1]))):
-                        result[i].append(stat_list)
+                        check_result[i].append(stat_list)
         for i in range(0, 2):
-            for x in result[i]:
+            for x in check_result[i]:
                 if x in stat_lists[i]:
                     stat_lists[i].remove(x)
         return stat_lists
