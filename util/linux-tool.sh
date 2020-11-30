@@ -73,7 +73,9 @@ Here <command> can be one of the following:
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
  stop-c # Stop client-bin.
- run-ut all|test_name [args] # Run all or the specified unit test via ctest.
+ run-ut test_name [args] # Run the specified unit test directly, passing args to it.
+ ctest all|test_name [ctest-args] # Run all or the specified unit test via ctest. Passing args to
+     the test executable is not possible via ctest; use "run-ut" if needed.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
  log-s [installed] [find] # Tail or find server main log file for the developed or installed VMS.
 
@@ -403,7 +405,7 @@ do_build()
         "${CONFIG_ARG[@]}" "$@" "${STOP_ON_BUILD_ERRORS_ARG[@]}"
 }
 
-do_run_ut() # all|TestName "$@"
+do_ctest() # all|TestName "$@"
 {
     nx_cd "$BUILD_DIR"
 
@@ -438,6 +440,31 @@ do_run_ut() # all|TestName "$@"
         else
             nx_echo $(nx_lred)"FAILURE: Some test(s) FAILED."$(nx_nocolor)
         fi
+    fi
+    return $RESULT
+}
+
+do_run_ut() # TestName "$@"
+{
+    if nx_is_cygwin
+    then
+        nx_append_path "$QT_DIR/bin"
+    fi
+    nx_cd "$BUILD_DIR/bin"
+
+    [[ $# < 1 ]] && nx_fail "Expected the test name as the first arg."
+    local TEST_NAME="$1" && shift
+
+    nx_verbose "./$TEST_NAME" "$@"
+    local -i -r RESULT=$?
+    
+    if [[ $RESULT = 0 ]]
+    then
+        nx_echo
+        nx_echo $(nx_dgreen)"SUCCESS: Test $TEST_NAME PASSED."$(nx_nocolor)
+    else
+        nx_echo
+        nx_echo $(nx_lred)"FAILURE: Test $TEST_NAME FAILED."$(nx_nocolor)
     fi
     return $RESULT
 }
@@ -1759,7 +1786,7 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|sdk|benchmark|start-s|start-c|run-ut|testcamera|log-s| \
+        apidoc|kit|sdk|benchmark|start-s|start-c|run-ut|ctest|testcamera|log-s| \
         gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
         print-dirs|print-vars|rsync)
             setup_vars
@@ -1845,6 +1872,9 @@ main()
         stop-c)
             # TODO: Decide on better impl.
             sudo pkill -9 client-bin
+            ;;
+        ctest)
+            do_ctest "$@"
             ;;
         run-ut)
             do_run_ut "$@"
