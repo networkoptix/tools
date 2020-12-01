@@ -10,7 +10,8 @@ namespace verify_globs {
 class Verifier
 {
 public:
-    Verifier(std::string buildDirectoryName): m_buildDirectoryName(buildDirectoryName) {}
+    Verifier(std::string buildDirectoryName, bool isVerbose = false):
+        m_buildDirectoryName(buildDirectoryName), m_isVerbose(isVerbose) {}
 
     void loadCmakeFile(const std::string& fileName = "CMakeFiles/VerifyGlobs.cmake");
     bool hasChangedGlobs();
@@ -43,6 +44,8 @@ private:
     std::vector<std::string> m_fileContents;
 
     bool hasUnlistedFiles(std::set<std::string> filenames, GlobContext const* context);
+    void outputUnlistedFiles(const std::set<std::string>& filenames);
+    void outputMissingFile(const std::string& filename);
     std::unique_ptr<GlobContext> createGlobContextFromGlobLine(const std::string& line);
     void setupDirectoryScaner(DirectoryScanner* scanner, GlobContext const* context);
     std::string getFileNameFromFileLine(const std::string& line);
@@ -59,6 +62,7 @@ private:
 
     std::string m_verifierGlobsFileName;
     int m_currentParsedLineNumber;
+    bool m_isVerbose;
 };
 
 } // namesapace verify_globs

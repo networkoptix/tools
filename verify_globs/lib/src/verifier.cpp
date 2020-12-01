@@ -60,7 +60,10 @@ bool Verifier::hasChangedGlobs()
             if (inFileList)
                 throw ParseException("Unexpected \"glob\" line found: " + line);
             if (hasUnlistedFiles(actualFilesForGlob, globContext.get()))
+            {
+                outputUnlistedFiles(actualFilesForGlob);
                 return true;
+            }
             actualFilesForGlob.clear();
             globContext = createGlobContextFromGlobLine(line);
             setupDirectoryScaner(directoryScanner.get(), globContext.get());
@@ -72,18 +75,54 @@ bool Verifier::hasChangedGlobs()
                 throw ParseException("Unexpected \"file\" line found: " + line);
             const std::string fileName = getFileNameFromFileLine(line);
             if (!removeFileFromFileList(fileName, &actualFilesForGlob))
+            {
+                outputMissingFile(fileName);
                 return true;
+            }
         }
         else if (lineType == LineType::fileListStart)
         {
             inFileList = true;
-        } else if (lineType == LineType::fileListEnd)
+        }
+        else if (lineType == LineType::fileListEnd)
         {
             inFileList = false;
         }
     }
 
     return false;
+}
+
+void Verifier::outputUnlistedFiles(const std::set<std::string>& filenames)
+{
+    if (!m_isVerbose)
+        return;
+
+    std::string filenamesList = "";
+    for (const std::string filename: filenames)
+    {
+        std::string delimiter = filenamesList.length() ? "" : "\n    ";
+        filenamesList += filename;
+    }
+    std::cerr << 1 + (const char*)
+R"(
+Unlisted files:
+    )" + filenamesList + R"(
+
+)";
+}
+
+void Verifier::outputMissingFile(const std::string& filename)
+{
+    if (!m_isVerbose)
+        return;
+
+    std::cerr << 1 + (const char*)
+R"(
+Missing file:
+    )" + filename + R"(
+
+)";
 }
 
 bool Verifier::hasUnlistedFiles(std::set<std::string> filenames, GlobContext const* context)
