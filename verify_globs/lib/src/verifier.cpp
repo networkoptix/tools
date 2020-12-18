@@ -271,7 +271,7 @@ std::string Verifier::getFileNameFromFileLine(const std::string& line)
     const int endFileNamePosition = (int) line.find('"', kFileLineBeginPathIndex);
     const auto filePath = fs::path(line.substr(kFileLineBeginPathIndex,
         endFileNamePosition - kFileLineBeginPathIndex));
-    return filePath.generic_string();
+    return filePath.lexically_normal().generic_string();
 }
 
 void Verifier::setGlobMismatchFileFlag(const std::string& flagFileName)
