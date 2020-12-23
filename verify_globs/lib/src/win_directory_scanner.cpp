@@ -49,7 +49,7 @@ std::set<std::string> DirectoryScanner::ScanDirectory(
             continue;
 
         const auto pathFileName = fs::path(findData.cFileName);
-        const fs::path fullPath = directory / pathFileName;
+        const fs::path fullPath = (directory / pathFileName).lexically_normal();
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
             if (m_recursive)
