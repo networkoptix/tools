@@ -1782,7 +1782,7 @@ only the top level data is provided.</description>
                         <params>
                             <param>
                                 <name>value</name>
-                                <type>integer</type>
+                                <type>string</type>
                                 <description/>
                             </param>
                             <param>
@@ -3761,7 +3761,7 @@ only the top level data is provided.</description>
                             </param>
                             <param>
                                 <name>storages[].spaceLimit</name>
-                                <type>integer</type>
+                                <type>string</type>
                                 <description/>
                             </param>
                             <param>
@@ -4684,7 +4684,7 @@ only the top level data is provided.</description>
                             </param>
                             <param>
                                 <name>storages[].spaceLimit</name>
-                                <type>integer</type>
+                                <type>string</type>
                                 <description/>
                             </param>
                             <param>
@@ -5181,7 +5181,7 @@ only the top level data is provided.</description>
                             </param>
                             <param>
                                 <name>spaceLimit</name>
-                                <type>integer</type>
+                                <type>string</type>
                                 <description>Storage space to leave free on the storage,
 in bytes.</description>
                             </param>
@@ -7854,7 +7854,7 @@ the result of the corresponding GET function.
                         </param>
                         <param>
                             <name>spaceLimit</name>
-                            <type>integer</type>
+                            <type>string</type>
                             <description>Free space to maintain on the storage,
 in bytes. Recommended value is 10 gigabytes for local storages and
 100 gigabytes for NAS.</description>
