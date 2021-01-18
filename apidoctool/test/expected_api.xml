@@ -907,7 +907,7 @@ format.</caption>
                                 <description>Type of motion detection method.</description>
                                 <values>
                                     <value>
-                                        <name>MT_Default</name>
+                                        <name>DEFAULT_ALT_CAPTION</name>
                                         <description>Use default method.</description>
                                     </value>
                                     <value>
@@ -1401,7 +1401,7 @@ is causing a lot of network issues.</description>
                                 <description>Type of motion detection method.</description>
                                 <values>
                                     <value>
-                                        <name>MT_Default</name>
+                                        <name>DEFAULT_ALT_CAPTION</name>
                                         <description>Use default method.</description>
                                     </value>
                                     <value>
@@ -2595,27 +2595,27 @@ only the top level data is provided.</description>
                             <param>
                                 <name>cameraUserAttributesList[].motionType</name>
                                 <type>enum</type>
-                                <description/>
+                                <description>Type of motion detection method.</description>
                                 <values>
                                     <value>
-                                        <name>MT_Default</name>
-                                        <description/>
+                                        <name>DEFAULT_ALT_CAPTION</name>
+                                        <description>Use default method.</description>
                                     </value>
                                     <value>
                                         <name>MT_HardwareGrid</name>
-                                        <description/>
+                                        <description>Use motion detection grid implemented by the camera.</description>
                                     </value>
                                     <value>
                                         <name>MT_SoftwareGrid</name>
-                                        <description/>
+                                        <description>Use motion detection grid implemented by the server.</description>
                                     </value>
                                     <value>
                                         <name>MT_MotionWindow</name>
-                                        <description/>
+                                        <description>Use motion detection window implemented by the camera.</description>
                                     </value>
                                     <value>
                                         <name>MT_NoMotion</name>
-                                        <description/>
+                                        <description>Do not perform motion detection.</description>
                                     </value>
                                 </values>
                             </param>
@@ -6259,7 +6259,7 @@ the result of the corresponding GET function.
                             <optional>false</optional>
                             <values>
                                 <value>
-                                    <name>MT_Default</name>
+                                    <name>DEFAULT_ALT_CAPTION</name>
                                     <description>Use default method.</description>
                                 </value>
                                 <value>
@@ -6659,7 +6659,7 @@ the result of the corresponding GET function.
                             <optional>false</optional>
                             <values>
                                 <value>
-                                    <name>MT_Default</name>
+                                    <name>DEFAULT_ALT_CAPTION</name>
                                     <description>Use default method.</description>
                                 </value>
                                 <value>

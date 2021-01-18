@@ -152,11 +152,16 @@ QN_DECLARE_METAOBJECT_HEADER(Qn,
 
 
     enum MotionType {
+        /**%apidoc
+         * Use default method.
+         * %caption DEFAULT_ALT_CAPTION
+         */
         MT_Default      = 0x0,
-        MT_HardwareGrid = 0x1,
-        MT_SoftwareGrid = 0x2,
-        MT_MotionWindow = 0x4,
-        MT_NoMotion     = 0x8
+        
+        MT_HardwareGrid = 0x1, /**<%apidoc Use motion detection grid implemented by the camera. */
+        MT_SoftwareGrid = 0x2, /**<%apidoc Use motion detection grid implemented by the server. */
+        MT_MotionWindow = 0x4, /**<%apidoc Use motion detection window implemented by the camera. */
+        MT_NoMotion     = 0x8, /**<%apidoc Do not perform motion detection. */
     };
     QN_ENABLE_ENUM_NUMERIC_SERIALIZATION(MotionType)
 

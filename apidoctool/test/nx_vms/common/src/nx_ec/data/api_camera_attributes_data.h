@@ -89,7 +89,12 @@ struct ApiCameraAttributesData: ApiData
     QString userDefinedGroupName;
     bool scheduleEnabled;
     bool licenseUsed;
+    
+    /**%apidoc
+     * Type of motion detection method.
+     */
     Qn::MotionType motionType;
+    
     QnLatin1Array motionMask;
     std::vector<ApiScheduleTaskData> scheduleTasks;
     bool audioEnabled;

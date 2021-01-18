@@ -107,12 +107,17 @@ public abstract class ApidocComment
 //     S* "/**%apidoc" (S* "[" TagAttr "]")? S* \
 //     Char* (NewLine TextLine)* (NewLine (Item NewLine)*)? S* "*/"
 //
-// FieldOrEnumItemApidocComment ::= //< Does not contain tags besides the initial "%apidoc".
+// FieldApidocComment ::= //< Does not contain tags besides the initial "%apidoc".
 //     S* "/**%apidoc" (S* "[" TagAttr "]")? S* \
 //     Char* (NewLine TextLine)* NewLine? S* "*/"
 //
 // FieldOrEnumItemPostfixApidocComment ::= //< Always single-line.
 //     S* "/**<%apidoc" (S* "[" TagAttr "]")? Char* "*/"
+//
+// EnumItemApidocComment ::= //< Can contain "%caption <effective-item-caption>".
+//     S* "/**%apidoc" (S* "[" TagAttr "]")? S* \
+//     Char* (NewLine TextLine)* NewLine? S* \
+//     ("%caption" S+ [_A-Za-z0-9]+)? S* NewLine? S* "*/"
 //
 //.................................................................................................
 //

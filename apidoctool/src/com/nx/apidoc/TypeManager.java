@@ -44,7 +44,6 @@ public final class TypeManager
             final StructParser structParser =
                 new StructParser(sourceCode, verbose, invalidChronoFieldSuffixIsError);
             structs.putAll(structParser.parseStructs());
-
         }
         makeStructsFlat();
         fillUnknownTypes();

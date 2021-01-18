@@ -420,12 +420,6 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      * %param licenseUsed Whether the license is used for the camera.
      *     %value false
      *     %value true
-     * %param motionType Type of motion detection method.
-     *     %value MT_Default Use default method.
-     *     %value MT_HardwareGrid Use motion detection grid implemented by the camera.
-     *     %value MT_SoftwareGrid Use motion detection grid implemented by the server.
-     *     %value MT_MotionWindow Use motion detection window implemented by the camera.
-     *     %value MT_NoMotion Do not perform motion detection.
      * %param motionMask List of motion detection areas and their
      *     sensitivity. The format is proprietary and is likely to change in
      *     future API versions. Currently, this string defines several rectangles separated
@@ -520,12 +514,6 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      * %param licenseUsed Whether the license is used for the camera.
      *     %value false
      *     %value true
-     * %param motionType Type of motion detection method.
-     *     %value MT_Default Use default method.
-     *     %value MT_HardwareGrid Use motion detection grid implemented by the camera.
-     *     %value MT_SoftwareGrid Use motion detection grid implemented by the server.
-     *     %value MT_MotionWindow Use motion detection window implemented by the camera.
-     *     %value MT_NoMotion Do not perform motion detection.
      * %param motionMask List of motion detection areas and their
      *     sensitivity. The format is proprietary and is likely to change in
      *     future API versions. Currently, this string defines several rectangles separated
@@ -620,12 +608,6 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *     %param licenseUsed Whether the license is used for the camera.
      *         %value false
      *         %value true
-     *     %param motionType Type of motion detection method.
-     *         %value MT_Default Use default method.
-     *         %value MT_HardwareGrid Use motion detection grid implemented by the camera.
-     *         %value MT_SoftwareGrid Use motion detection grid implemented by the server.
-     *         %value MT_MotionWindow Use motion detection window implemented by the camera.
-     *         %value MT_NoMotion Do not perform motion detection.
      *     %param motionMask List of motion detection areas and their
      *         sensitivity. The format is proprietary and is likely to change in
      *         future API versions. Currently, this string defines several rectangles separated
@@ -759,12 +741,6 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *     %param licenseUsed Whether the license is used for the camera.
      *         %value false
      *         %value true
-     *     %param motionType Type of motion detection method.
-     *         %value MT_Default Use default method.
-     *         %value MT_HardwareGrid Use motion detection grid implemented by the camera.
-     *         %value MT_SoftwareGrid Use motion detection grid implemented by the server.
-     *         %value MT_MotionWindow Use motion detection window implemented by the camera.
-     *         %value MT_NoMotion Do not perform motion detection.
      *     %param motionMask List of motion detection areas and their
      *         sensitivity. The format is proprietary and is likely to change in
      *         future API versions. Currently, this string defines several rectangles separated

@@ -66,7 +66,7 @@ public final class EnumParser
             {
                 final EnumInfo enumInfo = new EnumInfo();
                 enumInfo.name = values[1].trim();
-                enumInfo.description = parseDescription();
+                enumInfo.description = parseEnumDescription();
                 enumInfo.values = parseEnumValues();
                 enums.put(enumInfo.name, enumInfo);
             }
@@ -89,7 +89,7 @@ public final class EnumParser
             {
                 EnumInfo.Value value = new EnumInfo.Value();
                 value.name = match[0];
-                value.description = parseDescription();
+                parseEnumValueDescription(value);
                 values.add(value);
             }
             ++line;
@@ -97,7 +97,7 @@ public final class EnumParser
         return values;
     }
 
-    private String parseDescription() throws Error, ApidocTagParser.Error
+    private String parseEnumDescription() throws Error, ApidocTagParser.Error
     {
         final List<ApidocTagParser.Item> items =
             ApidocTagParser.getItemsForType(sourceCode, line, verbose);
@@ -109,6 +109,43 @@ public final class EnumParser
             return items.get(0).getFullText(0);
         }
         return null;
+    }
+
+    private void parseEnumValueDescription(EnumInfo.Value value) throws Error, ApidocTagParser.Error
+    {
+        final List<ApidocTagParser.Item> items =
+                ApidocTagParser.getItemsForType(sourceCode, line, verbose);
+
+        if (items == null || items.isEmpty())
+        {
+            value.description = null;
+            return;
+        }
+
+        value.description = items.get(0).getFullText(0);
+
+        if (items.size() == 1)
+            return; //< No tags follow the description text.
+
+        int itemIndex = 1;
+        final ApidocTagParser.Item item = items.get(itemIndex);
+        if (ApidocComment.TAG_CAPTION.equals(item.getTag()))
+        {
+            if (!item.getAttribute().isEmpty())
+                throw new Error("Unexpected attribute " + item.getAttribute() + " in " + item.getTag() + ".");
+
+            // Overriding the name with the one specified in `%caption`.
+            value.name = item.getInitialToken();
+
+            if (value.name == null || value.name.isEmpty())
+                throw new Error("Missing caption in " + item.getTag() + ".");
+            if (!item.getTextAfterInitialToken(/*indentLevel*/ 0).isEmpty())
+                throw new Error("Unexpected text after caption in " + item.getTag() + ".");
+
+            ++itemIndex;
+        }
+        if (itemIndex < items.size())
+            throw new Error("Unexpected tag " + items.get(itemIndex).getTag() + " found.");
     }
 
     private final boolean verbose;
