@@ -62,7 +62,8 @@ Here <command> can be one of the following:
  sdk [metadata] # Rebuild nx_*_sdk zip archives - all, or only Metadata SDK.
  benchmark [run|build] # Rebuild (if "run" is not specified), unzip and run (if "build" is not
      specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
- copyright [add] # Check and add (if requested) copyright notice in all files in the current dir.
+ copyright [add|remove] # Check and add or remove (if requested) copyright notice in all files in
+    the current dir.
 
 #--------------------------------------------------------------------------------------------------
  go [command args] # Log in to remote host via ssh, changing dir to match the current dir, and
@@ -135,14 +136,14 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
     local -r QT_VERSION=$(
         cat "$VMS_DIR/sync_dependencies.py" |grep '"qt":' |sed 's/.*"\([0-9.]*\)",/\1/'
     )
-    
+
     local -r TARGET_DEVICE=$(
         cat "$VMS_DIR/cmake/default_target.cmake" \
             |grep "set(default_target_device" \
             |grep "$TARGET" |sed 's/.*"\(.*\)")/\1/'
     )
-    
-    # QT_DIR will be set to an empty string for 
+
+    # QT_DIR will be set to an empty string for
     QT_DIR="$PACKAGES_DIR/$TARGET_DEVICE/qt-$QT_VERSION"
 
     case "$TARGET" in
@@ -457,7 +458,7 @@ do_run_ut() # TestName "$@"
 
     nx_verbose "./$TEST_NAME" "$@"
     local -i -r RESULT=$?
-    
+
     if [[ $RESULT = 0 ]]
     then
         nx_echo
@@ -472,15 +473,15 @@ do_run_ut() # TestName "$@"
 doGitUpdate() # [branch]
 {
     nx_verbose git fetch --all --tags `# Delete stale remote-tracking branches #` --prune
-    
+
     (( $# > 1 )) && nx_fail "Too many arguments."
     if (( $# > 0 ))
     then
         nx_verbose git checkout "$1"
     fi
-    
+
     nx_verbose git pull --rebase
-    
+
     # Find stale local branches, suggesting commands to delete them.
     local -i staleBranchFound=0
     local -r gitBranchesCommand=(
@@ -504,7 +505,7 @@ doGitUpdate() # [branch]
     else
         echo "" #< Empty line after the command list.
     fi
-    
+
     nx_verbose git status
 }
 
@@ -823,6 +824,27 @@ insert_copyright_notice() # <file> <notice-line> <shebang-line> <header-line> <n
     nx_echo
 }
 
+remove_copyright_notice() # <file> <notice-line> <shebang-line> <header-line> <newline-prefix>
+{
+    local -r FILE="$1"; shift
+    local -r COPYRIGHT_LINE_NUMBER="$1"; shift
+
+    local -r BAK="$FILE.bak"
+    cp "$FILE" "$BAK" || return $?
+    sed -i "${COPYRIGHT_LINE_NUMBER}d" "$FILE"
+
+    #< Remove an empty line that should be after the copyright notice.
+    empty_line=$(sed -n "${COPYRIGHT_LINE_NUMBER}p" "$FILE")
+    if [[ -z "${empty_line}" ]]
+    then
+        sed -i "${COPYRIGHT_LINE_NUMBER}d" "$FILE"
+    fi
+
+    nx_echo
+    nx_echo "Removed copyright notice from $FILE"
+    nx_echo
+}
+
 check_for_copyright() # <file> <actual-notice-line>
 {
     local -r FILE="$1"; shift
@@ -847,19 +869,26 @@ check_for_copyright() # <file> <actual-notice-line>
     return 0
 }
 
-do_copyright_file() # <file> <prefix> [add]
+do_copyright_file() # <file> <prefix> [add|remove]
 {
     local -r FILE="$1"; shift
     local -r PREFIX="$1"; shift
     if (( $# > 0 )) && [[ $1 == "add" ]]
     then
         local -r -i ADD=1
+        local -r -i REMOVE=0
+        shift
+    elif (( $# > 0 )) && [[ $1 == "remove" ]]
+    then
+        local -r -i REMOVE=1
+        local -r -i ADD=0
         shift
     elif (( $# > 0 ))
     then
         nx_fail "Invalid arguments."
     else
         local -r -i ADD=0
+        local -r -i REMOVE=0
     fi
 
     local -r NOTICE\
@@ -867,29 +896,36 @@ do_copyright_file() # <file> <prefix> [add]
 
     local SHEBANG_LINE=""
     local HEADER_LINE=""
-    local FIRST_LINE=$(head -n 1 "$FILE")
+    local COPYRIGHT_LINE=$(head -n 1 "$FILE")
     local NEWLINE_PREFIX=""
-    if [[ ${FIRST_LINE:(-1)} == $'\r' ]] #< First line ends with '\r' - Windows newlines are used.
+    local -i COPYRIGHT_LINE_NUMBER=1
+    if [[ ${COPYRIGHT_LINE:(-1)} == $'\r' ]] #< First line ends with '\r' - Windows newlines are used.
     then
         NEWLINE_PREFIX=$'\r'
-        FIRST_LINE=${FIRST_LINE: : (-1)} #< Trim the last char which is '\r'.
+        COPYRIGHT_LINE=${COPYRIGHT_LINE: : (-1)} #< Trim the last char which is '\r'.
     fi
-    if [[ $FIRST_LINE == '#!'* ]] #< Shell shebang - the copyright notice should be the third line.
+    if [[ $COPYRIGHT_LINE == '#!'* ]] #< Shell shebang - the copyright notice should be the third line.
     then
-        SHEBANG_LINE="$FIRST_LINE"
-        FIRST_LINE=$(head -n 3 "$FILE" |tail -n 1)
+        SHEBANG_LINE="$COPYRIGHT_LINE"
+        COPYRIGHT_LINE_NUMBER=3
+        COPYRIGHT_LINE=$(head -n ${COPYRIGHT_LINE_NUMBER} "$FILE" |tail -n 1)
     elif [[ $FILE == *'.md' ]] #< Markdown file - the copyright notice should be the third line.
     then
-        HEADER_LINE="$FIRST_LINE"
-        FIRST_LINE=$(head -n 3 "$FILE" |tail -n 1)
+        HEADER_LINE="$COPYRIGHT_LINE"
+        COPYRIGHT_LINE_NUMBER=3
+        COPYRIGHT_LINE=$(head -n ${COPYRIGHT_LINE_NUMBER} "$FILE" |tail -n 1)
     fi
 
-    if [[ $FIRST_LINE == $PREFIX$NOTICE ]] #< Copyright notice is in place and is correct.
+    if [[ $COPYRIGHT_LINE == $PREFIX$NOTICE ]] #< Copyright notice is in place and is correct.
     then
+        if [[ $REMOVE == 1 ]]
+        then
+            remove_copyright_notice "$FILE" $COPYRIGHT_LINE_NUMBER
+        fi
         return 0
     fi
 
-    check_for_copyright "$FILE" "$FIRST_LINE" || return $?
+    check_for_copyright "$FILE" "$COPYRIGHT_LINE" || return $?
 
     # The file has missing copyright notice.
     if [[ $ADD == 1 ]]
@@ -913,7 +949,7 @@ do_copyright() # "$@"
     do
         case "$(basename "$FILE")" in
             CMakeLists.txt|*.cmake|*.cmake.in) `# should come first #` do_copyright_file "$FILE" "## " "$@";;
-            *.h|*.cpp|*.inc|*.inc.in|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
+            *.go|*.h|*.h.in|*.cpp|*.cpp.in|*.inc|*.inc.in|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
             *.sh|*.py|Doxyfile) do_copyright_file "$FILE" "## " "$@";;
             *.bat) do_copyright_file "$FILE" ":: " "$@";;
             .gitignore|.hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
@@ -1735,7 +1771,7 @@ generateRemoteGitInfo()
     currentRefsFromGit="${currentRefsFromGit/HEAD -> /}"
 
     local -r currentRefs="\"${currentRefsFromGit}\""
-    
+
     nx_go_verbose \
         mkdir -p "$(dirname "$remoteGitInfoTxt")" \
         "[&&]" echo "$(cat <<EOF
