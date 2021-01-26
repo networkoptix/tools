@@ -89,8 +89,8 @@ public final class EnumParser
             {
                 EnumInfo.Value value = new EnumInfo.Value();
                 value.name = match[0];
-                parseEnumValueDescription(value);
-                values.add(value);
+                if (parseEnumValueDescription(value))
+                    values.add(value);
             }
             ++line;
         }
@@ -111,20 +111,32 @@ public final class EnumParser
         return null;
     }
 
-    private void parseEnumValueDescription(EnumInfo.Value value) throws Error, ApidocTagParser.Error
+    /**
+     * @return False in case the enum value must be ignored.
+     */
+    private boolean parseEnumValueDescription(EnumInfo.Value value) throws Error, ApidocTagParser.Error
     {
         final List<ApidocTagParser.Item> items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
 
         if (items == null || items.isEmpty())
         {
             value.description = null;
-            return;
+            return true;
         }
 
-        value.description = items.get(0).getFullText(0);
+        final ApidocTagParser.Item apidocItem = items.get(0);
+        value.description = apidocItem.getFullText(0);
+
+        final String apidocAttribute = apidocItem.getAttribute();
+        if (!apidocAttribute.isEmpty())
+        {
+            if (ApidocComment.ATTR_UNUSED.equals(apidocAttribute))
+                return false; //< Currently, there is no `unused` flag for enum items, so ignoring the item.
+            throw new Error("Unexpected attribute " + apidocAttribute + " in " + apidocItem.getTag() + ".");
+        }
 
         if (items.size() == 1)
-            return; //< No tags follow the description text.
+            return true; //< No tags follow the description text.
 
         int itemIndex = 1;
         final ApidocTagParser.Item item = items.get(itemIndex);
@@ -145,6 +157,7 @@ public final class EnumParser
         }
         if (itemIndex < items.size())
             throw new Error("Unexpected tag " + items.get(itemIndex).getTag() + " found.");
+        return true;
     }
 
     private final boolean verbose;

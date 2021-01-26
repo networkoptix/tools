@@ -11,6 +11,7 @@ enum class Enum
     value1, /**<%apidoc value1 description*/
     /**%apidoc value2 description */
     value2 = 0x1,
+    unusedValue = 0xFF, /**<%apidoc[unused] */
 };
 
 namespace Qn {
