@@ -168,6 +168,11 @@ public final class ApidocTagParser
         return items;
     }
 
+    // TODO: This method must be renamed, because it is used not only for structs or enums, but
+    // also for non-type entities like struct fields and enum items. Also tag checks must be added
+    // to the usages of this method: currently, if e.g. "%value" in a struct field apidoc comment
+    // is replaced with an arbitrary tag (e.g. "%xxx"), apidoctool works as if it were "%value",
+    // instead of producing an "Unexpected tag" error.
     /**
      * @return Null in case no apidoc comment found.
      */
@@ -203,8 +208,11 @@ public final class ApidocTagParser
         if (commentLines.isEmpty())
             return null;
 
-        return getItems(
+        final List<Item> items = getItems(
             commentLines, sourceCode.getFilename(), firstCommentLine, verbose);
+        assert !items.isEmpty();
+        assert ApidocComment.TAG_APIDOC.equals(items.get(0).getTag());
+        return items;
     }
 
     private ApidocTagParser(List<String> lines, String filename, int firstLine, boolean verbose)

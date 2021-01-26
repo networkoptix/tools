@@ -349,7 +349,7 @@ public final class ApidocCommentParser
             throw new Error(item.getErrorPrefix() + "Invalid param type \"" + item.getLabel()
                 + "\" found.");
         }
-        Param paramDescription = parseParamTags(tagIterator);
+        Param paramDescription = parseParamItems(tagIterator);
         param.values.addAll(paramDescription.values);
         param.structName = paramDescription.structName;
         if (!paramDescription.deprecatedDescription.isEmpty())
@@ -406,39 +406,39 @@ public final class ApidocCommentParser
         }
     }
 
-    private Param parseParamTags(
-        ListIterator<ApidocTagParser.Item> tagIterator)
+    private Param parseParamItems(
+        ListIterator<ApidocTagParser.Item> itemIterator)
         throws Error
     {
         indentLevel++;
         final Param paramDescription = new Param();
         paramDescription.values = new ArrayList<Apidoc.Value>();
-        while (tagIterator.hasNext())
+        while (itemIterator.hasNext())
         {
-            final ApidocTagParser.Item tag = tagIterator.next();
-            if (TAG_VALUE.equals(tag.getTag()))
+            final ApidocTagParser.Item item = itemIterator.next();
+            if (TAG_VALUE.equals(item.getTag()))
             {
-                // ATTENTION: Currently, [proprietary] params are ignored, until supported in XML.
-                if (ATTR_PROPRIETARY.equals(tag.getAttribute()))
+                // ATTENTION: Currently, [proprietary] values are ignored, until supported in XML.
+                if (ATTR_PROPRIETARY.equals(item.getAttribute()))
                     continue;
 
-                checkNoAttribute(tag);
+                checkNoAttribute(item);
                 Apidoc.Value value = new Apidoc.Value();
-                value.name = getInitialToken(tag, ParamMode.WithToken);
-                value.description = tag.getTextAfterInitialToken(indentLevel);
+                value.name = getInitialToken(item, ParamMode.WithToken);
+                value.description = item.getTextAfterInitialToken(indentLevel);
                 paramDescription.values.add(value);
             }
-            else if (TAG_STRUCT.equals(tag.getTag()))
+            else if (TAG_STRUCT.equals(item.getTag()))
             {
-                paramDescription.structName = tag.getFullText(indentLevel);
+                paramDescription.structName = item.getFullText(indentLevel);
             }
-            else if (TAG_DEPRECATED.equals(tag.getTag()))
+            else if (TAG_DEPRECATED.equals(item.getTag()))
             {
-                paramDescription.deprecatedDescription = tag.getFullText(indentLevel);
+                paramDescription.deprecatedDescription = item.getFullText(indentLevel);
             }
-            else if (!tag.getTag().startsWith(TAG_COMMENTED_OUT))
+            else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
-                tagIterator.previous(); //< Return previous tag for future parsing.
+                itemIterator.previous(); //< Return previous item for future parsing.
                 break;
             }
         }

@@ -113,8 +113,7 @@ public final class EnumParser
 
     private void parseEnumValueDescription(EnumInfo.Value value) throws Error, ApidocTagParser.Error
     {
-        final List<ApidocTagParser.Item> items =
-                ApidocTagParser.getItemsForType(sourceCode, line, verbose);
+        final List<ApidocTagParser.Item> items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
 
         if (items == null || items.isEmpty())
         {

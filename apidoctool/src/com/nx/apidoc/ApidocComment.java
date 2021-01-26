@@ -34,7 +34,7 @@ public abstract class ApidocComment
 
 //-------------------------------------------------------------------------------------------------
 // Apidoc comment format
-
+//
 // ATTENTION: This specification should be kept in sync with the current implementation,
 // because currently it is the only documentation for the Apidoc comment format.
 //
@@ -58,9 +58,9 @@ public abstract class ApidocComment
 // with "/**<%apidoc", and ends with "*/".
 //
 // Apidoc comments for API functions start with a function header denoting the HTTP method and the
-// function name, followed by "%param" tags for function arguments. Params which are JSON objects or
-// object arrays are documented with inner "%value" tags. Then follows the "%return" tag which may
-// describe a JSON object or object array with inner "%param" and "%value" tags as well.
+// function name, followed by "%param" tags for function arguments. Params which are JSON objects
+// or object arrays are documented with inner "%value" tags. Then follows the "%return" tag which
+// may describe a JSON object or object array with inner "%param" and "%value" tags as well.
 //
 // If an API function's input, result, or a certain param is an object or an object array, and the
 // C++ struct for such object has apidoc comments, these comments can be embedded by specifying the
@@ -130,18 +130,18 @@ public abstract class ApidocComment
 //
 // - Semantics of attributes
 //
-// Attribute "[unused]" may appear in "%param" or struct field's "%apidoc"; it means that the param
-// should be omitted from the generated XML.
+// Attribute "[unused]" may appear in "%param"; it means that the item must be omitted from the
+// generated XML.
 //
-// Attribute "[proprietary]" may appear in "%apidoc" and "%param". It means that the item
-// (whole API method or a particular param) should be hidden from the user when the generated XML
-// is presented in the browser, but should technically be present in that XML.
+// Attribute "[proprietary]" may appear in "%param", or function's "%apidoc", where it means that the item must be
+// hidden from the user when the generated XML is presented in the browser, but should technically be present in
+// that XML; also it may appear in "%value" meaning that the item must be completely ignored.
 //
 // Attribute "[opt]" may appear in "%param" or struct field's "%apidoc" to mark it as optional.
 //
 // Attribute "[default]" may appear only in "%param" with the name "format":
 //     %param[default] format
 // This line inserts into XML a hard-coded text which describes the "format" parameter which
-// is common to many API methods and defines the format (JSON, UBJSON, etc) of the requested
+// is common to many API functions and defines the format (JSON, UBJSON, etc) of the requested
 // data.
 }

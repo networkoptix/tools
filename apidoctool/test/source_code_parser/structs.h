@@ -52,7 +52,7 @@ struct OutputStruct
 {
     /**%apidoc outputParam description
      * %value 1 one
-     * %value 2 two
+     * %TODO_UNEXPECTED_TAG 2 two
      */
     int outputParam;
     Enum enumParam;
