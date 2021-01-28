@@ -149,7 +149,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
     case "$TARGET" in
         windows) ;;
         linux) ;;
-        linux_arm32|linux_arm64|bpi|android-arm|macosx) `# Do nothing #`;;
+        linux_arm32|linux_arm64|bpi|android_arm32|android_arm64|macosx) `# Do nothing #`;;
         edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
