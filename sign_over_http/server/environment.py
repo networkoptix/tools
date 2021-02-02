@@ -5,8 +5,10 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+real_path = os.path.dirname(os.path.realpath(__file__))
+work_dir_path = os.environ.get('NX_SIGN_SERVER_HOME', real_path)
 
-CONFIG_PATH = Path(os.path.realpath(__file__)).parent / 'config'
+CONFIG_PATH = Path(work_dir_path) / 'config'
 
 
 @dataclass

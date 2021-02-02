@@ -5,7 +5,7 @@ with open("readme.md", "r") as fh:
 
 setuptools.setup(
     name="nx-sign-over-http",
-    version="2.0.0",
+    version="2.0.1",
     author="Sergei Ivanov",
     author_email="sivanov@networkoptix.com",
     description="Standalone sign-over-http service",
