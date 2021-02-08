@@ -950,7 +950,7 @@ do_copyright() # "$@"
         case "$(basename "$FILE")" in
             CMakeLists.txt|*.cmake|*.cmake.in) `# should come first #` do_copyright_file "$FILE" "## " "$@";;
             *.go|*.h|*.h.in|*.cpp|*.cpp.in|*.inc|*.inc.in|*.c|*.mm|*.ts|*.js|*.txt|*.md) do_copyright_file "$FILE" "// " "$@";;
-            *.sh|*.py|Doxyfile) do_copyright_file "$FILE" "## " "$@";;
+            *.sh|*.py|Doxyfile|*.yaml|*.yml) do_copyright_file "$FILE" "## " "$@";;
             *.bat) do_copyright_file "$FILE" ":: " "$@";;
             .gitignore|.hgignore|*.orig|*.rej|*.bak|*.json) `# ignore #`;;
             *) SKIPPED_FILES+=( "$FILE" );;
