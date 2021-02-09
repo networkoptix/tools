@@ -34,7 +34,8 @@ class CrashServerMock:
 
 class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str, autoclose_indicators: Dict[str, str],
-                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = ''):
+                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = '',
+                 fallback_versions: list = []):
         self.issues = issues
         self.args = [url, login, password, file_limit, fix_versions, epic_link, prefix]
 
