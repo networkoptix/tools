@@ -137,6 +137,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         cat "$VMS_DIR/sync_dependencies.py" |grep '"qt":' |sed 's/.*"\([0-9.]*\)",/\1/'
     )
 
+    # TODO: #mshevchenko: Fix. In master, there is no cmake/default_target.cmake.
     local -r TARGET_DEVICE=$(
         cat "$VMS_DIR/cmake/default_target.cmake" \
             |grep "set(default_target_device" \
@@ -506,6 +507,7 @@ doGitUpdate() # [branch]
         echo "" #< Empty line after the command list.
     fi
 
+    nx_verbose git stash show
     nx_verbose git status
 }
 
@@ -1786,6 +1788,8 @@ EOF
 
 doRsync() # "$@"
 {
+    # TODO: #mshevchenko: Exclude __pycache__ from rsync.
+
     local -r relativeVmsDir=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
     local -r sshVmsDir="$GO_USER@$GO_HOST:$GO_DEVELOP_DIR/$relativeVmsDir"
 
@@ -1998,6 +2002,7 @@ main()
             ;;
         #..........................................................................................
         gs)
+            nx_verbose git stash show
             nx_verbose git status "$@"
             ;;
         gu)
