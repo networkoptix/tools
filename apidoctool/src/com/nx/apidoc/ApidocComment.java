@@ -130,8 +130,8 @@ public abstract class ApidocComment
 //
 // - Semantics of attributes
 //
-// Attribute "[unused]" may appear in "%param", or enum item's "%apidoc"; it means that the item
-// must be omitted from the generated XML.
+// Attribute "[unused]" may appear in "%param", struct field's or enum item's "%apidoc"; it means
+// that the item must be omitted from the generated XML.
 //
 // Attribute "[proprietary]" may appear in "%param", or function's "%apidoc", where it means that
 // the item must be hidden from the user when the generated XML is presented in the browser, but

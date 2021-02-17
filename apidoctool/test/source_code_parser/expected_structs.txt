@@ -43,6 +43,8 @@ multiline"
     Field:integer param1
     Apidoc item: "int param description"
     Field:unknown(InnerStruct) innerObject
+    Field:integer unusedField
+    Apidoc item: "Will appear in the struct dump but not in api.xml."
 
 Name: OutputStruct
 Parents: null

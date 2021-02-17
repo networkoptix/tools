@@ -54,6 +54,9 @@ struct NX_DEF InputStruct
 {
     int param1; /**<%apidoc[opt] int param description */
     InnerStruct innerObject;
+    
+    /**%apidoc[unused] Will appear in the struct dump but not in api.xml. */
+    int unusedField;
 };
 
 /**%apidoc Output description */
