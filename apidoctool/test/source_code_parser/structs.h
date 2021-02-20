@@ -14,6 +14,14 @@ enum class Enum
     unusedValue = 0xFF, /**<%apidoc[unused] */
 };
 
+/**%apidoc InstrumentedEnum description*/
+NX_REFLECTION_ENUM_CLASS(InstrumentedEnum,
+    value1, /**<%apidoc value1 description*/
+    /**%apidoc value2 description */
+    value2 = 0x1,
+    unusedValue = 0xFF /**<%apidoc[unused] */
+)
+
 namespace Qn {
     /**%apidoc Enum description*/
     enum class IndentedEnum

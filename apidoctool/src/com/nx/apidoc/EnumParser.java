@@ -52,8 +52,16 @@ public final class EnumParser
             return result;
         }
     }
-    
+
     public final Map<String, EnumInfo> parseEnums()
+        throws Error, SourceCode.Error, ApidocTagParser.Error
+    {
+        Map<String, EnumInfo> enums = parseRegularEnums();
+        enums.putAll(parseNxReflectEnums());
+        return enums;
+    }
+
+    private final Map<String, EnumInfo> parseRegularEnums()
         throws Error, SourceCode.Error, ApidocTagParser.Error
     {
         final Map<String, EnumInfo> enums = new HashMap<String, EnumInfo>();
@@ -92,6 +100,78 @@ public final class EnumParser
                 if (parseEnumValueDescription(value))
                     values.add(value);
             }
+            ++line;
+        }
+        return values;
+    }
+
+    private final Map<String, EnumInfo> parseNxReflectEnums()
+        throws Error, SourceCode.Error, ApidocTagParser.Error
+    {
+        final Map<String, EnumInfo> enums = new HashMap<String, EnumInfo>();
+        line = 1;
+        while (line <= sourceCode.getLineCount())
+        {
+            final String[] match = sourceCode.matchLine(line, nxReflectEnumHeaderRegex);
+            if (match != null)
+            {
+                final EnumInfo enumInfo = new EnumInfo();
+                enumInfo.name = match[0].trim();
+                enumInfo.description = parseEnumDescription();
+                enumInfo.values = parseNxReflectEnumValues();
+                enums.put(enumInfo.name, enumInfo);
+            }
+            ++line;
+        }
+        return enums;
+    }
+
+    /**
+     * nx_reflect library provides a set of macros to declare enumerations which could be
+     * serialized with no need to do anything else. They look like:
+     * ```
+     * NX_REFLECTION_ENUM(Enum,
+     *     value1,
+     *     value2,
+     *     value3
+     * )
+     * ```
+     * Enum class is declared with NX_REFLECTION_ENUM_CLASS. Also there are two additional macros
+     * for enumerations declared inside a class or a struct: NX_REFLECTION_ENUM_IN_CLASS and
+     * NX_REFLECTION_ENUM_CLASS_IN_CLASS.
+     */
+    private List<EnumInfo.Value> parseNxReflectEnumValues() throws Error, ApidocTagParser.Error
+    {
+        final List<EnumInfo.Value> values = new ArrayList<EnumInfo.Value>();
+        ++line;
+        int parenthesesCount = 1; //< The first one was in the header.
+        while (line <= sourceCode.getLineCount() && parenthesesCount != 0)
+        {
+            final String lineStr = sourceCode.getLine(line);
+            for (int i = 0; i < lineStr.length(); ++i)
+            {
+                final char c = lineStr.charAt(i);
+                if (c == '(')
+                {
+                    ++parenthesesCount;
+                }
+                else if (c == ')')
+                {
+                    --parenthesesCount;
+                    if (parenthesesCount == 0)
+                        break;
+                }
+            }
+
+            final String[] match = sourceCode.matchLine(line, valueRegex);
+            if (match != null)
+            {
+                EnumInfo.Value value = new EnumInfo.Value();
+                value.name = match[0];
+                if (parseEnumValueDescription(value))
+                    values.add(value);
+            }
+
             ++line;
         }
         return values;
@@ -175,6 +255,9 @@ public final class EnumParser
 
     private static final Pattern enumLastLineRegex = Pattern.compile(
         " {0,4}};");
+
+    private static final Pattern nxReflectEnumHeaderRegex = Pattern.compile(
+        " {0,4}NX_REFLECTION_ENUM(?:_CLASS)?(?:_IN_CLASS)?\\s*\\(\\s*([_A-Za-z0-9]+)\\s*,");
 
     private static final Pattern valueRegex = Pattern.compile(
         " {4,8}([_A-Za-z0-9]+)\\s*(=.*)?[,\\s]*.*");

@@ -10,6 +10,7 @@
 # Build and test output files
 /apidoctool/build/
 /apidoctool/out_test/
+/apidoctool/out/
 
 # Helm chart tgz files
 workflow_police/**/*.tgz

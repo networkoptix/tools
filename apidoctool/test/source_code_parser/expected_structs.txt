@@ -15,6 +15,13 @@ Description: Enum description
     Value: value2
     Description: value2 description
 
+Name: InstrumentedEnum
+Description: InstrumentedEnum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
 -----------------------------------------------------------------------
 - Structs
 
