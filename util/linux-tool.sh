@@ -136,13 +136,6 @@ get_TARGET_and_CUSTOMIZATION()
         cat "$VMS_DIR/sync_dependencies.py" |grep '"qt":' |sed 's/.*"\([0-9.]*\)",/\1/'
     )
 
-    # TODO: #mshevchenko: Fix. In master, there is no cmake/default_target.cmake.
-    local -r TARGET_DEVICE=$(
-        cat "$VMS_DIR/cmake/default_target.cmake" \
-            |grep "set(default_target_device" \
-            |grep "$TARGET" |sed 's/.*"\(.*\)")/\1/'
-    )
-
     case "$TARGET" in
         windows) ;;
         linux) ;;
@@ -171,15 +164,22 @@ get_TARGET_and_CUSTOMIZATION()
 }
 
 # [in] BUILD_DIR
-# [in] TARGET_DEVICE
 # [out] QT_DIR Is set only if TARGET is non-cross-compiling: the var is used only for launching.
 get_QT_DIR()
 {
-    # TODO: #mshevchenko Find a proper solution to locate Qt for conan.
-    if [[ $TARGET_DEVICE == "" ]]
+    # TODO: #ptolstov Find a proper solution to locate Qt for conan.
+
+    local -r DEFAULT_TARGET_CMAKE="$VMS_DIR/cmake/default_target.cmake"
+
+    if [[ ! -f $DEFAULT_TARGET_CMAKE ]]
     then # 4.3 and later - conan.
         QT_DIR="$BUILD_DIR\.conan\\data\\qt\\5.15.2\\_\\_\\package\\189784f1080359e8f6d1dfd7e8aa7dccd1cbae4c"
     else # 4.2 and earlier - rdep.
+        local -r TARGET_DEVICE=$(
+            cat "$DEFAULT_TARGET_CMAKE" \
+                |grep "set(default_target_device" \
+                |grep "$TARGET" |sed 's/.*"\(.*\)")/\1/'
+        )
         QT_DIR="$PACKAGES_DIR/$TARGET_DEVICE/qt-$QT_VERSION"
     fi
 }
@@ -539,8 +539,9 @@ copy_if_exists_and_different() # source_file target_file
 
 find_APIDOCTOOL_JAR()
 {
-    local PACKAGE=$(cat "$VMS_DIR/sync_dependencies.py" \
-        |grep -oE '"any/apidoctool(-[0-9.]+)?' |sed 's$"any/$$g')
+#    local PACKAGE=$(cat "$VMS_DIR/sync_dependencies.py" \
+#        |grep -oE '"any/apidoctool(-[0-9.]+)?' |sed 's$"any/$$g')
+local PACKAGE=apidoctool-2.1
 
     if [ -z "$PACKAGE" ]
     then
@@ -552,10 +553,15 @@ find_APIDOCTOOL_JAR()
 
 find_APIDOCTOOL_PARAMS()
 {
-    APIDOCTOOL_PARAMS=(
-        -config
-        "$(nx_path "$VMS_DIR/vms/server/nx_vms_server/api/apidoctool.properties")"
-    )
+    # Location for 4.3 and later.
+    local APIDOCTOOL_PROPERTIES="$VMS_DIR/vms/server/nx_vms_server/api/legacy/apidoctool.properties"
+    if [[ ! -f $APIDOCTOOL_PROPERTIES ]]
+    then
+        # Location for 4.2 and older.
+        APIDOCTOOL_PROPERTIES="$VMS_DIR/vms/server/nx_vms_server/api/apidoctool.properties"
+    fi
+    
+    APIDOCTOOL_PARAMS=( -config "$(nx_path "$APIDOCTOOL_PROPERTIES")" )
     nx_log_array APIDOCTOOL_PARAMS
 }
 
@@ -587,10 +593,14 @@ do_apidoc() # dev|prod [action] "$@"
     local -r API_XML="$BUILD_DIR/vms/server/nx_vms_server/api.xml.out"
     local -r API_JSON="$BUILD_DIR/vms/server/nx_vms_server/api.json.out"
 
-    local -r API_TEMPLATE_XML="$VMS_DIR/vms/server/nx_vms_server/api/api_template.xml"
-    if [ ! -f "$API_TEMPLATE_XML" ]
+    local API_TEMPLATE_XML="$VMS_DIR/vms/server/nx_vms_server/api/legacy/api_template.xml"
+    if [[ ! -f "$API_TEMPLATE_XML" ]]
     then
-        nx_fail "Cannot open file $API_TEMPLATE_XML"
+        API_TEMPLATE_XML="$VMS_DIR/vms/server/nx_vms_server/api/api_template.xml"
+        if [[ ! -f "$API_TEMPLATE_XML" ]]
+        then
+            nx_fail "Cannot open file $API_TEMPLATE_XML"
+        fi
     fi
 
     if [ "$ACTION" = "run" ]
