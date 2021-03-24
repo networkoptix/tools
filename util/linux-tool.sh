@@ -117,9 +117,8 @@ go_callback()
 
 # [out] TARGET
 # [in,out] CUSTOMIZATION
-# [out] QT_DIR Is set only if TARGET is non-cross-compiling: the var is used only for launching.
 # [in] VMS_DIR
-get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
+get_TARGET_and_CUSTOMIZATION()
 {
     if [ -z "$TARGET" ]
     then
@@ -143,9 +142,6 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
             |grep "set(default_target_device" \
             |grep "$TARGET" |sed 's/.*"\(.*\)")/\1/'
     )
-
-    # QT_DIR will be set to an empty string for
-    QT_DIR="$PACKAGES_DIR/$TARGET_DEVICE/qt-$QT_VERSION"
 
     case "$TARGET" in
         windows) ;;
@@ -171,6 +167,20 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
         then
             nx_fail "On Linux, \"windows\" target is not supported."
         fi
+    fi
+}
+
+# [in] BUILD_DIR
+# [in] TARGET_DEVICE
+# [out] QT_DIR Is set only if TARGET is non-cross-compiling: the var is used only for launching.
+get_QT_DIR()
+{
+    # TODO: #mshevchenko Find a proper solution to locate Qt for conan.
+    if [[ $TARGET_DEVICE == "" ]]
+    then # 4.3 and later - conan.
+        QT_DIR="$BUILD_DIR\.conan\\data\\qt\\5.15.2\\_\\_\\package\\189784f1080359e8f6d1dfd7e8aa7dccd1cbae4c"
+    else # 4.2 and earlier - rdep.
+        QT_DIR="$PACKAGES_DIR/$TARGET_DEVICE/qt-$QT_VERSION"
     fi
 }
 
@@ -265,7 +275,8 @@ setup_vars()
         then
             nx_fail "Cannot find $ACTUAL_CMAKE_LISTS_TXT" "$HELP"
         fi
-        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+        get_TARGET_and_CUSTOMIZATION
+        get_QT_DIR
     elif [ -f "$CMAKE_CACHE_TXT" ]
     then #< This is a cmake build dir: find respective repo dir via CMakeCache.txt.
         BUILD_DIR="$VMS_DIR"
@@ -275,7 +286,8 @@ setup_vars()
             nx_fail "CMAKE_HOME_DIRECTORY not found in $CMAKE_CACHE_TXT" "$HELP"
         fi
         canonicalize_VMS_DIR
-        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+        get_TARGET_and_CUSTOMIZATION
+        get_QT_DIR
     else #< This is not a cmake build dir: test it to be vms project repo dir.
         if [ ! -f "$CMAKE_LISTS_TXT" ]
         then
@@ -288,8 +300,9 @@ setup_vars()
 #            nx_fail "The parent repo is not \"vms\" project." "$HELP"
 #        fi
 
-        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+        get_TARGET_and_CUSTOMIZATION
         get_BUILD_DIR
+        get_QT_DIR
     fi
 
     case "$CONFIG" in
