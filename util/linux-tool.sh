@@ -1809,7 +1809,7 @@ generateRemoteGitInfo()
     if [[ -f "$fetchHeadFile" ]]
     then
         local -r localizedFetchTimestampS=$(stat --format='%.X' "$fetchHeadFile")
-        # "stat" return localized version of numbers so it is possible that we have "," instead of
+        # "stat" returns localized version of numbers so it is possible that we have "," instead of
         # "." in the localizedFetchTimestampS. Fixing it with the string substitution.
         local -r fetchTimestampS=${localizedFetchTimestampS/,/.}
     else
