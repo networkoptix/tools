@@ -560,7 +560,7 @@ find_APIDOCTOOL_PARAMS()
         # Location for 4.2 and older.
         APIDOCTOOL_PROPERTIES="$VMS_DIR/vms/server/nx_vms_server/api/apidoctool.properties"
     fi
-    
+
     APIDOCTOOL_PARAMS=( -config "$(nx_path "$APIDOCTOOL_PROPERTIES")" )
     nx_log_array APIDOCTOOL_PARAMS
 }
@@ -1797,12 +1797,33 @@ generateRemoteGitInfo()
 
     local -r currentRefs="\"${currentRefsFromGit}\""
 
+    local -r gitRootPath="${VMS_DIR}/.git"
+    if [[ -d "$gitRootPath" ]]
+    then
+        local -r realGitRootPath="$gitRootPath"
+    else
+        local -r realGitRootPath=$(cat "$gitRootPath" | cut -d" " -f2)
+    fi
+
+    local -r fetchHeadFile="${realGitRootPath}/FETCH_HEAD"
+    if [[ -f "$fetchHeadFile" ]]
+    then
+        local -r localizedFetchTimestampS=$(stat --format='%.X' "$fetchHeadFile")
+        # "stat" return localized version of numbers so it is possible that we have "," instead of
+        # "." in the localizedFetchTimestampS. Fixing it with the string substitution.
+        local -r fetchTimestampS=${localizedFetchTimestampS/,/.}
+    else
+        nx_echo "WARNING: Cannot find FETCH_HEAD file. Leaving \"fetchTimestampS\" field empty."
+        local -r fetchTimestampS=""
+    fi
+
     nx_go_verbose \
         mkdir -p "$(dirname "$remoteGitInfoTxt")" \
         "[&&]" echo "$(cat <<EOF
 changeSet=$changeset
 branch=$branch
 currentRefs=$currentRefs
+fetchTimestampS=${fetchTimestampS}
 EOF
 )" "[>\"$remoteGitInfoTxt\"]"
 
