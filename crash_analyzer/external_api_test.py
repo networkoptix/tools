@@ -168,14 +168,13 @@ def _test_jira():
         assert {'a', 'c', 'e', 'h'} == jira.attachments()
 
         logger.info('Suppose developer set fix version future')
-        jira.api._update_field_values(jira.issue, 'fixVersions', {'Future'})
-        jira.issue.update(fields={'fixVersions': [{'name': 'Future'}]})
-        assert {'Future'} == jira.field_set('fixVersions')
+        jira.api._update_field_values(jira.issue, 'fixVersions', {'3.1_hotfix', '3.2'})
+        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
 
         logging.info('Attachments rotation without fix version update')
         jira.update_issue(['server--3.2.0.324-xyz-default--arm-rpi--f.gdb-bt'])
         assert {'3.0', '3.1', '3.2'} == jira.field_set('versions')
-        assert {'Future'} == jira.field_set('fixVersions')
+        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'c', 'e', 'f', 'h'} == jira.attachments()
 
         logger.info('Suppose issue is marked as duplicate')
@@ -185,7 +184,7 @@ def _test_jira():
         logging.info('Attachments rotation still happens')
         jira.update_issue(['server--4.0.0.412-abc-default--linux-x86--g.gdb-bt'])
         assert {'3.0', '3.1', '3.2', '4.0'} == jira.field_set('versions')
-        assert {'Future'} == jira.field_set('fixVersions')
+        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'e', 'f', 'g', 'h'} == jira.attachments()
 
         logging.info('Issue must be reopened if the problem reproduced in the next version')
