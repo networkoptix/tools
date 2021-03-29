@@ -1,8 +1,9 @@
 #!/usr/bin/python
 #
-# Plugging as NGinx file viewer:
+# Fast NGinx file viewer. `
 # ```
 #     location ~ ^/files/$ {
+#       # sudo apt-get install nginx-extras
 #       default_type 'text/html';
 #       content_by_lua_block {
 #           local p = io.popen("/usr/bin/python /path/to/this-script.py /path/to/files")
