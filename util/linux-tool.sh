@@ -164,16 +164,45 @@ get_TARGET_and_CUSTOMIZATION()
 }
 
 # [in] BUILD_DIR
+# [out] CONAN_PACKAGE_DIR
+get_CONAN_PACKAGE_DIR() # package_name
+{
+    local -r packageNamePattern=$1
+
+    case $TARGET in
+        windows|linux) local -r conanProfileName="${TARGET}_x64";;
+        *) local -r conanProfileName=$TARGET;;
+    esac
+
+    local -r getConanPathsInfoCommand=(
+        "conan" "info" "--paths" "--only"
+        "package_folder" "$VMS_DIR"
+        "--profile" "${VMS_DIR}/conan_recipes/profiles/${conanProfileName}.profile"
+    )
+
+    export CONAN_USER_HOME="$BUILD_DIR"
+    if ! packagePathsInfo=$("${getConanPathsInfoCommand[@]}")
+    then
+        echo "ERROR: Cannot get package paths from Conan - the following command has failed:"
+        echo "${getConanPathsInfoCommand[@]}"
+        exit 1
+    fi
+
+    CONAN_PACKAGE_DIR=$(grep -A1 "^${packageNamePattern}" <<< "${packagePathsInfo}" | \
+        sed "1d;s/ *package_folder: //")
+}
+
+# [in] BUILD_DIR
 # [out] QT_DIR Is set only if TARGET is non-cross-compiling: the var is used only for launching.
 get_QT_DIR()
 {
-    # TODO: #ptolstov Find a proper solution to locate Qt for conan.
+    local -r conanfile="$VMS_DIR/conanfile.py"
 
-    local -r DEFAULT_TARGET_CMAKE="$VMS_DIR/cmake/default_target.cmake"
-
-    if [[ ! -f $DEFAULT_TARGET_CMAKE ]]
+    if [[ -f "$conanfile" ]]
     then # 4.3 and later - conan.
-        QT_DIR="$BUILD_DIR\.conan\\data\\qt\\5.15.2\\_\\_\\package\\189784f1080359e8f6d1dfd7e8aa7dccd1cbae4c"
+        local CONAN_PACKAGE_DIR
+        get_CONAN_PACKAGE_DIR "qt"
+        QT_DIR="$CONAN_PACKAGE_DIR"
     else # 4.2 and earlier - rdep.
         local -r TARGET_DEVICE=$(
             cat "$DEFAULT_TARGET_CMAKE" \
@@ -539,16 +568,19 @@ copy_if_exists_and_different() # source_file target_file
 
 find_APIDOCTOOL_JAR()
 {
-#    local PACKAGE=$(cat "$VMS_DIR/sync_dependencies.py" \
-#        |grep -oE '"any/apidoctool(-[0-9.]+)?' |sed 's$"any/$$g')
-local PACKAGE=apidoctool-2.1
+    local -r conanfile="$VMS_DIR/conanfile.py"
 
-    if [ -z "$PACKAGE" ]
-    then
-        PACKAGE="apidoctool"
+    if [[ -f "$conanfile" ]]
+    then # 4.3 and later - conan.
+	local CONAN_PACKAGE_DIR
+	get_CONAN_PACKAGE_DIR "apidoctool"
+        APIDOCTOOL_PATH="$CONAN_PACKAGE_DIR"
+    else
+        local -r PACKAGE=apidoctool-2.1
+        APIDOCTOOL_PATH="$PACKAGES_DIR/any/$PACKAGE"
     fi
 
-    APIDOCTOOL_JAR="$PACKAGES_DIR/any/$PACKAGE/apidoctool.jar"
+    APIDOCTOOL_JAR="${APIDOCTOOL_PATH}/apidoctool.jar"
 }
 
 find_APIDOCTOOL_PARAMS()
