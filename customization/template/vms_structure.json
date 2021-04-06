@@ -194,6 +194,18 @@
                         }
                     },
                     {
+                        "label": "Custom url for the open source libraries",
+                        "name": "%customOpenSourceLibrariesUrl%",
+                        "value": "",
+                        "description": "3rd-party developers can override the built-in link if they add dependencies to some custom libraries",
+                        "type": "Text",
+                        "advanced": true,
+                        "optional": true,
+                        "public": true,
+                        "protected": false,
+                        "meta": {}
+                    },
+                    {
                         "_": "-------------------------- CONTACT BLOCK --------------------------",
                         "label": "Company Web Page",
                         "name": "%contact.companyUrl%",
@@ -237,6 +249,30 @@
                         "type": "Check Box",
                         "advanced": true,
                         "protected": true
+                    },
+                    {
+                        "label": "Client Auto Updates",
+                        "name": "%desktop.clientAutoUpdates%",
+                        "value": "True",
+                        "description": "Allow desktop client auto-updates",
+                        "type": "Check Box",
+                        "advanced": true,
+                        "optional": true,
+                        "public": true,
+                        "protected": false,
+                        "meta": {}
+                    },
+                    {
+                        "label": "Custom client flag",
+                        "name": "%desktop.customClient%",
+                        "value": "",
+                        "description": "Mark the customization as custom (e.g. for open source based customizations); e.g. to prevent autoupdates",
+                        "type": "Check Box",
+                        "advanced": true,
+                        "optional": true,
+                        "public": true,
+                        "protected": false,
+                        "meta": {}
                     },
                     {
                         "label": "Trial licenses key",
@@ -508,7 +544,6 @@
                         "optional": true,
                         "advanced": true
                     }
-
                 ]
             },
             {

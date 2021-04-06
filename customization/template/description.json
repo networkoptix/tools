@@ -12,7 +12,7 @@
     "cloudName": "%cloudName%",
     "defaultLanguage": "%defaultLanguage%",
     "customLanguages": "%customLanguages%",
-
+    "customOpenSourceLibrariesUrl": "%customOpenSourceLibrariesUrl%",
     "contact": {
         "companyUrl": "%contact.companyUrl%",
         "supportAddress": "%contact.supportAddress%",
@@ -24,6 +24,8 @@
     },
 
     "desktop": {
+        "clientAutoUpdates": "%desktop.clientAutoUpdates%",
+        "customClient": "%desktop.customClient%",
         "supportsHanwha": "%desktop.supportsHanwha%",
         "supportsVmax": "%desktop.supportsVmax%",
         "trialLicenseKey": "%desktop.trialLicenseKey%",
