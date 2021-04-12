@@ -175,9 +175,10 @@ get_CONAN_PACKAGE_DIR() # package_name
     esac
 
     local -r getConanPathsInfoCommand=(
-        "conan" "info" "--paths" "--only"
+        "conan" "info" "--update" "--paths" "--only"
         "package_folder" "$VMS_DIR"
-        "--profile" "${VMS_DIR}/conan_recipes/profiles/${conanProfileName}.profile"
+        "--profile:build" "default"
+        "--profile:host" "${VMS_DIR}/conan_recipes/profiles/${conanProfileName}.profile"
     )
 
     export CONAN_USER_HOME="$BUILD_DIR"
