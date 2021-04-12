@@ -97,6 +97,7 @@ public final class SourceCodeParser
                 final List<ApidocCommentParser.FunctionDescription> functions =
                     createFunctionsFromComment(
                         typeManager,
+                        apidoc.groups,
                         requiredFunctionCaptionLenLimit,
                         requiredGroupNameLenLimit);
                 if (functions != null && !functions.isEmpty())
@@ -242,6 +243,7 @@ public final class SourceCodeParser
      */
     private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment(
         TypeManager typeManager,
+        List<Apidoc.Group> groups,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws ApidocCommentParser.Error, ApidocTagParser.Error, TypeManager.Error
@@ -259,6 +261,7 @@ public final class SourceCodeParser
             ApidocTagParser.getItems(
                 commentLines, sourceCode.getFilename(), commentStartLine, verbose),
             typeManager,
+            groups,
             requiredFunctionCaptionLenLimit,
             requiredGroupNameLenLimit);
 

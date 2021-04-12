@@ -98,6 +98,7 @@ public final class ApidocCommentParser
     public List<FunctionDescription> createFunctionsFromTags(
         List<ApidocTagParser.Item> tags,
         TypeManager typeManager,
+        List<Apidoc.Group> groups,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws
@@ -111,7 +112,11 @@ public final class ApidocCommentParser
         while (tagIterator.hasNext())
         {
             functions.add(createFunctionFromTags(
-                tagIterator, typeManager, requiredFunctionCaptionLenLimit, requiredGroupNameLenLimit));
+                tagIterator,
+                typeManager,
+                groups,
+                requiredFunctionCaptionLenLimit,
+                requiredGroupNameLenLimit));
         }
 
         return functions;
@@ -132,6 +137,7 @@ public final class ApidocCommentParser
     private FunctionDescription createFunctionFromTags(
         ListIterator<ApidocTagParser.Item> tagIterator,
         TypeManager typeManager,
+        List<Apidoc.Group> groups,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws
@@ -151,7 +157,7 @@ public final class ApidocCommentParser
         boolean permissionsParsed = false;
         boolean returnParsed = false;
 
-        FunctionDescription description = createFunctionFromApidocItem(item);
+        FunctionDescription description = createFunctionFromApidocItem(item, groups);
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
@@ -282,7 +288,8 @@ public final class ApidocCommentParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private FunctionDescription createFunctionFromApidocItem(ApidocTagParser.Item item)
+    private FunctionDescription createFunctionFromApidocItem(
+        ApidocTagParser.Item item, List<Apidoc.Group> groups)
         throws Error
     {
         String[] values = Utils.matchRegex(
@@ -291,19 +298,31 @@ public final class ApidocCommentParser
             throw new Error(item.getErrorPrefix() + "Wrong " + TAG_APIDOC + " function header.");
 
         FunctionDescription result = new FunctionDescription();
-        result.urlPrefix = values[1];
+        result.urlPrefix = "";
+        if (!groups.isEmpty())
+        {
+            for (Apidoc.Group g: groups)
+            {
+                if (values[1].startsWith(g.urlPrefix + '/'))
+                {
+                    result.urlPrefix = g.urlPrefix;
+                    values[1] = values[1].substring(g.urlPrefix.length() + 1);
+                    break;
+                }
+            }
+        }
         result.function = new Apidoc.Function();
 
         result.function.method = values[0].trim();
         try
         {
-            result.function.name = URLDecoder.decode(values[2], "UTF-8");
+            result.function.name = URLDecoder.decode(values[1], "UTF-8");
         }
         catch (UnsupportedEncodingException e)
         {
-            result.function.name = values[2];
+            result.function.name = values[1];
         }
-        result.function.description = values[3].trim();
+        result.function.description = values[2].trim();
         if (LABEL_ARRAY_PARAMS.equals(item.getLabel()))
             result.function.arrayParams = true;
         else if (!"".equals(item.getLabel()))
@@ -663,7 +682,7 @@ public final class ApidocCommentParser
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
-        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w[\\w%\\{\\}/\\?-]*)(.*)", Pattern.DOTALL);
-    //       0HttpMthd        1UrlPre   2FnNm                  3Txt
-    //       GET              /ec2      getRe                  \nRe
+        "\\s*([A-Z]+)\\s+(/[\\w{}./%?-]*)(?:\\s+(.*))?", Pattern.DOTALL);
+    //        0Method     1Path                  2Txt
+    //        GET         /ec2/getUsers        \nReturn users registered in the System.
 }
