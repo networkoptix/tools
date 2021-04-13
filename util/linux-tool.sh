@@ -94,6 +94,7 @@ Here <command> can be one of the following:
  bak [target-dir] # Back up all sources to the specified or same-name dir in BACKUP_DIR.
  vs [args] # Open the VMS project in Visual Studio (Windows-only).
  thg [args] # Open Tortoise HG for the VMS project dir; if no args, "log" command is issued.
+ check_open # Checks the current directory to comply with the open-source standards.
 
  list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
@@ -512,6 +513,26 @@ do_run_ut() # TestName "$@"
         nx_echo $(nx_lred)"FAILURE: Test $TEST_NAME FAILED."$(nx_nocolor)
     fi
     return $RESULT
+}
+
+do_check_open()
+{
+    if [[ -z "$AUTOMATION_REPO_DIR" ]]
+    then
+        local -r automationDir="${DEVELOP_DIR}/automation"
+    else
+        local -r automationDir="$AUTOMATION_REPO_DIR"
+    fi
+
+    local -r checkScript="${automationDir}/scripts/check_open_sources/check_open_sources.py"
+    if [[ ! -d "$automationDir" || ! -f "$checkScript" ]]
+    then
+        nx_echo "Cannot find directory with \"automation\" repo."
+        exit 1
+    fi
+
+    export PYTHONPATH=$(nx_absolute_path "${automationDir}/bots/robocat")
+    "$checkScript" "$(pwd)"
 }
 
 doGitUpdate() # [branch]
@@ -2261,6 +2282,9 @@ main()
 
             nx_set_background "$OLD_BACKGROUND"
             nx_pop_title
+            ;;
+        check_open)
+            do_check_open
             ;;
         #..........................................................................................
         *)
