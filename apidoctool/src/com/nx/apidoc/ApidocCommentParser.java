@@ -1,5 +1,6 @@
 package com.nx.apidoc;
 
+import com.nx.apidoctool.Replacement;
 import com.nx.util.Utils;
 
 import java.io.UnsupportedEncodingException;
@@ -99,6 +100,7 @@ public final class ApidocCommentParser
         List<ApidocTagParser.Item> tags,
         TypeManager typeManager,
         List<Apidoc.Group> groups,
+        List<Replacement> urlPrefixReplacements,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws
@@ -115,6 +117,7 @@ public final class ApidocCommentParser
                 tagIterator,
                 typeManager,
                 groups,
+                urlPrefixReplacements,
                 requiredFunctionCaptionLenLimit,
                 requiredGroupNameLenLimit));
         }
@@ -138,6 +141,7 @@ public final class ApidocCommentParser
         ListIterator<ApidocTagParser.Item> tagIterator,
         TypeManager typeManager,
         List<Apidoc.Group> groups,
+        List<Replacement> urlPrefixReplacements,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws
@@ -157,7 +161,8 @@ public final class ApidocCommentParser
         boolean permissionsParsed = false;
         boolean returnParsed = false;
 
-        FunctionDescription description = createFunctionFromApidocItem(item, groups);
+        FunctionDescription description =
+            createFunctionFromApidocItem(item, groups, urlPrefixReplacements);
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
@@ -289,13 +294,18 @@ public final class ApidocCommentParser
      * @return Null if the comment should not convert to an XML function.
      */
     private FunctionDescription createFunctionFromApidocItem(
-        ApidocTagParser.Item item, List<Apidoc.Group> groups)
+        ApidocTagParser.Item item,
+        List<Apidoc.Group> groups,
+        List<Replacement> urlPrefixReplacements)
         throws Error
     {
         String[] values = Utils.matchRegex(
             functionHeaderRegex, item.getFullText(indentLevel));
         if (values == null)
             throw new Error(item.getErrorPrefix() + "Wrong " + TAG_APIDOC + " function header.");
+
+        for (Replacement r: urlPrefixReplacements)
+            values[1] = values[1].replace('/' + r.target + '/', '/' + r.replacement + '/');
 
         FunctionDescription result = new FunctionDescription();
         result.urlPrefix = "";

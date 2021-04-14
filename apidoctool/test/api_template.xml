@@ -13,6 +13,11 @@
             <groupDescription>This group contains functions related to a single server.</groupDescription>
         </group>
         <group>
+            <groupName>Cloud Db API</groupName>
+            <urlPrefix>/cdb</urlPrefix>
+            <groupDescription>API functions.</groupDescription>
+        </group>
+        <group>
             <groupName>Video API</groupName>
             <urlPrefix/>
             <groupDescription>

@@ -2,7 +2,7 @@ package com.nx.apidoctool;
 
 import java.util.ArrayList;
 
-final class Replacement
+public final class Replacement
 {
     public final String target;
     public final String replacement;

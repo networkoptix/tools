@@ -10673,6 +10673,23 @@ system settings with their values</description>
             </functions>
         </group>
         <group>
+            <groupName>Cloud Db API</groupName>
+            <urlPrefix>/cdb</urlPrefix>
+            <groupDescription>API functions.</groupDescription>
+            <functions>
+                <function>
+                    <name>maintenance/malloc_info</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>malloc_info(3) output. See https://man7.org/linux/man-pages/man3/malloc_info.3.html
+for details.</caption>
+                    </result>
+                </function>
+            </functions>
+        </group>
+        <group>
             <groupName>Video API</groupName>
             <urlPrefix/>
             <groupDescription>

@@ -98,18 +98,11 @@ public final class SourceCodeParser
                     createFunctionsFromComment(
                         typeManager,
                         apidoc.groups,
+                        urlPrefixReplacements,
                         requiredFunctionCaptionLenLimit,
                         requiredGroupNameLenLimit);
                 if (functions != null && !functions.isEmpty())
                 {
-                    for (ApidocCommentParser.FunctionDescription description: functions)
-                    {
-                        for (Replacement r: urlPrefixReplacements)
-                        {
-                            description.urlPrefix =
-                                description.urlPrefix.replace(r.target, r.replacement);
-                        }
-                    }
                     final String urlPrefix = functions.get(0).urlPrefix;
                     for (ApidocCommentParser.FunctionDescription description: functions)
                     {
@@ -244,6 +237,7 @@ public final class SourceCodeParser
     private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment(
         TypeManager typeManager,
         List<Apidoc.Group> groups,
+        List<Replacement> urlPrefixReplacements,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws ApidocCommentParser.Error, ApidocTagParser.Error, TypeManager.Error
@@ -262,6 +256,7 @@ public final class SourceCodeParser
                 commentLines, sourceCode.getFilename(), commentStartLine, verbose),
             typeManager,
             groups,
+            urlPrefixReplacements,
             requiredFunctionCaptionLenLimit,
             requiredGroupNameLenLimit);
 
