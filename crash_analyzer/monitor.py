@@ -3,6 +3,7 @@
 import sys
 import argparse
 import logging
+import re
 import time
 import timeit
 from datetime import timedelta
@@ -22,6 +23,32 @@ VERSION = '2.0'
 RETRY_CRASH_ID = 'RETRY'
 FAILED_CRASH_ID = 'FAILED'
 USELESS_STACK_KEY = 'USELESS_STACK'
+
+USELESS_METHODS = [
+    'Q[A-Z]',
+    'QtPrivate',
+    'operator new',
+    'std::',
+]
+USELESS_METHODS_RE = re.compile('|'.join([f'({method})' for method in USELESS_METHODS]))
+
+
+def get_signature(lines_of_code: list) -> str:
+    for line in lines_of_code:
+        try:
+            lib, method = line.split('!')
+        except ValueError:
+            continue
+        if lib in ['nx_vms_client_desktop', 'Client'] and not USELESS_METHODS_RE.match(method):
+            return method
+    for line in lines_of_code:
+        try:
+            lib, method = line.split('!')
+        except ValueError:
+            continue
+        if not USELESS_METHODS_RE.match(method):
+            return line
+    return lines_of_code[0]
 
 
 class Options:
@@ -263,6 +290,10 @@ class Monitor:
             jira.autoclose_issue_if_required(issue, reason)
         else:
             jira.update_issue(issue, reports, directory=directory)
+
+        lines_of_code = jira.get_code(issue)
+        signature = get_signature(lines_of_code)
+        jira.create_or_update_crash_issue(issue, signature, lines_of_code)
         return issue, reports
 
     @classmethod
