@@ -316,11 +316,14 @@ public final class ApidocCommentParser
                 if (values[1].startsWith(g.urlPrefix + '/'))
                 {
                     result.urlPrefix = g.urlPrefix;
-                    values[1] = values[1].substring(g.urlPrefix.length() + 1);
+                    values[1] = values[1].substring(g.urlPrefix.length());
                     break;
                 }
             }
         }
+        assert values[1].charAt(0) == '/';
+        values[1] = values[1].substring(1); //< Removing initial `/`.
+
         result.function = new Apidoc.Function();
 
         result.function.method = values[0].trim();
