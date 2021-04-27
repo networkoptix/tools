@@ -28,12 +28,16 @@ public final class ApidocUtils
     /**
      * @throws Error if not found.
      */
-    public static Apidoc.Group getGroupByUrlPrefix(Apidoc apidoc, String urlPrefix) throws Error
+    public static Apidoc.Group getGroupByUrlPrefix(
+        Apidoc apidoc, String urlPrefix, boolean isProprietary) throws Error
     {
         for (Apidoc.Group group: apidoc.groups)
         {
-            if (group.urlPrefix.equals(urlPrefix))
+            if (group.urlPrefix.equals(urlPrefix)
+                && (isProprietary == group.groupName.startsWith("Proprietary ")))
+            {
                 return group;
+            }
         }
         throw new Error("Group not found in Apidoc XML: " + urlPrefix);
     }

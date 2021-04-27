@@ -68,6 +68,12 @@ public final class VmsCodeToApiXmlExecutor
             apidoc = new Apidoc();
         }
 
+        // Add legacy API predefined groups.
+        ApidocUtils.getGroupByName(apidoc, "System API", "/ec2");
+        ApidocUtils.getGroupByName(apidoc, "Proprietary System API", "/ec2");
+        ApidocUtils.getGroupByName(apidoc, "Server API", "/api");
+        ApidocUtils.getGroupByName(apidoc, "Proprietary Server API", "/api");
+
         TypeManager typeManager = null;
         if (!params.typeHeaderPaths().isEmpty())
         {
@@ -114,9 +120,11 @@ public final class VmsCodeToApiXmlExecutor
         else
             System.out.println("    API functions processed: " + processedFunctionsCount);
 
-        List<String> groupsToSort= new ArrayList<String>();
+        List<String> groupsToSort = new ArrayList<String>();
         groupsToSort.add("System API");
         groupsToSort.add("Server API");
+        groupsToSort.add("Proprietary System API");
+        groupsToSort.add("Proprietary Server API");
         ApidocUtils.sortGroups(apidoc, groupsToSort);
 
         if (outputApiXmlFile != null)

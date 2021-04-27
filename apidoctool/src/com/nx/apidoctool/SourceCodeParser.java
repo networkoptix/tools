@@ -155,7 +155,8 @@ public final class SourceCodeParser
                         {
                             final Apidoc.Group group =
                                 (requiredGroupNameLenLimit < 0)
-                                    ? ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix)
+                                    ? ApidocUtils.getGroupByUrlPrefix(
+                                        apidoc, urlPrefix, description.function.proprietary)
                                     : ApidocUtils.getGroupByName(
                                         apidoc, description.urlPrefix, description.urlPrefix);
                             if (!ApidocUtils.checkFunctionDuplicate(group, description.function))

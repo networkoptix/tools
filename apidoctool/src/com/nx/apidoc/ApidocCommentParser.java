@@ -313,7 +313,7 @@ public final class ApidocCommentParser
         {
             for (Apidoc.Group g: groups)
             {
-                if (values[1].startsWith(g.urlPrefix + '/'))
+                if (!g.urlPrefix.isEmpty() && values[1].startsWith(g.urlPrefix + '/'))
                 {
                     result.urlPrefix = g.urlPrefix;
                     values[1] = values[1].substring(g.urlPrefix.length());
