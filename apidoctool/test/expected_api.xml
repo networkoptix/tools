@@ -578,145 +578,6 @@ only the top level data is provided.</description>
                     </params>
                     <result/>
                 </function>
-                <function proprietary="true">
-                    <name>execAction</name>
-                    <description>Execute an action. Action data should be in the internal binary format. This method is going
-to be refactored in next versions.</description>
-                    <method>POST</method>
-                    <params>
-                        <param>
-                            <name>actionType</name>
-                            <type>enum</type>
-                            <description/>
-                            <optional>false</optional>
-                            <values>
-                                <value>
-                                    <name>undefinedAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>cameraOutputAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>bookmarkAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>cameraRecordingAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>panicRecordingAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>sendMailAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>diagnosticsAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>showPopupAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>playSoundAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>playSoundOnceAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>sayTextAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>executePtzPresetAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>showTextOverlayAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>showOnAlarmLayoutAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>execHttpRequestAction</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>acknowledgeAction</name>
-                                    <description/>
-                                </value>
-                            </values>
-                        </param>
-                        <param>
-                            <name>toggleState</name>
-                            <type>enum</type>
-                            <description/>
-                            <optional>false</optional>
-                            <values>
-                                <value>
-                                    <name>inactive</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>active</name>
-                                    <description/>
-                                </value>
-                                <value>
-                                    <name>undefined</name>
-                                    <description/>
-                                </value>
-                            </values>
-                        </param>
-                        <param>
-                            <name>receivedFromRemoteHost</name>
-                            <type>boolean</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>resourceIds</name>
-                            <type>uuidArray</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>params</name>
-                            <type>string</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>runtimeParams</name>
-                            <type>string</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>ruleId</name>
-                            <type>uuid</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>aggregationCount</name>
-                            <type>integer</type>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>XML with the "OK" message or an error code.</caption>
-                    </result>
-                </function>
                 <function>
                     <name>getAccessRights</name>
                     <description>Return list of ids of accessible resources for each user in the System.</description>
@@ -8519,56 +8380,6 @@ the result of the corresponding GET function.
                     </params>
                     <result/>
                 </function>
-                <function proprietary="true">
-                    <name>updateInformation/freeSpaceForUpdateFiles</name>
-                    <description>Get free space available for downloading and extracting update files.</description>
-                    <method>GET</method>
-                    <params>
-                        <param proprietary="true">
-                            <name>local</name>
-                            <type>option</type>
-                            <description>If present, the request should not be redirected to another
-server.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param proprietary="true">
-                            <name>extraFormatting</name>
-                            <type>option</type>
-                            <description>If present and the requested result format is
-non-binary, indentation and spacing will be used to improve readability.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>format</name>
-                            <type>enum</type>
-                            <description>Data format. Default value is "json".</description>
-                            <optional>true</optional>
-                            <values>
-                                <value>
-                                    <name>ubjson</name>
-                                    <description>Universal Binary JSON data format.</description>
-                                </value>
-                                <value>
-                                    <name>json</name>
-                                    <description>JSON data format.</description>
-                                </value>
-                                <value>
-                                    <name>xml</name>
-                                    <description>XML data format.</description>
-                                </value>
-                                <value>
-                                    <name>csv</name>
-                                    <description>CSV data format. In case of a hierarchical structure,
-only the top level data is provided.</description>
-                                </value>
-                            </values>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>The amount of free space available for update files in bytes for each online server
-in the system, in the specified format.</caption>
-                    </result>
-                </function>
             </functions>
         </group>
         <group>
@@ -8898,60 +8709,6 @@ be called either via GET or POST method. POST data should be a json object.</des
                     </params>
                     <result>
                         <caption>JSON object with an error code, error message and diagnostics result.</caption>
-                        <type>object</type>
-                    </result>
-                </function>
-                <function proprietary="true">
-                    <name>events</name>
-                    <description>Return event log in the proprietary binary format.</description>
-                    <method>GET</method>
-                    <params>
-                        <param>
-                            <name>from</name>
-                            <type>string</type>
-                            <description>Start of time period (in milliseconds since epoch).</description>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>to</name>
-                            <type>string</type>
-                            <description>End of time period (in milliseconds since epoch).</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>event</name>
-                            <type>enum</type>
-                            <description>Event type.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>action</name>
-                            <type>enum</type>
-                            <description>Action type.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>brule_id</name>
-                            <type>uuid</type>
-                            <description>Event rule id.</description>
-                            <optional>true</optional>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>Server event log in the proprietary binary format.</caption>
-                        <type>binary</type>
-                    </result>
-                </function>
-                <function proprietary="true">
-                    <name>execute</name>
-                    <description>Execute any script from subfolder "scripts" of media server. Script name provides directly
-in a URL path like "/api/execute/script1.sh". All URL parameters are passed directly to
-a script as an parameters.</description>
-                    <permissions>Administrator.</permissions>
-                    <method>GET</method>
-                    <params/>
-                    <result>
-                        <caption>JSON with error code.</caption>
                         <type>object</type>
                     </result>
                 </function>
@@ -9522,16 +9279,6 @@ field.</caption>
                         <type>object</type>
                     </result>
                 </function>
-                <function proprietary="true">
-                    <name>getHardwareInfo</name>
-                    <description>Get hardware information</description>
-                    <method>GET</method>
-                    <params/>
-                    <result>
-                        <caption>JSON with hardware information.</caption>
-                        <type>object</type>
-                    </result>
-                </function>
                 <function>
                     <name>getNonce</name>
                     <description>Return authentication parameters: "nonce" and "realm".</description>
@@ -9775,22 +9522,6 @@ decimal components.</description>
                         </params>
                     </result>
                 </function>
-                <function proprietary="true">
-                    <name>installUpdate</name>
-                    <description>Updates server by the package contained in POST body</description>
-                    <method>POST</method>
-                    <params/>
-                    <result>
-                        <caption>JSON with error code.
-When all is OK errorString will be empty. In case of error errorString will contain:
-UP_TO_DATE if the provided version is already installed;
-INVALID_FILE if the provided file cannot be opened as a ZIP archive;
-INCOMPATIBLE_SYSTEM if the update file is targeted for another system;
-EXTRACTION_ERROR if some extraction problems were found (e.g. not enough space);
-INSTALLATION_ERROR if the server could not execute installation script.</caption>
-                        <type>object</type>
-                    </result>
-                </function>
                 <function>
                     <name>logLevel</name>
                     <description>Get or set server log level.</description>
@@ -9855,51 +9586,6 @@ detailed levels.</description>
                         </param>
                     </params>
                     <result/>
-                </function>
-                <function proprietary="true">
-                    <name>manualCamera/add</name>
-                    <description>Manually add camera(s). If several cameras are added, parameters "url" and "manufacturer"
-must be defined several times with incrementing suffix "0", "1", etc.</description>
-                    <method>GET</method>
-                    <params>
-                        <param>
-                            <name>url0</name>
-                            <type>string</type>
-                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the
-result of /api/manualCamera/status.</description>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>uniqueId0</name>
-                            <type>string</type>
-                            <description>Camera physical id, can be obtained from "reply.cameras[].uniqueId"
-field in the result of /api/manualCamera/status.</description>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>manufacturer0</name>
-                            <type>string</type>
-                            <description>Camera manufacturer, can be obtained from
-"reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>user</name>
-                            <type>string</type>
-                            <description>Username for the cameras.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>password</name>
-                            <type>string</type>
-                            <description>Password for the cameras.</description>
-                            <optional>true</optional>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>JSON object with error message and error code (0 means OK).</caption>
-                        <type>object</type>
-                    </result>
                 </function>
                 <function>
                     <name>manualCamera/add</name>
@@ -10362,24 +10048,6 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                         <type>object</type>
                     </result>
                 </function>
-                <function proprietary="true">
-                    <name>restoreState</name>
-                    <description>Restore server state to default. Cleans database and system name.</description>
-                    <permissions>Administrator.</permissions>
-                    <method>POST</method>
-                    <params>
-                        <param>
-                            <name>oldPassword</name>
-                            <type>string</type>
-                            <description>Current admin password</description>
-                            <optional>false</optional>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>JSON result with an error code and an error string.</caption>
-                        <type>object</type>
-                    </result>
-                </function>
                 <function>
                     <name>saveCloudSystemCredentials</name>
                     <description>Sets or resets cloud credentials (systemId and authorization key) to be used by system</description>
@@ -10412,17 +10080,6 @@ cloud anymore</description>
                         </param>
                     </params>
                     <result/>
-                </function>
-                <function proprietary="true">
-                    <name>scriptList</name>
-                    <description>Return list of scripts to execute.</description>
-                    <permissions>Administrator.</permissions>
-                    <method>GET</method>
-                    <params/>
-                    <result>
-                        <caption>JSON object with string list.</caption>
-                        <type>object</type>
-                    </result>
                 </function>
                 <function>
                     <name>setCameraParam</name>
@@ -10483,32 +10140,6 @@ Can be called only if server flags include "SF_timeCtrl"
                             <type>string</type>
                             <description>Date and time (as string containing time in milliseconds since
 epoch, or a local time formatted like
-<code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
-- the format is auto-detected).</description>
-                            <optional>false</optional>
-                        </param>
-                    </params>
-                    <result/>
-                </function>
-                <function proprietary="true">
-                    <name>settime</name>
-                    <description>Set current time on the server machine. Can be called only if server flags include
-"SF_timeCtrl" (server flags can be obtained via /ec2/getMediaServersEx in "flags"
-field).</description>
-                    <permissions>Administrator.</permissions>
-                    <method>GET</method>
-                    <params>
-                        <param>
-                            <name>timezone</name>
-                            <type>string</type>
-                            <description>Time zone identifier, can be obtained via /api/getTimeZones.</description>
-                            <optional>true</optional>
-                        </param>
-                        <param>
-                            <name>datetime</name>
-                            <type>string</type>
-                            <description>System date and time (as a string containing time in milliseconds
-since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
@@ -11035,6 +10666,389 @@ for details.</caption>
                     </description>
                     <method/>
                     <params/>
+                    <result/>
+                </function>
+            </functions>
+        </group>
+        <group>
+            <groupName>Proprietary System API</groupName>
+            <urlPrefix>/ec2</urlPrefix>
+            <groupDescription/>
+            <functions>
+                <function proprietary="true">
+                    <name>execAction</name>
+                    <description>Execute an action. Action data should be in the internal binary format. This method is going
+to be refactored in next versions.</description>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>actionType</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>undefinedAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>cameraOutputAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>bookmarkAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>cameraRecordingAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>panicRecordingAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>sendMailAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>diagnosticsAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>showPopupAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>playSoundAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>playSoundOnceAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>sayTextAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>executePtzPresetAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>showTextOverlayAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>showOnAlarmLayoutAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>execHttpRequestAction</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>acknowledgeAction</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>toggleState</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>inactive</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>active</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>undefined</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>receivedFromRemoteHost</name>
+                            <type>boolean</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>resourceIds</name>
+                            <type>uuidArray</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>params</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>runtimeParams</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>ruleId</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>aggregationCount</name>
+                            <type>integer</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>XML with the "OK" message or an error code.</caption>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>updateInformation/freeSpaceForUpdateFiles</name>
+                    <description>Get free space available for downloading and extracting update files.</description>
+                    <method>GET</method>
+                    <params>
+                        <param proprietary="true">
+                            <name>local</name>
+                            <type>option</type>
+                            <description>If present, the request should not be redirected to another
+server.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param proprietary="true">
+                            <name>extraFormatting</name>
+                            <type>option</type>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>format</name>
+                            <type>enum</type>
+                            <description>Data format. Default value is "json".</description>
+                            <optional>true</optional>
+                            <values>
+                                <value>
+                                    <name>ubjson</name>
+                                    <description>Universal Binary JSON data format.</description>
+                                </value>
+                                <value>
+                                    <name>json</name>
+                                    <description>JSON data format.</description>
+                                </value>
+                                <value>
+                                    <name>xml</name>
+                                    <description>XML data format.</description>
+                                </value>
+                                <value>
+                                    <name>csv</name>
+                                    <description>CSV data format. In case of a hierarchical structure,
+only the top level data is provided.</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>The amount of free space available for update files in bytes for each online server
+in the system, in the specified format.</caption>
+                    </result>
+                </function>
+            </functions>
+        </group>
+        <group>
+            <groupName>Proprietary Server API</groupName>
+            <urlPrefix>/api</urlPrefix>
+            <groupDescription/>
+            <functions>
+                <function proprietary="true">
+                    <name>events</name>
+                    <description>Return event log in the proprietary binary format.</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>from</name>
+                            <type>string</type>
+                            <description>Start of time period (in milliseconds since epoch).</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>to</name>
+                            <type>string</type>
+                            <description>End of time period (in milliseconds since epoch).</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>event</name>
+                            <type>enum</type>
+                            <description>Event type.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>action</name>
+                            <type>enum</type>
+                            <description>Action type.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>brule_id</name>
+                            <type>uuid</type>
+                            <description>Event rule id.</description>
+                            <optional>true</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>Server event log in the proprietary binary format.</caption>
+                        <type>binary</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>execute</name>
+                    <description>Execute any script from subfolder "scripts" of media server. Script name provides directly
+in a URL path like "/api/execute/script1.sh". All URL parameters are passed directly to
+a script as an parameters.</description>
+                    <permissions>Administrator.</permissions>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON with error code.</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>getHardwareInfo</name>
+                    <description>Get hardware information</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON with hardware information.</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>installUpdate</name>
+                    <description>Updates server by the package contained in POST body</description>
+                    <method>POST</method>
+                    <params/>
+                    <result>
+                        <caption>JSON with error code.
+When all is OK errorString will be empty. In case of error errorString will contain:
+UP_TO_DATE if the provided version is already installed;
+INVALID_FILE if the provided file cannot be opened as a ZIP archive;
+INCOMPATIBLE_SYSTEM if the update file is targeted for another system;
+EXTRACTION_ERROR if some extraction problems were found (e.g. not enough space);
+INSTALLATION_ERROR if the server could not execute installation script.</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>manualCamera/add</name>
+                    <description>Manually add camera(s). If several cameras are added, parameters "url" and "manufacturer"
+must be defined several times with incrementing suffix "0", "1", etc.</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>url0</name>
+                            <type>string</type>
+                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the
+result of /api/manualCamera/status.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>uniqueId0</name>
+                            <type>string</type>
+                            <description>Camera physical id, can be obtained from "reply.cameras[].uniqueId"
+field in the result of /api/manualCamera/status.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>manufacturer0</name>
+                            <type>string</type>
+                            <description>Camera manufacturer, can be obtained from
+"reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>user</name>
+                            <type>string</type>
+                            <description>Username for the cameras.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>password</name>
+                            <type>string</type>
+                            <description>Password for the cameras.</description>
+                            <optional>true</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>JSON object with error message and error code (0 means OK).</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>restoreState</name>
+                    <description>Restore server state to default. Cleans database and system name.</description>
+                    <permissions>Administrator.</permissions>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>oldPassword</name>
+                            <type>string</type>
+                            <description>Current admin password</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>JSON result with an error code and an error string.</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>scriptList</name>
+                    <description>Return list of scripts to execute.</description>
+                    <permissions>Administrator.</permissions>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object with string list.</caption>
+                        <type>object</type>
+                    </result>
+                </function>
+                <function proprietary="true">
+                    <name>settime</name>
+                    <description>Set current time on the server machine. Can be called only if server flags include
+"SF_timeCtrl" (server flags can be obtained via /ec2/getMediaServersEx in "flags"
+field).</description>
+                    <permissions>Administrator.</permissions>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>timezone</name>
+                            <type>string</type>
+                            <description>Time zone identifier, can be obtained via /api/getTimeZones.</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>datetime</name>
+                            <type>string</type>
+                            <description>System date and time (as a string containing time in milliseconds
+since epoch, or a local time formatted like
+<code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
+- the format is auto-detected).</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
                     <result/>
                 </function>
             </functions>
