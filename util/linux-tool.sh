@@ -9,6 +9,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
 : ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
 : ${SDK=0} #< 0|1 - enable/disable building with SDKs when not building with distribs.
+: ${TESTS=1} #< 0|1 - enable/disable building with unit tests.
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${BACKUP_DIR="$DEVELOP_DIR/BACKUP"}
@@ -400,7 +401,11 @@ do_gen() # [cache] "$@"
 
     case "$TARGET" in
         edge1) `# Currently, unit tests cannot compile without camera vendor plugins. #`;;
-        *) COMPOSITION_ARG+=( -DwithTests=ON -DwithUnitTestsArchive=ON )
+        *)
+            if [[ $TESTS = 1 ]]
+            then
+                COMPOSITION_ARG+=( -DwithTests=ON -DwithUnitTestsArchive=ON )
+            fi
     esac
 
     if [[ $DISTRIB = 1 ]]
