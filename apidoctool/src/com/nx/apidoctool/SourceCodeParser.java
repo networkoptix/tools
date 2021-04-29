@@ -153,12 +153,8 @@ public final class SourceCodeParser
 
                         if (description.function.groups.isEmpty())
                         {
-                            final Apidoc.Group group =
-                                (requiredGroupNameLenLimit < 0)
-                                    ? ApidocUtils.getGroupByUrlPrefix(
-                                        apidoc, urlPrefix, description.function.proprietary)
-                                    : ApidocUtils.getGroupByName(
-                                        apidoc, description.urlPrefix, description.urlPrefix);
+                            final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(
+                                apidoc, urlPrefix, description.function.proprietary);
                             if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
                             {
                                 throw new Error(
@@ -172,7 +168,12 @@ public final class SourceCodeParser
                             for (final String groupName: description.function.groups)
                             {
                                 final Apidoc.Group group = ApidocUtils.getGroupByName(
-                                    apidoc, groupName, description.urlPrefix);
+                                    apidoc, groupName);
+                                if (!urlPrefix.isEmpty())
+                                {
+                                    description.function.name =
+                                        urlPrefix.substring(1) + '/' + description.function.name;
+                                }
                                 if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
                                 {
                                     throw new Error(

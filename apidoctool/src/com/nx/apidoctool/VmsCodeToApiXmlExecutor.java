@@ -69,10 +69,10 @@ public final class VmsCodeToApiXmlExecutor
         }
 
         // Add legacy API predefined groups.
-        ApidocUtils.getGroupByName(apidoc, "System API", "/ec2");
-        ApidocUtils.getGroupByName(apidoc, "Proprietary System API", "/ec2");
-        ApidocUtils.getGroupByName(apidoc, "Server API", "/api");
-        ApidocUtils.getGroupByName(apidoc, "Proprietary Server API", "/api");
+        ApidocUtils.getGroupByName(apidoc, "System API").urlPrefix = "/ec2";
+        ApidocUtils.getGroupByName(apidoc, "Proprietary System API").urlPrefix = "/ec2";
+        ApidocUtils.getGroupByName(apidoc, "Server API").urlPrefix = "/api";
+        ApidocUtils.getGroupByName(apidoc, "Proprietary Server API").urlPrefix = "/api";
 
         TypeManager typeManager = null;
         if (!params.typeHeaderPaths().isEmpty())

@@ -42,7 +42,7 @@ public final class ApidocUtils
         throw new Error("Group not found in Apidoc XML: " + urlPrefix);
     }
 
-    public static Apidoc.Group getGroupByName(Apidoc apidoc, String name, String urlPrefix)
+    public static Apidoc.Group getGroupByName(Apidoc apidoc, String name)
     {
         for (Apidoc.Group group: apidoc.groups)
         {
@@ -51,7 +51,7 @@ public final class ApidocUtils
         }
         Apidoc.Group group = new Apidoc.Group();
         group.groupName = name;
-        group.urlPrefix = urlPrefix;
+        group.urlPrefix = "";
         apidoc.groups.add(group);
         return group;
     }
