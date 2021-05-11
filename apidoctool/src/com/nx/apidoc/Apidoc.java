@@ -30,9 +30,10 @@ public final class Apidoc extends Serializable
         UUID_ARRAY, //< List of uuids.
         OBJECT_JSON, //< String with JSON object inside.
         ARRAY_JSON, //< String with JSON array inside.
+        BASE64, //< Base64-encoded string.
         TEXT, //< Raw text in result.
         BINARY, //< Raw binary data in result.
-        ANY; //< Arbitrary type
+        ANY; //< Arbitrary type.
 
         public static Type fromString(String value)
         {

@@ -319,9 +319,13 @@ public final class OpenApiSerializer
                 schema.put("type", "string");
                 schema.put("format", "uuid");
                 break;
+            case BASE64:
+                schema.put("type", "string");
+                schema.put("format", "byte");
+                break;
             case BINARY:
                 schema.put("type", "string");
-                schema.put("format", "base64");
+                schema.put("format", "binary");
                 break;
             default:
                 assert false: "Unspecified schema type.";
