@@ -389,6 +389,12 @@
                         "optional": true
                     },
                     {
+                        "label": "[Android] Baidu API key",
+                        "name": "%mobile.android.baiduApiKey%",
+                        "description": "Used for push notifications support in China",
+                        "optional": true
+                    },
+                    {
                         "label": "[Android] Compatibility app package",
                         "name": "%mobile.android.compatibilityPackage%",
                         "description": "Package Id for the VMS 2.4 and older",
