@@ -183,7 +183,7 @@ class Jira:
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
 
-    def get_code(self, issue_key: str) -> List[str]:
+    def get_issue_first_code_block(self, issue_key: str) -> List[str]:
         issue = self._jira.issue(issue_key)
         lines_of_code = issue.fields.description.split('{code}')[1].strip().splitlines()
         return lines_of_code
@@ -192,7 +192,7 @@ class Jira:
         query = self._jira.search_issues(
             jql_str=f'project="CRASH" and summary~"\\\"{signature}\\\""',
             json_result=True)
-        if not query['total']:
+        if not query['issues']:
             # No such issues found, so create one.
             description = '\n'.join(
                 ['One of possible stacks:', '{code}', *lines_of_code, '{code}'])
@@ -202,19 +202,19 @@ class Jira:
                 customfield_11180=len(self._jira.issue(issue_key).fields.attachment),
             )
             self._jira.create_issue_link('Parent', key, crash_issue.key)
+            return
+        # Update existing issue
+        existing_key = query['issues'][0]['key']
+        existing_issue = self._jira.issue(existing_key )
+        issues_in_crash = [i.inwardIssue.key for i in existing_issue.fields.issuelinks]
+        if key not in issues_in_crash:
+            attachments_number = len(self._jira.issue(key).fields.attachment)
+            new_crash_counter = existing_issue.fields.customfield_11180 + attachments_number
+            existing_issue.update(customfield_11180=new_crash_counter)
+            self._jira.create_issue_link('Parent', existing_issue.key, key)
         else:
-            # Update existing issue
-            crash_key = query['issues'][0]['key']
-            crash_issue = self._jira.issue(crash_key)
-            issues_in_crash = [i.inwardIssue.key for i in crash_issue.fields.issuelinks]
-            if key not in issues_in_crash:
-                attachments_number = len(self._jira.issue(key).fields.attachment)
-                new_crash_counter = crash_issue.fields.customfield_11180 + attachments_number
-                crash_issue.update(customfield_11180=new_crash_counter)
-                self._jira.create_issue_link('Parent', crash_issue.key, key)
-            else:
-                crash_issue.update(
-                    customfield_11180=crash_issue.fields.customfield_11180 + 1)
+            existing_issue.update(
+                customfield_11180=existing_issue.fields.customfield_11180 + 1)
 
     def autoclose_issue_if_required(self, key: str, reason: crash_info.Reason):
         """Autocloses the issue based on the crash stack from :reason.

@@ -24,32 +24,6 @@ RETRY_CRASH_ID = 'RETRY'
 FAILED_CRASH_ID = 'FAILED'
 USELESS_STACK_KEY = 'USELESS_STACK'
 
-USELESS_METHODS = [
-    'Q[A-Z]',
-    'QtPrivate',
-    'operator new',
-    'std::',
-]
-USELESS_METHODS_RE = re.compile('|'.join([f'({method})' for method in USELESS_METHODS]))
-
-
-def get_signature(lines_of_code: list) -> str:
-    for line in lines_of_code:
-        try:
-            lib, method = line.split('!')
-        except ValueError:
-            continue
-        if lib in ['nx_vms_client_desktop', 'Client'] and not USELESS_METHODS_RE.match(method):
-            return method
-    for line in lines_of_code:
-        try:
-            lib, method = line.split('!')
-        except ValueError:
-            continue
-        if not USELESS_METHODS_RE.match(method):
-            return line
-    return lines_of_code[0]
-
 
 class Options:
     def __init__(self, directory: str,
@@ -80,13 +54,16 @@ class Options:
 
 class Monitor:
     def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict,
-                 issue_autoclose_indicators: dict, debug: dict = {}):
+                 issue_autoclose_indicators: dict, non_significant_methods: list,
+                 debug: dict = {}):
         self._debug = debug
         self._options = Options(**options)
         self._options.reports_directory.make()
         self._options.dump_tool_directory.make()
         self._fetch, self._upload, self._analyze = fetch, upload, analyze
         self._autoclose_indicators = issue_autoclose_indicators
+        self._non_significant_methods_re = re.compile(
+            '|'.join([f'({method})' for method in non_significant_methods]))
         self._analyze['cache_directory'] = self._options.dump_tool_directory.path
         self._records = self._options.records_file.parse(dict())
 
@@ -291,8 +268,8 @@ class Monitor:
         else:
             jira.update_issue(issue, reports, directory=directory)
 
-        lines_of_code = jira.get_code(issue)
-        signature = get_signature(lines_of_code)
+        lines_of_code = jira.get_issue_first_code_block(issue)
+        signature = crash_info.get_signature(lines_of_code, self._non_significant_methods_re)
         jira.create_or_update_crash_issue(issue, signature, lines_of_code)
         return issue, reports
 
