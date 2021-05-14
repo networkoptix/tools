@@ -201,20 +201,22 @@ class Jira:
                 issuetype={'name': 'Task'},
                 customfield_11180=len(self._jira.issue(issue_key).fields.attachment),
             )
-            self._jira.create_issue_link('Parent', key, crash_issue.key)
-            return
+            self._jira.create_issue_link('Parent', crash_issue.key, issue_key)
+            return crash_issue
         # Update existing issue
         existing_key = query['issues'][0]['key']
-        existing_issue = self._jira.issue(existing_key )
-        issues_in_crash = [i.inwardIssue.key for i in existing_issue.fields.issuelinks]
-        if key not in issues_in_crash:
-            attachments_number = len(self._jira.issue(key).fields.attachment)
+        existing_issue = self._jira.issue(existing_key)
+        issues_in_crash = [i.outwardIssue.key for i in existing_issue.fields.issuelinks]
+
+        if issue_key not in issues_in_crash:
+            attachments_number = len(self._jira.issue(issue_key).fields.attachment)
             new_crash_counter = existing_issue.fields.customfield_11180 + attachments_number
             existing_issue.update(customfield_11180=new_crash_counter)
-            self._jira.create_issue_link('Parent', existing_issue.key, key)
+            self._jira.create_issue_link('Parent', existing_issue.key, issue_key)
         else:
             existing_issue.update(
                 customfield_11180=existing_issue.fields.customfield_11180 + 1)
+        return existing_issue
 
     def autoclose_issue_if_required(self, key: str, reason: crash_info.Reason):
         """Autocloses the issue based on the crash stack from :reason.

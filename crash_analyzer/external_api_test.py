@@ -56,6 +56,7 @@ class JiraFixture:
         self.api = external_api.Jira(**JIRA_CONFIG, autoclose_indicators=autoclose_indicators,
                                      file_limit=4, prefix=JIRA_PREFIX)
         self.issue = None
+        self.crash_issue = None
 
     def __enter__(self):
         return self
@@ -63,11 +64,17 @@ class JiraFixture:
     def __exit__(self, *args):
         if self.issue:
             self.issue.delete()
+        if self.crash_issue:
+            self.crash_issue.delete()
 
     def create_issue(self, name: str):
         self.issue = self.api._jira.issue(self.api.create_issue(
             crash_info.Report(name),
             crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])))
+
+    def create_or_update_crash_issue(self, issue_key, signature, lines_of_code):
+        self.crash_issue = self.api.create_or_update_crash_issue(
+            issue_key, signature, lines_of_code)
 
     def autoclose_issue(self, reason: crash_info.Reason):
         self.api.autoclose_issue_if_required(self.issue.key, reason)
@@ -189,6 +196,19 @@ def _test_jira():
 
         logging.info('Issue must be reopened if the problem reproduced in the next version')
         assert 'Open' == jira.issue.fields.status.name
+
+        logging.info('Code block is fetched correctly')
+        assert jira.api.get_issue_first_code_block(jira.issue.key) == ['f1', 'f2']
+
+        logging.info('Crash issue is created')
+        jira.create_or_update_crash_issue(jira.issue.key, 'f1', ['f1', 'f2'])
+        assert jira.crash_issue.fields.description == 'One of possible stacks:\n{code}\nf1\nf2\n{code}'
+        assert jira.crash_issue.fields.customfield_11180 == 4
+
+        logging.info('Crash issue is updated')
+        jira.create_or_update_crash_issue(jira.issue.key, 'f1', ['f1', 'f2'])
+        assert jira.crash_issue.fields.customfield_11180 == 5
+
 
 
 def test_jira_autoclose():

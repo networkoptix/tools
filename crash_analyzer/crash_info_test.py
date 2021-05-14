@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 from typing import Callable
 
 import pytest
@@ -84,3 +85,29 @@ def test_analyze_reports_concurrent(directory: utils.Directory, extension: str):
     results = crash_info.analyze_reports_concurrent(
         reports, directory=utils.Directory(directory.path), thread_count=8)
     assert expected == [r for r, _ in results]
+
+
+@pytest.mark.parametrize(
+    'code, expected',
+    (
+        ([
+            'nx_vms_client_desktop!QSharedPointer::operator=',
+            'nx_vms_client_desktop!QSharedPointer::{ctor}',
+            'nx_vms_client_desktop!nx::vms::client::desktop::node_view::details',
+        ], 'nx::vms::client::desktop::node_view::details'),
+        ([
+            'nx_network!nx::network::ssl::Pipeline::initSslBio',
+            'nx_network!nx::network::ssl::Pipeline::Pipeline',
+            'nx_vms_client_desktop!nx::network::http::detail::BaseFusionDataHttpClient::execute',
+        ], 'nx::network::http::detail::BaseFusionDataHttpClient::execute'),
+        ([
+            'udt!CGuard::enterCS',
+            'udt!CGuard::CGuard',
+            'udt!CCache::lookup',
+        ], 'udt!CGuard::enterCS'),
+    ),
+)
+def test_get_signature(code: list, expected: str):
+    non_significant_methods_re = re.compile('Q[A-Z]|QtPrivate|operator new|std::')
+    real = crash_info.get_signature(code, non_significant_methods_re)
+    assert real == expected
