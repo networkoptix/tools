@@ -55,7 +55,8 @@
             "storepass": "%mobile.android.storepass%",
             "alias": "%mobile.android.alias%",
             "keypass": "%mobile.android.keypass%",
-            "compatibilityPackage": "%mobile.android.compatibilityPackage%"
+            "compatibilityPackage": "%mobile.android.compatibilityPackage%",
+            "baiduApiKey": "%mobile.android.baiduApiKey%"
         },
 
         "ios": {
