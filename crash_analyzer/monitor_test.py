@@ -65,6 +65,18 @@ class JiraMock:
         logger.info('Issue {} is updated with {} reports'.format(key, len(reports)))
         return True
 
+    def get_issue_first_code_block(self, issue_key: str):
+        return [f'Code for {issue_key}']
+
+    def create_or_update_crash_issue(self, issue_key: str, signature: str, lines_of_code: list):
+        self.issues[signature] = {
+            'code': lines_of_code,
+            'extension': None,
+            'versions': [],
+            'stack': None,
+            'attachments': [],
+        }
+
 
 class MonitorFixture:
     def __init__(self, directory: str):
@@ -120,4 +132,14 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     actual = {k: v for k, v in monitor_fixture.issues.items()}
     possible = utils.Resource('expected_issues.yaml').parse()
     expected = {k: v for k, v in possible.items() if v['extension'].endswith(extension)}
+    expected_crashes = {
+        f'Code for {k}': {
+            'code': [f'Code for {k}'],
+            'extension': None,
+            'versions': [],
+            'stack': None,
+            'attachments': [],
+        } for k, v in possible.items() if v['extension'].endswith(extension)}
+    expected.update(expected_crashes)
+
     assert expected == actual

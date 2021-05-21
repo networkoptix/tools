@@ -109,5 +109,6 @@ def test_analyze_reports_concurrent(directory: utils.Directory, extension: str):
 )
 def test_get_signature(code: list, expected: str):
     non_significant_methods_re = re.compile('Q[A-Z]|QtPrivate|operator new|std::')
-    real = crash_info.get_signature(code, non_significant_methods_re)
+    client_libs = ['nx_vms_client_desktop', 'Client']
+    real = crash_info.get_signature(code, non_significant_methods_re, client_libs)
     assert real == expected

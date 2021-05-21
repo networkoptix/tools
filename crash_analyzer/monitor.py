@@ -55,7 +55,7 @@ class Options:
 class Monitor:
     def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict,
                  issue_autoclose_indicators: dict, non_significant_methods: list,
-                 debug: dict = {}):
+                 client_libs: list, debug: dict = {}):
         self._debug = debug
         self._options = Options(**options)
         self._options.reports_directory.make()
@@ -64,6 +64,7 @@ class Monitor:
         self._autoclose_indicators = issue_autoclose_indicators
         self._non_significant_methods_re = re.compile(
             '|'.join([f'({method})' for method in non_significant_methods]))
+        self._client_libs = client_libs
         self._analyze['cache_directory'] = self._options.dump_tool_directory.path
         self._records = self._options.records_file.parse(dict())
 
@@ -223,6 +224,8 @@ class Monitor:
         uploads_count = 0
         for result in utils.run_concurrent(
                 self._jira_sync, crashes_to_push, directory=self._options.reports_directory,
+                non_significant_methods_re=self._non_significant_methods_re,
+                client_libs=self._client_libs,
                 autoclose_indicators=self._autoclose_indicators, **self._upload):
             if isinstance(result, external_api.JiraError):
                 logger.warning(utils.format_error(result))
@@ -243,6 +246,7 @@ class Monitor:
 
     @staticmethod
     def _jira_sync(crash_tuple: Tuple[str, List[crash_info.Report]], directory: utils.Directory,
+                   non_significant_methods_re: re.Pattern, client_libs: list,
                    api: type = external_api.Jira, **options):
         jira = api(**options)
         issue, reports = crash_tuple
@@ -269,7 +273,8 @@ class Monitor:
             jira.update_issue(issue, reports, directory=directory)
 
         lines_of_code = jira.get_issue_first_code_block(issue)
-        signature = crash_info.get_signature(lines_of_code, self._non_significant_methods_re)
+        signature = crash_info.get_signature(
+            lines_of_code, non_significant_methods_re, client_libs)
         jira.create_or_update_crash_issue(issue, signature, lines_of_code)
         return issue, reports
 

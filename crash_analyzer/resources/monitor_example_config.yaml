@@ -80,3 +80,7 @@ non_significant_methods:
     - 'QtPrivate'
     - 'operator new'
     - 'std::'
+
+client_libs:
+    - 'nx_vms_client_desktop'
+    - 'Client'
