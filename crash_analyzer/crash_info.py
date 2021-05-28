@@ -409,7 +409,7 @@ def analyze_report(report: Report, directory: utils.Directory, **dump_tool_optio
     raise NotImplementedError('Dump format is not supported: ' + report.name)
 
 
-def get_signature(lines_of_code: list, non_significant_methods_re: re.Pattern,
+def get_signature(lines_of_code: list, non_significant_methods_re,
                   client_libs: list) -> str:
     def _is_significant(method):
         return not non_significant_methods_re.match(method)

@@ -246,7 +246,7 @@ class Monitor:
 
     @staticmethod
     def _jira_sync(crash_tuple: Tuple[str, List[crash_info.Report]], directory: utils.Directory,
-                   non_significant_methods_re: re.Pattern, client_libs: list,
+                   non_significant_methods_re, client_libs: list,
                    api: type = external_api.Jira, **options):
         jira = api(**options)
         issue, reports = crash_tuple
