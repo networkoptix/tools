@@ -5,6 +5,7 @@ import os
 import multiprocessing
 import functools
 from typing import List, Dict
+from unittest.mock import Mock
 
 import pytest
 
@@ -76,6 +77,17 @@ class JiraMock:
             'stack': None,
             'attachments': [],
         }
+
+    def get_issue(self, key):
+        if key in self.issues:
+            component = Mock()
+            component.name = 'Client'
+            issue = Mock()
+            issue.fields = Mock()
+            issue.fields.components = [component]
+            return issue
+        else:
+            return None
 
 
 class MonitorFixture:

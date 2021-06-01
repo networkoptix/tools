@@ -183,6 +183,9 @@ class Jira:
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
 
+    def get_issue(self, key: str):
+        return self._jira.issue(key)
+
     def get_issue_first_code_block(self, issue_key: str) -> List[str]:
         issue = self._jira.issue(issue_key)
         lines_of_code = issue.fields.description.split('{code}')[1].strip().splitlines()

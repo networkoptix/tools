@@ -99,6 +99,9 @@ class JiraFixture:
         reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])
         return report, reason
 
+    def get_issue(self, key):
+        return self.api.get_issue(key)
+
 
 def test_jira():
     _test_jira()
@@ -199,6 +202,10 @@ def _test_jira():
 
         logging.info('Code block is fetched correctly')
         assert jira.api.get_issue_first_code_block(jira.issue.key) == ['f1', 'f2']
+
+        logging.info('We can get issue')
+        issue = jira.get_issue(jira.issue.key)
+        assert issue.fields.status.name == 'Open'
 
         logging.info('Crash issue is created')
         jira.create_or_update_crash_issue(jira.issue.key, 'f1', ['f1', 'f2'])
