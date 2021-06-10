@@ -56,7 +56,11 @@
             "alias": "%mobile.android.alias%",
             "keypass": "%mobile.android.keypass%",
             "compatibilityPackage": "%mobile.android.compatibilityPackage%",
-            "baiduApiKey": "%mobile.android.baiduApiKey%"
+            "baidu":
+            {
+                "apiKey": "%mobile.android.baidu.apiKey%",
+                "displayName": "%mobile.android.baidu.displayName%"
+            }
         },
 
         "ios": {

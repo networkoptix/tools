@@ -390,8 +390,14 @@
                     },
                     {
                         "label": "[Android] Baidu API key",
-                        "name": "%mobile.android.baiduApiKey%",
+                        "name": "%mobile.android.baidu.apiKey%",
                         "description": "Used for push notifications support in China",
+                        "optional": true
+                    },
+                    {
+                        "label": "[Android] Baidu application title",
+                        "name": "%mobile.android.baidu.displayName%",
+                        "description": "Application title for Baidu version of the mobile client",
                         "optional": true
                     },
                     {
