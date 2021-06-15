@@ -368,6 +368,8 @@ class Jira:
                     'Unable to attach "{}" file to issue {}'.format(report.name, key), jira_error)
                 if jira_error.status_code == 413:  # HTTP Code: Payload Too Large.
                     logger.warning(utils.format_error(error))
+                elif 'Added empty attachment' in jira_error.status_code:
+                    logger.warning(utils.format_error(error))
                 else:
                     raise error
             else:
