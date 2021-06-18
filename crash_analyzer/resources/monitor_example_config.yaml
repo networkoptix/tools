@@ -81,9 +81,10 @@ non_significant_methods:
     - 'operator new'
     - 'std::'
 
-client_libs:
+client:
+  component: Client
+  libs:
     - 'nx_vms_client_desktop'
     - 'Client'
-
-components_to_create_crash_issue:
-    - 'Client'
+  ignore_versions:
+    - '4.1'

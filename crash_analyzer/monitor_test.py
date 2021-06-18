@@ -155,3 +155,34 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     expected.update(expected_crashes)
 
     assert expected == actual
+
+
+def test_versions_to_ignore(monitor_fixture):
+    extension = 'cdb-bt'
+    monitor_fixture.options['fetch'].update(extension=extension, report_count=10)
+    monitor_fixture.options['client']['ignore_versions'] = ['3.1']
+    monitor_fixture.new_monitor()
+
+    def ignore_report(report):
+        return bool(report['versions'] == ['3.1'] and
+                    not any('server' in a for a in report['attachments']))
+
+    while monitor_fixture.monitor.fetch():
+        monitor_fixture.monitor.analyze()
+        monitor_fixture.monitor.upload()
+
+    actual = {k: v for k, v in monitor_fixture.issues.items()}
+    possible = utils.Resource('expected_issues.yaml').parse()
+    expected = {k: v for k, v in possible.items()
+                if v['extension'].endswith(extension) and not ignore_report(v)}
+    expected_crashes = {
+        f'Code for {k}': {
+            'code': [f'Code for {k}'],
+            'extension': None,
+            'versions': [],
+            'stack': None,
+            'attachments': [],
+        } for k, v in possible.items()
+        if v['extension'].endswith(extension) and not ignore_report(v)}
+    expected.update(expected_crashes)
+    assert expected == actual
