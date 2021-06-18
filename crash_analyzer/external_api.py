@@ -209,7 +209,16 @@ class Jira:
         # Update existing issue
         existing_key = query['issues'][0]['key']
         existing_issue = self._jira.issue(existing_key)
-        issues_in_crash = [i.outwardIssue.key for i in existing_issue.fields.issuelinks]
+        issues_in_crash = []
+        for link in existing_issue.fields.issuelinks:
+            try:
+                issues_in_crash.append(link.outwardIssue.key)
+            except AttributeError:
+                pass
+            try:
+                issues_in_crash.append(link.inwardIssue.key)
+            except AttributeError:
+                pass
 
         if issue_key not in issues_in_crash:
             attachments_number = len(self._jira.issue(issue_key).fields.attachment)
