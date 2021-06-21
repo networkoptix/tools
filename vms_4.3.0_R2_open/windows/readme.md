@@ -1,7 +1,7 @@
 # Network Optix VMS Desktop Client build package
 
 This directory contains the package of source code and pre-built third-party artifacts needed to
-build the Network Optix VMS Desktop Client.
+build the Network Optix VMS Desktop Client for Windows x64.
 
 ---------------------------------------------------------------------------------------------------
 ## Legal notice
@@ -22,20 +22,18 @@ Meta-version: R2-OPEN
 
 The built Client can connect to the corresponding MetaVMS Server 4.3.0 R2.
 
-Supported platforms: Windows x64, Linux x64.
-
-Building distribution packages (MSI for Windows, .deb for Linux) is not supported by this package.
+Building of the MSI distribution is not supported by this package.
 
 ### Contents
 
-conan/
+conan\
     Third-party pre-built and header-only packages, originally managed by conan, but included here
     to avoid using conan.
 
-packages/
+packages\
     Other third-party pre-built and header-only packages.
     
-nx/
+nx\
     Source code.
    
 ---------------------------------------------------------------------------------------------------
@@ -45,11 +43,10 @@ nx/
 
 Python 3.8+ should be installed and available on PATH as `python`.
 
-Windows: a Windows-native (non-Cygwin) version of Python should be installed.
+A Windows-native (non-Cygwin) version of Python should be installed.
 
 Python module pyaml should be installed into Python:
-    python -m pip install pyaml # via pip
-    sudo apt install python3-yaml # via apt
+    python -m pip install pyaml
 
 ### Visual Studio
     
@@ -62,10 +59,6 @@ build tools (v14.00)" are selected.
 
 NOTE: CMake and Ninja required to build this project will be used from Visual Studio installation.
 
-### Cygwin or MinGW (Git Bash)
-
-One of these Unix-style command-line environments is required to run the build scripts.
-
 ---------------------------------------------------------------------------------------------------
 ## How to build and run
 
@@ -73,24 +66,19 @@ ATTENTION: Building the Client may take from a few minutes to an hour or more, d
 workstation. A multi-core i7, i9 or equivalent with 32 GB or more RAM, and an SSD with 50 GB of
 free space is recommended.
 
-Open a Unix-style command line (Cygwin or Git Bash). Navigate to the directory where this readme.md
-is located. Run the following commands:
+Open a command prompt. Navigate to the directory with this readme.md. Run the following commands:
 
-./build.sh
+build.bat
 
     This will run CMake configuration and then run the build process. The build directory will
     be generated one level higher than the current directory, and will be named
-    `nx-open-build-windows_x64` on Windows, and `nx-open-build-linux_x64` on Linux.
+    `vms_4.3.0_R2_OPEN_windows_x64-build`.
     
     ATTENTION: If the build fails, it is recommended to manually delete the build directory to
     produce a clean build, though incremental build can be attempted in certain cases.
     
-Linux:    
-./run.sh
+run.bat
 
-Windows:
-./run.bat
-
-    This will run the Client.
+    This will run the built Client.
     
 Refer to the source code of the above scripts to learn the details on the building procedure.

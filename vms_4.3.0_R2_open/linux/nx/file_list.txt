@@ -13097,7 +13097,7 @@ ad99ffb927031687f9b96cdf8caaedd6 open_candidate/vms/libs/nx_vms_common/src/nx/vm
 81890302f6b58041215190a75f77dc2b open_candidate/vms/libs/nx_vms_common/src/nx/vms/rules/ec2_router.h
 5674216d15b908df641d9aed9bf2ea6f open_candidate/vms/libs/nx_vms_common/src/nx/vms/rules/initializer.cpp
 27180c9e30f5a38e309ae67cb24b74ca open_candidate/vms/libs/nx_vms_common/src/nx/vms/rules/initializer.h
-f7a72fefbe7a35e9a3b2e746358be953 open_candidate/vms/libs/nx_vms_common/src/nx/vms/statistics/settings.h
+c4e1037f61598fe165d87b302656aac5 open_candidate/vms/libs/nx_vms_common/src/nx/vms/statistics/settings.h
 9d4c72ce446edb85690025decd9dd098 open_candidate/vms/libs/nx_vms_common/src/nx/vms/testcamera/discovery_response.cpp
 a8bc07a893429b6d0f7c73cd27af6bff open_candidate/vms/libs/nx_vms_common/src/nx/vms/testcamera/discovery_response.h
 0295d669ef9d620933d951ca9aac94c7 open_candidate/vms/libs/nx_vms_common/src/nx/vms/testcamera/packet.h
