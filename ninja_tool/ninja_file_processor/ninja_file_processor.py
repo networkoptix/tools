@@ -64,7 +64,7 @@ class NinjaFileProcessor(metaclass=ABCMeta):
         self._debug_output = debug_output
         self._current_parsed_line = 0
 
-    def needs_patching(self, script_version_timestamp: float) -> bool:
+    def needs_patching(self, script_version_timestamp: float = None) -> bool:
         """Check if build.ninja file needs patching.
 
         :param script_version_timestamp: Unix timestamp of the patch script file.
@@ -75,8 +75,9 @@ class NinjaFileProcessor(metaclass=ABCMeta):
 
         try:
             # If the currently processed file is older than the patch script, patch it.
-            if self._file_name.stat().st_mtime < script_version_timestamp:
-                return True
+            if script_version_timestamp is not None:
+                if self._file_name.stat().st_mtime < script_version_timestamp:
+                    return True
 
             with open(self._file_name) as file:
                 first_line = next(file)
