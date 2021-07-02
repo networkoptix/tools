@@ -8,4 +8,4 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:./conan/data/ffmpeg/3.1.9/_/_/package/d
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:./packages/linux_x64/libva-2.6/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$osDepsLibDir/pulseaudio"
 
-LD_PRELOAD="$osDepsLibDir/libopenal.so.1" ../vms_4.3.0_R2_OPEN_linux_x64/bin/metavms_client
+LD_PRELOAD="$osDepsLibDir/libopenal.so.1" ../vms_4.3.0_R2_OPEN_linux_x64-build/bin/metavms_client
