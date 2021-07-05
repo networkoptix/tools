@@ -553,6 +553,8 @@ doGitUpdate() # [branch]
 
     nx_verbose git pull --rebase
 
+    nx_verbose git submodule update --init
+
     # Find stale local branches, suggesting commands to delete them.
     local -i staleBranchFound=0
     local -r gitBranchesCommand=(
