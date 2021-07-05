@@ -542,7 +542,8 @@ do_check_open()
 
 doGitUpdate() # [branch]
 {
-    nx_verbose git fetch --all --tags `# Delete stale remote-tracking branches #` --prune
+    # --force is needed to enable updating local tags.
+    nx_verbose git fetch --all --tags `# Delete stale remote-tracking branches #` --prune --force
 
     (( $# > 1 )) && nx_fail "Too many arguments."
     if (( $# > 0 ))
