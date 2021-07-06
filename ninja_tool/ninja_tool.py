@@ -14,6 +14,7 @@ import subprocess
 from typing import List, NamedTuple, Optional, Set
 from pathlib import Path
 
+from ninja_deps_processor import NinjaDepsProcessor
 from ninja_file_processor.ninja_file_processor import NinjaFileProcessorError
 from ninja_file_processor.build_ninja_processor import BuildNinjaFileProcessor
 from ninja_file_processor.rules_ninja_processor import RulesNinjaFileProcessor
@@ -351,11 +352,28 @@ def generate_list_of_targets_affected_by_listed_files(
         files = f.read().splitlines()
 
     build_file_processor.load_data()
+    ninja_deps_processor = NinjaDepsProcessor(build_dir)
+    ninja_deps_processor.load_data()
     for file in files:
-        updated_targets |= build_file_processor.get_changed_targets_by_file_name(source_dir / file)
+        full_path = source_dir / file
+        # Get targets that explicitly depend on the changed file.
+        updated_targets |= build_file_processor.get_changed_targets_by_file_name(full_path)
+        # Get targets (object files) that implicitly depend on the changed file. For each such
+        # target, get all the targets that depend on it.
+        for target_file in ninja_deps_processor.get_dependent_object_files(full_path):
+            updated_targets |= build_file_processor.get_changed_targets_by_file_name(target_file)
 
-    with open(build_dir / affected_targets_list_file_name, "w") as f:
-        f.write("\n".join(updated_targets))
+    try:
+        with open(build_dir / affected_targets_list_file_name) as f:
+            old_targets = set([l.rstrip() for l in f.readlines()])
+    except:
+        old_targets = None
+
+    # Prevent overwriting of the output file (and hence rebuilding dependent targets) if its
+    # content hasn't changed.
+    if old_targets != updated_targets:
+        with open(build_dir / affected_targets_list_file_name, "w") as f:
+            f.write("\n".join(updated_targets))
 
     print("Done")
 
