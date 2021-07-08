@@ -51,12 +51,18 @@ Python module pyaml should be installed into Python using either one of the foll
 
 ### Cmake
 
-CMake 3.17.0 or higher should be installed and available on PATH.
+CMake 3.19.0 or higher should be installed and available on PATH.
 
 ### Ninja
 
 Ninja 1.8.0 or higher should be installed and available on PATH:
     sudo apt install ninja-build
+
+
+### Other requirements
+
+Package "pkg-config" should be installed:
+   sudo apt install pkg-config
 
 ---------------------------------------------------------------------------------------------------
 ## How to build and run
