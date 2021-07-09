@@ -240,7 +240,7 @@ public final class StructParser
     private static final List<String> integerAliases = Arrays.asList(
         "int", "qint32", "qint16", "qint8");
     private static final List<String> typesRepresentedAsJsonString = Arrays.asList(
-        "QString", "QnLatin1Array", "QByteArray", "qint64", "size_t", "int64_t");
+        "QString", "QnLatin1Array", "QByteArray", "qint64", "size_t", "int64_t", "std::string");
     private static final List<String> booleanAliases = Arrays.asList("bool");
     private static final List<String> uuidAliases = Arrays.asList("QnUuid");
     private static final List<String> floatAliases = Arrays.asList("float", "qreal");
