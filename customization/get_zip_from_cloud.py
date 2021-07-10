@@ -5,6 +5,7 @@ import sys
 import re
 import requests
 import shutil
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -14,27 +15,67 @@ DEFAULT_INSTANCE = "https://nxvms.com"
 FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
 
 
+def create_package(args, fs):
+    try:
+        fs.raise_for_status()
+    except Exception as e:
+        print(e)
+        print(f"Reason: {fs.text}")
+        return
+
+    package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
+    package_name = f"{package_name[0] if len(package_name) else 'package'}"
+
+    if args.type == 'vms':
+        package_suffix = f"_{args.package_name_suffix}" if args.package_name_suffix else ""
+        package_dir = args.destination_path / f"customization_pack-{package_name}{package_suffix}"
+        package_dir.mkdir(parents=True, exist_ok=True)
+        package_name = f"{package_dir}/package"
+
+    with open(f"{package_name}.zip", "wb") as f:
+        shutil.copyfileobj(fs.raw, f)
+
+
+# Todo: post 20.2 release use async package download
+def download_package_async(session, args, asset_id):
+    draft = "?draft" if args.draft else ""
+    async_package_url = f"{args.instance}/admin/cms/async_package/{asset_id}/{draft}"
+    package_url = f"{args.instance}/admin/cms/package/{asset_id}/{draft}"
+
+    # Initial async package
+    res = session.get(package_url)
+    try:
+        res.raise_for_status()
+    except Exception as e:
+        print(e)
+        print(f"Reason: {res.text}")
+        return
+
+    # Poll for package every 5 seconds
+    while 1:
+        res = session.get(async_package_url)
+        try:
+            res.raise_for_status()
+        except Exception as e:
+            print(e)
+            print(f"Reason: {res.text}")
+            return
+
+        data = res.json()
+        if data["is_ready"]:
+            break
+
+        time.sleep(5)
+
+    with session.get(async_package_url, stream=True) as fs:
+        create_package(args, fs)
+
+
+
 def download_package(session, args, asset_id):
     draft = "?draft" if args.draft else ""
     with session.get(f"{args.instance}/admin/cms/package/{asset_id}/{draft}", stream=True) as fs:
-        try:
-            fs.raise_for_status()
-        except Exception as e:
-            print(e)
-            print(f"Reason: {fs.text}")
-            return
-
-        package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
-        package_name = f"{package_name[0] if len(package_name) else 'package'}"
-
-        if args.type == 'vms':
-            package_suffix = f"_{args.package_name_suffix}" if args.package_name_suffix else ""
-            package_dir = args.destination_path / f"customization_pack-{package_name}{package_suffix}"
-            package_dir.mkdir(parents=True, exist_ok=True)
-            package_name = f"{package_dir}/package"
-
-        with open(f"{package_name}.zip", "wb") as f:
-            shutil.copyfileobj(fs.raw, f)
+        create_package(args, fs)
 
 
 def download_packages(session, args, asset_ids):
