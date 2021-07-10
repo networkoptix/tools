@@ -80,14 +80,6 @@
         "bundleUpgradeCode": "%paxton.bundleUpgradeCode%"
     },
 
-    "nxtool": {
-        "enabled": "%nxtool.enabled%",
-        "applicationName": "%nxtool.applicationName%",
-        "productId": "%nxtool.productId%",
-        "productUpgradeCode": "%nxtool.productUpgradeCode%",
-        "bundleUpgradeCode": "%nxtool.bundleUpgradeCode%"
-    },
-
     "advanced": {
         "useMetaVersion": "%advanced.useMetaVersion%",
         "useFullCloudNameEverywhere": "%advanced.useFullCloudNameEverywhere%",

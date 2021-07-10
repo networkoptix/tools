@@ -478,42 +478,6 @@
                     },
 
                     {
-                        "_": "-------------------------- NXTOOL BLOCK --------------------------",
-                        "label": "Build Server Tool",
-                        "name": "%nxtool.enabled%",
-                        "type": "Check Box"
-                    },
-                    {
-                        "label": "[Server Tool] Application name",
-                        "name": "%nxtool.applicationName%",
-                        "optional": true
-                    },
-                    {
-                        "label": "[Server Tool] Product Id",
-                        "name": "%nxtool.productId%",
-                        "type": "GUID",
-                        "unique": true,
-                        "advanced": true,
-                        "optional": true
-                    },
-                    {
-                        "label": "[Server Tool] Product Upgrade Code",
-                        "name": "%nxtool.productUpgradeCode%",
-                        "type": "GUID",
-                        "unique": true,
-                        "advanced": true,
-                        "optional": true
-                    },
-                    {
-                        "label": "[Server Tool] Bundle Upgrade Code",
-                        "name": "%nxtool.bundleUpgradeCode%",
-                        "type": "GUID",
-                        "unique": true,
-                        "advanced": true,
-                        "optional": true
-                    },
-
-                    {
                         "_": "------------------------ ADVANCED BLOCK --------------------------",
                         "label": "Use Meta Version",
                         "name": "%advanced.useMetaVersion%",
@@ -739,20 +703,6 @@
                         "name": "desktop/linux/icon_128x128.png",
                         "type": "Image",
                         "meta": { "width": 128, "height": 128, "format": "png" }
-                    },
-                    {
-                        "label": "Server Tool Desktop icon",
-                        "name": "desktop/windows/nxtool/icon.ico",
-                        "type": "Image",
-                        "meta": { "width": 256, "height": 256, "format": "ico" },
-                        "optional": true
-                    },
-                    {
-                        "label": "[Windows] Server Tool Installer logo",
-                        "name": "desktop/windows/nxtool/installer_logo.png",
-                        "type": "Image",
-                        "meta": { "width": 64, "height": 64, "format": "png" },
-                        "optional": true
                     }
                 ]
             },
