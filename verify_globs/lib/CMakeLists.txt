@@ -16,7 +16,7 @@ endif()
 
 set(nxKitDir "" CACHE PATH "Path to NX Kit library sources.")
 if(nxKitDir STREQUAL "")
-    set(nxKitDir "${CMAKE_CURRENT_LIST_DIR}/../../../nx/open/artifacts")
+    set(nxKitDir "${CMAKE_CURRENT_LIST_DIR}/../../nx_kit/artifacts")
     if(NOT EXISTS ${nxKitDir}/nx_kit/src/nx/kit)
         message(FATAL_ERROR
             "Define nxKitDir cache variable to point to NX Kit library source directory.")
