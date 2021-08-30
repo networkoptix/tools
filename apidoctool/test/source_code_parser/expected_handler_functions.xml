@@ -242,6 +242,7 @@ description</description>
                     <method>GET</method>
                     <params/>
                     <result>
+                        <caption>Derived description</caption>
                         <type>object</type>
                         <params>
                             <param>
@@ -291,6 +292,7 @@ description</description>
                     <method>GET</method>
                     <params/>
                     <result>
+                        <caption>Nested description</caption>
                         <type>object</type>
                         <params>
                             <param>
@@ -335,6 +337,40 @@ description</description>
                                 <name>addParam</name>
                                 <type>integer</type>
                                 <description>Additional param</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testReturnStructWithOverriddenDescription</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>Overridden description.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>field</name>
+                                <type>integer</type>
+                                <description>Description for StructWithDescription::field.</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testReturnStructWithDescription</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>Description for StructWithDescription.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>field</name>
+                                <type>integer</type>
+                                <description>Description for StructWithDescription::field.</description>
                             </param>
                         </params>
                     </result>

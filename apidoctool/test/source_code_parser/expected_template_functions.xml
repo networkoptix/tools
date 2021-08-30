@@ -121,6 +121,7 @@
                         </param>
                     </params>
                     <result>
+                        <caption>Output description</caption>
                         <type>array</type>
                         <params>
                             <param>

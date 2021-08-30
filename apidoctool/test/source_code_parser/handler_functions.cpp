@@ -118,6 +118,18 @@ struct StructWithDescription
     int field;
 };
 
+/**%apidoc GET /urlPrefix/testReturnStructWithOverriddenDescription
+ * %return Overridden description.
+ *     %struct StructWithDescription
+ */
+reg("urlPrefix/testReturnStructWithOverriddenDescription", new handler());
+
+/**%apidoc GET /urlPrefix/testReturnStructWithDescription
+ * %return
+ *     %struct StructWithDescription
+ */
+reg("urlPrefix/testReturnStructWithDescription", new handler());
+
 /**%apidoc GET /urlPrefix/testReturnStructArray
  * %return:array
  *     %struct StructWithDescription

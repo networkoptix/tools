@@ -73,6 +73,13 @@ public final class TypeManager
                 function.result.params,
                 function.result.unusedParams,
                 ApidocCommentParser.ParamDirection.Input);
+            if (function.result.caption.isEmpty())
+            {
+                // Take the function result caption from the output struct description.
+                final StructParser.StructInfo structInfo = structs.get(outputDataType);
+                if (structInfo != null)
+                    function.result.caption = structInfo.description();
+            }
         }
 
         if (inputDataType != null)
