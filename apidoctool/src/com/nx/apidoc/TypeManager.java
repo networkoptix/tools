@@ -73,6 +73,7 @@ public final class TypeManager
                 function.result.unusedParams,
                 ApidocCommentParser.ParamDirection.Input);
         }
+
         if (inputDataType != null)
         {
             if (inputDataType.endsWith("List"))
@@ -167,7 +168,7 @@ public final class TypeManager
             }
             if (functionParam != null)
             {
-                functionParam.fillMissedFieldsFrom(structParam);
+                functionParam.fillMissingFieldsFrom(structParam);
 
                 mergedParams.add(functionParam);
                 if (functionParam.type == Apidoc.Type.OBJECT_JSON
@@ -232,7 +233,7 @@ public final class TypeManager
     }
 
     private void structToParams(
-        List<Apidoc.Param> overiddenParams,
+        List<Apidoc.Param> overriddenParams,
         List<Apidoc.Param> params,
         String namePrefix,
         StructParser.StructInfo structInfo,
@@ -241,7 +242,7 @@ public final class TypeManager
     {
         try
         {
-            overiddenParams.addAll(ApidocCommentParser.parseParams(
+            overriddenParams.addAll(ApidocCommentParser.parseParams(
                 structInfo.items, namePrefix, paramDirection, ApidocCommentParser.ParamMode.WithToken));
         }
         catch (ApidocCommentParser.Error e)
@@ -251,8 +252,8 @@ public final class TypeManager
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
             final String name = namePrefix + field.name;
-            final Apidoc.Param overiddenParam = findParam(overiddenParams, name);
-            if (overiddenParam != null && overiddenParam.unused)
+            final Apidoc.Param overriddenParam = findParam(overriddenParams, name);
+            if (overriddenParam != null && overriddenParam.unused)
                 continue;
 
             Apidoc.Param param;
@@ -281,10 +282,10 @@ public final class TypeManager
             if (field.isStdOptional)
                 param.optional = true;
 
-            if (overiddenParam != null)
+            if (overriddenParam != null)
             {
-                overiddenParam.fillMissedFieldsFrom(param);
-                params.add(overiddenParam);
+                overriddenParam.fillMissingFieldsFrom(param);
+                params.add(overriddenParam);
             }
             else
             {
@@ -305,7 +306,7 @@ public final class TypeManager
                     nextNamePrefix += "[].";
                 else
                     nextNamePrefix += ".";
-                structToParams(overiddenParams, params, nextNamePrefix, innerStructInfo, paramDirection);
+                structToParams(overriddenParams, params, nextNamePrefix, innerStructInfo, paramDirection);
             }
         }
     }

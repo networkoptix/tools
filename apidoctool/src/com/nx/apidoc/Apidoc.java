@@ -98,7 +98,7 @@ public final class Apidoc extends Serializable
             values = new ArrayList<Value>();
         }
 
-        public void fillMissedFieldsFrom(Param origin)
+        public void fillMissingFieldsFrom(Param origin)
         {
             if (!isGeneratedFromStruct)
                 isGeneratedFromStruct = origin.isGeneratedFromStruct;

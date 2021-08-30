@@ -50,7 +50,7 @@ public final class StructParser
                 for (ApidocTagParser.Item item : items)
                     result += "Apidoc item: \"" + item.getFullText(0) + "\"\n";
             }
-            for (Field field : fields)
+            for (Field field: fields)
             {
                 result += "    Field:" + field.type.toString();
                 if (field.typeName != null)

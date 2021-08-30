@@ -24,7 +24,6 @@
  */
 reg("urlPrefix/testFunction2", new onTestFunction2());
 
-
 /**%apidoc Enum
  * description
  */
@@ -46,11 +45,13 @@ struct SomeStruct
      * List as object
      */
     std::vector<ElementStruct> elements;
+
     /**%apidoc outputParam Param description
      * %value 1 one
      * %value 2 two
      */
     int outputParam;
+
     Enum enumParam;
     std::optional<QnUuid> optUuid;
     std::optional<std::vector<QnUuid>> optUuids;
@@ -77,7 +78,7 @@ reg("urlPrefix/testFunction4", new onTestFunction4());
 
 /**%apidoc Derived description
  * %param [unused] outputParam
- * %param enumParam Derived param description
+ * %param enumParam Overriding description in StructDerived for SomeStruct::enumParam
  */
 struct StructDerived: SomeStruct
 {
@@ -93,12 +94,13 @@ reg("urlPrefix/testFunction5", new onTestFunction5());
 
 /**%apidoc Nested description
  * %param [unused] nested.outputParam
- * %param nested.enumParam Nested param description
+ * %param nested.enumParam Overriding description in StructNested for nested SomeStruct::enumParam
  */
 struct StructNested
 {
     /**%apidoc Nested overriden description*/
     SomeStruct nested;
+
     /**%apidoc Additional param*/
     int addParam;
 };

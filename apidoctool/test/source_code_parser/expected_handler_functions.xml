@@ -253,7 +253,7 @@ description</description>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>Derived param description</description>
+                                <description>Overriding description in StructDerived for SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
@@ -307,7 +307,7 @@ description</description>
                             <param>
                                 <name>nested.enumParam</name>
                                 <type>enum</type>
-                                <description>Nested param description</description>
+                                <description>Overriding description in StructNested for nested SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
