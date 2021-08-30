@@ -39,6 +39,17 @@ public final class ApidocUtils
                 return group;
             }
         }
+
+        // For proprietary functions, no "Proprietary ..." group found - look for any group.
+        if (isProprietary)
+        {
+            for (Apidoc.Group group: apidoc.groups)
+            {
+                if (group.urlPrefix.equals(urlPrefix))
+                    return group;
+            }
+        }
+
         throw new Error("Group not found in Apidoc XML: " + urlPrefix);
     }
 
