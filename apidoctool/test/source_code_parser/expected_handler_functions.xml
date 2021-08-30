@@ -339,6 +339,23 @@ description</description>
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testReturnStructArray</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>Description for StructWithDescription.</caption>
+                        <type>array</type>
+                        <params>
+                            <param>
+                                <name>field</name>
+                                <type>integer</type>
+                                <description>Description for StructWithDescription::field.</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

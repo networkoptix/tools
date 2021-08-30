@@ -110,3 +110,16 @@ struct StructNested
  *     %struct StructNested
  */
 reg("urlPrefix/testFunction6", new onTestFunction6());
+
+/**%apidoc Description for StructWithDescription. */
+struct StructWithDescription
+{
+    /**%apidoc Description for StructWithDescription::field. */
+    int field;
+};
+
+/**%apidoc GET /urlPrefix/testReturnStructArray
+ * %return:array
+ *     %struct StructWithDescription
+ */
+reg("urlPrefix/testReturnStructArray", new handler());

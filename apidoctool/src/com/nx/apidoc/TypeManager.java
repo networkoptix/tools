@@ -65,7 +65,8 @@ public final class TypeManager
             }
             else if (!outputDataType.isEmpty())
             {
-                function.result.type = Apidoc.Type.OBJECT;
+                if (function.result.type == Apidoc.Type.UNKNOWN)
+                    function.result.type = Apidoc.Type.OBJECT;
             }
             function.result.params = mergeStructParams(
                 outputDataType,
