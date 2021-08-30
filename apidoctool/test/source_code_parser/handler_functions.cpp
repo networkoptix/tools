@@ -135,3 +135,19 @@ reg("urlPrefix/testReturnStructWithDescription", new handler());
  *     %struct StructWithDescription
  */
 reg("urlPrefix/testReturnStructArray", new handler());
+
+/**%apidoc
+ * Description for StructWithFantomParam.
+ * %param fantomParam Description of fantomParam which is absent in the struct definition.
+ */
+struct StructWithFantomParam
+{
+    /**%apidoc Description for StructWithFantomParam::field. */
+    int field;
+};
+
+/**%apidoc GET /urlPrefix/testStructWithFantomParam
+ * %return
+ *     %struct StructWithFantomParam
+ */
+reg("urlPrefix/testStructWithFantomParam", new handler());

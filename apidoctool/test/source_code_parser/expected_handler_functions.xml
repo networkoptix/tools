@@ -392,6 +392,27 @@ description</description>
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testStructWithFantomParam</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>Description for StructWithFantomParam.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>field</name>
+                                <type>integer</type>
+                                <description>Description for StructWithFantomParam::field.</description>
+                            </param>
+                            <param>
+                                <name>fantomParam</name>
+                                <description>Description of fantomParam which is absent in the struct definition.</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

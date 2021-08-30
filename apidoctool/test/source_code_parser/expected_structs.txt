@@ -53,3 +53,11 @@ Apidoc item: "Output description"
     Apidoc item: "2 two"
     Field:unknown(Enum) enumParam
 
+Name: StructWithFantomParam
+Parents: null
+Apidoc item: "Description for StructWithFantomParam."
+Apidoc item: "field Overridden description of StructWithFantomParam::field."
+Apidoc item: "fantomParam Description of fantomParam which is absent in the struct definition."
+    Field:integer field
+    Apidoc item: "Description for StructWithFantomParam::field."
+

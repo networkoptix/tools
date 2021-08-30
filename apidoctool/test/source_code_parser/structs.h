@@ -71,4 +71,15 @@ struct OutputStruct
     }
 };
 
+/**%apidoc
+ * Description for StructWithFantomParam.
+ * %param field Overridden description of StructWithFantomParam::field.
+ * %param fantomParam Description of fantomParam which is absent in the struct definition.
+ */
+struct StructWithFantomParam
+{
+    /**%apidoc Description for StructWithFantomParam::field. */
+    int field;
+};
+
 } // namespace ec2

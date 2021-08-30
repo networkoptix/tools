@@ -109,9 +109,7 @@ public final class TypeManager
             System.out.println("WARNING: Struct `" + structName + "` not found.");
             return null;
         }
-        final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
-        structToParams(new ArrayList<Apidoc.Param>(), structParams, prefix, structInfo, paramDirection);
-        return structParams;
+        return structToParams(prefix, structInfo, paramDirection, new ArrayList<Apidoc.Param>());
     }
 
     private List<Apidoc.Param> mergeStructParams(
@@ -142,9 +140,9 @@ public final class TypeManager
             return functionParams;
         }
 
-        final List<Apidoc.Param> structParams = new ArrayList<Apidoc.Param>();
+        final List<Apidoc.Param> structParams = structToParams(
+            /*namePrefix*/ "", structInfo, paramDirection, new ArrayList<Apidoc.Param>());
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
-        structToParams(new ArrayList<Apidoc.Param>(), structParams, "", structInfo, paramDirection);
         for (Apidoc.Param structParam: structParams)
         {
             if (structParam.unused)
@@ -240,23 +238,31 @@ public final class TypeManager
         }
     }
 
-    private void structToParams(
-        List<Apidoc.Param> overriddenParams,
-        List<Apidoc.Param> params,
+    /**
+     * @param overriddenParams Used for recursion only; supply an empty list.
+     */
+    private List<Apidoc.Param> structToParams(
         String namePrefix,
         StructParser.StructInfo structInfo,
-        ApidocCommentParser.ParamDirection paramDirection)
+        ApidocCommentParser.ParamDirection paramDirection,
+        List<Apidoc.Param> overriddenParams)
         throws Error
     {
+        List<Apidoc.Param> paramsFromItems;
         try
         {
-            overriddenParams.addAll(ApidocCommentParser.parseParams(
-                structInfo.items, namePrefix, paramDirection, ApidocCommentParser.ParamMode.WithToken));
+            paramsFromItems = ApidocCommentParser.parseParams(
+                structInfo.items,
+                namePrefix,
+                paramDirection,
+                ApidocCommentParser.ParamMode.WithToken);
+            overriddenParams.addAll(paramsFromItems);
         }
         catch (ApidocCommentParser.Error e)
         {
             throw new Error(e.getMessage());
         }
+        List<Apidoc.Param> params = new ArrayList<Apidoc.Param>();
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
             final String name = namePrefix + field.name;
@@ -314,9 +320,22 @@ public final class TypeManager
                     nextNamePrefix += "[].";
                 else
                     nextNamePrefix += ".";
-                structToParams(overriddenParams, params, nextNamePrefix, innerStructInfo, paramDirection);
+
+                params.addAll(
+                    structToParams( //< Recursion.
+                        nextNamePrefix, innerStructInfo, paramDirection, overriddenParams));
             }
         }
+
+        // Add all "fantom" fields - `items` which have no corresponding field in the struct
+        // definition, but are mentioned in `items`. Such fields remain in overriddenParams.
+        for (final Apidoc.Param paramFromItems: paramsFromItems)
+        {
+            if (findParam(params, paramFromItems.name) == null)
+                params.add(paramFromItems);
+        }
+
+        return params;
     }
 
     private void fillUnknownTypes()
