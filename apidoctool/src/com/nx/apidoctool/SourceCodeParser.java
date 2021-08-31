@@ -94,17 +94,17 @@ public final class SourceCodeParser
             RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                final List<ApidocCommentParser.FunctionDescription> functions =
+                final List<ApidocCommentParser.FunctionDescription> functionDescriptions =
                     createFunctionsFromComment(
                         typeManager,
                         apidoc.groups,
                         urlPrefixReplacements,
                         requiredFunctionCaptionLenLimit,
                         requiredGroupNameLenLimit);
-                if (functions != null && !functions.isEmpty())
+                if (functionDescriptions != null && !functionDescriptions.isEmpty())
                 {
-                    final String urlPrefix = functions.get(0).urlPrefix;
-                    for (ApidocCommentParser.FunctionDescription description: functions)
+                    final String urlPrefix = functionDescriptions.get(0).urlPrefix;
+                    for (ApidocCommentParser.FunctionDescription description: functionDescriptions)
                     {
                         if (verbose)
                             System.out.println("            " + description.function.name);
@@ -250,10 +250,10 @@ public final class SourceCodeParser
         if (commentLines == null)
             return null;
 
-        final List<ApidocCommentParser.FunctionDescription> functions;
+        final List<ApidocCommentParser.FunctionDescription> functionDescriptions;
         final int commentStartLine = mainLine - commentLines.size();
         final ApidocCommentParser parser = new ApidocCommentParser();
-        functions = parser.createFunctionsFromTags(
+        functionDescriptions = parser.createFunctionsFromTags(
             ApidocTagParser.getItems(
                 commentLines, sourceCode.getFilename(), commentStartLine, verbose),
             typeManager,
@@ -262,7 +262,7 @@ public final class SourceCodeParser
             requiredFunctionCaptionLenLimit,
             requiredGroupNameLenLimit);
 
-        return functions;
+        return functionDescriptions;
     }
 
     private void checkFunctionProperties(

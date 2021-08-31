@@ -103,26 +103,24 @@ public final class ApidocCommentParser
         List<Replacement> urlPrefixReplacements,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
-        throws
-            Error,
-            TypeManager.Error
-
+        throws Error, TypeManager.Error
     {
-        final List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
+        final List<FunctionDescription> functionDescriptions = new ArrayList<FunctionDescription>();
 
         ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         while (tagIterator.hasNext())
         {
-            functions.add(createFunctionFromTags(
-                tagIterator,
-                typeManager,
-                groups,
-                urlPrefixReplacements,
-                requiredFunctionCaptionLenLimit,
-                requiredGroupNameLenLimit));
+            functionDescriptions.add(
+                createFunctionFromTags(
+                    tagIterator,
+                    typeManager,
+                    groups,
+                    urlPrefixReplacements,
+                    requiredFunctionCaptionLenLimit,
+                    requiredGroupNameLenLimit));
         }
 
-        return functions;
+        return functionDescriptions;
     }
 
     private static final class Param
@@ -144,9 +142,7 @@ public final class ApidocCommentParser
         List<Replacement> urlPrefixReplacements,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
-        throws
-            Error,
-            TypeManager.Error
+        throws Error, TypeManager.Error
     {
         ApidocTagParser.Item item = tagIterator.next();
 
@@ -258,16 +254,18 @@ public final class ApidocCommentParser
         Apidoc.Param param,
         TypeManager typeManager,
         ParamDirection direction)
-        throws TypeManager.Error,
-        Error
+        throws TypeManager.Error, Error
     {
         if (typeManager != null && param.structName != null)
         {
-            if (param.type != Apidoc.Type.ARRAY && param.type != Apidoc.Type.OBJECT &&
-                param.type != Apidoc.Type.UNKNOWN)
+            if (param.type != Apidoc.Type.ARRAY
+                && param.type != Apidoc.Type.OBJECT
+                && param.type != Apidoc.Type.UNKNOWN)
             {
-                throw new Error("Param '" + param.name + "' has '%struct' tag, but param type is '" +
-                    param.type + "'" + ". To use '%struct' tag type should be 'object' or 'array'");
+                throw new Error(
+                    "Param `" + param.name + "` has %struct tag, but the param type is `"
+                    + param.type + "`" + ". "
+                    + "To use %struct tag, the type must be `object` or `array`.");
             }
             String prefix = param.name;
             if (param.type == Apidoc.Type.ARRAY)
@@ -399,12 +397,12 @@ public final class ApidocCommentParser
     private static void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
-        if ("".equals(item.getAttribute()))
-        {
-            param.proprietary = false;
-            param.optional = false;
-        }
-        else if (ATTR_PROPRIETARY.equals(item.getAttribute()))
+        param.proprietary = false;
+        param.optional = false;
+        param.readonly = false;
+        param.unused = false;
+
+        if (ATTR_PROPRIETARY.equals(item.getAttribute()))
         {
             param.proprietary = true;
             param.optional = true;
@@ -416,7 +414,6 @@ public final class ApidocCommentParser
         }
         else if (ATTR_OPT.equals(item.getAttribute()))
         {
-            param.proprietary = false;
             param.optional = true;
         }
         else if (ATTR_DEFAULT.equals(item.getAttribute()))
@@ -432,7 +429,7 @@ public final class ApidocCommentParser
         {
             param.unused = true;
         }
-        else
+        else if (!"".equals(item.getAttribute()))
         {
             throwInvalidAttribute(item);
         }
@@ -513,8 +510,7 @@ public final class ApidocCommentParser
         ApidocTagParser.Item item,
         ListIterator<ApidocTagParser.Item> tagIterator,
         TypeManager typeManager)
-        throws Error,
-        TypeManager.Error
+        throws Error, TypeManager.Error
     {
         assert TAG_RETURN.equals(item.getTag());
         indentLevel++;
@@ -527,8 +523,8 @@ public final class ApidocCommentParser
         }
         catch (Exception e)
         {
-            throw new Error(item.getErrorPrefix() + "Invalid result type \"" + item.getLabel()
-                + "\" found.");
+            throw new Error(
+                item.getErrorPrefix() + "Invalid result type \"" + item.getLabel() + "\" found.");
         }
 
         boolean deprecatedAttributeTagFound = false;

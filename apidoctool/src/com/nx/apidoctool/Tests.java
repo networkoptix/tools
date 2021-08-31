@@ -102,7 +102,7 @@ public final class Tests extends TestBase
             throw new Exception("Invalid arg [" + arg + "] accepted by Params.");
     }
 
-    private void ckeanupDescription() throws Exception
+    private void cleanUpDescription() throws Exception
     {
         final String description =
 "    <br/>Example:\n" +
@@ -393,8 +393,8 @@ public final class Tests extends TestBase
 
         readTestProperties();
 
-        run("CleanupDescription", new Run() { public void run() throws Exception {
-            ckeanupDescription(); } });
+        run("CleanUpDescription", new Run() { public void run() throws Exception {
+            cleanUpDescription(); } });
 
         run("ParamsBase", new Run() { public void run() throws Exception {
             testParamsBase(); } });
