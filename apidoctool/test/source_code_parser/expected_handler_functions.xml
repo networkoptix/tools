@@ -413,6 +413,50 @@ description</description>
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testResultWithReply</name>
+                    <description/>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>resultField</name>
+                            <type>integer</type>
+                            <description>Description of resultField.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>reply</name>
+                            <description>Description of Reply.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>reply.replyField</name>
+                            <type>integer</type>
+                            <description>Description of replyField.</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>Description of Result.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>resultField</name>
+                                <type>integer</type>
+                                <description>Description of resultField.</description>
+                            </param>
+                            <param>
+                                <name>reply</name>
+                                <description>Description of Reply.</description>
+                            </param>
+                            <param>
+                                <name>reply.replyField</name>
+                                <type>integer</type>
+                                <description>Description of replyField.</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

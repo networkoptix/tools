@@ -38,7 +38,7 @@ struct ElementStruct
 {
 };
 
-/**%apidoc Output description */
+/**%apidoc SomeStruct description */
 struct SomeStruct
 {
     /**%apidoc[opt]:object
@@ -151,3 +151,32 @@ struct StructWithFantomParam
  *     %struct StructWithFantomParam
  */
 reg("urlPrefix/testStructWithFantomParam", new handler());
+
+/**%apidoc Description of Result. */
+struct Result
+{
+    /**%apidoc Description of resultField. */
+    int resultField;
+};
+
+/**%apidoc Description of Reply. */
+struct Reply
+{
+    /**%apidoc Description of replyField. */
+    int replyField;
+};
+
+/**%apidoc GET /urlPrefix/testResultWithReply
+ *
+ * %// Assuming that the function accepts as input and returns the same data - `struct Result` with
+ * %// a fantom param `struct Reply reply` which is not a C++ field but added during serialization.
+ *
+ * %struct Result
+ * %param reply
+ *     %struct Reply
+ * %return
+ *     %struct Result
+ *     %param reply
+ *         %struct Reply
+ */
+reg("urlPrefix/testResultWithReply", new handler());

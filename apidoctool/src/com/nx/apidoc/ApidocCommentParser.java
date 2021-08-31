@@ -220,7 +220,7 @@ public final class ApidocCommentParser
                 else
                     description.function.params.add(param);
 
-                addStructParams(
+                addStructParamsAndDescription(
                     description.function.params,
                     description.function.unusedParams,
                     param,
@@ -248,42 +248,47 @@ public final class ApidocCommentParser
         return description;
     }
 
-    private void addStructParams(
+    private void addStructParamsAndDescription(
         List<Apidoc.Param> params,
         List<Apidoc.Param> unusedParams,
         Apidoc.Param param,
         TypeManager typeManager,
-        ParamDirection direction)
+        ParamDirection paramDirection)
         throws TypeManager.Error, Error
     {
-        if (typeManager != null && param.structName != null)
+        if (typeManager == null || param.structName == null)
+            return;
+
+        if (param.description.isEmpty())
+            param.description = typeManager.getStructDescription(param.structName);
+
+        if (param.type != Apidoc.Type.ARRAY
+            && param.type != Apidoc.Type.OBJECT
+            && param.type != Apidoc.Type.UNKNOWN)
         {
-            if (param.type != Apidoc.Type.ARRAY
-                && param.type != Apidoc.Type.OBJECT
-                && param.type != Apidoc.Type.UNKNOWN)
+            throw new Error(
+                "Param `" + param.name + "` has %struct tag, but the param type is `"
+                + param.type + "`" + ". "
+                + "To use %struct tag, the type must be `object` or `array`.");
+        }
+
+        String prefix = param.name;
+        if (param.type == Apidoc.Type.ARRAY)
+            prefix += "[].";
+        else
+            prefix += ".";
+
+        final List<Apidoc.Param> structParams =
+            typeManager.getStructParams(param.structName, prefix, paramDirection);
+        if (structParams != null)
+        {
+            for (Apidoc.Param structParam: structParams)
             {
-                throw new Error(
-                    "Param `" + param.name + "` has %struct tag, but the param type is `"
-                    + param.type + "`" + ". "
-                    + "To use %struct tag, the type must be `object` or `array`.");
-            }
-            String prefix = param.name;
-            if (param.type == Apidoc.Type.ARRAY)
-                prefix += "[].";
-            else
-                prefix += ".";
-            List<Apidoc.Param> structParams = typeManager.getStructParams(
-                param.structName, prefix, direction);
-            if (structParams != null)
-            {
-                for (Apidoc.Param structParam: structParams)
-                {
-                    structParam.isGeneratedFromStruct = true;
-                    if (structParam.unused)
-                        unusedParams.add(structParam);
-                    else
-                        params.add(structParam);
-                }
+                structParam.isGeneratedFromStruct = true;
+                if (structParam.unused)
+                    unusedParams.add(structParam);
+                else
+                    params.add(structParam);
             }
         }
     }
@@ -546,7 +551,7 @@ public final class ApidocCommentParser
                 else
                     result.params.add(param);
 
-                addStructParams(
+                addStructParamsAndDescription(
                     result.params,
                     result.unusedParams,
                     param,

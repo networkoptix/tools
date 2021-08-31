@@ -112,6 +112,23 @@ public final class TypeManager
         return structToParams(prefix, structInfo, paramDirection, new ArrayList<Apidoc.Param>());
     }
 
+    /**
+     * @return Empty string if the struct was not found, or has no description.
+     */
+    public String getStructDescription(String structName)
+        throws Error
+    {
+        StructParser.StructInfo structInfo = structs.get(structName);
+        if (structInfo == null)
+        {
+            if (unknownParamTypeIsError)
+                throw new Error("Struct `" + structName + "` not found.");
+            System.out.println("WARNING: Struct `" + structName + "` not found.");
+            return "";
+        }
+        return structInfo.description();
+    }
+
     private List<Apidoc.Param> mergeStructParams(
         String structName,
         List<Apidoc.Param> functionParams,
