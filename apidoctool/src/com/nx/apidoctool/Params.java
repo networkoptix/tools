@@ -29,6 +29,17 @@ public class Params
         "Produce an error if a parameter type is unspecified and cannot be deduced from the " +
             "struct field.");
 
+    public boolean generateOrderByParameters() throws Exception
+    {
+        return toBoolean(generateOrderByParameters, "generateOrderByParameters");
+    }
+
+    private final StringBuilder generateOrderByParameters = regStringParam(
+        "generateOrderByParameters",
+        "false",
+        "Whether the default query parameter `_orderBy` must be generated to sort response lists " +
+            "by their fields.");
+
     public int requiredFunctionCaptionLenLimit() throws Exception
     {
         return toUnsignedInt(

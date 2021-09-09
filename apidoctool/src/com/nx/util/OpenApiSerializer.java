@@ -80,7 +80,8 @@ public final class OpenApiSerializer
     public static String toString(
         Apidoc apidoc,
         JSONObject root,
-        int requiredGroupNameLenLimit) throws Exception
+        int requiredGroupNameLenLimit,
+        boolean generateOrderByParameters) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
@@ -89,8 +90,11 @@ public final class OpenApiSerializer
         final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
-            if (!fillPaths(getObject(root, "paths"), group, refParameters))
+            if (!fillPaths(
+                getObject(root, "paths"), group, refParameters, generateOrderByParameters))
+            {
                 continue;
+            }
             JSONObject tag = null;
             for (int i = 0; i < tags.length(); ++i)
             {
@@ -134,13 +138,16 @@ public final class OpenApiSerializer
     }
 
     private static boolean fillPaths(
-        JSONObject paths, Apidoc.Group group, JSONObject refParameters) throws Exception
+        JSONObject paths,
+        Apidoc.Group group,
+        JSONObject refParameters,
+        boolean generateOrderByParameters) throws Exception
     {
         boolean filled = false;
         for (final Apidoc.Function function: group.functions)
         {
             final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
-            final JSONObject method = fillPath(path, function, refParameters);
+            final JSONObject method = fillPath(path, function, refParameters, generateOrderByParameters);
             final JSONArray tags = getArray(method, "tags");
             tags.put(group.groupName);
             filled = true;
@@ -149,7 +156,10 @@ public final class OpenApiSerializer
     }
 
     private static JSONObject fillPath(
-        JSONObject path, Apidoc.Function function, JSONObject refParameters) throws Exception
+        JSONObject path,
+        Apidoc.Function function,
+        JSONObject refParameters,
+        boolean generateOrderByParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.knownMethod());
         if (!function.caption.isEmpty())
@@ -199,7 +209,7 @@ public final class OpenApiSerializer
             }
             getArray(method, "parameters").put(parameter);
         }
-        fillResult(method, function.result);
+        fillResult(method, function.result, generateOrderByParameters);
         return method;
     }
 
@@ -246,7 +256,8 @@ public final class OpenApiSerializer
         return orderBy;
     }
 
-    private static void fillResult(JSONObject path, Apidoc.Result result) throws Exception
+    private static void fillResult(
+        JSONObject path, Apidoc.Result result, boolean generateOrderByParameters) throws Exception
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         default_.put("description", Utils.cleanupDescription(result.caption));
@@ -261,12 +272,14 @@ public final class OpenApiSerializer
             if (result.type == Apidoc.Type.ARRAY)
             {
                 schema = schema.getJSONObject("items");
-                orderBy = orderByTemplate();
+                if (generateOrderByParameters)
+                    orderBy = orderByTemplate();
             }
             for (final Apidoc.Param param: result.params)
             {
                 addStructParam(schema, param);
-                orderBy = fillOrderBy(orderBy, param);
+                if (generateOrderByParameters)
+                    orderBy = fillOrderBy(orderBy, param);
             }
             if (orderBy != null)
                 getArray(path, "parameters").put(orderBy);

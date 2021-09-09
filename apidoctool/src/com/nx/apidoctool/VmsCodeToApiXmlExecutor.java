@@ -166,7 +166,10 @@ public final class VmsCodeToApiXmlExecutor
             try
             {
                 json = OpenApiSerializer.toString(
-                    apidoc, openApi, params.requiredGroupNameLenLimit());
+                    apidoc,
+                    openApi,
+                    params.requiredGroupNameLenLimit(),
+                    params.generateOrderByParameters());
             }
             catch (Exception e)
             {
