@@ -28,7 +28,7 @@
 
             {
                 "_": "-------------------------- DESCRIPTION.JSON --------------------------",
-                "name": "General information",
+                "name": "General info",
                 "file_path": "description.json",
                 "description": "List of all customizable parameters",
                 "translatable": false,
