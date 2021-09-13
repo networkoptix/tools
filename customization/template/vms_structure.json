@@ -80,7 +80,7 @@
                     },
                     {
                         "label": "Cloud Host",
-                        "name": "%cloudHost%",
+                        "name": "%cloudHost%"
                     },
                     {
                         "type": "Select",
