@@ -10,6 +10,7 @@
     "eulaVersion": "%eulaVersion%",
     "installerName": "%installerName%",
     "cloudName": "%cloudName%",
+    "cloudHost": "%cloudHost%",
     "defaultLanguage": "%defaultLanguage%",
     "customLanguages": "%customLanguages%",
     "customOpenSourceLibrariesUrl": "%customOpenSourceLibrariesUrl%",

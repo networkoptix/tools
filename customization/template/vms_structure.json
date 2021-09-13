@@ -79,6 +79,10 @@
                         "name": "%cloudName%"
                     },
                     {
+                        "label": "Cloud Host",
+                        "name": "%cloudHost%",
+                    },
+                    {
                         "type": "Select",
                         "label": "Skin",
                         "name": "%skin%",
