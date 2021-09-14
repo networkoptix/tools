@@ -50,7 +50,7 @@
         "enabled": "%mobile.enabled%",
         "displayName": "%mobile.displayName%",
         "compatibleCustomizations": "%mobile.compatibleCustomizations%",
-        "compatibleUriProtocols": "%mobile.compatibleUriProtocols",
+        "compatibleUriProtocols": "%mobile.compatibleUriProtocols%",
 
         "android": {
             "packageName": "%mobile.android.packageName%",
