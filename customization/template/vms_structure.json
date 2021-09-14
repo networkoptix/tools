@@ -370,6 +370,13 @@
                         "optional": true
                     },
                     {
+                        "label": "[Mobile] Additional supported protocols",
+                        "name": "%mobile.compatibleUriProtocols%",
+                        "description": "Example: nx-metavms;nx-some-other-protocol",
+                        "advanced": true,
+                        "optional": true
+                    },
+                    {
                         "label": "[Android] package name",
                         "name": "%mobile.android.packageName%",
                         "description": "Unique package identifier. Only lowercase alphanumeric symbols are allowed. Should be in format: \"com.companyName.productname\"",
