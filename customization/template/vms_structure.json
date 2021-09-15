@@ -1496,6 +1496,138 @@
                         }
                     }
                 ]
+            },
+            {
+                "name": "webadmin_config.json",
+                "label": "Webadmin Config",
+                "file_path": "webadmin_config.json",
+                "description": "List of all customizable parameters",
+                "url": "",
+                "translatable": false,
+                "values": [
+                    {
+                        "label": "Footer links",
+                        "name": "%footerLinks%",
+                        "value": [
+                            {
+                                "name": "Download %VMS_NAME%",
+                                "url": "{{CLOUD_HOST}}/download",
+                                "newWindow": false,
+                                "enabled": true
+                            },
+                            {
+                                "name": "Support",
+                                "url": "%SUPPORT_LINK%",
+                                "newWindow": true,
+                                "enabled": true
+                            },
+                            {
+                                "name": "API Documentation",
+                                "url": "/swagger-ui/index.html",
+                                "newWindow": true,
+                                "enabled": true
+                            },
+                            {
+                                "name": "Download SDK",
+                                "url": "{{CLOUD_HOST}}/download/sdk",
+                                "newWindow": true,
+                                "enabled": true
+                            }
+                        ],
+                        "description": "Footer links for webadmin.",
+                        "type": "Array",
+                        "advanced": false,
+                        "optional": false,
+                        "public": false,
+                        "protected": false,
+                        "meta": {}
+                    },
+                    {
+                        "label": "Copyright Year",
+                        "name": "%copyrightYear%",
+                        "value": "2020",
+                        "description": "",
+                        "type": "Text",
+                        "advanced": false,
+                        "optional": false,
+                        "public": false,
+                        "protected": false,
+                        "meta": {}
+                    },
+                    {
+                        "label": "License Types",
+                        "name": "%licenseTypes%",
+                        "value": [
+                            {
+                                "name": "time",
+                                "title": "Time",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "trial",
+                                "title": "Trial",
+                                "deactivationsAllowed": 0
+                            },
+                            {
+                                "name": "digital",
+                                "title": "Professional",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "analog",
+                                "title": "Analog",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "edge",
+                                "title": "Edge",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "vmax",
+                                "title": "VMAX",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "videowall",
+                                "title": "Video Wall",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "analogencoder",
+                                "title": "Analog Encoder",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "starter",
+                                "title": "Starter",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "iomodule",
+                                "title": "IO Module",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "bridge",
+                                "title": "Bridge",
+                                "deactivationsAllowed": 3
+                            },
+                            {
+                                "name": "nvr",
+                                "title": "NVR",
+                                "deactivationsAllowed": 0
+                            }
+                        ],
+                        "description": "List of supported licenses to be used for webadmin.\r\nPlease do not modify this as it will be overwrite when we update to 20.2.\r\nTODO: Delete when prod is on version 20.2",
+                        "type": "Array",
+                        "advanced": true,
+                        "optional": false,
+                        "public": true,
+                        "protected": false,
+                        "meta": {}
+                    }
+                ]
             }
         ]
     }
