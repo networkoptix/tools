@@ -391,7 +391,7 @@ public final class OpenApiSerializer
             result.put("required", true);
         fillSchemaType(getObject(result, "schema"), param);
         if (param.type == Apidoc.Type.OPTION)
-            result.put("allowEmptyValue", "true");
+            result.put("allowEmptyValue", true);
         return result;
     }
 }

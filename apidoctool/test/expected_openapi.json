@@ -91,14 +91,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -182,14 +182,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -227,14 +227,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -268,14 +268,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -359,14 +359,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -464,14 +464,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -3906,7 +3906,7 @@
           "name": "keepSmallChunks",
           "description": " If specified, standalone chunks smaller than the detail\nlevel are not removed from the result.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
@@ -3919,7 +3919,7 @@
           "name": "flat",
           "description": " If specified, do not group chunk lists by server.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         }
       ],
@@ -5373,14 +5373,14 @@
           "name": "local",
           "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
           "name": "extraFormatting",
           "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {"type": "boolean"},
-          "allowEmptyValue": "true",
+          "allowEmptyValue": true,
           "in": "query"
         },
         {
