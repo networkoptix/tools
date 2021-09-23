@@ -355,6 +355,7 @@ public final class Tests extends TestBase
         assertJsonEqualsXml(generatedApiJsonFile, generatedApiXmlFile);
 
         assertFileContentsEqual(expectedApiXmlFile, generatedApiXmlFile);
+        assertFileContentsEqual(expectedOpenApiJsonFile, generatedOpenApiJsonFile);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -370,6 +371,7 @@ public final class Tests extends TestBase
     private final File vmsPath;
     private final File outputVmsPath;
     private final File expectedApiXmlFile;
+    private final File expectedOpenApiJsonFile;
 
     private int apiXmlFunctionsCount;
 
@@ -388,6 +390,7 @@ public final class Tests extends TestBase
         this.vmsPath = new File(testPath, "nx_vms");
         this.outputVmsPath = new File(outputTestPath, "nx_vms");
         this.expectedApiXmlFile = new File(testPath, "expected_api.xml");
+        this.expectedOpenApiJsonFile = new File(testPath, "expected_openapi.json");
         sourceCodeParserOutputTestPath.mkdirs();
         sourceCodeParserOutputTestPath.mkdir();
 
