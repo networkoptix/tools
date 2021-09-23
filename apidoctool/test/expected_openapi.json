@@ -564,7 +564,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -600,7 +608,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -637,7 +653,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -842,7 +866,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -1145,7 +1177,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -1187,7 +1227,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -1345,7 +1393,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -2444,7 +2500,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -2504,7 +2568,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -2626,7 +2698,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -2654,7 +2734,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -2738,7 +2826,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -2915,7 +3011,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -2967,7 +3071,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3010,7 +3122,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -3070,7 +3190,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -3098,7 +3226,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3150,7 +3286,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3247,7 +3391,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3279,7 +3431,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3344,7 +3504,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {
@@ -3445,7 +3613,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -3598,7 +3774,15 @@
       "parameters": [{
         "name": "format",
         "description": " Data format. Default value is \"json\".",
-        "schema": {},
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
+        },
         "in": "query"
       }],
       "responses": {"default": {
@@ -3641,7 +3825,15 @@
         {
           "name": "format",
           "description": " Data format. Default value is \"json\".",
-          "schema": {},
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          },
           "in": "query"
         },
         {

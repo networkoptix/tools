@@ -724,6 +724,7 @@ to be refactored in next versions.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -773,6 +774,7 @@ one server to another.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -820,6 +822,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -1223,6 +1226,7 @@ to another server for failover (if the current server fails).</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -1753,6 +1757,7 @@ such information as full ONVIF URL, camera maximum FPS, etc.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -1836,6 +1841,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -2241,6 +2247,7 @@ Example: Enable all hours in a week except for the Monday interval from 7am to 9
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -3948,6 +3955,7 @@ field:</caption>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4025,6 +4033,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4223,6 +4232,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4270,6 +4280,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4416,6 +4427,7 @@ value if not limited.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4727,6 +4739,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4854,6 +4867,7 @@ The list of parameters depends on the resource type.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4914,6 +4928,7 @@ for cameras such as maximum FPS, resolution, etc.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -4991,6 +5006,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5038,6 +5054,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5121,6 +5138,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5256,6 +5274,7 @@ Intended for internal use.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5308,6 +5327,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5440,6 +5460,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5642,6 +5663,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5839,6 +5861,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5903,6 +5926,7 @@ to database.</description>
                     <params>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>

@@ -490,6 +490,7 @@ public final class ApidocCommentParser
         }
 
         // TODO: Consider defining default "format" in the C++ source code.
+        param.type = Apidoc.Type.ENUM;
         param.optional = true;
         param.description = DEFAULT_FORMAT_DESCRIPTION;
         param.values.add(createValue("ubjson",
