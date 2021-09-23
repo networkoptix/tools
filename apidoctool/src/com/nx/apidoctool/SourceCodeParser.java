@@ -151,6 +151,11 @@ public final class SourceCodeParser
                                 throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ true);
                         }
 
+                        for (Apidoc.Param param: description.function.params)
+                            verifyParamValueNames(description, param, /*isResult*/ false);
+                        for (Apidoc.Param param: description.function.result.params)
+                            verifyParamValueNames(description, param, /*isResult*/ true);
+
                         if (description.function.groups.isEmpty())
                         {
                             final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(
@@ -229,6 +234,34 @@ public final class SourceCodeParser
         throw new Error(description.function.method + " " + description.urlPrefix + "/" +
             description.function.name + ": " + error + " of " + (isResult ? "result " : "") +
             "parameter \"" + param.name + "\".");
+    }
+
+    private void verifyParamValueNames(
+        ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
+    {
+        if (!param.type.mustBeQuotedInInput() && !param.type.mustBeUnquotedInInput())
+            return;
+
+        for (final Apidoc.Value value: param.values)
+        {
+            String error = null;
+            if (param.type.mustBeQuotedInInput())
+            {
+                if (value.areQuotesRemovedFromName)
+                    continue;
+                error = "must be quoted";
+            }
+            if (param.type.mustBeUnquotedInInput())
+            {
+                if (!value.areQuotesRemovedFromName)
+                    continue;
+                error = "must be NOT quoted";
+            }
+            System.out.println("WARNING: " + description.function.method + " " +
+                description.urlPrefix + "/" + description.function.name + ": value \"" +
+                value.name + "\" of " + (isResult ? "result " : "") + "parameter \"" + param.name +
+                "\" " + error + ".");
+        }
     }
 
     //---------------------------------------------------------------------------------------------

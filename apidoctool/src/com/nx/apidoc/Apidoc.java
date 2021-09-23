@@ -55,12 +55,34 @@ public final class Apidoc extends Serializable
             for (Type value: values())
                 stringValues.add(Utils.toCamelCase(value.name()));
         }
+
+        public boolean mustBeQuotedInInput()
+        {
+            return this == STRING;
+        }
+
+        public boolean mustBeUnquotedInInput()
+        {
+            return this == BOOLEAN || this == ENUM || this == FLAGS || this == INTEGER
+                || this == OPTION || this == UUID;
+        }
+
+        public boolean mustBeQuotedInOutput()
+        {
+            return this == ENUM || this == FLAGS || this == STRING || this == UUID;
+        }
+
+        public boolean mustBeUnquotedInOutput()
+        {
+            return this == BOOLEAN || this == INTEGER || this == OPTION;
+        }
     }
 
     public static final class Value extends Serializable
     {
         public String name;
         public String description; ///< optional
+        public boolean areQuotesRemovedFromName = false;
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
@@ -72,6 +94,27 @@ public final class Apidoc extends Serializable
         {
             g.writeString("name", name, Emptiness.PROHIBIT);
             g.writeInnerXml("description", description, Emptiness.ALLOW);
+        }
+
+        public void setName(String name)
+        {
+            name = name.trim();
+            // TODO: Support a name in quotes separated by space.
+            if ((name.length() >= 2) && name.startsWith("\"") && name.endsWith("\""))
+            {
+                name = name.substring(1, name.length() - 2);
+                areQuotesRemovedFromName = true;
+            }
+            this.name = name;
+        }
+
+        public String nameForDescription(Apidoc.Type type)
+        {
+            if (type.mustBeUnquotedInOutput())
+                return name;
+            if (areQuotesRemovedFromName || type.mustBeQuotedInOutput())
+                return '"' + name + '"';
+            return name;
         }
     }
 

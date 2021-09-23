@@ -458,7 +458,7 @@ public final class ApidocCommentParser
 
                 checkNoAttribute(item);
                 Apidoc.Value value = new Apidoc.Value();
-                value.name = getInitialToken(item, ParamMode.WithToken);
+                value.setName(getInitialToken(item, ParamMode.WithToken));
                 value.description = item.getTextAfterInitialToken(indentLevel);
                 paramDescription.values.add(value);
             }

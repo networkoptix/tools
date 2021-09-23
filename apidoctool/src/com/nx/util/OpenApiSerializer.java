@@ -358,21 +358,57 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void putDescription(boolean isProprietary, String description, JSONObject param)
-        throws Exception
+    private static String description(Apidoc.Param param) throws Exception
     {
-        String result = isProprietary ? "<b>Proprietary.</b>" : "";
-        description = Utils.cleanupDescription(description);
-        if (!description.isEmpty())
-            result += " " + description;
+        String result = param.proprietary ? "<b>Proprietary.</b>" : "";
+        String cleanedDescription = Utils.cleanupDescription(param.description);
+        if (!cleanedDescription.isEmpty())
+            result += (param.proprietary ? " " : "") + cleanedDescription;
+        if (param.values.isEmpty())
+            return result;
+        if (param.type == Apidoc.Type.ENUM || param.type == Apidoc.Type.FLAGS)
+        {
+            boolean hasDescription = false;
+            for (final Apidoc.Value value: param.values)
+            {
+                if (value.description != null && !value.description.trim().isEmpty())
+                {
+                    hasDescription = true;
+                    break;
+                }
+            }
+            if (!hasDescription)
+                return result;
+        }
         if (!result.isEmpty())
-            param.put("description", result);
+            result += "\n\n";
+        if (param.type == Apidoc.Type.FLAGS)
+            result += "Possible values are one of or the combination by `|` of the following:";
+        else
+            result += "Possible values are:";
+        for (final Apidoc.Value value: param.values)
+        {
+            result += "\n- `" + value.nameForDescription(param.type) + '`';
+            if (value.description == null)
+                continue;
+            final String description = value.description.trim();
+            if (!description.isEmpty())
+                result += ' ' + description;
+        }
+        return result;
+    }
+
+    private static void putDescription(Apidoc.Param param, JSONObject object) throws Exception
+    {
+        String result = description(param);
+        if (!result.isEmpty())
+            object.put("description", result);
     }
 
     private static void addStructParam(JSONObject schema, Apidoc.Param param) throws Exception
     {
         final JSONObject parameter = getParamByPath(schema, param.name);
-        putDescription(param.proprietary, param.description, parameter);
+        putDescription(param, parameter);
         if (param.readonly)
             parameter.put("readOnly", true);
         if (!param.optional)
@@ -384,7 +420,7 @@ public final class OpenApiSerializer
     {
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
-        putDescription(param.proprietary, param.description, result);
+        putDescription(param, result);
         if (param.readonly)
             result.put("readOnly", true);
         else if (!param.optional)
