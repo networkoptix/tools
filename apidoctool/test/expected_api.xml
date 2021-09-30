@@ -7907,15 +7907,15 @@ in bytes. Recommended value is 10 gigabytes for local storages and
                             <optional>false</optional>
                             <values>
                                 <value>
-                                    <name>local</name>
+                                    <name>"local"</name>
                                     <description/>
                                 </value>
                                 <value>
-                                    <name>network</name>
+                                    <name>"network"</name>
                                     <description>(manually mounted NAS)</description>
                                 </value>
                                 <value>
-                                    <name>smb</name>
+                                    <name>"smb"</name>
                                     <description>(auto mounted NAS)</description>
                                 </value>
                             </values>

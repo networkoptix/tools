@@ -86,13 +86,16 @@ public final class Apidoc extends Serializable
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            name = p.readString("name", Presence.REQUIRED);
+            setName(p.readString("name", Presence.REQUIRED));
             description = p.readInnerXml("description", Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeString("name", name, Emptiness.PROHIBIT);
+            g.writeString(
+                "name",
+                areQuotesRemovedFromName ? ('"' + name + '"') : name,
+                Emptiness.PROHIBIT);
             g.writeInnerXml("description", description, Emptiness.ALLOW);
         }
 
@@ -102,7 +105,7 @@ public final class Apidoc extends Serializable
             // TODO: Support a name in quotes separated by space.
             if ((name.length() >= 2) && name.startsWith("\"") && name.endsWith("\""))
             {
-                name = name.substring(1, name.length() - 2);
+                name = name.substring(/*beginIndex*/ 1, /*endIndex*/ name.length() - 1);
                 areQuotesRemovedFromName = true;
             }
             this.name = name;

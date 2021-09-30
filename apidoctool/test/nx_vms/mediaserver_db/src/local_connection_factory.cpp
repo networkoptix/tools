@@ -379,10 +379,10 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      * %param usedForWriting Whether writing to the storage is allowed.
      *     %value false
      *     %value true
-     * %param storageType Type of the method to access the storage.
-     *     %value local
-     *     %value network (manually mounted NAS)
-     *     %value smb (auto mounted NAS)
+     * %param:string storageType Type of the method to access the storage.
+     *     %value "local"
+     *     %value "network" (manually mounted NAS)
+     *     %value "smb" (auto mounted NAS)
      * %param addParams List of storage additional parameters. Intended for
      *     internal use; leave empty when creating a new storage.
      * %param isBackup Whether the storage is used for backup.
