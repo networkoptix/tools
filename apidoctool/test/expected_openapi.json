@@ -692,11 +692,11 @@
                 "type": "string"
               },
               "scheduleEnabled": {
-                "description": "Whether recording to the archive is enabled for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether recording to the archive is enabled for the camera.",
                 "type": "boolean"
               },
               "licenseUsed": {
-                "description": "Whether the license is used for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the license is used for the camera.",
                 "type": "boolean"
               },
               "motionType": {
@@ -729,7 +729,7 @@
                       "type": "integer"
                     },
                     "recordAudio": {
-                      "description": "Whether to record sound.\n\nPossible values are:\n- `false`\n- `true`",
+                      "description": "Whether to record sound.",
                       "type": "boolean"
                     },
                     "recordingType": {
@@ -788,7 +788,7 @@
                 }
               },
               "audioEnabled": {
-                "description": "Whether audio is enabled on the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether audio is enabled on the camera.",
                 "type": "boolean"
               },
               "disableDualStreaming": {
@@ -796,7 +796,7 @@
                 "type": "boolean"
               },
               "controlEnabled": {
-                "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
                 "type": "boolean"
               },
               "dewarpingParams": {
@@ -927,7 +927,7 @@
                 "type": "string"
               },
               "manuallyAdded": {
-                "description": "Whether the user added the camera manually.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the user added the camera manually.",
                 "type": "boolean"
               },
               "model": {
@@ -968,11 +968,11 @@
                 "type": "string"
               },
               "scheduleEnabled": {
-                "description": "Whether recording to the archive is enabled for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether recording to the archive is enabled for the camera.",
                 "type": "boolean"
               },
               "licenseUsed": {
-                "description": "Whether the license is used for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the license is used for the camera.",
                 "type": "boolean"
               },
               "motionType": {
@@ -1005,7 +1005,7 @@
                       "type": "integer"
                     },
                     "recordAudio": {
-                      "description": "Whether to record sound.\n\nPossible values are:\n- `false`\n- `true`",
+                      "description": "Whether to record sound.",
                       "type": "boolean"
                     },
                     "recordingType": {
@@ -1064,7 +1064,7 @@
                 }
               },
               "audioEnabled": {
-                "description": "Whether audio is enabled on the camera.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether audio is enabled on the camera.",
                 "type": "boolean"
               },
               "disableDualStreaming": {
@@ -1072,7 +1072,7 @@
                 "type": "boolean"
               },
               "controlEnabled": {
-                "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
                 "type": "boolean"
               },
               "dewarpingParams": {
@@ -1360,7 +1360,7 @@
                 "type": "integer"
               },
               "disabled": {
-                "description": "Whether the rule is disabled.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the rule is disabled.",
                 "type": "boolean"
               },
               "comment": {
@@ -1372,7 +1372,7 @@
                 "type": "string"
               },
               "system": {
-                "description": "Whether the rule is a built-in one, which cannot be deleted.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the rule is a built-in one, which cannot be deleted.",
                 "type": "boolean"
               }
             },
@@ -2784,7 +2784,7 @@
                 "type": "integer"
               },
               "allowAutoRedundancy": {
-                "description": "Whether the server can take cameras from\nan offline server automatically.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the server can take cameras from\nan offline server automatically.",
                 "type": "boolean"
               },
               "backupType": {
@@ -3349,7 +3349,7 @@
                 "type": "string"
               },
               "usedForWriting": {
-                "description": "Whether writing to the storage is allowed.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether writing to the storage is allowed.",
                 "type": "boolean"
               },
               "storageType": {
@@ -3372,7 +3372,7 @@
                 }
               },
               "isBackup": {
-                "description": "Whether the storage is used for backup.\n\nPossible values are:\n- `false`\n- `true`",
+                "description": "Whether the storage is used for backup.",
                 "type": "boolean"
               }
             },
@@ -4066,11 +4066,11 @@
               "type": "string"
             },
             "scheduleEnabled": {
-              "description": "Whether recording to the archive is enabled for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether recording to the archive is enabled for the camera.",
               "type": "boolean"
             },
             "licenseUsed": {
-              "description": "Whether the license is used for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the license is used for the camera.",
               "type": "boolean"
             },
             "motionType": {
@@ -4103,7 +4103,7 @@
                     "type": "integer"
                   },
                   "recordAudio": {
-                    "description": "Whether to record sound.\n\nPossible values are:\n- `false`\n- `true`",
+                    "description": "Whether to record sound.",
                     "type": "boolean"
                   },
                   "recordingType": {
@@ -4162,7 +4162,7 @@
               }
             },
             "audioEnabled": {
-              "description": "Whether audio is enabled on the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether audio is enabled on the camera.",
               "type": "boolean"
             },
             "disableDualStreaming": {
@@ -4170,7 +4170,7 @@
               "type": "boolean"
             },
             "controlEnabled": {
-              "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
               "type": "boolean"
             },
             "dewarpingParams": {
@@ -4259,11 +4259,11 @@
               "type": "string"
             },
             "scheduleEnabled": {
-              "description": "Whether recording to the archive is enabled for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether recording to the archive is enabled for the camera.",
               "type": "boolean"
             },
             "licenseUsed": {
-              "description": "Whether the license is used for the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the license is used for the camera.",
               "type": "boolean"
             },
             "motionType": {
@@ -4296,7 +4296,7 @@
                     "type": "integer"
                   },
                   "recordAudio": {
-                    "description": "Whether to record sound.\n\nPossible values are:\n- `false`\n- `true`",
+                    "description": "Whether to record sound.",
                     "type": "boolean"
                   },
                   "recordingType": {
@@ -4355,7 +4355,7 @@
               }
             },
             "audioEnabled": {
-              "description": "Whether audio is enabled on the camera.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether audio is enabled on the camera.",
               "type": "boolean"
             },
             "disableDualStreaming": {
@@ -4363,7 +4363,7 @@
               "type": "boolean"
             },
             "controlEnabled": {
-              "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
               "type": "boolean"
             },
             "dewarpingParams": {
@@ -4548,7 +4548,7 @@
                     "type": "string"
                   },
                   "displayInfo": {
-                    "description": "Whether to display info for the layout item.\n\nPossible values are:\n- `false`\n- `true`",
+                    "description": "Whether to display info for the layout item.",
                     "type": "boolean"
                   }
                 },
@@ -4574,7 +4574,7 @@
               }
             },
             "locked": {
-              "description": "Whether the layout is locked.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the layout is locked.",
               "type": "boolean"
             },
             "backgroundImageFilename": {"type": "string"},
@@ -4786,7 +4786,7 @@
                     "type": "string"
                   },
                   "displayInfo": {
-                    "description": "Whether to display info for the layout item.\n\nPossible values are:\n- `false`\n- `true`",
+                    "description": "Whether to display info for the layout item.",
                     "type": "boolean"
                   }
                 },
@@ -4812,7 +4812,7 @@
               }
             },
             "locked": {
-              "description": "Whether the layout is locked.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the layout is locked.",
               "type": "boolean"
             },
             "backgroundImageFilename": {"type": "string"},
@@ -4871,7 +4871,7 @@
               "type": "integer"
             },
             "allowAutoRedundancy": {
-              "description": "Whether the server can take cameras from\nan offline server automatically.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the server can take cameras from\nan offline server automatically.",
               "type": "boolean"
             },
             "backupType": {
@@ -4937,7 +4937,7 @@
               "type": "integer"
             },
             "allowAutoRedundancy": {
-              "description": "Whether the server can take cameras from\nan offline server automatically.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the server can take cameras from\nan offline server automatically.",
               "type": "boolean"
             },
             "backupType": {
@@ -5017,7 +5017,7 @@
               "type": "string"
             },
             "usedForWriting": {
-              "description": "Whether writing to the storage is allowed.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether writing to the storage is allowed.",
               "type": "boolean"
             },
             "storageType": {
@@ -5040,7 +5040,7 @@
               }
             },
             "isBackup": {
-              "description": "Whether the storage is used for backup.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the storage is used for backup.",
               "type": "boolean"
             }
           },
@@ -5092,7 +5092,7 @@
               "format": "uuid"
             },
             "isAdmin": {
-              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
               "type": "boolean"
             },
             "permissions": {
@@ -5137,7 +5137,7 @@
               "type": "string"
             },
             "isLdap": {
-              "description": "Whether the user was imported from LDAP.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the user was imported from LDAP.",
               "type": "boolean"
             },
             "isEnabled": {
@@ -5237,7 +5237,7 @@
               "format": "uuid"
             },
             "isAdmin": {
-              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
               "type": "boolean"
             },
             "permissions": {
@@ -5282,7 +5282,7 @@
               "type": "string"
             },
             "isLdap": {
-              "description": "Whether the user was imported from LDAP.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the user was imported from LDAP.",
               "type": "boolean"
             },
             "isEnabled": {
@@ -5874,7 +5874,7 @@
                 },
                 "additionalResources": {"description": "JSON list of ids of additional\nresources; user ids for Show On Alarm Layout."},
                 "forced": {
-                  "description": "Alarm Layout - if it must be opened immediately.\n\nPossible values are:\n- `true`\n- `false`",
+                  "description": "Alarm Layout - if it must be opened immediately.",
                   "type": "boolean"
                 },
                 "presetId": {
@@ -6102,7 +6102,7 @@
               "type": "string"
             },
             "hasDaylightTime": {
-              "description": "Whether the time zone has the DST feature.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the time zone has the DST feature.",
               "type": "boolean"
             },
             "id": {
@@ -6110,7 +6110,7 @@
               "type": "string"
             },
             "isDaylightTime": {
-              "description": "Whether the time zone is on DST right now. To be reported\nproperly, the server machine should have the correct current time set.\n\nPossible values are:\n- `false`\n- `true`",
+              "description": "Whether the time zone is on DST right now. To be reported\nproperly, the server machine should have the correct current time set.",
               "type": "boolean"
             },
             "offsetFromUtc": {

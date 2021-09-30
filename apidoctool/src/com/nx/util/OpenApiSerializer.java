@@ -366,7 +366,9 @@ public final class OpenApiSerializer
             result += (param.proprietary ? " " : "") + cleanedDescription;
         if (param.values.isEmpty())
             return result;
-        if (param.type == Apidoc.Type.ENUM || param.type == Apidoc.Type.FLAGS)
+        if (param.type == Apidoc.Type.BOOLEAN
+            || param.type == Apidoc.Type.ENUM
+            || param.type == Apidoc.Type.FLAGS)
         {
             boolean hasDescription = false;
             for (final Apidoc.Value value: param.values)
