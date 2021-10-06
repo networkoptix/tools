@@ -155,7 +155,11 @@ class Jira:
                 raise ('Unsupported JIRA dump extension:' + extension)
 
         try:
-            fixVersions = self._fix_versions_for(report.version)
+            if reason.component == 'Client':
+                # Temporary, see CA-9
+                fixVersions = {'master', }
+            else:
+                fixVersions = self._fix_versions_for(report.version)
             if not fixVersions:
                 raise ValueError("No fix version for this report")
             request = dict(
@@ -263,6 +267,11 @@ class Jira:
             except jira.exceptions.JIRAError as error:
                 if 'Version name' not in error.text: raise
                 logger.warning('Unabe to update version on JIRA issue {}: {}'.format(key, error.text))
+
+        if 'Future' in [v.name for v in issue.fields.fixVersions]:
+            logger.debug('JIRA issue {} update for fixVersions is skipped: Future is in FixVersions'
+                         .format(issue.key))
+            return
 
         current_fix_versions = {v.name for v in issue.fields.fixVersions}
         new_fix_versions = self._cut_off_older_versions(fix_versions, current_fix_versions)
