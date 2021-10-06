@@ -3,7 +3,6 @@
 import sys
 import argparse
 import logging
-import re
 import time
 import timeit
 from datetime import timedelta
@@ -54,17 +53,13 @@ class Options:
 
 class Monitor:
     def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict,
-                 issue_autoclose_indicators: dict, non_significant_methods: list,
-                 client: dict, debug: dict = {}):
+                 issue_autoclose_indicators: dict, debug: dict = {}):
         self._debug = debug
         self._options = Options(**options)
         self._options.reports_directory.make()
         self._options.dump_tool_directory.make()
         self._fetch, self._upload, self._analyze = fetch, upload, analyze
         self._autoclose_indicators = issue_autoclose_indicators
-        self._non_significant_methods_re = re.compile(
-            '|'.join([f'({method})' for method in non_significant_methods]))
-        self._client_options = client
         self._analyze['cache_directory'] = self._options.dump_tool_directory.path
         self._records = self._options.records_file.parse(dict())
 
@@ -202,10 +197,6 @@ class Monitor:
 
         return len(analyzed)
 
-    def ignore_report(self, report):
-        return bool(report.component == self._client_options['component'] and
-                    report.version in self._client_options['ignore_versions'])
-
     def upload(self):
         crashes_by_id = {}
         for name, record in self._records.items():
@@ -221,19 +212,13 @@ class Monitor:
         crashes_to_push = []
         for _, data in crashes_by_id.items():
             if data['reports']:
-                useful_reports = []
-                for r in data['reports']:
-                    if not self.ignore_report(r):
-                        useful_reports.append(r)
-                if data['issue'] or len(useful_reports) >= self._options.min_report_count:
-                    crashes_to_push.append((data['issue'], useful_reports))
+                if data['issue'] or len(data['reports']) >= self._options.min_report_count:
+                    crashes_to_push.append((data['issue'], data['reports']))
 
         logger.info('Create or update {} JIRA issue(s) with new report(s)'.format(len(crashes_to_push)))
         uploads_count = 0
         for result in utils.run_concurrent(
                 self._jira_sync, crashes_to_push, directory=self._options.reports_directory,
-                non_significant_methods_re=self._non_significant_methods_re,
-                client_options=self._client_options,
                 autoclose_indicators=self._autoclose_indicators, **self._upload):
             if isinstance(result, external_api.JiraError):
                 logger.warning(utils.format_error(result))
@@ -254,8 +239,6 @@ class Monitor:
 
     @staticmethod
     def _jira_sync(crash_tuple: Tuple[str, List[crash_info.Report]], directory: utils.Directory,
-                   non_significant_methods_re,
-                   client_options: dict,
                    api: type = external_api.Jira, **options):
         jira = api(**options)
         issue, reports = crash_tuple
@@ -280,13 +263,6 @@ class Monitor:
             jira.autoclose_issue_if_required(issue, reason)
         else:
             jira.update_issue(issue, reports, directory=directory)
-
-        issue_components = [c.name for c in jira.get_issue(issue).fields.components]
-        if client_options['component'] in issue_components:
-            lines_of_code = jira.get_issue_first_code_block(issue)
-            signature = crash_info.get_signature(
-                lines_of_code, non_significant_methods_re, client_options['libs'])
-            jira.create_or_update_crash_issue(issue, signature, lines_of_code)
         return issue, reports
 
     @classmethod

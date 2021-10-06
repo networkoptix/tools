@@ -183,53 +183,6 @@ class Jira:
         logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
 
-    def get_issue(self, key: str):
-        return self._jira.issue(key)
-
-    def get_issue_first_code_block(self, issue_key: str) -> List[str]:
-        issue = self._jira.issue(issue_key)
-        lines_of_code = issue.fields.description.split('{code}')[1].strip().splitlines()
-        return lines_of_code
-
-    def create_or_update_crash_issue(self, issue_key: str, signature: str, lines_of_code: list):
-        query = self._jira.search_issues(
-            jql_str=f'project="CRASH" and summary~"\\\"{signature}\\\""',
-            json_result=True)
-        if not query['issues']:
-            # No such issues found, so create one.
-            description = '\n'.join(
-                ['One of possible stacks:', '{code}', *lines_of_code, '{code}'])
-            crash_issue = self._jira.create_issue(project='CRASH', summary=signature,
-                description=description,
-                issuetype={'name': 'Task'},
-                customfield_11180=len(self._jira.issue(issue_key).fields.attachment),
-            )
-            self._jira.create_issue_link('Parent', crash_issue.key, issue_key)
-            return crash_issue
-        # Update existing issue
-        existing_key = query['issues'][0]['key']
-        existing_issue = self._jira.issue(existing_key)
-        issues_in_crash = []
-        for link in existing_issue.fields.issuelinks:
-            try:
-                issues_in_crash.append(link.outwardIssue.key)
-            except AttributeError:
-                pass
-            try:
-                issues_in_crash.append(link.inwardIssue.key)
-            except AttributeError:
-                pass
-
-        if issue_key not in issues_in_crash:
-            attachments_number = len(self._jira.issue(issue_key).fields.attachment)
-            new_crash_counter = existing_issue.fields.customfield_11180 + attachments_number
-            existing_issue.update(customfield_11180=new_crash_counter)
-            self._jira.create_issue_link('Parent', existing_issue.key, issue_key)
-        else:
-            existing_issue.update(
-                customfield_11180=existing_issue.fields.customfield_11180 + 1)
-        return existing_issue
-
     def autoclose_issue_if_required(self, key: str, reason: crash_info.Reason):
         """Autocloses the issue based on the crash stack from :reason.
         Leaves the comment with the autoclose reason.
@@ -376,8 +329,6 @@ class Jira:
                 error = JiraError(
                     'Unable to attach "{}" file to issue {}'.format(report.name, key), jira_error)
                 if jira_error.status_code == 413:  # HTTP Code: Payload Too Large.
-                    logger.warning(utils.format_error(error))
-                elif 'Added empty attachment' in jira_error.status_code:
                     logger.warning(utils.format_error(error))
                 else:
                     raise error

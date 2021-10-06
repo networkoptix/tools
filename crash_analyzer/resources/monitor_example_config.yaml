@@ -75,16 +75,3 @@ issue_autoclose_indicators:
         'QVector::reallocData': "Memory overflow"
         'QVector::append': "Memory overflow"
 
-non_significant_methods:
-    - 'Q[A-Z]'
-    - 'QtPrivate'
-    - 'operator new'
-    - 'std::'
-
-client:
-  component: Client
-  libs:
-    - 'nx_vms_client_desktop'
-    - 'Client'
-  ignore_versions:
-    - '4.1'

@@ -56,7 +56,6 @@ class JiraFixture:
         self.api = external_api.Jira(**JIRA_CONFIG, autoclose_indicators=autoclose_indicators,
                                      file_limit=4, prefix=JIRA_PREFIX)
         self.issue = None
-        self.crash_issue = None
 
     def __enter__(self):
         return self
@@ -64,17 +63,11 @@ class JiraFixture:
     def __exit__(self, *args):
         if self.issue:
             self.issue.delete()
-        if self.crash_issue:
-            self.crash_issue.delete()
 
     def create_issue(self, name: str):
         self.issue = self.api._jira.issue(self.api.create_issue(
             crash_info.Report(name),
             crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])))
-
-    def create_or_update_crash_issue(self, issue_key, signature, lines_of_code):
-        self.crash_issue = self.api.create_or_update_crash_issue(
-            issue_key, signature, lines_of_code)
 
     def autoclose_issue(self, reason: crash_info.Reason):
         self.api.autoclose_issue_if_required(self.issue.key, reason)
@@ -98,9 +91,6 @@ class JiraFixture:
         report = crash_info.Report(name)
         reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'], ['f1', 'f2'])
         return report, reason
-
-    def get_issue(self, key):
-        return self.api.get_issue(key)
 
 
 def test_jira():
@@ -178,13 +168,14 @@ def _test_jira():
         assert {'a', 'c', 'e', 'h'} == jira.attachments()
 
         logger.info('Suppose developer set fix version future')
-        jira.api._update_field_values(jira.issue, 'fixVersions', {'3.1_hotfix', '3.2'})
-        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        jira.api._update_field_values(jira.issue, 'fixVersions', {'Future'})
+        jira.issue.update(fields={'fixVersions': [{'name': 'Future'}]})
+        assert {'Future'} == jira.field_set('fixVersions')
 
         logging.info('Attachments rotation without fix version update')
         jira.update_issue(['server--3.2.0.324-xyz-default--arm-rpi--f.gdb-bt'])
         assert {'3.0', '3.1', '3.2'} == jira.field_set('versions')
-        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        assert {'Future'} == jira.field_set('fixVersions')
         assert {'c', 'e', 'f', 'h'} == jira.attachments()
 
         logger.info('Suppose issue is marked as duplicate')
@@ -194,28 +185,11 @@ def _test_jira():
         logging.info('Attachments rotation still happens')
         jira.update_issue(['server--4.0.0.412-abc-default--linux-x86--g.gdb-bt'])
         assert {'3.0', '3.1', '3.2', '4.0'} == jira.field_set('versions')
-        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        assert {'Future'} == jira.field_set('fixVersions')
         assert {'e', 'f', 'g', 'h'} == jira.attachments()
 
         logging.info('Issue must be reopened if the problem reproduced in the next version')
         assert 'Open' == jira.issue.fields.status.name
-
-        logging.info('Code block is fetched correctly')
-        assert jira.api.get_issue_first_code_block(jira.issue.key) == ['f1', 'f2']
-
-        logging.info('We can get issue')
-        issue = jira.get_issue(jira.issue.key)
-        assert issue.fields.status.name == 'Open'
-
-        logging.info('Crash issue is created')
-        jira.create_or_update_crash_issue(jira.issue.key, 'f1', ['f1', 'f2'])
-        assert jira.crash_issue.fields.description == 'One of possible stacks:\n{code}\nf1\nf2\n{code}'
-        assert jira.crash_issue.fields.customfield_11180 == 4
-
-        logging.info('Crash issue is updated')
-        jira.create_or_update_crash_issue(jira.issue.key, 'f1', ['f1', 'f2'])
-        assert jira.crash_issue.fields.customfield_11180 == 5
-
 
 
 def test_jira_autoclose():

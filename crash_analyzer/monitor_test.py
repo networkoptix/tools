@@ -5,7 +5,6 @@ import os
 import multiprocessing
 import functools
 from typing import List, Dict
-from unittest.mock import Mock
 
 import pytest
 
@@ -35,8 +34,7 @@ class CrashServerMock:
 
 class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str, autoclose_indicators: Dict[str, str],
-                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = '',
-                 fallback_versions: list = []):
+                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = ''):
         self.issues = issues
         self.args = [url, login, password, file_limit, fix_versions, epic_link, prefix]
 
@@ -65,29 +63,6 @@ class JiraMock:
         self.issues[key] = issue
         logger.info('Issue {} is updated with {} reports'.format(key, len(reports)))
         return True
-
-    def get_issue_first_code_block(self, issue_key: str):
-        return [f'Code for {issue_key}']
-
-    def create_or_update_crash_issue(self, issue_key: str, signature: str, lines_of_code: list):
-        self.issues[signature] = {
-            'code': lines_of_code,
-            'extension': None,
-            'versions': [],
-            'stack': None,
-            'attachments': [],
-        }
-
-    def get_issue(self, key):
-        if key in self.issues:
-            component = Mock()
-            component.name = 'Client'
-            issue = Mock()
-            issue.fields = Mock()
-            issue.fields.components = [component]
-            return issue
-        else:
-            return None
 
 
 class MonitorFixture:
@@ -144,45 +119,4 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     actual = {k: v for k, v in monitor_fixture.issues.items()}
     possible = utils.Resource('expected_issues.yaml').parse()
     expected = {k: v for k, v in possible.items() if v['extension'].endswith(extension)}
-    expected_crashes = {
-        f'Code for {k}': {
-            'code': [f'Code for {k}'],
-            'extension': None,
-            'versions': [],
-            'stack': None,
-            'attachments': [],
-        } for k, v in possible.items() if v['extension'].endswith(extension)}
-    expected.update(expected_crashes)
-
-    assert expected == actual
-
-
-def test_versions_to_ignore(monitor_fixture):
-    extension = 'cdb-bt'
-    monitor_fixture.options['fetch'].update(extension=extension, report_count=10)
-    monitor_fixture.options['client']['ignore_versions'] = ['3.1']
-    monitor_fixture.new_monitor()
-
-    def ignore_report(report):
-        return bool(report['versions'] == ['3.1'] and
-                    not any('server' in a for a in report['attachments']))
-
-    while monitor_fixture.monitor.fetch():
-        monitor_fixture.monitor.analyze()
-        monitor_fixture.monitor.upload()
-
-    actual = {k: v for k, v in monitor_fixture.issues.items()}
-    possible = utils.Resource('expected_issues.yaml').parse()
-    expected = {k: v for k, v in possible.items()
-                if v['extension'].endswith(extension) and not ignore_report(v)}
-    expected_crashes = {
-        f'Code for {k}': {
-            'code': [f'Code for {k}'],
-            'extension': None,
-            'versions': [],
-            'stack': None,
-            'attachments': [],
-        } for k, v in possible.items()
-        if v['extension'].endswith(extension) and not ignore_report(v)}
-    expected.update(expected_crashes)
     assert expected == actual
