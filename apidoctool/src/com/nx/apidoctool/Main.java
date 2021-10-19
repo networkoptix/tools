@@ -1,11 +1,14 @@
 package com.nx.apidoctool;
 
 import com.nx.util.SimpleArgsParser;
+
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class Main
 {
-    private static final String VERSION = "2.0";
+    private static final String VERSION = "2.2";
 
     private static final String DESCRIPTION =
         "Parses Apidoc comments in C++ code and generates api.xml.";
@@ -53,9 +56,15 @@ public class Main
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
         try
         {
+            Properties properties = new Properties();
+            InputStream propertiesInput =
+                Main.class.getClassLoader().getResourceAsStream("version.properties");
+            if (propertiesInput != null)
+                properties.load(propertiesInput);
             final Params params = new Params();
-
-            final SimpleArgsParser arg = new SimpleArgsParser(args, VERSION, DESCRIPTION)
+            final SimpleArgsParser arg = new SimpleArgsParser(args,
+                VERSION + "-" + properties.getProperty("gitSha", "unknown").replace("-dirty", "+"),
+                DESCRIPTION)
             {
                 protected void printUsageHelp()
                 {

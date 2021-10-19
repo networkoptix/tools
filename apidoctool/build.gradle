@@ -5,6 +5,15 @@ plugins {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+task generateVersionProperties(type: WriteProperties) {
+    outputFile = "${buildDir}/version.properties"
+    property("gitSha", 'git describe --match="" --always --dirty'.execute([], project.rootDir).text.trim())
+}
+
+processResources {
+    from(generateVersionProperties)
+}
+
 sourceSets {
     main {
         java {

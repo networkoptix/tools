@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Version" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.nx.apidoctool.Main" />
+    <module name="apidoctool" />
+    <option name="PROGRAM_PARAMETERS" value="-version" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <method />
+  </configuration>
+</component>
