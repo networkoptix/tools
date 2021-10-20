@@ -18,7 +18,7 @@ export PATH="$PATH\
 :/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/bin/Roslyn\
 :/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/Team Tools/Performance Tools\
 :/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/Team Tools/Performance Tools/x64\
-:/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/HostX64/x64\
+:/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/HostX64/x64\
 :/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/Shared/Common/VSPerfCollectionTools/vs2019\
 :/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/Shared/Common/VSPerfCollectionTools/vs2019/x64\
 :/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64\
@@ -35,21 +35,21 @@ export FrameworkDIR64="C:\\WINDOWS\\Microsoft.NET\\Framework64"
 export FrameworkDir="C:\\WINDOWS\\Microsoft.NET\\Framework64\\"
 export FrameworkVersion64="v4.0.30319"
 export FrameworkVersion="v4.0.30319"
-export IFCPATH="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\ifc\\x64"
+export IFCPATH="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\ifc\\x64"
 export NETFXSDKDir="C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\"
 export Platform="x64"
 export UCRTVersion="10.0.17763.0"
 export UniversalCRTSdkDir="C:\\Program Files (x86)\\Windows Kits\\10\\"
 export VCIDEInstallDir="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\VC\\"
 export VCINSTALLDIR="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\"
-export VCToolsInstallDir="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\"
-export VCToolsRedistDir="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Redist\\MSVC\\14.29.30036\\"
-export VCToolsVersion="14.29.30037"
+export VCToolsInstallDir="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\"
+export VCToolsRedistDir="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Redist\\MSVC\\14.29.30133\\"
+export VCToolsVersion="14.29.30133"
 export VS160COMNTOOLS="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\Tools\\"
 export VSCMD_ARG_HOST_ARCH="x64"
 export VSCMD_ARG_TGT_ARCH="x64"
 export VSCMD_ARG_app_plat="Desktop"
-export VSCMD_VER="16.10.0"
+export VSCMD_VER="16.11.5"
 export VSINSTALLDIR="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\"
 export VisualStudioVersion="16.0"
 export WindowsSDKLibVersion="10.0.17763.0\\"
@@ -101,8 +101,8 @@ C:\\Users\\mshevchenko\\AppData\\Local\\Microsoft\\WindowsApps;\
 C:\\Users\\mshevchenko\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;\
 "
 export INCLUDE="\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\ATLMFC\\include;\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\include;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\ATLMFC\\include;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\include;\
 C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\include\\um;\
 C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\ucrt;\
 C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\shared;\
@@ -111,16 +111,16 @@ C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\winrt;\
 C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\cppwinrt;\
 "
 export LIB="\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\ATLMFC\\lib\\x64;\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\lib\\x64;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\ATLMFC\\lib\\x64;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\lib\\x64;\
 C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\lib\\um\\x64;\
 C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\ucrt\\x64;\
 C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\um\\x64;\
 "
 export LIBPATH="\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\ATLMFC\\lib\\x64;\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\lib\\x64;\
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30037\\lib\\x86\\store\\references;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\ATLMFC\\lib\\x64;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\lib\\x64;\
+C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\lib\\x86\\store\\references;\
 C:\\Program Files (x86)\\Windows Kits\\10\\UnionMetadata\\10.0.17763.0;\
 C:\\Program Files (x86)\\Windows Kits\\10\\References\\10.0.17763.0;\
 C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319;\
