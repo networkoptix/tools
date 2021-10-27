@@ -308,7 +308,6 @@ setup_vars()
             nx_fail "Cannot find $ACTUAL_CMAKE_LISTS_TXT" "$HELP"
         fi
         get_TARGET_and_CUSTOMIZATION
-        get_QT_DIR
     elif [ -f "$CMAKE_CACHE_TXT" ]
     then #< This is a cmake build dir: find respective repo dir via CMakeCache.txt.
         BUILD_DIR="$VMS_DIR"
@@ -319,7 +318,6 @@ setup_vars()
         fi
         canonicalize_VMS_DIR
         get_TARGET_and_CUSTOMIZATION
-        get_QT_DIR
     else #< This is not a cmake build dir: test it to be vms project repo dir.
         if [ ! -f "$CMAKE_LISTS_TXT" ]
         then
@@ -334,7 +332,6 @@ setup_vars()
 
         get_TARGET_and_CUSTOMIZATION
         get_BUILD_DIR
-        get_QT_DIR
     fi
 
     case "$CONFIG" in
@@ -497,6 +494,8 @@ do_ctest() # all|TestName "$@"
 
 do_run_ut() # TestName "$@"
 {
+    get_QT_DIR
+
     if nx_is_cygwin
     then
         nx_append_path "$QT_DIR/bin"
@@ -1981,6 +1980,7 @@ main()
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
+                    get_QT_DIR
                     local -r QT_PATH="$QT_DIR/bin"
                     nx_append_path "$QT_PATH"
                     nx_verbose bin/mediaserver -e "$@"
@@ -2001,6 +2001,7 @@ main()
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
+                    get_QT_DIR
                     local -r EXTRA_PATH="$QT_DIR/bin:$PACKAGES_DIR\windows-x64\icu-60.2\bin"
                     nx_append_path "$EXTRA_PATH"
                     case "$CUSTOMIZATION" in
@@ -2038,6 +2039,7 @@ main()
 
             if nx_is_cygwin
             then
+                get_QT_DIR
                 nx_append_path "$QT_DIR/bin:$BUILD_DIR/bin"
             fi
 
@@ -2218,7 +2220,6 @@ main()
             nx_echo_var DISTRIB
             nx_echo_var SDK
             nx_echo_var DEV
-            nx_echo_var QT_DIR
             nx_echo_var DEVELOP_DIR
             ;;
         tunnel) # ip1 [ip2]...
