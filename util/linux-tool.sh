@@ -291,7 +291,7 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 # [out] BUILD_DIR
 # [out] TARGET
 # [out] QT_DIR
-setup_vars()
+set_up_vars()
 {
     local -r HELP="Run this script from any dir inside \"nx\" repo dir or its cmake build dir."
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" "$HELP"
@@ -1934,7 +1934,7 @@ main()
         apidoc|kit|sdk|benchmark|start-s|start-c|run-ut|ctest|testcamera|log-s| \
         gen|cd|build|cmake|distrib|test-distrib|bak|vs|thg| \
         print-dirs|print-vars|rsync)
-            setup_vars
+            set_up_vars
             ;;
     esac
 
