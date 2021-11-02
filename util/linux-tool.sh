@@ -494,10 +494,9 @@ do_ctest() # all|TestName "$@"
 
 do_run_ut() # TestName "$@"
 {
-    get_QT_DIR
-
     if nx_is_cygwin
     then
+        get_QT_DIR
         nx_append_path "$QT_DIR/bin"
     fi
     nx_cd "$BUILD_DIR/bin"
