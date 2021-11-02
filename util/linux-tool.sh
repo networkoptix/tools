@@ -192,7 +192,7 @@ get_CONAN_PACKAGE_DIR() # package_name
     fi
 
     CONAN_PACKAGE_DIR=$(grep -A1 "^${packageNamePattern}" <<< "${packagePathsInfo}" | \
-        sed "1d;s/ *package_folder: //")
+        sed "1d;s/ *package_folder: //" | `# trim trailing \r #` sed -e 's/[[:space:]]*$//')
 }
 
 # [in] BUILD_DIR
