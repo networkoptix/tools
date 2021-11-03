@@ -1626,6 +1626,40 @@
                         "public": true,
                         "protected": false,
                         "meta": {}
+                    },
+                    {
+                        "label": "Header Links",
+                        "name": "%headerLinks%",
+                        "value": [
+                            {
+                                "name": "Services",
+                                "display_name": "Services",
+                                "url": "",
+                                "new_window": false,
+                                "icon": "services.svg",
+                                "authentication": "both",
+                                "order": 1,
+                                "enabled": true,
+                                "nodes": [
+                                    {
+                                    "name": "Downloads",
+                                    "display_name": "Downloads",
+                                    "url": "{{CLOUD_HOST}}/download",
+                                    "new_window": true,
+                                    "icon": "",
+                                    "authentication": "both",
+                                    "order": 0,
+                                    "enabled": true
+                                    }
+                                ]
+                            }
+                        ],
+                        "type": "Array",
+                        "advanced": false,
+                        "optional": false,
+                        "public": false,
+                        "protected": false,
+                        "meta": {}
                     }
                 ]
             }
