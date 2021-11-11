@@ -47,9 +47,9 @@ class NxSubmoduleConfig:
         config_data = {}
         with open(config_file) as config:
             for line in config.readlines():
-                if line.startswith("#"):
-                    continue
-                file_key, _, value = line.partition("=")
+                line_stripped = line.strip()
+                if not line_stripped or line_stripped.startswith("#"): continue
+                file_key, _, value = line_stripped.partition("=")
                 object_key = file_key.strip().replace("-", "_")
                 config_data[object_key] = value.strip()
 
@@ -74,8 +74,7 @@ def get_repo_url_by_local_dir(dir: Path) -> str:
     normalized_dir_name = dir.as_posix()
     git_get_remotes_run_result = subprocess.run(
         ["git", "-C", normalized_dir_name, "remote"],
-        capture_output=True,
-        shell=True)    
+        capture_output=True)    
     if git_get_remotes_run_result.returncode != 0:
         raise NxSubmoduleError(
             f"ERROR: Failed to obtain remotes list from {normalized_dir_name!r} directory: "
@@ -94,8 +93,7 @@ def get_repo_url_by_local_dir(dir: Path) -> str:
 def _get_remote_url(normalized_dir_name: str, remote: str) -> str:
     git_get_url_run_result = subprocess.run(
         ["git", "-C", normalized_dir_name, "remote", "get-url", remote],
-        capture_output=True,
-        shell=True)
+        capture_output=True)
     if git_get_url_run_result.returncode != 0:
         raise NxSubmoduleError(
             f"ERROR: Failed to obtain sub-repository URL from {normalized_dir_name!r} directory: "
@@ -129,10 +127,9 @@ def create_submodule(dir: Path, repo_url: str, repo_dir: str, commit_sha: str):
 
 def _update_or_create_submodule(submodule_dir: Path, config: NxSubmoduleConfig):
     with tempfile.TemporaryDirectory() as tmp_dir_name:
-        subprocess.run(["git", "clone", config.subrepo_url, tmp_dir_name], shell=True)
+        subprocess.run(["git", "clone", config.subrepo_url, tmp_dir_name])
         git_reset_run_result = subprocess.run(
-            ["git", "-C", tmp_dir_name, "reset", "--hard", config.commit_sha],
-            shell=True)
+            ["git", "-C", tmp_dir_name, "reset", "--hard", config.commit_sha])
         if git_reset_run_result.returncode != 0:
             raise NxSubmoduleUpdateError(
                 f"ERROR: Failed to update Nx submodule with URL {config.subrepo_url!r} in "
