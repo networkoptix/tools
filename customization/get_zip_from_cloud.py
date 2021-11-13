@@ -13,6 +13,7 @@ FETCH_BY_TYPE = 'type'
 FETCH_BY_ID = 'id'
 DEFAULT_INSTANCE = "https://nxvms.com"
 FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
+DOWNLOAD_ATTEMPTS = 24 # With a timeout of 5s its 2 minutes.
 
 
 def create_package(args, fs):
@@ -35,8 +36,6 @@ def create_package(args, fs):
     with open(f"{package_name}.zip", "wb") as f:
         shutil.copyfileobj(fs.raw, f)
 
-
-# Todo: post 20.2 release use async package download
 def download_package_async(session, args, asset_id):
     draft = "?draft" if args.draft else ""
     async_package_url = f"{args.instance}/admin/cms/async_package/{asset_id}/{draft}"
@@ -52,8 +51,8 @@ def download_package_async(session, args, asset_id):
         return
 
     # Poll for package every 5 seconds
-    while 1:
-        res = session.get(async_package_url)
+    for _ in range(DOWNLOAD_ATTEMPTS):
+        res = session.get(package_url)
         try:
             res.raise_for_status()
         except Exception as e:
@@ -66,27 +65,29 @@ def download_package_async(session, args, asset_id):
             break
 
         time.sleep(5)
+    else:
+        task_id = data.get("task_id")
+        if task_id:
+            print(f"Something went wrong creating the package.\n"
+                  f"Please contact the web team.\n"
+                  f"Asset id: {asset_id}\nCelery task result id: {task_id}")
+        else:
+            print(f"Something went horribly wrong.\n"
+                  f"Asset id is {asset_id}. Please contact the web team.")
 
     with session.get(async_package_url, stream=True) as fs:
         create_package(args, fs)
 
 
-
-def download_package(session, args, asset_id):
-    draft = "?draft" if args.draft else ""
-    with session.get(f"{args.instance}/admin/cms/package/{asset_id}/{draft}", stream=True) as fs:
-        create_package(args, fs)
-
-
 def download_packages(session, args, asset_ids):
     if len(asset_ids) == 1:
-        download_package(session, args, asset_ids[0])
+        download_package_async(session, args, asset_ids[0])
         return
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = []
         for asset_id in asset_ids:
-            futures.append(executor.submit(download_package, session, args, asset_id))
+            futures.append(executor.submit(download_package_async, session, args, asset_id))
 
         for future in futures:
             future.result()
