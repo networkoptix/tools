@@ -19,6 +19,7 @@ exceptions = [
     'CameraSettingsLicenseWatcher',
     'TileInteractionHandler',
     'LicenseDeactivationDialogs',
+    'ContextMenu',
 ]
 
 template = '%n'
