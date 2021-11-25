@@ -137,8 +137,15 @@ def _update_or_create_submodule(submodule_dir: Path, config: NxSubmoduleConfig):
 
         if submodule_dir.exists():
             shutil.rmtree(submodule_dir)
+
+        subrepo_dir = Path(config.subrepo_dir)
+        if subrepo_dir.is_absolute():
+            error = NxSubmoduleConfigError(
+                f"ERROR: `subrepo_dir` parameter must not be an absolute path.")
+            raise error from None
+        
         shutil.copytree(
-            Path(tmp_dir_name) / config.subrepo_dir,
+            Path(tmp_dir_name) / subrepo_dir,
             submodule_dir,
             ignore=shutil.ignore_patterns(NxSubmoduleConfig.CONFIG_FILE_NAME, ".git"))
 

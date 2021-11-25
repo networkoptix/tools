@@ -15,7 +15,7 @@ To create Nx submodule:
     nx_submodule.py create \\
         --submodule-local-dir <dir_inside_main_repo> \\
         (--subrepo-working-dir <cloned_subrepo_dir> | --subrepo-url <subrepo_url>) \\
-        --subrepo-dir <path_relative_to_subrepo> \\
+        [--subrepo-dir <path_relative_to_subrepo>] \\
         --commit-sha <commit_sha>
 
 To update Nx submodule:
@@ -57,8 +57,11 @@ def _create_arg_parser() -> argparse.ArgumentParser:
         help="Commit SHA of the sub-repository.")
     parser.add_argument(
         "--subrepo-dir",
+        default=".",
         type=str,
-        help="Directory inside the sub-repository to add to the main repository as Nx submodule.")
+        help=(
+          "Directory inside the sub-repository to add to the main repository as Nx submodule."
+          'Default value is "." which means the root directory.'))
 
     main_repo_dir = parser.add_mutually_exclusive_group()
     main_repo_dir.add_argument("--main-repo-dir", type=Path, help="Main repository directory.")
@@ -116,8 +119,8 @@ def main():
                 '"--submodule-local-dir" parameter is mandatory when creating Nx submodule',
                 parser)
 
-        if not args.subrepo_dir:
-            _exit('"--subrepo-dir" parameter is mandatory when creating Nx submodule', parser)
+        if Path(args.subrepo_dir).is_absolute():
+            _exit('"--subrepo-dir" parameter must not be an absolute path', parser)
      
         if (repo_url := _get_repo_url(args)) is None:
             _exit(
