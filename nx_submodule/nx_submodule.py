@@ -150,4 +150,7 @@ def main():
 
 
 if __name__ == "__main__":
+  try:
     main()
+  except nx_submodule_lib.NxSubmoduleError as err:
+    sys.exit(str(err))
