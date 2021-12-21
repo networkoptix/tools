@@ -17,6 +17,8 @@ class StatServerData:
         weirdos = []
         full_json = requests.get(url).json()
         for data in full_json:
+            if data['isDuplicate'] or data['isFilteredOut']:
+                continue
             vendor = data['origVendor']
             if vendor.lower().startswith("hangzhou hikvision digital technology co., ltd"):
                 vendor = "hikvision"
