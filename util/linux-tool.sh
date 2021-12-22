@@ -176,23 +176,41 @@ get_CONAN_PACKAGE_DIR() # package_name
         *) local -r conanProfileName=$TARGET;;
     esac
 
+    local PROFILE="$VMS_DIR/conan_profiles/${conanProfileName}.profile"
+    if [[ ! -f $PROFILE ]] #< In 5.0, conan profiles moved to open-source.
+    then
+        PROFILE="$VMS_DIR/conan_recipes/profiles/${conanProfileName}.profile"
+    fi
+
     local -r getConanPathsInfoCommand=(
         "conan" "info" "--update" "--paths" "--only"
         "package_folder" "$VMS_DIR"
         "--profile:build" "default"
-        "--profile:host" "${VMS_DIR}/conan_recipes/profiles/${conanProfileName}.profile"
+        "--profile:host" "$PROFILE"
+        "--package-filter" "$packageNamePattern*"
     )
 
-    export CONAN_USER_HOME="$BUILD_DIR"
-    if ! packagePathsInfo=$("${getConanPathsInfoCommand[@]}")
+    local packagePathInfo
+    if ! packagePathInfo=$(CONAN_USER_HOME="$BUILD_DIR" "${getConanPathsInfoCommand[@]}") \
+        || [[ -z $packagePathInfo ]]
     then
-        echo "ERROR: Cannot get package paths from Conan - the following command has failed:"
-        echo "${getConanPathsInfoCommand[@]}"
-        exit 1
+        nx_echo_array getConanPathsInfoCommand
+        nx_fail "Unable to get path for a Conan package (see details above): ${packageNamePattern}"
     fi
+    nx_log_var packagePathInfo
 
-    CONAN_PACKAGE_DIR=$(grep -A1 "^${packageNamePattern}" <<< "${packagePathsInfo}" | \
-        sed "1d;s/ *package_folder: //" | `# trim trailing \r #` sed -e 's/[[:space:]]*$//')
+    if CONAN_PACKAGE_DIR=$(
+        echo "$packagePathInfo" \
+        | sed "1d;s/ *package_folder: //" \
+        | `# trim trailing \r #` sed -e 's/[[:space:]]*$//'
+    ) || [[ ! -d $CONAN_PACKAGE_DIR ]]
+    then
+        nx_echo_array getConanPathsInfoCommand
+        nx_echo_var packagePathInfo
+        nx_echo_var CONAN_PACKAGE_DIR
+        nx_fail "Unable to locate conan package (see details above): ${packageNamePattern}"
+    fi
+    nx_log_var CONAN_PACKAGE_DIR
 }
 
 # [in] BUILD_DIR

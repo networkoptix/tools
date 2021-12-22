@@ -177,13 +177,13 @@ nx_log_array() # ARRAY_NAME
             local -r ARRAY_NAME="$1"
             eval local -r -a ARRAY_VALUE=("\${$ARRAY_NAME[@]}")
             echo "####### $ARRAY_NAME: array[${#ARRAY_VALUE[@]}]:"
-            echo "####### {"
+            echo "####### ("
             local ITEM_VALUE
             for ITEM_VALUE in "${ARRAY_VALUE[@]}"
             do
                 echo "#######     [$ITEM_VALUE]"
             done
-            echo "####### }"
+            echo "####### )"
 
             set -x
         fi
@@ -211,13 +211,13 @@ nx_log_map() # ARRAY_NAME
             )
             eval "$COMMAND"
             echo "####### $MAP_NAME: map[${#MAP_VALUE[@]}]:"
-            echo "####### {"
+            echo "####### ("
             local KEY
             for KEY in "${!MAP_VALUE[@]}"
             do
-                echo "#######     [$KEY] -> [${MAP_VALUE["$KEY"]}]"
+                echo "#######     [$KEY]=[${MAP_VALUE["$KEY"]}]"
             done
-            echo "####### }"
+            echo "####### )"
 
             set -x
         fi
@@ -268,6 +268,21 @@ nx_echo_var() # VAR_NAME
     local -r VAR_NAME="$1"
     eval local -r VAR_VALUE="\$$VAR_NAME"
     echo "####### $VAR_NAME: [$VAR_VALUE]"
+}
+
+nx_echo_array() # ARRAY_NAME
+{
+    local -r ARRAY_NAME="$1"
+
+    eval local -r -a ARRAY_VALUE=("\${$ARRAY_NAME[@]}")
+    echo "####### $ARRAY_NAME: array[${#ARRAY_VALUE[@]}]:"
+    echo "####### ("
+    local ITEM_VALUE
+    for ITEM_VALUE in "${ARRAY_VALUE[@]}"
+    do
+        echo "#######     [$ITEM_VALUE]"
+    done
+    echo "####### )"
 }
 
 # Echo the args replacing full home path with '~', but do nothing in verbose mode because the args
