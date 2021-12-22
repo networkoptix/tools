@@ -594,14 +594,15 @@ copy_if_exists_and_different() # source_file target_file
     fi
 }
 
+# [in] BUILD_DIR
 find_APIDOCTOOL_JAR()
 {
     local -r conanfile="$VMS_DIR/conanfile.py"
 
     if [[ -f "$conanfile" ]]
     then # 4.3 and later - conan.
-	local CONAN_PACKAGE_DIR
-	get_CONAN_PACKAGE_DIR "apidoctool"
+        local CONAN_PACKAGE_DIR
+        get_CONAN_PACKAGE_DIR "apidoctool"
         APIDOCTOOL_PATH="$CONAN_PACKAGE_DIR"
     else
         local -r PACKAGE=apidoctool-2.1
