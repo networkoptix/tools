@@ -72,9 +72,15 @@ public final class OpenApiSerializer
                 schema = getObject(getObject(schema, "properties"), item);
         }
         if (!path.isEmpty())
+        {
             setRequired(schema, path);
+        }
         else
-            getArray(schema, "required").put(item);
+        {
+            JSONArray requiredArray = getArray(schema, "required");
+            if (!requiredArray.toList().contains(item))
+                requiredArray.put(item);
+        }
     }
 
     public static String toString(
@@ -87,11 +93,16 @@ public final class OpenApiSerializer
             return "";
         final JSONArray tags = getArray(root, "tags");
         final JSONObject refParameters = getObject(getObject(root, "components"), "parameters");
+        final JSONObject componentsSchemas = getObject(getObject(root, "components"), "schemas");
         final HashSet<String> usedTags = new HashSet<String>();
         for (final Apidoc.Group group: apidoc.groups)
         {
             if (!fillPaths(
-                getObject(root, "paths"), group, refParameters, generateOrderByParameters))
+                getObject(root, "paths"),
+                group,
+                refParameters,
+                componentsSchemas,
+                generateOrderByParameters))
             {
                 continue;
             }
@@ -141,13 +152,14 @@ public final class OpenApiSerializer
         JSONObject paths,
         Apidoc.Group group,
         JSONObject refParameters,
+        JSONObject componentsSchemas,
         boolean generateOrderByParameters) throws Exception
     {
         boolean filled = false;
         for (final Apidoc.Function function: group.functions)
         {
             final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
-            final JSONObject method = fillPath(path, function, refParameters, generateOrderByParameters);
+            final JSONObject method = fillPath(path, function, refParameters, componentsSchemas, generateOrderByParameters);
             final JSONArray tags = getArray(method, "tags");
             tags.put(group.groupName);
             filled = true;
@@ -159,6 +171,7 @@ public final class OpenApiSerializer
         JSONObject path,
         Apidoc.Function function,
         JSONObject refParameters,
+        JSONObject componentsSchemas,
         boolean generateOrderByParameters) throws Exception
     {
         final JSONObject method = getObject(path, function.knownMethod());
@@ -190,6 +203,10 @@ public final class OpenApiSerializer
                 final JSONObject schema = getObject(getObject(getObject(
                     requestBody, "content"), "application/json"), "schema");
                 addStructParam(schema, param);
+
+                if (param.hasRecursiveField)
+                    addReferenceParam(schema, param, componentsSchemas);
+
                 continue;
             }
             JSONObject parameter;
@@ -209,7 +226,7 @@ public final class OpenApiSerializer
             }
             getArray(method, "parameters").put(parameter);
         }
-        fillResult(method, function.result, generateOrderByParameters);
+        fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
         return method;
     }
 
@@ -257,7 +274,10 @@ public final class OpenApiSerializer
     }
 
     private static void fillResult(
-        JSONObject path, Apidoc.Result result, boolean generateOrderByParameters) throws Exception
+        JSONObject path,
+        Apidoc.Result result,
+        JSONObject componentsSchemas,
+        boolean generateOrderByParameters) throws Exception
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         default_.put("description", Utils.cleanupDescription(result.caption));
@@ -278,6 +298,9 @@ public final class OpenApiSerializer
             for (final Apidoc.Param param: result.params)
             {
                 addStructParam(schema, param);
+
+                if (param.hasRecursiveField)
+                    addReferenceParam(schema, param, componentsSchemas);
                 if (generateOrderByParameters)
                     orderBy = fillOrderBy(orderBy, param);
             }
@@ -417,6 +440,41 @@ public final class OpenApiSerializer
         if (!param.optional)
             setRequired(schema, param.name);
         fillSchemaType(parameter, param);
+    }
+
+    public static void addReferenceParam(
+        JSONObject schema,
+        Apidoc.Param param,
+        JSONObject componentsSchemas)
+    {
+        final String[] list = param.name.replace("[]", "").split("\\.");
+
+        if (list.length == 0)
+            return;
+
+        final String topParamName = list.length > 1 ? list[list.length - 2] : list[0];
+        final String nestedParamName = list[list.length - 1];
+
+        JSONObject parentObj = schema.getJSONObject("properties");
+        JSONObject topObject = new JSONObject();
+        for (final String key: list)
+        {
+            final JSONObject obj = parentObj.getJSONObject(key);
+            final boolean isArray = obj.has("items");
+            if (key.equals(topParamName))
+            {
+                topObject = isArray ? getObject(obj, "items") : obj;
+                JSONObject innerObj = getObject(getObject(topObject, "properties"), nestedParamName);
+                innerObj = innerObj.has("items") ? innerObj.getJSONObject("items") : innerObj;
+                innerObj.remove("type");
+                innerObj.put("$ref", "#/components/schemas/" + param.structName);
+                break;
+            }
+            parentObj = isArray
+                ? obj.getJSONObject("items").getJSONObject("properties")
+                : obj.getJSONObject("properties");
+        }
+        componentsSchemas.put(param.structName, topObject);
     }
 
     private static JSONObject toJson(Apidoc.Param param) throws Exception

@@ -130,6 +130,7 @@ public final class Apidoc extends Serializable
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
         public boolean isRef = false; ///< Internal field
+        public boolean hasRecursiveField = false; ///< Internal field
 
         public boolean proprietary = false; ///< attribute; optional(default=false)
         public boolean readonly = false; ///< attribute; optional(default=false)
@@ -170,6 +171,8 @@ public final class Apidoc extends Serializable
                 optional = origin.optional;
             if (values == null || values.isEmpty())
                 values = origin.values;
+            if (!hasRecursiveField)
+                hasRecursiveField = origin.hasRecursiveField;
             // TODO: #lbusygin: Merge param values?
         }
 

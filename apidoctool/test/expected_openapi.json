@@ -25,7 +25,214 @@
       "description": "Request authentication methods supported by server."
     }
   ],
-  "components": {"parameters": {}},
+  "components": {
+    "parameters": {},
+    "schemas": {
+      "StructA": {
+        "properties": {"vectorB": {
+          "items": {"$ref": "#/components/schemas/StructA"},
+          "type": "array"
+        }},
+        "required": ["vectorB"],
+        "type": "object"
+      },
+      "StructC": {
+        "type": "object",
+        "properties": {"fieldC": {"$ref": "#/components/schemas/StructC"}}
+      },
+      "StructB": {
+        "properties": {
+          "vectorB": {
+            "items": {"$ref": "#/components/schemas/StructB"},
+            "type": "array"
+          },
+          "fieldA": {"$ref": "#/components/schemas/StructB"}
+        },
+        "required": [
+          "vectorB",
+          "fieldA"
+        ],
+        "type": "object"
+      },
+      "StructF": {
+        "type": "object",
+        "properties": {"vectorFInF": {"$ref": "#/components/schemas/StructF"}}
+      },
+      "StructE": {
+        "type": "object",
+        "properties": {
+          "dInD": {"$ref": "#/components/schemas/StructE"},
+          "vectorDinD": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          },
+          "eInD": {"$ref": "#/components/schemas/StructE"},
+          "vectorEInD": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          },
+          "fInD": {"$ref": "#/components/schemas/StructE"},
+          "vectorFInD": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          },
+          "dInE": {"$ref": "#/components/schemas/StructE"},
+          "vectorDinE": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          },
+          "eInE": {"$ref": "#/components/schemas/StructE"},
+          "vectorEInE": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          },
+          "fInE": {"$ref": "#/components/schemas/StructE"},
+          "vectorFInE": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructE"}
+          }
+        },
+        "required": [
+          "dInD",
+          "vectorDinD",
+          "eInD",
+          "vectorEInD",
+          "fInD",
+          "vectorFInD",
+          "dInE",
+          "vectorDinE",
+          "eInE",
+          "vectorEInE",
+          "fInE",
+          "vectorFInE"
+        ]
+      },
+      "StructD": {
+        "type": "object",
+        "properties": {
+          "dInD": {"$ref": "#/components/schemas/StructD"},
+          "vectorDinD": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructD"}
+          },
+          "eInD": {
+            "type": "object",
+            "properties": {
+              "dInD": {"$ref": "#/components/schemas/StructE"},
+              "vectorDinD": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              },
+              "eInD": {"$ref": "#/components/schemas/StructE"},
+              "vectorEInD": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              },
+              "fInD": {"$ref": "#/components/schemas/StructE"},
+              "vectorFInD": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              },
+              "dInE": {"$ref": "#/components/schemas/StructE"},
+              "vectorDinE": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              },
+              "eInE": {"$ref": "#/components/schemas/StructE"},
+              "vectorEInE": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              },
+              "fInE": {"$ref": "#/components/schemas/StructE"},
+              "vectorFInE": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StructE"}
+              }
+            },
+            "required": [
+              "dInD",
+              "vectorDinD",
+              "eInD",
+              "vectorEInD",
+              "fInD",
+              "vectorFInD",
+              "dInE",
+              "vectorDinE",
+              "eInE",
+              "vectorEInE",
+              "fInE",
+              "vectorFInE"
+            ]
+          },
+          "vectorEInD": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dInD": {"$ref": "#/components/schemas/StructE"},
+                "vectorDinD": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                },
+                "eInD": {"$ref": "#/components/schemas/StructE"},
+                "vectorEInD": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                },
+                "fInD": {"$ref": "#/components/schemas/StructE"},
+                "vectorFInD": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                },
+                "dInE": {"$ref": "#/components/schemas/StructE"},
+                "vectorDinE": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                },
+                "eInE": {"$ref": "#/components/schemas/StructE"},
+                "vectorEInE": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                },
+                "fInE": {"$ref": "#/components/schemas/StructE"},
+                "vectorFInE": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/StructE"}
+                }
+              },
+              "required": [
+                "dInD",
+                "vectorDinD",
+                "eInD",
+                "vectorEInD",
+                "fInD",
+                "vectorFInD",
+                "dInE",
+                "vectorDinE",
+                "eInE",
+                "vectorEInE",
+                "fInE",
+                "vectorFInE"
+              ]
+            }
+          },
+          "fInD": {"$ref": "#/components/schemas/StructD"},
+          "vectorFInD": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/StructD"}
+          }
+        },
+        "required": [
+          "dInD",
+          "vectorDinD",
+          "eInD",
+          "vectorEInD",
+          "fInD",
+          "vectorFInD"
+        ]
+      }
+    }
+  },
   "paths": {
     "/ec2/bookmarks": {"get": {
       "description": "Read bookmarks using the specified parameters.",
@@ -6931,6 +7138,1978 @@
       "responses": {"default": {"description": ""}},
       "tags": ["Server API"]
     }},
+    "/api/testHandler": {
+      "get": {
+        "description": "Test GET handler's description.",
+        "parameters": [{
+          "name": "String",
+          "description": "param's description\".",
+          "required": true,
+          "schema": {"type": "string"},
+          "in": "query"
+        }],
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "vectorB": {
+                "items": {
+                  "properties": {
+                    "vectorB": {
+                      "items": {"$ref": "#/components/schemas/StructB"},
+                      "type": "array"
+                    },
+                    "fieldA": {
+                      "properties": {"vectorB": {
+                        "items": {"$ref": "#/components/schemas/StructA"},
+                        "type": "array"
+                      }},
+                      "required": ["vectorB"],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "vectorB",
+                    "fieldA"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "fieldA": {
+                "properties": {"vectorB": {
+                  "items": {
+                    "properties": {
+                      "vectorB": {
+                        "items": {"$ref": "#/components/schemas/StructB"},
+                        "type": "array"
+                      },
+                      "fieldA": {"$ref": "#/components/schemas/StructB"}
+                    },
+                    "required": [
+                      "vectorB",
+                      "fieldA"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }},
+                "required": ["vectorB"],
+                "type": "object"
+              },
+              "fieldC": {
+                "type": "object",
+                "properties": {"fieldC": {"$ref": "#/components/schemas/StructC"}}
+              }
+            },
+            "required": [
+              "vectorB",
+              "fieldA",
+              "fieldC"
+            ]
+          }}}
+        }},
+        "tags": ["Server API"]
+      },
+      "post": {
+        "description": "Test POST handler's description",
+        "requestBody": {
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "dInD": {
+                "type": "object",
+                "properties": {
+                  "dInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  },
+                  "eInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "dInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD",
+                      "dInE",
+                      "vectorDinE",
+                      "eInE",
+                      "vectorEInE",
+                      "fInE",
+                      "vectorFInE"
+                    ]
+                  },
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    }
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD"
+                ]
+              },
+              "vectorDinD": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    },
+                    "eInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    },
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "dInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD",
+                          "dInE",
+                          "vectorDinE",
+                          "eInE",
+                          "vectorEInE",
+                          "fInE",
+                          "vectorFInE"
+                        ]
+                      }
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD"
+                  ]
+                }
+              },
+              "eInD": {
+                "type": "object",
+                "properties": {
+                  "dInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "dInE": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD",
+                  "dInE",
+                  "vectorDinE",
+                  "eInE",
+                  "vectorEInE",
+                  "fInE",
+                  "vectorFInE"
+                ]
+              },
+              "vectorEInD": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "dInE": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinE": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD",
+                    "dInE",
+                    "vectorDinE",
+                    "eInE",
+                    "vectorEInE",
+                    "fInE",
+                    "vectorFInE"
+                  ]
+                }
+              },
+              "fInD": {
+                "type": "object",
+                "properties": {"fInD": {"$ref": "#/components/schemas/StructF"}}
+              },
+              "vectorFInD": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {"vectorFInD": {"$ref": "#/components/schemas/StructF"}}
+                }
+              },
+              "dInE": {
+                "type": "object",
+                "properties": {
+                  "dInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  },
+                  "eInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "dInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD",
+                      "dInE",
+                      "vectorDinE",
+                      "eInE",
+                      "vectorEInE",
+                      "fInE",
+                      "vectorFInE"
+                    ]
+                  },
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    }
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD"
+                ]
+              },
+              "vectorDinE": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    },
+                    "eInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    },
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "dInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD",
+                          "dInE",
+                          "vectorDinE",
+                          "eInE",
+                          "vectorEInE",
+                          "fInE",
+                          "vectorFInE"
+                        ]
+                      }
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD"
+                  ]
+                }
+              },
+              "eInE": {
+                "type": "object",
+                "properties": {
+                  "dInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "dInE": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD",
+                  "dInE",
+                  "vectorDinE",
+                  "eInE",
+                  "vectorEInE",
+                  "fInE",
+                  "vectorFInE"
+                ]
+              },
+              "vectorEInE": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "dInE": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinE": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD",
+                    "dInE",
+                    "vectorDinE",
+                    "eInE",
+                    "vectorEInE",
+                    "fInE",
+                    "vectorFInE"
+                  ]
+                }
+              },
+              "fInE": {
+                "type": "object",
+                "properties": {"fInE": {"$ref": "#/components/schemas/StructF"}}
+              },
+              "vectorFInE": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {"vectorFInE": {"$ref": "#/components/schemas/StructF"}}
+                }
+              },
+              "dInF": {
+                "type": "object",
+                "properties": {
+                  "dInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  },
+                  "eInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "dInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD",
+                      "dInE",
+                      "vectorDinE",
+                      "eInE",
+                      "vectorEInE",
+                      "fInE",
+                      "vectorFInE"
+                    ]
+                  },
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    }
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD"
+                ]
+              },
+              "vectorDinF": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    },
+                    "eInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    },
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "dInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorDinE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "eInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorEInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          },
+                          "fInE": {"$ref": "#/components/schemas/StructE"},
+                          "vectorFInE": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructE"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD",
+                          "dInE",
+                          "vectorDinE",
+                          "eInE",
+                          "vectorEInE",
+                          "fInE",
+                          "vectorFInE"
+                        ]
+                      }
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructD"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructD"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD"
+                  ]
+                }
+              },
+              "eInF": {
+                "type": "object",
+                "properties": {
+                  "dInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "dInE": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructD"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructD"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD"
+                    ]
+                  },
+                  "vectorDinE": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    }
+                  },
+                  "eInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorEInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  },
+                  "fInE": {"$ref": "#/components/schemas/StructE"},
+                  "vectorFInE": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructE"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD",
+                  "dInE",
+                  "vectorDinE",
+                  "eInE",
+                  "vectorEInE",
+                  "fInE",
+                  "vectorFInE"
+                ]
+              },
+              "vectorEInF": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dInD": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinD": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInD": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInD": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "dInE": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructD"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructD"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD"
+                      ]
+                    },
+                    "vectorDinE": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorDinD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "eInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorEInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          },
+                          "fInD": {"$ref": "#/components/schemas/StructD"},
+                          "vectorFInD": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/StructD"}
+                          }
+                        },
+                        "required": [
+                          "dInD",
+                          "vectorDinD",
+                          "eInD",
+                          "vectorEInD",
+                          "fInD",
+                          "vectorFInD"
+                        ]
+                      }
+                    },
+                    "eInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorEInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    },
+                    "fInE": {"$ref": "#/components/schemas/StructE"},
+                    "vectorFInE": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/StructE"}
+                    }
+                  },
+                  "required": [
+                    "dInD",
+                    "vectorDinD",
+                    "eInD",
+                    "vectorEInD",
+                    "fInD",
+                    "vectorFInD",
+                    "dInE",
+                    "vectorDinE",
+                    "eInE",
+                    "vectorEInE",
+                    "fInE",
+                    "vectorFInE"
+                  ]
+                }
+              },
+              "fInF": {
+                "type": "object",
+                "properties": {"fInF": {"$ref": "#/components/schemas/StructF"}}
+              },
+              "vectorFInF": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {"vectorFInF": {"$ref": "#/components/schemas/StructF"}}
+                }
+              },
+              "optionalDinF": {
+                "type": "object",
+                "properties": {
+                  "dInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorDinD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  },
+                  "eInD": {
+                    "type": "object",
+                    "properties": {
+                      "dInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInD": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInD": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "dInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorDinE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "eInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorEInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      },
+                      "fInE": {"$ref": "#/components/schemas/StructE"},
+                      "vectorFInE": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/StructE"}
+                      }
+                    },
+                    "required": [
+                      "dInD",
+                      "vectorDinD",
+                      "eInD",
+                      "vectorEInD",
+                      "fInD",
+                      "vectorFInD",
+                      "dInE",
+                      "vectorDinE",
+                      "eInE",
+                      "vectorEInE",
+                      "fInE",
+                      "vectorFInE"
+                    ]
+                  },
+                  "vectorEInD": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInD": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInD": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "dInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorDinE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "eInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorEInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        },
+                        "fInE": {"$ref": "#/components/schemas/StructE"},
+                        "vectorFInE": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/StructE"}
+                        }
+                      },
+                      "required": [
+                        "dInD",
+                        "vectorDinD",
+                        "eInD",
+                        "vectorEInD",
+                        "fInD",
+                        "vectorFInD",
+                        "dInE",
+                        "vectorDinE",
+                        "eInE",
+                        "vectorEInE",
+                        "fInE",
+                        "vectorFInE"
+                      ]
+                    }
+                  },
+                  "fInD": {"$ref": "#/components/schemas/StructD"},
+                  "vectorFInD": {
+                    "type": "array",
+                    "items": {"$ref": "#/components/schemas/StructD"}
+                  }
+                },
+                "required": [
+                  "dInD",
+                  "vectorDinD",
+                  "eInD",
+                  "vectorEInD",
+                  "fInD",
+                  "vectorFInD"
+                ]
+              }
+            },
+            "required": [
+              "dInD",
+              "vectorDinD",
+              "eInD",
+              "vectorEInD",
+              "fInD",
+              "vectorFInD",
+              "dInE",
+              "vectorDinE",
+              "eInE",
+              "vectorEInE",
+              "fInE",
+              "vectorFInE",
+              "dInF",
+              "vectorDinF",
+              "eInF",
+              "vectorEInF",
+              "fInF",
+              "vectorFInF"
+            ]
+          }}},
+          "required": true
+        },
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {"type": "string"}}}
+        }},
+        "tags": ["Server API"]
+      }
+    },
     "/cdb/maintenance/malloc_info": {"get": {
       "responses": {"default": {"description": "malloc_info(3) output. See https://man7.org/linux/man-pages/man3/malloc_info.3.html\nfor details."}},
       "tags": ["Cloud Db API"]

@@ -109,7 +109,7 @@ public final class TypeManager
             System.out.println("WARNING: Struct `" + structName + "` not found.");
             return null;
         }
-        return structToParams(prefix, structInfo, paramDirection, new ArrayList<Apidoc.Param>());
+        return structToParams(prefix, structInfo, paramDirection, new ArrayList<Apidoc.Param>(), new ArrayList<String>());
     }
 
     /**
@@ -158,7 +158,7 @@ public final class TypeManager
         }
 
         final List<Apidoc.Param> structParams = structToParams(
-            /*namePrefix*/ "", structInfo, paramDirection, new ArrayList<Apidoc.Param>());
+            /*namePrefix*/ "", structInfo, paramDirection, new ArrayList<Apidoc.Param>(), new ArrayList<String>());
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
         for (Apidoc.Param structParam: structParams)
         {
@@ -257,14 +257,18 @@ public final class TypeManager
 
     /**
      * @param overriddenParams Used for recursion only; supply an empty list.
+     * @param processedStructs Used for recursion only; supply an empty list.
      */
     private List<Apidoc.Param> structToParams(
         String namePrefix,
         StructParser.StructInfo structInfo,
         ApidocCommentParser.ParamDirection paramDirection,
-        List<Apidoc.Param> overriddenParams)
+        List<Apidoc.Param> overriddenParams,
+        List<String> processedStructs)
         throws Error
     {
+        processedStructs.add(structInfo.name);
+
         List<Apidoc.Param> paramsFromItems;
         try
         {
@@ -308,10 +312,14 @@ public final class TypeManager
             if (field.type == Apidoc.Type.ENUM || field.type == Apidoc.Type.FLAGS)
                 enumToParam(param, field.typeName);
 
+            final boolean isTypeAlreadyProcessed = field.typeName != null
+                && processedStructs.contains(field.typeName);
             if (param.type == null || param.type == Apidoc.Type.UNKNOWN)
                 param.type = field.type;
             if (field.isStdOptional)
                 param.optional = true;
+            if (isTypeAlreadyProcessed)
+                param.hasRecursiveField = true;
 
             if (overriddenParam != null)
             {
@@ -323,7 +331,7 @@ public final class TypeManager
                 params.add(param);
             }
 
-            if (field.type == Apidoc.Type.OBJECT || field.type == Apidoc.Type.ARRAY)
+            if (!isTypeAlreadyProcessed && (field.type == Apidoc.Type.OBJECT || field.type == Apidoc.Type.ARRAY))
             {
                 StructParser.StructInfo innerStructInfo = structs.get(field.typeName);
                 if (innerStructInfo == null)
@@ -340,7 +348,7 @@ public final class TypeManager
 
                 params.addAll(
                     structToParams( //< Recursion.
-                        nextNamePrefix, innerStructInfo, paramDirection, overriddenParams));
+                        nextNamePrefix, innerStructInfo, paramDirection, overriddenParams, processedStructs));
             }
         }
 
@@ -351,6 +359,8 @@ public final class TypeManager
             if (findParam(params, paramFromItems.name) == null)
                 params.add(paramFromItems);
         }
+
+        processedStructs.remove(processedStructs.size() - 1);
 
         return params;
     }
