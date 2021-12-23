@@ -301,8 +301,9 @@ public final class OpenApiSerializer
             case FLAGS:
                 schema.put("type", "string");
                 break;
-            case BOOLEAN:
             case OPTION:
+                schema.put("enum", getArray(schema, "enum").put("true"));
+            case BOOLEAN:
                 schema.put("type", "boolean");
                 break;
             case INTEGER:
@@ -428,8 +429,6 @@ public final class OpenApiSerializer
         else if (!param.optional)
             result.put("required", true);
         fillSchemaType(getObject(result, "schema"), param);
-        if (param.type == Apidoc.Type.OPTION)
-            result.put("allowEmptyValue", true);
         return result;
     }
 }
