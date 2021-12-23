@@ -249,10 +249,9 @@ public final class Apidoc extends Serializable
             unusedParams = new ArrayList<Param>();
         }
 
-        public boolean isBodyAllowed()
+        public boolean areInBodyParameters()
         {
-            return !method.equals("GET") && !method.equals("HEAD") && !method.equals("DELETE")
-                && !method.equals("CONNECT");
+            return method.equals("POST") || method.equals("PUT") || method.equals("PATCH");
         }
 
         public String knownMethod()

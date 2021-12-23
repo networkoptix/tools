@@ -5533,29 +5533,31 @@
     "/api/changeCameraPassword": {"post": {
       "description": "Change password for already existing user on a camera.",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "cameraId",
-          "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "user",
-          "description": "User name.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "password",
-          "description": "New password to set.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "cameraId": {
+              "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
+              "type": "string"
+            },
+            "user": {
+              "description": "User name.",
+              "type": "string"
+            },
+            "password": {
+              "description": "New password to set.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cameraId",
+            "user",
+            "password"
+          ]
+        }}},
+        "required": true
+      },
       "responses": {"default": {
         "description": "JSON result with error code",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -5565,20 +5567,19 @@
     "/api/configure": {"post": {
       "description": "Configure various server parameters.",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "systemName",
-          "description": "System display name. It affects all servers in the system.",
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "port",
-          "description": "Server API port. It affects the current server only.",
-          "schema": {"type": "integer"},
-          "in": "query"
+      "requestBody": {"content": {"application/json": {"schema": {
+        "type": "object",
+        "properties": {
+          "systemName": {
+            "description": "System display name. It affects all servers in the system.",
+            "type": "string"
+          },
+          "port": {
+            "description": "Server API port. It affects the current server only.",
+            "type": "integer"
+          }
         }
-      ],
+      }}}},
       "responses": {"default": {"description": "JSON with error code, error string, and flag \"restartNeeded\" that shows whether the\nserver must be restarted to apply settings. Error string contains a hint to identify the\nproblem: \"SYSTEM_NAME\" or \"PORT\"."}},
       "tags": ["Server API"]
     }},
@@ -5637,12 +5638,13 @@
     "/api/detachFromCloud": {"post": {
       "description": "Detach media server from cloud. Local admin user is enabled, admin password is changed to\nnew value (if specified), all cloud users are disabled. Cloud link is removed. Function can\nbe called either via GET or POST method. POST data should be a json object.",
       "x-permissions": "Administrator.",
-      "parameters": [{
-        "name": "password",
-        "description": "Set new admin password after detach.",
-        "schema": {"type": "string"},
-        "in": "query"
-      }],
+      "requestBody": {"content": {"application/json": {"schema": {
+        "type": "object",
+        "properties": {"password": {
+          "description": "Set new admin password after detach.",
+          "type": "string"
+        }}
+      }}}},
       "responses": {"default": {"description": "JSON result with error code"}},
       "tags": ["Server API"]
     }},
@@ -6173,64 +6175,56 @@
     "/api/ifconfig": {"post": {
       "description": "Set new network settings (list of interfaces) for the server. Can be called only if server\nflags include \"SF_IfListCtrl\" (server flags can be obtained via /ec2/getMediaServersEx\nin \"flags\" field). <p> Parameters should be passed as a JSON array of objects in POST\nmessage body with content type \"application/json\". Example of such object can be seen in\nthe result of GET /api/iflist function. <\/p>",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "name",
-          "description": "Interface name.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "ipAddr",
-          "description": "IP address with dot-separated decimal components.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "netMask",
-          "description": "Network mask with dot-separated decimal components.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "mac",
-          "description": "MAC address with colon-separated upper-case hex components.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "gateway",
-          "description": "IP address of the gateway with dot-separated decimal components. Can\nbe empty.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "dhcp",
-          "description": "Possible values are:\n- `false` DHCP is not used, IP address and other parameters should be specified in\nthe respective JSON fields.\n- `true` IP address and other parameters assigned via DHCP, the respective JSON\nfields can be empty.",
-          "required": true,
-          "schema": {"type": "boolean"},
-          "in": "query"
-        },
-        {
-          "name": "extraParams",
-          "description": "JSON object with data in the internal format.",
-          "required": true,
-          "schema": {"type": "object"},
-          "in": "query"
-        },
-        {
-          "name": "dns_servers",
-          "description": "Space-separated list of IP addresses with dot-separated decimal\ncomponents.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Interface name.",
+              "type": "string"
+            },
+            "ipAddr": {
+              "description": "IP address with dot-separated decimal components.",
+              "type": "string"
+            },
+            "netMask": {
+              "description": "Network mask with dot-separated decimal components.",
+              "type": "string"
+            },
+            "mac": {
+              "description": "MAC address with colon-separated upper-case hex components.",
+              "type": "string"
+            },
+            "gateway": {
+              "description": "IP address of the gateway with dot-separated decimal components. Can\nbe empty.",
+              "type": "string"
+            },
+            "dhcp": {
+              "description": "Possible values are:\n- `false` DHCP is not used, IP address and other parameters should be specified in\nthe respective JSON fields.\n- `true` IP address and other parameters assigned via DHCP, the respective JSON\nfields can be empty.",
+              "type": "boolean"
+            },
+            "extraParams": {
+              "description": "JSON object with data in the internal format.",
+              "type": "object"
+            },
+            "dns_servers": {
+              "description": "Space-separated list of IP addresses with dot-separated decimal\ncomponents.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "ipAddr",
+            "netMask",
+            "mac",
+            "gateway",
+            "dhcp",
+            "extraParams",
+            "dns_servers"
+          ]
+        }}},
+        "required": true
+      },
       "responses": {"default": {"description": ""}},
       "tags": ["Server API"]
     }},
@@ -6372,51 +6366,49 @@
       },
       "post": {
         "description": "Manually add camera(s).\n<p>\nParameters should be passed as a JSON object in POST message body with\ncontent type \"application/json\". Example of such object:\n<pre><code>\n{\n    \"user\": \"some_user\",\n    \"password\": \"some_password\",\n    \"cameras\":\n    [\n        {\n            \"uniqueId\": \"00-1A-07-00-FF-FF\",\n            \"url\": \"192.168.0.100\",\n            \"manufacturer\": \"3100\"\n        }\n    ]\n}\n<\/code><\/pre><\/p>",
-        "parameters": [
-          {
-            "name": "user",
-            "description": "Username for the cameras.",
-            "schema": {"type": "string"},
-            "in": "query"
-          },
-          {
-            "name": "password",
-            "description": "Password for the cameras.",
-            "schema": {"type": "string"},
-            "in": "query"
-          },
-          {
-            "name": "cameras",
-            "description": "List of objects with fields defined below.",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {"type": "object"}
+        "requestBody": {
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "description": "Username for the cameras.",
+                "type": "string"
+              },
+              "password": {
+                "description": "Password for the cameras.",
+                "type": "string"
+              },
+              "cameras": {
+                "description": "List of objects with fields defined below.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "description": "Camera url, can be obtained from \"reply.cameras[].url\"\nfield in the result of /api/manualCamera/status.",
+                      "type": "string"
+                    },
+                    "uniqueId": {
+                      "description": "Camera physical id, can be obtained from\n\"reply.cameras[].uniqueId\" field in the result of /api/manualCamera/status.",
+                      "type": "string"
+                    },
+                    "manufacturer": {
+                      "description": "Camera manufacturer, can be obtained from\n\"reply.cameras[].manufacturer\" field in the result of /api/manualCamera/status.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "uniqueId",
+                    "manufacturer"
+                  ]
+                }
+              }
             },
-            "in": "query"
-          },
-          {
-            "name": "cameras[].url",
-            "description": "Camera url, can be obtained from \"reply.cameras[].url\"\nfield in the result of /api/manualCamera/status.",
-            "required": true,
-            "schema": {"type": "string"},
-            "in": "query"
-          },
-          {
-            "name": "cameras[].uniqueId",
-            "description": "Camera physical id, can be obtained from\n\"reply.cameras[].uniqueId\" field in the result of /api/manualCamera/status.",
-            "required": true,
-            "schema": {"type": "string"},
-            "in": "query"
-          },
-          {
-            "name": "cameras[].manufacturer",
-            "description": "Camera manufacturer, can be obtained from\n\"reply.cameras[].manufacturer\" field in the result of /api/manualCamera/status.",
-            "required": true,
-            "schema": {"type": "string"},
-            "in": "query"
-          }
-        ],
+            "required": ["cameras"]
+          }}},
+          "required": true
+        },
         "responses": {"default": {
           "description": "JSON object with error message and error code (0 means OK).",
           "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6485,16 +6477,18 @@
     }},
     "/api/manualCamera/stop": {"post": {
       "description": "Stop manual adding progress.",
-      "parameters": [{
-        "name": "uuid",
-        "description": "Process unique id, can be obtained from \"processUuid\" field in the result\nof /api/manualCamera/search.",
+      "requestBody": {
         "required": true,
-        "schema": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "in": "query"
-      }],
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {"uuid": {
+            "description": "Process unique id, can be obtained from \"processUuid\" field in the result\nof /api/manualCamera/search.",
+            "type": "string",
+            "format": "uuid"
+          }},
+          "required": ["uuid"]
+        }}}
+      },
       "responses": {"default": {
         "description": "JSON object with error message and error code (0 means OK).",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6504,47 +6498,43 @@
     "/api/mergeSystems": {"post": {
       "description": "Merge two Systems. <br/> The System that joins another System is called the current System,\nthe joinable System is called the target System. The <b>URL<\/b> parameter sets the\ntarget Server which should be joined with the current System. Other servers, that are\nmerged with the target Server will be joined if parameter <b>mergeOneServer<\/b> is set\nto false. <br/> The method uses digest authentication. Two hashes should be previouly\ncalculated: <b>getKey<\/b> and <b>postKey<\/b>. Both are mandatory. The calculation\nalgorithm is described in <b>Calculating authentication hash<\/b> section (in the bootom\nof the page). While calculating hashes, username and password of the target Server are\nneeded. Digest authentication needs realm and nonce, both can be obtained with <code>GET\n/api/getNonce call<\/code> call. The lifetime of a nonce is about a few minutes.",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "url",
-          "description": "URL of one Server in the System to join.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "getKey",
-          "description": "Authentication hash of the target Server for GET requests.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "postKey",
-          "description": "Authentication hash of the target Server for POST requests.",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "takeRemoteSettings",
-          "description": "Direction of the merge. Default value is false. If\n<b>mergeOneServer<\/b> is true, <b>takeRemoteSettings<\/b> parameter is ignored and\ntreated as false.\n\nPossible values are:\n- `true` The current system will get system name and administrator password of the\ntarget system.\n- `false` The target system will get system name and administrator password of the\ncurrent system.",
-          "schema": {"type": "boolean"},
-          "in": "query"
-        },
-        {
-          "name": "mergeOneServer",
-          "description": "Whether to merge with servers merged with the target\nserver. Default value is false. If <b>mergeOneServer<\/b> is set to true,\n<b>takeRemoteSettings<\/b> is ignored and treated as false.\n\nPossible values are:\n- `true` The current system will merge with target server only. The target server\nwill be disjoined from another system (if it was joined).\n- `false` The current system will merge with target server and all servers which are\nmerged with the target server.",
-          "schema": {"type": "boolean"},
-          "in": "query"
-        },
-        {
-          "name": "ignoreIncompatible",
-          "description": "Whether to ignore different version of merged server\nprotocols. Default value is false.\n\nPossible values are:\n- `true` Merge will start anyway.\n- `false` If the target server protocol version differs from the current server\nprotocol version merge aborts.",
-          "schema": {"type": "boolean"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "URL of one Server in the System to join.",
+              "type": "string"
+            },
+            "getKey": {
+              "description": "Authentication hash of the target Server for GET requests.",
+              "type": "string"
+            },
+            "postKey": {
+              "description": "Authentication hash of the target Server for POST requests.",
+              "type": "string"
+            },
+            "takeRemoteSettings": {
+              "description": "Direction of the merge. Default value is false. If\n<b>mergeOneServer<\/b> is true, <b>takeRemoteSettings<\/b> parameter is ignored and\ntreated as false.\n\nPossible values are:\n- `true` The current system will get system name and administrator password of the\ntarget system.\n- `false` The target system will get system name and administrator password of the\ncurrent system.",
+              "type": "boolean"
+            },
+            "mergeOneServer": {
+              "description": "Whether to merge with servers merged with the target\nserver. Default value is false. If <b>mergeOneServer<\/b> is set to true,\n<b>takeRemoteSettings<\/b> is ignored and treated as false.\n\nPossible values are:\n- `true` The current system will merge with target server only. The target server\nwill be disjoined from another system (if it was joined).\n- `false` The current system will merge with target server and all servers which are\nmerged with the target server.",
+              "type": "boolean"
+            },
+            "ignoreIncompatible": {
+              "description": "Whether to ignore different version of merged server\nprotocols. Default value is false.\n\nPossible values are:\n- `true` Merge will start anyway.\n- `false` If the target server protocol version differs from the current server\nprotocol version merge aborts.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "getKey",
+            "postKey"
+          ]
+        }}},
+        "required": true
+      },
       "responses": {"default": {
         "description": "JSON with error code and error string. Error string could be empty in case\nof successful ping, \"FAIL\" if the specified system is unreachable or there is no system,\n\"UNAUTHORIZED\" if the authentication credentials are invalid, \"INCOMPATIBLE\" if the\nfound system has incompatible version or different customization, and \"BACKUP_ERROR\" if\ndatabase backup could not been created.",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6695,13 +6685,17 @@
     "/api/restoreState": {"post": {
       "description": "<p><b>Proprietary.<\/b><\/p>Restore server state to default. Cleans database and system name.",
       "x-permissions": "Administrator.",
-      "parameters": [{
-        "name": "oldPassword",
-        "description": "Current admin password",
+      "requestBody": {
         "required": true,
-        "schema": {"type": "string"},
-        "in": "query"
-      }],
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {"oldPassword": {
+            "description": "Current admin password",
+            "type": "string"
+          }},
+          "required": ["oldPassword"]
+        }}}
+      },
       "responses": {"default": {
         "description": "JSON result with an error code and an error string.",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6710,24 +6704,17 @@
     }},
     "/api/saveCloudSystemCredentials": {"post": {
       "description": "Sets or resets cloud credentials (systemId and authorization key) to be used by system",
-      "parameters": [
-        {
-          "name": "cloudSystemId",
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "cloudAuthenticationKey",
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "reset",
-          "description": "Possible values are:\n- `\"true\"` If specified, removes cloud credentials from DB. System will not connect to\ncloud anymore",
-          "schema": {"type": "string"},
-          "in": "query"
+      "requestBody": {"content": {"application/json": {"schema": {
+        "type": "object",
+        "properties": {
+          "cloudSystemId": {"type": "string"},
+          "cloudAuthenticationKey": {"type": "string"},
+          "reset": {
+            "description": "Possible values are:\n- `\"true\"` If specified, removes cloud credentials from DB. System will not connect to\ncloud anymore",
+            "type": "string"
+          }
         }
-      ],
+      }}}},
       "responses": {"default": {"description": ""}},
       "tags": ["Server API"]
     }},
@@ -6742,21 +6729,23 @@
     }},
     "/api/setCameraParam": {"post": {
       "description": "Sets values of several camera parameters. This parameters are used on the Advanced tab in\ncamera settings. For instance: brightness, contrast e.t.c.",
-      "parameters": [
-        {
-          "name": "cameraId",
-          "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "<any_name>",
-          "description": "Parameter for camera to set. Request can contain one or more\nparameters to set.",
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "required": true,
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "cameraId": {
+              "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
+              "type": "string"
+            },
+            "<any_name>": {
+              "description": "Parameter for camera to set. Request can contain one or more\nparameters to set.",
+              "type": "string"
+            }
+          },
+          "required": ["cameraId"]
+        }}}
+      },
       "responses": {"default": {
         "description": "\"OK\" if all parameters have been set, otherwise return error 500 (Internal\nserver error) and the result of setting for every parameter.",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6766,21 +6755,23 @@
     "/api/setTime": {"post": {
       "description": "Set current time on the server machine.\nCan be called only if server flags include \"SF_timeCtrl\"\n(server flags can be obtained via /ec2/getMediaServersEx in \"flags\" field).\n<p>\n    Parameters should be passed as a JSON object in POST message body with\n    content type \"application/json\". Example of such object:\n<pre><code>\n{\n    \"dateTime\": \"2015-02-28T16:37:00\",\n    \"timeZoneId\": \"Europe/Moscow\"\n}\n<\/code>\n<\/pre>\n<\/p>",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "timeZoneId",
-          "description": "Time zone identifier, can be obtained via /api/getTimeZones.",
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "dateTime",
-          "description": "Date and time (as string containing time in milliseconds since\nepoch, or a local time formatted like\n<code>\"<i>YYYY<\/i>-<i>MM<\/i>-<i>DD<\/i>T<i>HH<\/i>:<i>mm<\/i>:<i>ss<\/i>.<i>zzz<\/i>\"<\/code>\n- the format is auto-detected).",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "timeZoneId": {
+              "description": "Time zone identifier, can be obtained via /api/getTimeZones.",
+              "type": "string"
+            },
+            "dateTime": {
+              "description": "Date and time (as string containing time in milliseconds since\nepoch, or a local time formatted like\n<code>\"<i>YYYY<\/i>-<i>MM<\/i>-<i>DD<\/i>T<i>HH<\/i>:<i>mm<\/i>:<i>ss<\/i>.<i>zzz<\/i>\"<\/code>\n- the format is auto-detected).",
+              "type": "string"
+            }
+          },
+          "required": ["dateTime"]
+        }}},
+        "required": true
+      },
       "responses": {"default": {"description": ""}},
       "tags": ["Server API"]
     }},
@@ -6808,29 +6799,31 @@
     "/api/setupCloudSystem": {"post": {
       "description": "Configure server system name and attach it to cloud. This function can be called for server\nwith default system name. Otherwise function returns error. This method requires owner\npermissions.",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "systemName",
-          "description": "New system name",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "cloudAuthKey",
-          "description": "could authentication key",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "cloudSystemID",
-          "description": "could system id",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "systemName": {
+              "description": "New system name",
+              "type": "string"
+            },
+            "cloudAuthKey": {
+              "description": "could authentication key",
+              "type": "string"
+            },
+            "cloudSystemID": {
+              "description": "could system id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "systemName",
+            "cloudAuthKey",
+            "cloudSystemID"
+          ]
+        }}},
+        "required": true
+      },
       "responses": {"default": {
         "description": "JSON result with error code",
         "content": {"application/json": {"schema": {"type": "object"}}}
@@ -6840,22 +6833,26 @@
     "/api/setupLocalSystem": {"post": {
       "description": "Configure server system name and password. This function can be called for server with\ndefault system name. Otherwise function returns error. This method requires owner\npermissions.",
       "x-permissions": "Administrator.",
-      "parameters": [
-        {
-          "name": "password",
-          "description": "New password for admin user",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        },
-        {
-          "name": "systemName",
-          "description": "New system name",
-          "required": true,
-          "schema": {"type": "string"},
-          "in": "query"
-        }
-      ],
+      "requestBody": {
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "description": "New password for admin user",
+              "type": "string"
+            },
+            "systemName": {
+              "description": "New system name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "password",
+            "systemName"
+          ]
+        }}},
+        "required": true
+      },
       "responses": {"default": {
         "description": "JSON result with error code",
         "content": {"application/json": {"schema": {"type": "object"}}}
