@@ -115,8 +115,19 @@ def get_files_from_list_file(list_file_name: Path) -> set:
     result = set()
     with open(list_file_name) as list_file:
         for line in list_file:
-            file_name = line.strip()
-            result.add(file_name)
+            entry = line.strip()
+            path = Path(entry)
+
+            # If an entry ends with a slash, consider it as a directory which contents should be
+            # ignored. All files will be added to the list of known files.
+            if entry.endswith("/") and path.exists():
+                for root, _, files in os.walk(path):
+                    root = os.path.normpath(root)
+                    for file in files:
+                        result.add(str(Path(root) / file))
+
+            result.add(str(path))
+
     return result
 
 
@@ -142,6 +153,7 @@ def find_extra_files(build_dir: Path, known_files: set) -> list:
         'CMakeFiles',
         '_autogen',
         ".conan",
+        ".cmake",
     }
 
     exclusion_extensions = {
