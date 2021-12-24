@@ -296,7 +296,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -305,7 +305,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -391,7 +391,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -400,7 +400,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -440,7 +440,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -449,7 +449,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -485,7 +485,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -494,7 +494,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -580,7 +580,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -589,7 +589,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -689,7 +689,7 @@
         },
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -698,7 +698,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -964,13 +964,14 @@
                       "type": "boolean"
                     },
                     "recordingType": {
-                      "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.",
+                      "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                       "type": "string",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
                         "RT_Never",
-                        "RT_MotionAndLowQuality"
+                        "RT_MotionAndLowQuality",
+                        "RT_Count"
                       ]
                     },
                     "dayOfWeek": {
@@ -995,7 +996,8 @@
                         "QualityHigh",
                         "QualityHighest",
                         "QualityPreSet",
-                        "QualityNotDefined"
+                        "QualityNotDefined",
+                        "StreamQualityCount"
                       ]
                     },
                     "fps": {
@@ -1048,13 +1050,14 @@
                 "format": "uuid"
               },
               "failoverPriority": {
-                "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.",
+                "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
                 "type": "string",
                 "enum": [
                   "FP_Never",
                   "FP_Low",
                   "FP_Medium",
-                  "FP_High"
+                  "FP_High",
+                  "FP_Count"
                 ]
               },
               "backupType": {
@@ -1240,13 +1243,14 @@
                       "type": "boolean"
                     },
                     "recordingType": {
-                      "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.",
+                      "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                       "type": "string",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
                         "RT_Never",
-                        "RT_MotionAndLowQuality"
+                        "RT_MotionAndLowQuality",
+                        "RT_Count"
                       ]
                     },
                     "dayOfWeek": {
@@ -1271,7 +1275,8 @@
                         "QualityHigh",
                         "QualityHighest",
                         "QualityPreSet",
-                        "QualityNotDefined"
+                        "QualityNotDefined",
+                        "StreamQualityCount"
                       ]
                     },
                     "fps": {
@@ -1324,13 +1329,14 @@
                 "format": "uuid"
               },
               "failoverPriority": {
-                "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.",
+                "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
                 "type": "string",
                 "enum": [
                   "FP_Never",
                   "FP_Low",
                   "FP_Medium",
-                  "FP_High"
+                  "FP_High",
+                  "FP_Count"
                 ]
               },
               "backupType": {
@@ -1350,8 +1356,12 @@
                 "type": "string",
                 "enum": [
                   "Offline",
+                  "Unauthorized",
                   "Online",
-                  "Recording"
+                  "Recording",
+                  "NotDefined",
+                  "Incompatible",
+                  "AnyStatus"
                 ]
               },
               "addParams": {
@@ -1500,7 +1510,7 @@
                 "format": "uuid"
               },
               "eventType": {
-                "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
+                "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"analyticsSdkEvent\"`\n- `\"systemHealthEvent\"` <p><b>Proprietary.<\/b><\/p>Equals 500. First system health message.\n- `\"maxSystemHealthEvent\"` <p><b>Proprietary.<\/b><\/p>Equals 599. Last possible system health\nmessage.\n- `\"anyCameraEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyServerEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
                 "type": "string",
                 "enum": [
                   "undefinedEvent",
@@ -1516,6 +1526,12 @@
                   "licenseIssueEvent",
                   "backupFinishedEvent",
                   "softwareTriggerEvent",
+                  "analyticsSdkEvent",
+                  "systemHealthEvent",
+                  "maxSystemHealthEvent",
+                  "anyCameraEvent",
+                  "anyServerEvent",
+                  "anyEvent",
                   "userDefinedEvent"
                 ]
               },
@@ -4118,7 +4134,7 @@
         },
         {
           "name": "format",
-          "description": "<b>Proprietary.<\/b> Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
+          "description": "<p><b>Proprietary.<\/b><\/p> Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
           "schema": {
             "type": "string",
             "enum": [
@@ -4342,13 +4358,14 @@
                     "type": "boolean"
                   },
                   "recordingType": {
-                    "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.",
+                    "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                     "type": "string",
                     "enum": [
                       "RT_Always",
                       "RT_MotionOnly",
                       "RT_Never",
-                      "RT_MotionAndLowQuality"
+                      "RT_MotionAndLowQuality",
+                      "RT_Count"
                     ]
                   },
                   "dayOfWeek": {
@@ -4373,7 +4390,8 @@
                       "QualityHigh",
                       "QualityHighest",
                       "QualityPreSet",
-                      "QualityNotDefined"
+                      "QualityNotDefined",
+                      "StreamQualityCount"
                     ]
                   },
                   "fps": {
@@ -4426,13 +4444,14 @@
               "format": "uuid"
             },
             "failoverPriority": {
-              "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.",
+              "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
               "type": "string",
               "enum": [
                 "FP_Never",
                 "FP_Low",
                 "FP_Medium",
-                "FP_High"
+                "FP_High",
+                "FP_Count"
               ]
             },
             "backupType": {
@@ -4535,13 +4554,14 @@
                     "type": "boolean"
                   },
                   "recordingType": {
-                    "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.",
+                    "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                     "type": "string",
                     "enum": [
                       "RT_Always",
                       "RT_MotionOnly",
                       "RT_Never",
-                      "RT_MotionAndLowQuality"
+                      "RT_MotionAndLowQuality",
+                      "RT_Count"
                     ]
                   },
                   "dayOfWeek": {
@@ -4566,7 +4586,8 @@
                       "QualityHigh",
                       "QualityHighest",
                       "QualityPreSet",
-                      "QualityNotDefined"
+                      "QualityNotDefined",
+                      "StreamQualityCount"
                     ]
                   },
                   "fps": {
@@ -4619,13 +4640,14 @@
               "format": "uuid"
             },
             "failoverPriority": {
-              "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.",
+              "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
               "type": "string",
               "enum": [
                 "FP_Never",
                 "FP_Low",
                 "FP_Medium",
-                "FP_High"
+                "FP_High",
+                "FP_Count"
               ]
             },
             "backupType": {
@@ -4693,7 +4715,7 @@
               "type": "string"
             },
             "typeId": {
-              "description": "<b>Proprietary.<\/b> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
               "type": "string",
               "format": "uuid"
             },
@@ -4931,7 +4953,7 @@
               "type": "string"
             },
             "typeId": {
-              "description": "<b>Proprietary.<\/b> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
               "type": "string",
               "format": "uuid"
             },
@@ -5322,28 +5344,36 @@
               "type": "string"
             },
             "typeId": {
-              "description": "<b>Proprietary.<\/b> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
               "type": "string",
               "format": "uuid"
             },
             "isAdmin": {
-              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
+              "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
               "type": "boolean"
             },
             "permissions": {
-              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions",
+              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
               "type": "string",
               "enum": [
+                "NoGlobalPermissions",
                 "GlobalAdminPermission",
                 "GlobalEditCamerasPermission",
                 "GlobalControlVideoWallPermission",
+                "GlobalViewLogsPermission",
                 "GlobalViewArchivePermission",
                 "GlobalExportPermission",
                 "GlobalViewBookmarksPermission",
                 "GlobalManageBookmarksPermission",
                 "GlobalUserInputPermission",
                 "GlobalAccessAllMediaPermission",
-                "GlobalCustomUserPermission"
+                "GlobalCustomUserPermission",
+                "GlobalLiveViewerPermissionSet",
+                "GlobalViewerPermissionSet",
+                "GlobalAdvancedViewerPermissionSet",
+                "GlobalAdminPermissionSet",
+                "GlobalVideoWallModePermissionSet",
+                "GlobalActiveXModePermissionSet"
               ]
             },
             "userRoleId": {
@@ -5417,17 +5447,27 @@
               "type": "string"
             },
             "permissions": {
-              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).",
+              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"`\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"`\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
               "type": "string",
               "enum": [
+                "NoGlobalPermissions",
+                "GlobalAdminPermission",
                 "GlobalEditCamerasPermission",
                 "GlobalControlVideoWallPermission",
+                "GlobalViewLogsPermission",
                 "GlobalViewArchivePermission",
                 "GlobalExportPermission",
                 "GlobalViewBookmarksPermission",
                 "GlobalManageBookmarksPermission",
                 "GlobalUserInputPermission",
-                "GlobalAccessAllMediaPermission"
+                "GlobalAccessAllMediaPermission",
+                "GlobalCustomUserPermission",
+                "GlobalLiveViewerPermissionSet",
+                "GlobalViewerPermissionSet",
+                "GlobalAdvancedViewerPermissionSet",
+                "GlobalAdminPermissionSet",
+                "GlobalVideoWallModePermissionSet",
+                "GlobalActiveXModePermissionSet"
               ]
             }
           },
@@ -5467,28 +5507,36 @@
               "type": "string"
             },
             "typeId": {
-              "description": "<b>Proprietary.<\/b> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
               "type": "string",
               "format": "uuid"
             },
             "isAdmin": {
-              "description": "<b>Proprietary.<\/b> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
+              "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
               "type": "boolean"
             },
             "permissions": {
-              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions",
+              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
               "type": "string",
               "enum": [
+                "NoGlobalPermissions",
                 "GlobalAdminPermission",
                 "GlobalEditCamerasPermission",
                 "GlobalControlVideoWallPermission",
+                "GlobalViewLogsPermission",
                 "GlobalViewArchivePermission",
                 "GlobalExportPermission",
                 "GlobalViewBookmarksPermission",
                 "GlobalManageBookmarksPermission",
                 "GlobalUserInputPermission",
                 "GlobalAccessAllMediaPermission",
-                "GlobalCustomUserPermission"
+                "GlobalCustomUserPermission",
+                "GlobalLiveViewerPermissionSet",
+                "GlobalViewerPermissionSet",
+                "GlobalAdvancedViewerPermissionSet",
+                "GlobalAdminPermissionSet",
+                "GlobalVideoWallModePermissionSet",
+                "GlobalActiveXModePermissionSet"
               ]
             },
             "userRoleId": {
@@ -5570,7 +5618,7 @@
               "type": "string"
             },
             "typeId": {
-              "description": "<b>Proprietary.<\/b> Should have fixed value.\n\nPossible values are:\n- `\"{57d7112a-b9c3-247b-c045-1660250adae5}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{57d7112a-b9c3-247b-c045-1660250adae5}\"`",
               "type": "string",
               "format": "uuid"
             }
@@ -5622,7 +5670,7 @@
       "parameters": [
         {
           "name": "local",
-          "description": "<b>Proprietary.<\/b> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -5631,7 +5679,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<b>Proprietary.<\/b> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -6270,7 +6318,7 @@
               "type": "integer"
             },
             "flags": {
-              "description": "<b>Proprietary.<\/b> Combination (via \"|\") or the following flags:",
+              "description": "<p><b>Proprietary.<\/b><\/p> Combination (via \"|\") or the following flags:",
               "type": "string",
               "enum": ["VideoLinkExists"]
             }
@@ -9106,6 +9154,139 @@
         "responses": {"default": {
           "description": "",
           "content": {"application/json": {"schema": {"type": "string"}}}
+        }},
+        "tags": ["Server API"]
+      }
+    },
+    "/api/testHandler2": {
+      "get": {
+        "description": "testHandler2 GET response description",
+        "parameters": [{
+          "name": "analyticsEngineId",
+          "description": "Id of an Analytics Engine.",
+          "required": true,
+          "schema": {"type": "string"},
+          "in": "query"
+        }],
+        "responses": {"default": {
+          "description": "JSON object including the error status.",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "description": "Error code on failure (as an integer inside an enquoted string), or \"0\" on success.",
+                "type": "string",
+                "enum": [
+                  "0",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "proprietaryTest": {
+                "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+                "type": "string",
+                "enum": [
+                  "test0",
+                  "test1"
+                ]
+              },
+              "deprecatedTest": {
+                "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+                "type": "string",
+                "enum": [
+                  "test2",
+                  "test3"
+                ]
+              },
+              "errorString": {
+                "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+                "type": "string"
+              },
+              "errorId": {
+                "description": "Mnemonic error id corresponding to the error code.",
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "serviceUnavailable",
+                  "unauthorized",
+                  "sessionExpired"
+                ]
+              },
+              "reply": {
+                "description": "Object with Engine settings model and values.",
+                "type": "object"
+              }
+            },
+            "required": [
+              "error",
+              "proprietaryTest",
+              "deprecatedTest",
+              "errorId"
+            ]
+          }}}
+        }},
+        "tags": ["Server API"]
+      },
+      "post": {
+        "description": "testHandler2 POST description",
+        "responses": {"default": {
+          "description": "JSON object including the error status.",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "description": "Error code on failure (as an integer inside an enquoted string), or \"0\" on success.",
+                "type": "string",
+                "enum": [
+                  "0",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "proprietaryTest": {
+                "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+                "type": "string",
+                "enum": [
+                  "test0",
+                  "test1"
+                ]
+              },
+              "deprecatedTest": {
+                "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+                "type": "string",
+                "enum": [
+                  "test2",
+                  "test3"
+                ]
+              },
+              "errorString": {
+                "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+                "type": "string"
+              },
+              "errorId": {
+                "description": "Mnemonic error id corresponding to the error code.",
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "serviceUnavailable",
+                  "unauthorized",
+                  "sessionExpired"
+                ]
+              },
+              "reply": {
+                "description": "Object with Engine settings model and values that the Engine\nreturns after the values have been supplied.",
+                "type": "object"
+              }
+            },
+            "required": [
+              "error",
+              "proprietaryTest",
+              "deprecatedTest",
+              "errorId"
+            ]
+          }}}
         }},
         "tags": ["Server API"]
       }

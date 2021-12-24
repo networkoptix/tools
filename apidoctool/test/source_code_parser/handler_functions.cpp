@@ -30,8 +30,19 @@ reg("urlPrefix/testFunction2", new onTestFunction2());
 enum class Enum
 {
     value1, /**<%apidoc value1 description */
-    /**%apidoc value2 description */
+    /**%apidoc value2 description
+     * %deprecated Explanation why the enum value is deprecated
+     */
     value2,
+    /**%apidoc[proprietary] value3 description
+     * Proprietary description
+     */
+    value3,
+    /**%apidoc[proprietary] value3 description
+     * Proprietary description
+     * %deprecated Deprecated description
+     */
+    value4
 };
 
 struct ElementStruct
@@ -52,8 +63,16 @@ struct SomeStruct
      */
     int outputParam;
 
+    /**%apidoc enumParam param description
+     * %deprecated Explanation why the param is deprecated
+     */
     Enum enumParam;
+    /**%apidoc optUuid param description
+     * %deprecated
+     */
     std::optional<QnUuid> optUuid;
+    Enum enumParam;
+    /**%apidoc[proprietary] optUuids param description */
     std::optional<std::vector<QnUuid>> optUuids;
 };
 
@@ -136,6 +155,14 @@ reg("urlPrefix/testReturnStructWithDescription", new handler());
  */
 reg("urlPrefix/testReturnStructArray", new handler());
 
+/**%apidoc GET /urlPrefix/testValuesFromParamStruct
+ * %struct SomeStruct
+ * %param outputParam Param description overridden
+ * %return some result description
+ *     %struct SomeStruct
+ */
+reg("urlPrefix/testValuesFromParamStruct", new onTestValuesFromParamStruct());
+
 /**%apidoc
  * Description for StructWithFantomParam.
  * %param fantomParam Description of fantomParam which is absent in the struct definition.
@@ -180,3 +207,24 @@ struct Reply
  *         %struct Reply
  */
 reg("urlPrefix/testResultWithReply", new handler());
+
+/**%apidoc GET /urlPrefix/deprecatedFunctionWithoutExplanation
+ * Description of a deprecated function
+ * %deprecated
+ *
+ * %return
+ *     %param reply
+ *         %struct Reply
+ */
+reg("urlPrefix/deprecatedFunctionWithoutExplanation", new handler());
+
+/**%apidoc GET /urlPrefix/deprecatedFunctionWithExplanation
+ * Description of a deprecated function
+ * %deprecated Explanation why the function is deprecated
+ *
+ * %return
+ *     %param reply
+ *         %struct Reply
+ */
+reg("urlPrefix/deprecatedFunctionWithExplanation", new handler());
+

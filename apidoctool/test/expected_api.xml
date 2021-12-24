@@ -995,6 +995,10 @@ from 00:00:00).</description>
                                         <description>Always record low quality
 stream, and record high quality stream on motion.</description>
                                     </value>
+                                    <value>
+                                        <name>RT_Count</name>
+                                        <description/>
+                                    </value>
                                 </values>
                             </param>
                             <param>
@@ -1075,6 +1079,10 @@ record the video for.</description>
                                     </value>
                                     <value>
                                         <name>QualityNotDefined</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>StreamQualityCount</name>
                                         <description/>
                                     </value>
                                 </values>
@@ -1181,6 +1189,10 @@ to another server for failover (if the current server fails).</description>
                                     <value>
                                         <name>FP_High</name>
                                         <description>High priority against other cameras.</description>
+                                    </value>
+                                    <value>
+                                        <name>FP_Count</name>
+                                        <description/>
                                     </value>
                                 </values>
                             </param>
@@ -1490,6 +1502,10 @@ from 00:00:00).</description>
                                         <description>Always record low quality
 stream, and record high quality stream on motion.</description>
                                     </value>
+                                    <value>
+                                        <name>RT_Count</name>
+                                        <description/>
+                                    </value>
                                 </values>
                             </param>
                             <param>
@@ -1570,6 +1586,10 @@ record the video for.</description>
                                     </value>
                                     <value>
                                         <name>QualityNotDefined</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>StreamQualityCount</name>
                                         <description/>
                                     </value>
                                 </values>
@@ -1677,6 +1697,10 @@ to another server for failover (if the current server fails).</description>
                                         <name>FP_High</name>
                                         <description>High priority against other cameras.</description>
                                     </value>
+                                    <value>
+                                        <name>FP_Count</name>
+                                        <description/>
+                                    </value>
                                 </values>
                             </param>
                             <param>
@@ -1721,11 +1745,27 @@ to another server for failover (if the current server fails).</description>
                                         <description/>
                                     </value>
                                     <value>
+                                        <name>Unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
                                         <name>Online</name>
                                         <description/>
                                     </value>
                                     <value>
                                         <name>Recording</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>NotDefined</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Incompatible</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>AnyStatus</name>
                                         <description/>
                                     </value>
                                 </values>
@@ -1936,6 +1976,31 @@ only the top level data is provided.</description>
                                     <value>
                                         <name>softwareTriggerEvent</name>
                                         <description>Software triggers.</description>
+                                    </value>
+                                    <value>
+                                        <name>analyticsSdkEvent</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>systemHealthEvent</name>
+                                        <description>Equals 500. First system health message.</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>maxSystemHealthEvent</name>
+                                        <description>Equals 599. Last possible system health
+message.</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>anyCameraEvent</name>
+                                        <description>Event group.</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>anyServerEvent</name>
+                                        <description>Event group.</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>anyEvent</name>
+                                        <description>Event group.</description>
                                     </value>
                                     <value>
                                         <name>userDefinedEvent</name>
@@ -6374,6 +6439,10 @@ from 00:00:00).</description>
                                     <description>Always record low quality
 stream, and record high quality stream on motion.</description>
                                 </value>
+                                <value>
+                                    <name>RT_Count</name>
+                                    <description/>
+                                </value>
                             </values>
                         </param>
                         <param>
@@ -6458,6 +6527,10 @@ record the video for.</description>
                                 </value>
                                 <value>
                                     <name>QualityNotDefined</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>StreamQualityCount</name>
                                     <description/>
                                 </value>
                             </values>
@@ -6574,6 +6647,10 @@ to another server for failover (if the current server fails).</description>
                                 <value>
                                     <name>FP_High</name>
                                     <description>High priority against other cameras.</description>
+                                </value>
+                                <value>
+                                    <name>FP_Count</name>
+                                    <description/>
                                 </value>
                             </values>
                         </param>
@@ -6774,6 +6851,10 @@ from 00:00:00).</description>
                                     <description>Always record low quality
 stream, and record high quality stream on motion.</description>
                                 </value>
+                                <value>
+                                    <name>RT_Count</name>
+                                    <description/>
+                                </value>
                             </values>
                         </param>
                         <param>
@@ -6858,6 +6939,10 @@ record the video for.</description>
                                 </value>
                                 <value>
                                     <name>QualityNotDefined</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>StreamQualityCount</name>
                                     <description/>
                                 </value>
                             </values>
@@ -6974,6 +7059,10 @@ to another server for failover (if the current server fails).</description>
                                 <value>
                                     <name>FP_High</name>
                                     <description>High priority against other cameras.</description>
+                                </value>
+                                <value>
+                                    <name>FP_Count</name>
+                                    <description/>
                                 </value>
                             </values>
                         </param>
@@ -8031,6 +8120,10 @@ a previously received object, use false when creating a new one.</description>
                             <optional>false</optional>
                             <values>
                                 <value>
+                                    <name>NoGlobalPermissions</name>
+                                    <description/>
+                                </value>
+                                <value>
                                     <name>GlobalAdminPermission</name>
                                     <description>Admin, can edit other non-admins.</description>
                                 </value>
@@ -8041,6 +8134,10 @@ a previously received object, use false when creating a new one.</description>
                                 <value>
                                     <name>GlobalControlVideoWallPermission</name>
                                     <description>Can control video walls.</description>
+                                </value>
+                                <value>
+                                    <name>GlobalViewLogsPermission</name>
+                                    <description/>
                                 </value>
                                 <value>
                                     <name>GlobalViewArchivePermission</name>
@@ -8070,6 +8167,30 @@ buttons.</description>
                                 <value>
                                     <name>GlobalCustomUserPermission</name>
                                     <description>Flag: this user has custom permissions</description>
+                                </value>
+                                <value>
+                                    <name>GlobalLiveViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdvancedViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdminPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalVideoWallModePermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalActiveXModePermissionSet</name>
+                                    <description/>
                                 </value>
                             </values>
                         </param>
@@ -8208,12 +8329,24 @@ object exists, omitted fields will not be changed.</description>
                             <optional>false</optional>
                             <values>
                                 <value>
+                                    <name>NoGlobalPermissions</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdminPermission</name>
+                                    <description/>
+                                </value>
+                                <value>
                                     <name>GlobalEditCamerasPermission</name>
                                     <description>Can edit camera settings.</description>
                                 </value>
                                 <value>
                                     <name>GlobalControlVideoWallPermission</name>
                                     <description>Can control video walls.</description>
+                                </value>
+                                <value>
+                                    <name>GlobalViewLogsPermission</name>
+                                    <description/>
                                 </value>
                                 <value>
                                     <name>GlobalViewArchivePermission</name>
@@ -8239,6 +8372,34 @@ buttons.</description>
                                 <value>
                                     <name>GlobalAccessAllMediaPermission</name>
                                     <description>Has access to all media (cameras and web pages).</description>
+                                </value>
+                                <value>
+                                    <name>GlobalCustomUserPermission</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalLiveViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdvancedViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdminPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalVideoWallModePermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalActiveXModePermissionSet</name>
+                                    <description/>
                                 </value>
                             </values>
                         </param>
@@ -8319,6 +8480,10 @@ a previously received object, use false when creating a new one.</description>
                             <optional>false</optional>
                             <values>
                                 <value>
+                                    <name>NoGlobalPermissions</name>
+                                    <description/>
+                                </value>
+                                <value>
                                     <name>GlobalAdminPermission</name>
                                     <description>Admin, can edit other non-admins.</description>
                                 </value>
@@ -8329,6 +8494,10 @@ a previously received object, use false when creating a new one.</description>
                                 <value>
                                     <name>GlobalControlVideoWallPermission</name>
                                     <description>Can control video walls.</description>
+                                </value>
+                                <value>
+                                    <name>GlobalViewLogsPermission</name>
+                                    <description/>
                                 </value>
                                 <value>
                                     <name>GlobalViewArchivePermission</name>
@@ -8358,6 +8527,30 @@ buttons.</description>
                                 <value>
                                     <name>GlobalCustomUserPermission</name>
                                     <description>Flag: this user has custom permissions</description>
+                                </value>
+                                <value>
+                                    <name>GlobalLiveViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdvancedViewerPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalAdminPermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalVideoWallModePermissionSet</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>GlobalActiveXModePermissionSet</name>
+                                    <description/>
                                 </value>
                             </values>
                         </param>
@@ -13495,6 +13688,232 @@ system settings with their values</description>
                     </params>
                     <result>
                         <type>string</type>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler2</name>
+                    <description>testHandler2 GET response description</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>analyticsEngineId</name>
+                            <type>string</type>
+                            <description>Id of an Analytics Engine.</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>3</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                    <value deprecated="true" proprietary="true">
+                                        <name>4</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Error message in English, or an empty string.</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>reply</name>
+                                <type>object</type>
+                                <description>Object with Engine settings model and values.</description>
+                                <optional>true</optional>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler2</name>
+                    <description>testHandler2 POST description</description>
+                    <method>POST</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>3</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                    <value deprecated="true" proprietary="true">
+                                        <name>4</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Error message in English, or an empty string.</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>reply</name>
+                                <type>object</type>
+                                <description>Object with Engine settings model and values that the Engine
+returns after the values have been supplied.</description>
+                                <optional>true</optional>
+                            </param>
+                        </params>
                     </result>
                 </function>
             </functions>

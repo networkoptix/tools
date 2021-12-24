@@ -177,8 +177,19 @@ public final class OpenApiSerializer
         final JSONObject method = getObject(path, function.knownMethod());
         if (!function.caption.isEmpty())
             method.put("summary", function.caption);
-        final String description = (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
+
+        String description = new String();
+
+        if (function.deprecated)
+        {
+            method.put("deprecated", true);
+            description += !function.deprecatedDescription.isEmpty() ?
+                String.format("<p><b>%s</b></p>", function.deprecatedDescription) : "";
+        }
+
+        description += (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
             + Utils.cleanupDescription(function.description);
+
         if (!description.isEmpty())
             method.put("description", description);
         if (function.permissions != null && !function.permissions.isEmpty())
@@ -384,7 +395,8 @@ public final class OpenApiSerializer
 
     private static String description(Apidoc.Param param) throws Exception
     {
-        String result = param.proprietary ? "<b>Proprietary.</b>" : "";
+        String result = param.proprietary ? "<p><b>Proprietary.</b></p>" : "";
+        result += param.getDeprecatedString();
         String cleanedDescription = Utils.cleanupDescription(param.description);
         if (!cleanedDescription.isEmpty())
             result += (param.proprietary ? " " : "") + cleanedDescription;
@@ -417,7 +429,11 @@ public final class OpenApiSerializer
             result += "\n- `" + value.nameForDescription(param.type) + '`';
             if (value.description == null)
                 continue;
-            final String description = value.description.trim();
+
+            String description = value.proprietary ? "<p><b>Proprietary.</b></p>" : "";
+
+            result += value.getDeprecatedString();
+            description += value.description.trim();
             if (!description.isEmpty())
                 result += ' ' + description;
         }
@@ -439,6 +455,7 @@ public final class OpenApiSerializer
             parameter.put("readOnly", true);
         if (!param.optional)
             setRequired(schema, param.name);
+
         fillSchemaType(parameter, param);
     }
 

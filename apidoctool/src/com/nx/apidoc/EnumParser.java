@@ -31,6 +31,9 @@ public final class EnumParser
         {
             public String name;
             public String description;
+            public boolean proprietary = false;
+            public boolean deprecated = false;
+            public String deprecatedDescription = "";
         }
 
         public String name;
@@ -210,30 +213,47 @@ public final class EnumParser
         final String apidocAttribute = apidocItem.getAttribute();
         if (!apidocAttribute.isEmpty())
         {
-            if (ApidocComment.ATTR_UNUSED.equals(apidocAttribute))
+            if (ApidocComment.ATTR_PROPRIETARY.equals(apidocAttribute))
+                value.proprietary = true;
+            else if (ApidocComment.ATTR_UNUSED.equals(apidocAttribute))
                 return false; //< Currently, there is no `unused` flag for enum items, so ignoring the item.
-            throw new Error("Unexpected attribute " + apidocAttribute + " in " + apidocItem.getTag() + ".");
+            else
+                throw new Error("Unexpected attribute " + apidocAttribute + " in " + apidocItem.getTag() + ".");
         }
 
         if (items.size() == 1)
             return true; //< No tags follow the description text.
 
         int itemIndex = 1;
-        final ApidocTagParser.Item item = items.get(itemIndex);
-        if (ApidocComment.TAG_CAPTION.equals(item.getTag()))
+
+        while (itemIndex < items.size())
         {
-            if (!item.getAttribute().isEmpty())
-                throw new Error("Unexpected attribute " + item.getAttribute() + " in " + item.getTag() + ".");
+            final ApidocTagParser.Item item = items.get(itemIndex);
+            if (ApidocComment.TAG_CAPTION.equals(item.getTag()))
+            {
+                if (!item.getAttribute().isEmpty())
+                    throw new Error("Unexpected attribute " + item.getAttribute() + " in " + item.getTag() + ".");
 
-            // Overriding the name with the one specified in `%caption`.
-            value.name = item.getInitialToken();
+                // Overriding the name with the one specified in `%caption`.
+                value.name = item.getInitialToken();
 
-            if (value.name == null || value.name.isEmpty())
-                throw new Error("Missing caption in " + item.getTag() + ".");
-            if (!item.getTextAfterInitialToken(/*indentLevel*/ 0).isEmpty())
-                throw new Error("Unexpected text after caption in " + item.getTag() + ".");
+                if (value.name == null || value.name.isEmpty())
+                    throw new Error("Missing caption in " + item.getTag() + ".");
+                if (!item.getTextAfterInitialToken(/*indentLevel*/ 0).isEmpty())
+                    throw new Error("Unexpected text after caption in " + item.getTag() + ".");
 
-            ++itemIndex;
+                ++itemIndex;
+            }
+            else if (ApidocComment.TAG_DEPRECATED.equals(item.getTag()))
+            {
+                value.deprecated = true;
+                value.deprecatedDescription = item.getFullText(0);
+                ++itemIndex;
+            }
+            else
+            {
+                break;
+            }
         }
         if (itemIndex < items.size())
             throw new Error("Unexpected tag " + items.get(itemIndex).getTag() + " found.");

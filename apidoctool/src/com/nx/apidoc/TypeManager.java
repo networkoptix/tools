@@ -192,6 +192,7 @@ public final class TypeManager
             if (functionParam != null)
             {
                 functionParam.fillMissingFieldsFrom(structParam);
+                functionParam.normalizeProperties();
 
                 mergedParams.add(functionParam);
                 if (functionParam.type == Apidoc.Type.OBJECT_JSON
@@ -204,6 +205,7 @@ public final class TypeManager
             }
             else
             {
+                structParam.normalizeProperties();
                 mergedParams.add(structParam);
             }
         }
@@ -452,6 +454,9 @@ public final class TypeManager
                 value = new Apidoc.Value();
                 value.name = enumValue.name;
                 value.description = enumValue.description;
+                value.proprietary = enumValue.proprietary;
+                value.deprecated = enumValue.deprecated;
+                value.deprecatedDescription = enumValue.deprecatedDescription;
                 param.values.add(value);
             }
         }

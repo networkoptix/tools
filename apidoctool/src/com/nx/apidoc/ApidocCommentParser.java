@@ -84,7 +84,7 @@ public final class ApidocCommentParser
             if (TAG_PARAM.equals(item.getTag()))
             {
                 final Apidoc.Param param =
-                        parser.parseParam(item, tagIterator, paramDirection, paramMode);
+                    parser.parseParam(item, tagIterator, paramDirection, paramMode);
                 checkDuplicateParam(item, result, param.name);
                 param.name = namePrefix + param.name;
                 result.add(param);
@@ -127,6 +127,8 @@ public final class ApidocCommentParser
     {
         List<Apidoc.Value> values;
         String structName;
+        boolean proprietary = false;
+        boolean deprecated = false;
         String deprecatedDescription = "";
     }
 
@@ -167,10 +169,16 @@ public final class ApidocCommentParser
         while (tagIterator.hasNext())
         {
             item = tagIterator.next();
+
             if (TAG_APIDOC.equals(item.getTag()))
             {
                 tagIterator.previous(); //< Return previous tag for future parsing.
                 break;
+            }
+            else if (TAG_DEPRECATED.equals(item.getTag()))
+            {
+                description.function.deprecated = true;
+                description.function.deprecatedDescription = item.getFullText(indentLevel);
             }
             else if (TAG_STRUCT.equals(item.getTag()))
             {
@@ -387,8 +395,8 @@ public final class ApidocCommentParser
         Param paramDescription = parseParamItems(tagIterator);
         param.values.addAll(paramDescription.values);
         param.structName = paramDescription.structName;
-        if (!paramDescription.deprecatedDescription.isEmpty())
-            param.description = paramDescription.deprecatedDescription + "\n" + param.description;
+        param.deprecated = paramDescription.deprecated;
+        param.deprecatedDescription = paramDescription.deprecatedDescription;
 
         if (paramDirection == ParamDirection.Output)
             parseFunctionResultParamAttr(item, param);
@@ -402,6 +410,7 @@ public final class ApidocCommentParser
     private static void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
+        param.deprecated = false;
         param.proprietary = false;
         param.optional = false;
         param.readonly = false;
@@ -440,35 +449,29 @@ public final class ApidocCommentParser
         }
     }
 
-    private Param parseParamItems(
-        ListIterator<ApidocTagParser.Item> itemIterator)
-        throws Error
+    private Param parseParamItems(ListIterator<ApidocTagParser.Item> itemIterator) throws Error
     {
         indentLevel++;
         final Param paramDescription = new Param();
         paramDescription.values = new ArrayList<Apidoc.Value>();
+
         while (itemIterator.hasNext())
         {
             final ApidocTagParser.Item item = itemIterator.next();
-            if (TAG_VALUE.equals(item.getTag()))
-            {
-                // ATTENTION: Currently, [proprietary] values are ignored, until supported in XML.
-                if (ATTR_PROPRIETARY.equals(item.getAttribute()))
-                    continue;
 
-                checkNoAttribute(item);
-                Apidoc.Value value = new Apidoc.Value();
-                value.setName(getInitialToken(item, ParamMode.WithToken));
-                value.description = item.getTextAfterInitialToken(indentLevel);
+            if (TAG_DEPRECATED.equals(item.getTag()))
+            {
+                paramDescription.deprecated = true;
+                paramDescription.deprecatedDescription = item.getFullText(indentLevel);
+            }
+            else if (TAG_VALUE.equals(item.getTag()))
+            {
+                Apidoc.Value value = parseValue(item, itemIterator);
                 paramDescription.values.add(value);
             }
             else if (TAG_STRUCT.equals(item.getTag()))
             {
                 paramDescription.structName = item.getFullText(indentLevel);
-            }
-            else if (TAG_DEPRECATED.equals(item.getTag()))
-            {
-                paramDescription.deprecatedDescription = item.getFullText(indentLevel);
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -478,6 +481,34 @@ public final class ApidocCommentParser
         }
         indentLevel--;
         return paramDescription;
+    }
+
+    private Apidoc.Value parseValue(
+        ApidocTagParser.Item valueItem,
+        ListIterator<ApidocTagParser.Item> itemIterator) throws Error
+    {
+        Apidoc.Value value = new Apidoc.Value();
+        value.setName(getInitialToken(valueItem, ParamMode.WithToken));
+        value.description = valueItem.getTextAfterInitialToken(indentLevel);
+
+        if (ATTR_PROPRIETARY.equals(valueItem.getAttribute()))
+            value.proprietary = true;
+
+        while (itemIterator.hasNext())
+        {
+            ApidocTagParser.Item item = itemIterator.next();
+            if (TAG_DEPRECATED.equals(item.getTag()))
+            {
+                value.deprecated = true;
+                value.deprecatedDescription = item.getFullText(indentLevel);
+            }
+            else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
+            {
+                itemIterator.previous(); //< Return previous item for future parsing.
+                break;
+            }
+        }
+        return value;
     }
 
     private static void fillDefaultFormatParam(ApidocTagParser.Item item, Apidoc.Param param)

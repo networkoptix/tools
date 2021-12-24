@@ -20,6 +20,10 @@
                                     <name>regularValue</name>
                                     <description>Appears in xml.</description>
                                 </value>
+                                <value proprietary="true">
+                                    <name>proprietaryValue</name>
+                                    <description>Description of a proprietary value</description>
+                                </value>
                             </values>
                         </param>
                     </params>

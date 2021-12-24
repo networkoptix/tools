@@ -7,7 +7,7 @@
  * %//Testing comments without a space after `//`.
  * %param withProprietaryValues
  *     %value regularValue Appears in xml.
- *     %value[proprietary] proprietaryValue Such values are ignored, thus, do not appear in xml.
+ *     %value[proprietary] proprietaryValue Description of a proprietary value
  * %return some result description
  *     %param someParam some result param
  *     %param[proprietary] proprietaryParam proprietary result param

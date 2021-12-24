@@ -3,6 +3,8 @@ package com.nx.apidoc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.nx.util.Serializable;
 import com.nx.util.Utils;
@@ -82,21 +84,33 @@ public final class Apidoc extends Serializable
     {
         public String name;
         public String description; ///< optional
+        public boolean proprietary; ///< optional
+        public boolean deprecated; ///< optional
+        public String deprecatedDescription = "";
         public boolean areQuotesRemovedFromName = false;
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
             setName(p.readString("name", Presence.REQUIRED));
+            proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
+            deprecated = p.readBooleanAttr("deprecated", BooleanDefault.FALSE);
             description = p.readInnerXml("description", Presence.OPTIONAL);
+            stripDeprecatedDescriptionFromDescription();
         }
 
         protected void writeToGenerator(Generator g)
         {
+            g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
+            g.writeBooleanAttr("deprecated", deprecated, BooleanDefault.FALSE);
+
             g.writeString(
                 "name",
                 areQuotesRemovedFromName ? ('"' + name + '"') : name,
                 Emptiness.PROHIBIT);
-            g.writeInnerXml("description", description, Emptiness.ALLOW);
+
+            final String deprecatedString = getDeprecatedString();
+            final String descriptionString = (description == null) ? "" : description;
+            g.writeInnerXml("description", deprecatedString + descriptionString, Emptiness.ALLOW);
         }
 
         public void setName(String name)
@@ -119,6 +133,33 @@ public final class Apidoc extends Serializable
                 return '"' + name + '"';
             return name;
         }
+
+        public String getDeprecatedString()
+        {
+            return deprecated
+                ? String.format(
+                    "<p><b>Deprecated.</b>%s</p>",
+                    !deprecatedDescription.isEmpty()
+                        ? " " + deprecatedDescription
+                        : "")
+                : "";
+        }
+
+        private void stripDeprecatedDescriptionFromDescription()
+        {
+            Pattern pattern = Pattern.compile("<p>[ \\n]*<b>Deprecated\\.</b>(.)*</p>");
+            Matcher matcher = pattern.matcher(description);
+            if (matcher.find())
+            {
+                final String deprecatedString = matcher.group(0);
+                description = description.replace(deprecatedString, "").trim();
+                pattern = Pattern.compile("</b>.+</p>");
+                matcher = pattern.matcher(deprecatedString);
+                deprecatedDescription = matcher.find()
+                    ? matcher.group(0).replaceAll("(</b>)|(</p>)", "").trim()
+                    : "";
+            }
+        }
     }
 
     public static final class Param extends Serializable
@@ -133,10 +174,12 @@ public final class Apidoc extends Serializable
         public boolean hasRecursiveField = false; ///< Internal field
 
         public boolean proprietary = false; ///< attribute; optional(default=false)
+        public boolean deprecated = false; ///< attribute; optional(default=false)
         public boolean readonly = false; ///< attribute; optional(default=false)
         public String name;
         public Type type;
         public String description; ///< optional
+        public String deprecatedDescription = ""; ///< optional
         public boolean optional = false; ///< attribute; optional(default=false)
         public List<Value> values; ///< optional
 
@@ -145,7 +188,7 @@ public final class Apidoc extends Serializable
             values = new ArrayList<Value>();
         }
 
-        public void fillMissingFieldsFrom(Param origin)
+        public void fillMissingFieldsFrom(Param origin) throws Error
         {
             if (!isGeneratedFromStruct)
                 isGeneratedFromStruct = origin.isGeneratedFromStruct;
@@ -159,6 +202,12 @@ public final class Apidoc extends Serializable
                 hasDefaultDescription = origin.hasDefaultDescription;
             if (!proprietary)
                 proprietary = origin.proprietary;
+            if (!deprecated)
+            {
+                deprecated = origin.deprecated;
+                if (deprecatedDescription.isEmpty())
+                    deprecatedDescription = origin.deprecatedDescription;
+            }
             if (!readonly)
                 readonly = origin.readonly;
             if (name == null || name.isEmpty())
@@ -169,11 +218,103 @@ public final class Apidoc extends Serializable
                 description = origin.description;
             if (!optional)
                 optional = origin.optional;
-            if (values == null || values.isEmpty())
-                values = origin.values;
             if (!hasRecursiveField)
                 hasRecursiveField = origin.hasRecursiveField;
-            // TODO: #lbusygin: Merge param values?
+
+            if (this.type.equals(Type.ENUM) || this.type.equals(Type.FLAGS))
+                mergeEnumValues(origin.values);
+            else if (this.values == null || this.values.isEmpty())
+                this.values = origin.values;
+        }
+
+        public void normalizeProperties()
+        {
+            squashValueProperties();
+        }
+
+        public String getDeprecatedString()
+        {
+            return deprecated
+                ? String.format(
+                    "<p><b>Deprecated.</b>%s</p>",
+                    !deprecatedDescription.isEmpty()
+                        ? " " + deprecatedDescription
+                        : "")
+                : "";
+        }
+
+        private void mergeEnumValues(List<Apidoc.Value> originValues) throws Error
+        {
+            if (this.values == null || this.values.isEmpty())
+            {
+                this.values = originValues;
+                return;
+            }
+
+            for (final Apidoc.Value value: this.values)
+            {
+                if (originValues.stream().filter(val -> val.name.equals(value.name)).count() == 0)
+                    throw new Error("Values of a parameter must be a subset of " + this.name);
+            }
+
+            for (final Apidoc.Value originValue: originValues)
+            {
+                final Object[] filteredByName = this.values.stream().filter(
+                    val -> val.name.equals(originValue.name)).toArray();
+                if (filteredByName.length > 0)
+                {
+                    Apidoc.Value value = (Apidoc.Value) filteredByName[0];
+                    mergeEnumValue(originValue, value);
+                }
+            }
+            this.values = originValues;
+        }
+
+        private void mergeEnumValue(Apidoc.Value originValue, Apidoc.Value value)
+        {
+            if (!originValue.proprietary || this.proprietary)
+                originValue.proprietary = !this.proprietary && value.proprietary;
+
+            if (!originValue.deprecated || this.deprecated)
+                originValue.deprecated = !this.deprecated && value.deprecated;
+
+            if (originValue.deprecated
+                && (originValue.deprecatedDescription == null
+                || originValue.deprecatedDescription.isEmpty()))
+            {
+                originValue.deprecatedDescription = value.deprecatedDescription;
+            }
+
+            if (originValue.description == null || originValue.description.isEmpty())
+                originValue.description = value.description;
+        }
+
+        private void squashValueProperties()
+        {
+            if (this.values.isEmpty())
+                return;
+
+            boolean areAllValuesProprietary = true;
+            boolean areAllValuesDeprecated = true;
+            for (final Apidoc.Value value: this.values)
+            {
+                areAllValuesProprietary &= value.proprietary;
+                areAllValuesDeprecated &= value.deprecated;
+
+                if (!areAllValuesProprietary && !areAllValuesDeprecated)
+                    break;
+            }
+
+            if (areAllValuesProprietary)
+            {
+                this.proprietary = true;
+                this.values.stream().forEach(val -> val.proprietary = false);
+            }
+            if (areAllValuesDeprecated)
+            {
+                this.deprecated = true;
+                this.values.stream().forEach(val -> val.deprecated = false);
+            }
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
@@ -188,11 +329,20 @@ public final class Apidoc extends Serializable
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
+            if (proprietary)
+                g.writeBooleanAttr("proprietary", true, BooleanDefault.NONE);
+
             g.writeString("name", name, Emptiness.PROHIBIT);
             g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
-            g.writeInnerXml("description", description, Emptiness.ALLOW);
-            g.writeBoolean("optional", optional,
+            final String deprecatedString = getDeprecatedString();
+            g.writeInnerXml(
+                "description",
+                !deprecatedString.isEmpty()
+                    ? deprecatedString + description
+                    : description,
+                Emptiness.ALLOW);
+            g.writeBoolean(
+                "optional", optional,
                 omitOptionalFieldIfFalse ? BooleanDefault.FALSE : BooleanDefault.NONE);
             g.writeObjectList("values", values, Emptiness.OMIT);
         }
@@ -236,12 +386,14 @@ public final class Apidoc extends Serializable
 
         public boolean arrayParams; ///< optional(false)
         public boolean proprietary; ///< attribute; optional(false)
+        public boolean deprecated; ///< attribute; optional(false)
         public String name;
         public String caption; ///< optional
         public List<String> groups;
         public String description; ///< optional
         public String permissions; ///< optional
         public String method; ///< optional
+        public String deprecatedDescription = ""; ///< optional
         public List<Param> params; ///< optional
         public Result result; ///< optional
 
@@ -282,15 +434,28 @@ public final class Apidoc extends Serializable
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
+            if (proprietary)
+                g.writeBooleanAttr("proprietary", true, BooleanDefault.NONE);
+
             g.writeBoolean("arrayParams", arrayParams, BooleanDefault.FALSE);
             g.writeString("name", name, Emptiness.PROHIBIT);
             g.writeString("caption", caption, Emptiness.OMIT);
-            g.writeInnerXml("description", description, Emptiness.ALLOW);
+            g.writeInnerXml("description", getDeprecatedString() + description, Emptiness.ALLOW);
             g.writeString("permissions", permissions, Emptiness.OMIT);
             g.writeString("method", method, Emptiness.ALLOW);
             g.writeObjectList("params", params, Emptiness.ALLOW);
             g.writeObject("result", result, Emptiness.ALLOW);
+        }
+
+        public String getDeprecatedString()
+        {
+            return deprecated
+                ? String.format(
+                "<p><b>Deprecated.</b>%s</p>",
+                !deprecatedDescription.isEmpty()
+                    ? " " + deprecatedDescription
+                    : "")
+                : "";
         }
     }
 
