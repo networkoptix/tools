@@ -199,7 +199,7 @@ get_CONAN_PACKAGE_DIR() # package_name
     fi
     nx_log_var packagePathInfo
 
-    if CONAN_PACKAGE_DIR=$(
+    if ! CONAN_PACKAGE_DIR=$(
         echo "$packagePathInfo" \
         | sed "1d;s/ *package_folder: //" \
         | `# trim trailing \r #` sed -e 's/[[:space:]]*$//'
