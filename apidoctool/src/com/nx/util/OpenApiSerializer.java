@@ -211,8 +211,14 @@ public final class OpenApiSerializer
                 final JSONObject requestBody = getObject(method, "requestBody");
                 if (!param.optional)
                     requestBody.put("required", true);
-                final JSONObject schema = getObject(getObject(getObject(
+                JSONObject schema = getObject(getObject(getObject(
                     requestBody, "content"), "application/json"), "schema");
+                if (function.arrayParams)
+                {
+                    schema.put("type", "array");
+                    schema = getObject(schema, "items");
+                }
+
                 addStructParam(schema, param);
 
                 if (param.hasRecursiveField)

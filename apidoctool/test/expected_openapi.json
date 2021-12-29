@@ -4497,192 +4497,195 @@
       "description": "Save additional camera attributes for a number of cameras.\n<p>\nParameters should be passed as a JSON array of objects in POST message body with\ncontent type \"application/json\". Example of such object can be seen in\nthe result of the corresponding GET function.\n<\/p>",
       "requestBody": {
         "content": {"application/json": {"schema": {
-          "type": "object",
-          "properties": {
-            "cameraId": {
-              "description": "Camera unique id. If such object exists, omitted fields will not be changed.",
-              "type": "string",
-              "format": "uuid"
-            },
-            "cameraName": {
-              "description": "Camera name.",
-              "type": "string"
-            },
-            "userDefinedGroupName": {
-              "description": "Name of the user-defined camera group.",
-              "type": "string"
-            },
-            "scheduleEnabled": {
-              "description": "Whether recording to the archive is enabled for the camera.",
-              "type": "boolean"
-            },
-            "licenseUsed": {
-              "description": "Whether the license is used for the camera.",
-              "type": "boolean"
-            },
-            "motionType": {
-              "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
-              "type": "string",
-              "enum": [
-                "DEFAULT_ALT_CAPTION",
-                "MT_HardwareGrid",
-                "MT_SoftwareGrid",
-                "MT_MotionWindow",
-                "MT_NoMotion"
-              ]
-            },
-            "motionMask": {
-              "description": "List of motion detection areas and their\nsensitivity. The format is proprietary and is likely to change in\nfuture API versions. Currently, this string defines several rectangles separated\nwith \":\", each rectangle is described by 5 comma-separated numbers: sensitivity,\nx and y (for left top corner), width, height.",
-              "type": "string"
-            },
-            "scheduleTasks": {
-              "description": "List of scheduleTask objects which define the camera recording\nschedule.",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "startTime": {
-                    "description": "Time of day when the backup starts (in seconds passed\nfrom 00:00:00).",
-                    "type": "integer"
-                  },
-                  "endTime": {
-                    "description": "Time of day when the backup ends (in seconds passed\nfrom 00:00:00).",
-                    "type": "integer"
-                  },
-                  "recordAudio": {
-                    "description": "Whether to record sound.",
-                    "type": "boolean"
-                  },
-                  "recordingType": {
-                    "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
-                    "type": "string",
-                    "enum": [
-                      "RT_Always",
-                      "RT_MotionOnly",
-                      "RT_Never",
-                      "RT_MotionAndLowQuality",
-                      "RT_Count"
-                    ]
-                  },
-                  "dayOfWeek": {
-                    "description": "Day of week for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
-                    "type": "integer"
-                  },
-                  "beforeThreshold": {
-                    "description": "The number of seconds before a motion event to\nrecord the video for.",
-                    "type": "integer"
-                  },
-                  "afterThreshold": {
-                    "description": "The number of seconds after a motion event to\nrecord the video for.",
-                    "type": "integer"
-                  },
-                  "streamQuality": {
-                    "description": "Quality of the recording.",
-                    "type": "string",
-                    "enum": [
-                      "QualityLowest",
-                      "QualityLow",
-                      "QualityNormal",
-                      "QualityHigh",
-                      "QualityHighest",
-                      "QualityPreSet",
-                      "QualityNotDefined",
-                      "StreamQualityCount"
-                    ]
-                  },
-                  "fps": {
-                    "description": "Frames per second (integer).",
-                    "type": "integer"
-                  },
-                  "bitrateKbps": {"type": "integer"}
-                },
-                "required": [
-                  "startTime",
-                  "endTime",
-                  "recordAudio",
-                  "recordingType",
-                  "dayOfWeek",
-                  "beforeThreshold",
-                  "afterThreshold",
-                  "streamQuality",
-                  "fps",
-                  "bitrateKbps"
+          "items": {
+            "type": "object",
+            "properties": {
+              "cameraId": {
+                "description": "Camera unique id. If such object exists, omitted fields will not be changed.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "cameraName": {
+                "description": "Camera name.",
+                "type": "string"
+              },
+              "userDefinedGroupName": {
+                "description": "Name of the user-defined camera group.",
+                "type": "string"
+              },
+              "scheduleEnabled": {
+                "description": "Whether recording to the archive is enabled for the camera.",
+                "type": "boolean"
+              },
+              "licenseUsed": {
+                "description": "Whether the license is used for the camera.",
+                "type": "boolean"
+              },
+              "motionType": {
+                "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
+                "type": "string",
+                "enum": [
+                  "DEFAULT_ALT_CAPTION",
+                  "MT_HardwareGrid",
+                  "MT_SoftwareGrid",
+                  "MT_MotionWindow",
+                  "MT_NoMotion"
                 ]
-              }
+              },
+              "motionMask": {
+                "description": "List of motion detection areas and their\nsensitivity. The format is proprietary and is likely to change in\nfuture API versions. Currently, this string defines several rectangles separated\nwith \":\", each rectangle is described by 5 comma-separated numbers: sensitivity,\nx and y (for left top corner), width, height.",
+                "type": "string"
+              },
+              "scheduleTasks": {
+                "description": "List of scheduleTask objects which define the camera recording\nschedule.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "startTime": {
+                      "description": "Time of day when the backup starts (in seconds passed\nfrom 00:00:00).",
+                      "type": "integer"
+                    },
+                    "endTime": {
+                      "description": "Time of day when the backup ends (in seconds passed\nfrom 00:00:00).",
+                      "type": "integer"
+                    },
+                    "recordAudio": {
+                      "description": "Whether to record sound.",
+                      "type": "boolean"
+                    },
+                    "recordingType": {
+                      "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
+                      "type": "string",
+                      "enum": [
+                        "RT_Always",
+                        "RT_MotionOnly",
+                        "RT_Never",
+                        "RT_MotionAndLowQuality",
+                        "RT_Count"
+                      ]
+                    },
+                    "dayOfWeek": {
+                      "description": "Day of week for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
+                      "type": "integer"
+                    },
+                    "beforeThreshold": {
+                      "description": "The number of seconds before a motion event to\nrecord the video for.",
+                      "type": "integer"
+                    },
+                    "afterThreshold": {
+                      "description": "The number of seconds after a motion event to\nrecord the video for.",
+                      "type": "integer"
+                    },
+                    "streamQuality": {
+                      "description": "Quality of the recording.",
+                      "type": "string",
+                      "enum": [
+                        "QualityLowest",
+                        "QualityLow",
+                        "QualityNormal",
+                        "QualityHigh",
+                        "QualityHighest",
+                        "QualityPreSet",
+                        "QualityNotDefined",
+                        "StreamQualityCount"
+                      ]
+                    },
+                    "fps": {
+                      "description": "Frames per second (integer).",
+                      "type": "integer"
+                    },
+                    "bitrateKbps": {"type": "integer"}
+                  },
+                  "required": [
+                    "startTime",
+                    "endTime",
+                    "recordAudio",
+                    "recordingType",
+                    "dayOfWeek",
+                    "beforeThreshold",
+                    "afterThreshold",
+                    "streamQuality",
+                    "fps",
+                    "bitrateKbps"
+                  ]
+                }
+              },
+              "audioEnabled": {
+                "description": "Whether audio is enabled on the camera.",
+                "type": "boolean"
+              },
+              "disableDualStreaming": {
+                "description": "Possible values are:\n- `false` turn of dual streaming.\n- `true` enable dual streaming if it supported by camera.",
+                "type": "boolean"
+              },
+              "controlEnabled": {
+                "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
+                "type": "boolean"
+              },
+              "dewarpingParams": {
+                "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
+                "type": "string"
+              },
+              "minArchiveDays": {
+                "description": "Minimum number of days to keep the archive for.\nIf the value is less than or equal to zero, it is not used.",
+                "type": "integer"
+              },
+              "maxArchiveDays": {
+                "description": "Maximum number of days to keep the archive for.\nIf the value is less than or equal zero, it is not used.",
+                "type": "integer"
+              },
+              "preferredServerId": {
+                "description": "Unique id of a server which has the highest priority of hosting\nthe camera for failover (if the current server fails).",
+                "type": "string",
+                "format": "uuid"
+              },
+              "failoverPriority": {
+                "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
+                "type": "string",
+                "enum": [
+                  "FP_Never",
+                  "FP_Low",
+                  "FP_Medium",
+                  "FP_High",
+                  "FP_Count"
+                ]
+              },
+              "backupType": {
+                "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
+                "type": "string",
+                "enum": [
+                  "CameraBackup_Disabled",
+                  "CameraBackup_HighQuality",
+                  "CameraBackup_LowQuality",
+                  "CameraBackup_Both",
+                  "CameraBackup_Default"
+                ]
+              },
+              "logicalId": {"type": "string"}
             },
-            "audioEnabled": {
-              "description": "Whether audio is enabled on the camera.",
-              "type": "boolean"
-            },
-            "disableDualStreaming": {
-              "description": "Possible values are:\n- `false` turn of dual streaming.\n- `true` enable dual streaming if it supported by camera.",
-              "type": "boolean"
-            },
-            "controlEnabled": {
-              "description": "Whether server manages the camera (changes resolution, FPS, create\nprofiles, etc).",
-              "type": "boolean"
-            },
-            "dewarpingParams": {
-              "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
-              "type": "string"
-            },
-            "minArchiveDays": {
-              "description": "Minimum number of days to keep the archive for.\nIf the value is less than or equal to zero, it is not used.",
-              "type": "integer"
-            },
-            "maxArchiveDays": {
-              "description": "Maximum number of days to keep the archive for.\nIf the value is less than or equal zero, it is not used.",
-              "type": "integer"
-            },
-            "preferredServerId": {
-              "description": "Unique id of a server which has the highest priority of hosting\nthe camera for failover (if the current server fails).",
-              "type": "string",
-              "format": "uuid"
-            },
-            "failoverPriority": {
-              "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
-              "type": "string",
-              "enum": [
-                "FP_Never",
-                "FP_Low",
-                "FP_Medium",
-                "FP_High",
-                "FP_Count"
-              ]
-            },
-            "backupType": {
-              "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
-              "type": "string",
-              "enum": [
-                "CameraBackup_Disabled",
-                "CameraBackup_HighQuality",
-                "CameraBackup_LowQuality",
-                "CameraBackup_Both",
-                "CameraBackup_Default"
-              ]
-            },
-            "logicalId": {"type": "string"}
+            "required": [
+              "cameraId",
+              "cameraName",
+              "userDefinedGroupName",
+              "scheduleEnabled",
+              "licenseUsed",
+              "motionType",
+              "motionMask",
+              "scheduleTasks",
+              "audioEnabled",
+              "disableDualStreaming",
+              "controlEnabled",
+              "dewarpingParams",
+              "minArchiveDays",
+              "maxArchiveDays",
+              "preferredServerId",
+              "failoverPriority",
+              "backupType",
+              "logicalId"
+            ]
           },
-          "required": [
-            "cameraId",
-            "cameraName",
-            "userDefinedGroupName",
-            "scheduleEnabled",
-            "licenseUsed",
-            "motionType",
-            "motionMask",
-            "scheduleTasks",
-            "audioEnabled",
-            "disableDualStreaming",
-            "controlEnabled",
-            "dewarpingParams",
-            "minArchiveDays",
-            "maxArchiveDays",
-            "preferredServerId",
-            "failoverPriority",
-            "backupType",
-            "logicalId"
-          ]
+          "type": "array"
         }}},
         "required": true
       },
@@ -4932,175 +4935,178 @@
       "description": "Save the list of layouts.\n<p>\nParameters should be passed as a JSON array of objects in POST message body with\ncontent type \"application/json\". Example of such object can be seen in\nthe result of the corresponding GET function.\n<\/p>",
       "requestBody": {
         "content": {"application/json": {"schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "description": "Layout unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
-              "type": "string",
-              "format": "uuid"
-            },
-            "parentId": {
-              "description": "Unique id of the user owning the layout.",
-              "type": "string",
-              "format": "uuid"
-            },
-            "name": {
-              "description": "Layout name.",
-              "type": "string"
-            },
-            "url": {
-              "description": "Should be empty string.",
-              "type": "string"
-            },
-            "typeId": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
-              "type": "string",
-              "format": "uuid"
-            },
-            "cellAspectRatio": {
-              "description": "Aspect ratio of a cell for layout items\n(floating-point).",
-              "type": "number"
-            },
-            "horizontalSpacing": {
-              "description": "Horizontal spacing between layout items\n(floating-point).",
-              "type": "number"
-            },
-            "verticalSpacing": {
-              "description": "Vertical spacing between layout items\n(floating-point).",
-              "type": "number"
-            },
-            "items": {
-              "description": "List of the layout items.",
-              "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "Layout unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "parentId": {
+                "description": "Unique id of the user owning the layout.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "description": "Layout name.",
+                "type": "string"
+              },
+              "url": {
+                "description": "Should be empty string.",
+                "type": "string"
+              },
+              "typeId": {
+                "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
+                "type": "string",
+                "format": "uuid"
+              },
+              "cellAspectRatio": {
+                "description": "Aspect ratio of a cell for layout items\n(floating-point).",
+                "type": "number"
+              },
+              "horizontalSpacing": {
+                "description": "Horizontal spacing between layout items\n(floating-point).",
+                "type": "number"
+              },
+              "verticalSpacing": {
+                "description": "Vertical spacing between layout items\n(floating-point).",
+                "type": "number"
+              },
               "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "description": "Item unique id. Can be omitted when creating a new object.",
-                    "type": "string",
-                    "format": "uuid"
+                "description": "List of the layout items.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "description": "Item unique id. Can be omitted when creating a new object.",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "flags": {
+                      "description": "Should have fixed value.\n\nPossible values are:\n- `0`",
+                      "type": "integer"
+                    },
+                    "left": {
+                      "description": "Left coordinate of the layout item (floating-point).",
+                      "type": "number"
+                    },
+                    "top": {
+                      "description": "Top coordinate of the layout item (floating-point).",
+                      "type": "number"
+                    },
+                    "right": {
+                      "description": "Right coordinate of the layout item (floating-point).",
+                      "type": "number"
+                    },
+                    "bottom": {
+                      "description": "Bottom coordinate of the layout item (floating-point).",
+                      "type": "number"
+                    },
+                    "rotation": {
+                      "description": "Degree of image tilt; a positive value rotates\ncounter-clockwise (floating-point, 0..360).",
+                      "type": "number"
+                    },
+                    "resourceId": {
+                      "description": "Camera unique id.",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "resourcePath": {
+                      "description": "If the item represents a local file - URL of\nthe file, otherwise is empty.",
+                      "type": "string"
+                    },
+                    "zoomLeft": {
+                      "description": "Left coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
+                      "type": "number"
+                    },
+                    "zoomTop": {
+                      "description": "Top coordinate of the displayed window inside\nthe camera image, as a fraction of the image height\n(floating-point, 0..1).",
+                      "type": "number"
+                    },
+                    "zoomRight": {
+                      "description": "Right coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
+                      "type": "number"
+                    },
+                    "zoomBottom": {
+                      "description": "Bottom coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
+                      "type": "number"
+                    },
+                    "zoomTargetId": {
+                      "description": "Unique id of the original layout item for\nwhich the zoom window was created.",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "contrastParams": {
+                      "description": "Image enhancement parameters. The format\nis proprietary and is likely to change in future API versions.",
+                      "type": "string"
+                    },
+                    "dewarpingParams": {
+                      "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
+                      "type": "string"
+                    },
+                    "displayInfo": {
+                      "description": "Whether to display info for the layout item.",
+                      "type": "boolean"
+                    }
                   },
-                  "flags": {
-                    "description": "Should have fixed value.\n\nPossible values are:\n- `0`",
-                    "type": "integer"
-                  },
-                  "left": {
-                    "description": "Left coordinate of the layout item (floating-point).",
-                    "type": "number"
-                  },
-                  "top": {
-                    "description": "Top coordinate of the layout item (floating-point).",
-                    "type": "number"
-                  },
-                  "right": {
-                    "description": "Right coordinate of the layout item (floating-point).",
-                    "type": "number"
-                  },
-                  "bottom": {
-                    "description": "Bottom coordinate of the layout item (floating-point).",
-                    "type": "number"
-                  },
-                  "rotation": {
-                    "description": "Degree of image tilt; a positive value rotates\ncounter-clockwise (floating-point, 0..360).",
-                    "type": "number"
-                  },
-                  "resourceId": {
-                    "description": "Camera unique id.",
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "resourcePath": {
-                    "description": "If the item represents a local file - URL of\nthe file, otherwise is empty.",
-                    "type": "string"
-                  },
-                  "zoomLeft": {
-                    "description": "Left coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
-                    "type": "number"
-                  },
-                  "zoomTop": {
-                    "description": "Top coordinate of the displayed window inside\nthe camera image, as a fraction of the image height\n(floating-point, 0..1).",
-                    "type": "number"
-                  },
-                  "zoomRight": {
-                    "description": "Right coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
-                    "type": "number"
-                  },
-                  "zoomBottom": {
-                    "description": "Bottom coordinate of the displayed window inside\nthe camera image, as a fraction of the image width\n(floating-point, 0..1).",
-                    "type": "number"
-                  },
-                  "zoomTargetId": {
-                    "description": "Unique id of the original layout item for\nwhich the zoom window was created.",
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "contrastParams": {
-                    "description": "Image enhancement parameters. The format\nis proprietary and is likely to change in future API versions.",
-                    "type": "string"
-                  },
-                  "dewarpingParams": {
-                    "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
-                    "type": "string"
-                  },
-                  "displayInfo": {
-                    "description": "Whether to display info for the layout item.",
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "id",
-                  "flags",
-                  "left",
-                  "top",
-                  "right",
-                  "bottom",
-                  "rotation",
-                  "resourceId",
-                  "resourcePath",
-                  "zoomLeft",
-                  "zoomTop",
-                  "zoomRight",
-                  "zoomBottom",
-                  "zoomTargetId",
-                  "contrastParams",
-                  "dewarpingParams",
-                  "displayInfo"
-                ]
+                  "required": [
+                    "id",
+                    "flags",
+                    "left",
+                    "top",
+                    "right",
+                    "bottom",
+                    "rotation",
+                    "resourceId",
+                    "resourcePath",
+                    "zoomLeft",
+                    "zoomTop",
+                    "zoomRight",
+                    "zoomBottom",
+                    "zoomTargetId",
+                    "contrastParams",
+                    "dewarpingParams",
+                    "displayInfo"
+                  ]
+                }
+              },
+              "locked": {
+                "description": "Whether the layout is locked.",
+                "type": "boolean"
+              },
+              "backgroundImageFilename": {"type": "string"},
+              "backgroundWidth": {
+                "description": "Width of the background image in pixels (integer).",
+                "type": "integer"
+              },
+              "backgroundHeight": {
+                "description": "Height of the background image in pixels (integer).",
+                "type": "integer"
+              },
+              "backgroundOpacity": {
+                "description": "Level of opacity of the background image in pixels (floating-point\n0..1).",
+                "type": "number"
               }
             },
-            "locked": {
-              "description": "Whether the layout is locked.",
-              "type": "boolean"
-            },
-            "backgroundImageFilename": {"type": "string"},
-            "backgroundWidth": {
-              "description": "Width of the background image in pixels (integer).",
-              "type": "integer"
-            },
-            "backgroundHeight": {
-              "description": "Height of the background image in pixels (integer).",
-              "type": "integer"
-            },
-            "backgroundOpacity": {
-              "description": "Level of opacity of the background image in pixels (floating-point\n0..1).",
-              "type": "number"
-            }
+            "required": [
+              "id",
+              "parentId",
+              "name",
+              "url",
+              "cellAspectRatio",
+              "horizontalSpacing",
+              "verticalSpacing",
+              "items",
+              "locked",
+              "backgroundImageFilename",
+              "backgroundWidth",
+              "backgroundHeight",
+              "backgroundOpacity"
+            ]
           },
-          "required": [
-            "id",
-            "parentId",
-            "name",
-            "url",
-            "cellAspectRatio",
-            "horizontalSpacing",
-            "verticalSpacing",
-            "items",
-            "locked",
-            "backgroundImageFilename",
-            "backgroundWidth",
-            "backgroundHeight",
-            "backgroundOpacity"
-          ]
+          "type": "array"
         }}},
         "required": true
       },
@@ -5178,62 +5184,65 @@
       "description": "Save additional attributes of a number of servers.\n<p>\nParameters should be passed as a JSON array of objects in POST message body with\ncontent type \"application/json\". Example of such object can be seen in\nthe result of the corresponding GET function.\n<\/p>",
       "requestBody": {
         "content": {"application/json": {"schema": {
-          "type": "object",
-          "properties": {
-            "serverId": {
-              "description": "Server unique id. If such object exists, omitted fields will not be changed.",
-              "type": "string",
-              "format": "uuid"
+          "items": {
+            "type": "object",
+            "properties": {
+              "serverId": {
+                "description": "Server unique id. If such object exists, omitted fields will not be changed.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "serverName": {
+                "description": "Server name.",
+                "type": "string"
+              },
+              "maxCameras": {
+                "description": "Maximum number of cameras on the server.",
+                "type": "integer"
+              },
+              "allowAutoRedundancy": {
+                "description": "Whether the server can take cameras from\nan offline server automatically.",
+                "type": "boolean"
+              },
+              "backupType": {
+                "description": "Settings for storage redundancy.\n\nPossible values are:\n- `\"Backup_Manual\"` Backup is performed only at a user's request.\n- `\"Backup_RealTime\"` Backup is performed during recording.\n- `\"Backup_Schedule\"` Backup is performed on schedule.",
+                "type": "string",
+                "enum": [
+                  "Backup_Manual",
+                  "Backup_RealTime",
+                  "Backup_Schedule"
+                ]
+              },
+              "backupDaysOfTheWeek": {
+                "description": "Combination (via \"|\") of weekdays\nthe backup is active on.\n\nPossible values are:\n- `Monday`\n- `Tuesday`\n- `Wednesday`\n- `Thursday`\n- `Friday`\n- `Saturday`\n- `Sunday`",
+                "type": "integer"
+              },
+              "backupStart": {
+                "description": "Time of day when the backup starts (in seconds passed from 00:00:00).",
+                "type": "integer"
+              },
+              "backupDuration": {
+                "description": "Duration of the synchronization period (in seconds). -1 if not set.",
+                "type": "integer"
+              },
+              "backupBitrate": {
+                "description": "Maximum backup bitrate (in bytes per second). Negative\nvalue if not limited.",
+                "type": "integer"
+              }
             },
-            "serverName": {
-              "description": "Server name.",
-              "type": "string"
-            },
-            "maxCameras": {
-              "description": "Maximum number of cameras on the server.",
-              "type": "integer"
-            },
-            "allowAutoRedundancy": {
-              "description": "Whether the server can take cameras from\nan offline server automatically.",
-              "type": "boolean"
-            },
-            "backupType": {
-              "description": "Settings for storage redundancy.\n\nPossible values are:\n- `\"Backup_Manual\"` Backup is performed only at a user's request.\n- `\"Backup_RealTime\"` Backup is performed during recording.\n- `\"Backup_Schedule\"` Backup is performed on schedule.",
-              "type": "string",
-              "enum": [
-                "Backup_Manual",
-                "Backup_RealTime",
-                "Backup_Schedule"
-              ]
-            },
-            "backupDaysOfTheWeek": {
-              "description": "Combination (via \"|\") of weekdays\nthe backup is active on.\n\nPossible values are:\n- `Monday`\n- `Tuesday`\n- `Wednesday`\n- `Thursday`\n- `Friday`\n- `Saturday`\n- `Sunday`",
-              "type": "integer"
-            },
-            "backupStart": {
-              "description": "Time of day when the backup starts (in seconds passed from 00:00:00).",
-              "type": "integer"
-            },
-            "backupDuration": {
-              "description": "Duration of the synchronization period (in seconds). -1 if not set.",
-              "type": "integer"
-            },
-            "backupBitrate": {
-              "description": "Maximum backup bitrate (in bytes per second). Negative\nvalue if not limited.",
-              "type": "integer"
-            }
+            "required": [
+              "serverId",
+              "serverName",
+              "maxCameras",
+              "allowAutoRedundancy",
+              "backupType",
+              "backupDaysOfTheWeek",
+              "backupStart",
+              "backupDuration",
+              "backupBitrate"
+            ]
           },
-          "required": [
-            "serverId",
-            "serverName",
-            "maxCameras",
-            "allowAutoRedundancy",
-            "backupType",
-            "backupDaysOfTheWeek",
-            "backupStart",
-            "backupDuration",
-            "backupBitrate"
-          ]
+          "type": "array"
         }}},
         "required": true
       },
@@ -5486,107 +5495,110 @@
       "x-permissions": "Administrator.",
       "requestBody": {
         "content": {"application/json": {"schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "description": "User unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
-              "type": "string",
-              "format": "uuid"
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "User unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "parentId": {
+                "description": "Should be empty.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "description": "User name.",
+                "type": "string"
+              },
+              "url": {
+                "description": "Should be empty.",
+                "type": "string"
+              },
+              "typeId": {
+                "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
+                "type": "string",
+                "format": "uuid"
+              },
+              "isAdmin": {
+                "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
+                "type": "boolean"
+              },
+              "permissions": {
+                "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
+                "type": "string",
+                "enum": [
+                  "NoGlobalPermissions",
+                  "GlobalAdminPermission",
+                  "GlobalEditCamerasPermission",
+                  "GlobalControlVideoWallPermission",
+                  "GlobalViewLogsPermission",
+                  "GlobalViewArchivePermission",
+                  "GlobalExportPermission",
+                  "GlobalViewBookmarksPermission",
+                  "GlobalManageBookmarksPermission",
+                  "GlobalUserInputPermission",
+                  "GlobalAccessAllMediaPermission",
+                  "GlobalCustomUserPermission",
+                  "GlobalLiveViewerPermissionSet",
+                  "GlobalViewerPermissionSet",
+                  "GlobalAdvancedViewerPermissionSet",
+                  "GlobalAdminPermissionSet",
+                  "GlobalVideoWallModePermissionSet",
+                  "GlobalActiveXModePermissionSet"
+                ]
+              },
+              "userRoleId": {
+                "description": "User role unique id.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "email": {
+                "description": "User's email.",
+                "type": "string"
+              },
+              "digest": {
+                "description": "HA1 digest hash from user password, as per RFC 2069. When modifying an\nexisting user, supply empty string. When creating a new user, calculate the value\nbased on UTF-8 password as follows:\n<code>digest = md5_hex(user_name + \":\" + realm + \":\" + password);<\/code>",
+                "type": "string"
+              },
+              "hash": {
+                "description": "User's password hash. When modifying an existing user, supply empty string.\nWhen creating a new user, calculate the value based on UTF-8 password as follows:\n<code>salt = rand_hex();\nhash = \"md5$\" + salt + \"$\" + md5_hex(salt + password);<\/code>",
+                "type": "string"
+              },
+              "cryptSha512Hash": {
+                "description": "Cryptography key hash. Supply empty string\nwhen creating, keep the value when modifying.",
+                "type": "string"
+              },
+              "realm": {
+                "description": "HTTP authorization realm as defined in RFC 2617, can be obtained via\n/api/gettime.",
+                "type": "string"
+              },
+              "isLdap": {
+                "description": "Whether the user was imported from LDAP.",
+                "type": "boolean"
+              },
+              "isEnabled": {
+                "description": "Whether the user is enabled.\n\nPossible values are:\n- `false`\n- `true` Default value.",
+                "type": "boolean"
+              },
+              "isCloud": {
+                "description": "Whether the user is a cloud user, as opposed to a local one.\n\nPossible values are:\n- `false` Default value.\n- `true`",
+                "type": "boolean"
+              },
+              "fullName": {
+                "description": "Full name of the user.",
+                "type": "string"
+              }
             },
-            "parentId": {
-              "description": "Should be empty.",
-              "type": "string",
-              "format": "uuid"
-            },
-            "name": {
-              "description": "User name.",
-              "type": "string"
-            },
-            "url": {
-              "description": "Should be empty.",
-              "type": "string"
-            },
-            "typeId": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
-              "type": "string",
-              "format": "uuid"
-            },
-            "isAdmin": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
-              "type": "boolean"
-            },
-            "permissions": {
-              "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
-              "type": "string",
-              "enum": [
-                "NoGlobalPermissions",
-                "GlobalAdminPermission",
-                "GlobalEditCamerasPermission",
-                "GlobalControlVideoWallPermission",
-                "GlobalViewLogsPermission",
-                "GlobalViewArchivePermission",
-                "GlobalExportPermission",
-                "GlobalViewBookmarksPermission",
-                "GlobalManageBookmarksPermission",
-                "GlobalUserInputPermission",
-                "GlobalAccessAllMediaPermission",
-                "GlobalCustomUserPermission",
-                "GlobalLiveViewerPermissionSet",
-                "GlobalViewerPermissionSet",
-                "GlobalAdvancedViewerPermissionSet",
-                "GlobalAdminPermissionSet",
-                "GlobalVideoWallModePermissionSet",
-                "GlobalActiveXModePermissionSet"
-              ]
-            },
-            "userRoleId": {
-              "description": "User role unique id.",
-              "type": "string",
-              "format": "uuid"
-            },
-            "email": {
-              "description": "User's email.",
-              "type": "string"
-            },
-            "digest": {
-              "description": "HA1 digest hash from user password, as per RFC 2069. When modifying an\nexisting user, supply empty string. When creating a new user, calculate the value\nbased on UTF-8 password as follows:\n<code>digest = md5_hex(user_name + \":\" + realm + \":\" + password);<\/code>",
-              "type": "string"
-            },
-            "hash": {
-              "description": "User's password hash. When modifying an existing user, supply empty string.\nWhen creating a new user, calculate the value based on UTF-8 password as follows:\n<code>salt = rand_hex();\nhash = \"md5$\" + salt + \"$\" + md5_hex(salt + password);<\/code>",
-              "type": "string"
-            },
-            "cryptSha512Hash": {
-              "description": "Cryptography key hash. Supply empty string\nwhen creating, keep the value when modifying.",
-              "type": "string"
-            },
-            "realm": {
-              "description": "HTTP authorization realm as defined in RFC 2617, can be obtained via\n/api/gettime.",
-              "type": "string"
-            },
-            "isLdap": {
-              "description": "Whether the user was imported from LDAP.",
-              "type": "boolean"
-            },
-            "isEnabled": {
-              "description": "Whether the user is enabled.\n\nPossible values are:\n- `false`\n- `true` Default value.",
-              "type": "boolean"
-            },
-            "isCloud": {
-              "description": "Whether the user is a cloud user, as opposed to a local one.\n\nPossible values are:\n- `false` Default value.\n- `true`",
-              "type": "boolean"
-            },
-            "fullName": {
-              "description": "Full name of the user.",
-              "type": "string"
-            }
+            "required": [
+              "name",
+              "permissions",
+              "email",
+              "fullName"
+            ]
           },
-          "required": [
-            "name",
-            "permissions",
-            "email",
-            "fullName"
-          ]
+          "type": "array"
         }}},
         "required": true
       },
