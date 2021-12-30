@@ -120,22 +120,22 @@ public final class SourceCodeParser
                         checkFunctionProperties(match, description.function);
                         if (typeManager != null)
                         {
-                            String inputStructName = description.inputStructName;
+                            String inputStructName = description.function.input.structName;
                             if (inputStructName == null)
                                 inputStructName = match.inputDataType;
 
                             String outputStructName = null;
                             if (description.function.result != null)
-                                outputStructName = description.function.result.outputStructName;
+                                outputStructName = description.function.result.structName;
                             if (outputStructName == null)
                                 outputStructName = match.outputDataType;
 
                             typeManager.mergeDescription(
                                 inputStructName, outputStructName, description.function);
 
-                            if (description.inputIsOptional)
+                            if (description.function.input.optional)
                             {
-                                for (Apidoc.Param param: description.function.params)
+                                for (Apidoc.Param param: description.function.input.params)
                                 {
                                     if (param.isGeneratedFromStruct)
                                         param.optional = true;
@@ -145,13 +145,13 @@ public final class SourceCodeParser
 
                         if (unknownParamTypeIsError)
                         {
-                            for (Apidoc.Param param: description.function.params)
+                            for (Apidoc.Param param: description.function.input.params)
                                 throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ false);
                             for (Apidoc.Param param: description.function.result.params)
                                 throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ true);
                         }
 
-                        for (Apidoc.Param param: description.function.params)
+                        for (Apidoc.Param param: description.function.input.params)
                             verifyParamValueNames(description, param, /*isResult*/ false);
                         for (Apidoc.Param param: description.function.result.params)
                             verifyParamValueNames(description, param, /*isResult*/ true);

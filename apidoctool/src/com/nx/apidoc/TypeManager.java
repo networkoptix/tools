@@ -89,10 +89,10 @@ public final class TypeManager
                 inputDataType = inputDataType.substring(
                     0, inputDataType.length() - "List".length());
             }
-            function.params = mergeStructParams(
+            function.input.params = mergeStructParams(
                 inputDataType,
-                function.params,
-                function.unusedParams,
+                function.input.params,
+                function.input.unusedParams,
                 ApidocCommentParser.ParamDirection.Input);
         }
     }

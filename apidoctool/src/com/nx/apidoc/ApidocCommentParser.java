@@ -31,8 +31,6 @@ public final class ApidocCommentParser
     public static class FunctionDescription 
     {
         public String urlPrefix;
-        public String inputStructName;
-        public boolean inputIsOptional = false;
         public Apidoc.Function function;
     }
 
@@ -158,6 +156,7 @@ public final class ApidocCommentParser
         boolean captionParsed = false;
         boolean permissionsParsed = false;
         boolean returnParsed = false;
+        boolean structParsed = false;
 
         FunctionDescription description =
             createFunctionFromApidocItem(item, groups, urlPrefixReplacements);
@@ -177,14 +176,19 @@ public final class ApidocCommentParser
             }
             else if (TAG_DEPRECATED.equals(item.getTag()))
             {
-                description.function.deprecated = true;
+                description.function.deprecated =
+                    checkTagOnce(item, description.function.deprecated, TAG_DEPRECATED);
+                checkNoAttribute(item);
                 description.function.deprecatedDescription = item.getFullText(indentLevel);
             }
             else if (TAG_STRUCT.equals(item.getTag()))
             {
-                description.inputStructName = item.getFullText(indentLevel);
+                structParsed = checkTagOnce(item, structParsed, TAG_STRUCT);
                 if (ATTR_OPT.equals(item.getAttribute()))
-                    description.inputIsOptional = true;
+                    description.function.input.optional = true;
+                else
+                    checkNoAttribute(item);
+                description.function.input.structName = item.getFullText(indentLevel);
             }
             else if (TAG_CAPTION.equals(item.getTag()))
             {
@@ -222,15 +226,15 @@ public final class ApidocCommentParser
                 final Apidoc.Param param = parseParam(
                     item, tagIterator, ParamDirection.Input, ParamMode.WithToken);
 
-                checkDuplicateParam(item, description.function.params, param.name);
+                checkDuplicateParam(item, description.function.input.params, param.name);
                 if (param.unused)
-                    description.function.unusedParams.add(param);
+                    description.function.input.unusedParams.add(param);
                 else
-                    description.function.params.add(param);
+                    description.function.input.params.add(param);
 
                 addStructParamsAndDescription(
-                    description.function.params,
-                    description.function.unusedParams,
+                    description.function.input.params,
+                    description.function.input.unusedParams,
                     param,
                     typeManager,
                     ParamDirection.Input);
@@ -347,17 +351,40 @@ public final class ApidocCommentParser
             result.function.name = values[1];
         }
         result.function.description = values[2].trim();
-        if (LABEL_ARRAY_PARAMS.equals(item.getLabel()))
-            result.function.arrayParams = true;
-        else if (!"".equals(item.getLabel()))
-            throw new Error(item.getErrorPrefix() + "Invalid label: \"" + item.getLabel() + "\"");
 
-        if ("".equals(item.getAttribute()))
-            result.function.proprietary = false;
-        else if (ATTR_PROPRIETARY.equals(item.getAttribute()))
-            result.function.proprietary = true;
-        else
-            throwInvalidAttribute(item);
+        final String label = item.getLabel();
+        if (label != null && !label.isEmpty())
+        {
+            if (LABEL_ARRAY_PARAMS.equals(label))
+            {
+                result.function.arrayParams = true;
+            }
+            else
+            {
+                try
+                {
+                    result.function.input.type = Apidoc.Type.fromString(label);
+                }
+                catch (Exception e)
+                {
+                    throw new Error(item.getErrorPrefix() +
+                        "Invalid function type \"" + label + "\" found.");
+                }
+            }
+        }
+
+        result.function.proprietary = false;
+        result.function.input.optional = false;
+        final String attribute = item.getAttribute();
+        if (attribute != null && !attribute.isEmpty())
+        {
+            if (ATTR_PROPRIETARY.equals(attribute))
+                result.function.proprietary = true;
+            else if (ATTR_OPT.equals(attribute))
+                result.function.input.optional = true;
+            else
+                throwInvalidAttribute(item);
+        }
 
         return result;
     }
@@ -570,7 +597,7 @@ public final class ApidocCommentParser
             item = tagIterator.next();
             if (TAG_STRUCT.equals(item.getTag()))
             {
-                result.outputStructName = item.getFullText(indentLevel);
+                result.structName = item.getFullText(indentLevel);
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {

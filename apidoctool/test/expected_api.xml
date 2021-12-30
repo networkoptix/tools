@@ -9849,6 +9849,41 @@ is added for convenience)</description>
                     </result>
                 </function>
                 <function>
+                    <name>handlerWithType</name>
+                    <description>handlerWithType PATCH description</description>
+                    <method>PATCH</method>
+                    <params/>
+                    <result/>
+                </function>
+                <function>
+                    <name>handlerWithType/{id}</name>
+                    <description>handlerWithType POST description</description>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>id</name>
+                            <type>string</type>
+                            <description>Id in path of handlerWithType.</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result/>
+                </function>
+                <function>
+                    <name>handlerWithType/{id}</name>
+                    <description>handlerWithType PUT description</description>
+                    <method>PUT</method>
+                    <params>
+                        <param>
+                            <name>id</name>
+                            <type>string</type>
+                            <description>Id in path of handlerWithType.</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result/>
+                </function>
+                <function>
                     <name>ifconfig</name>
                     <description>Set new network settings (list of interfaces) for the server. Can be called only if server
 flags include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx

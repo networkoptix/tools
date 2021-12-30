@@ -30,3 +30,16 @@
      *         %struct EngineSettingsResponse
      */
     reg("api/testHandler2", new testHandler2());
+
+    /**%apidoc:any POST /api/handlerWithType/{id}
+     * handlerWithType POST description
+     * %param:string id Id in path of handlerWithType.
+     *
+     **%apidoc[opt]:uuid PUT /api/handlerWithType/{id}
+     * handlerWithType PUT description
+     * %param:string id Id in path of handlerWithType.
+     *
+     **%apidoc:object PATCH /api/handlerWithType
+     * handlerWithType PATCH description
+     */
+    reg("api/handlerWithType", new handlerWithType());

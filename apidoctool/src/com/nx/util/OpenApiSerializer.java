@@ -167,34 +167,13 @@ public final class OpenApiSerializer
         return filled;
     }
 
-    private static JSONObject fillPath(
-        JSONObject path,
+    private static void processFunctionInputParams(
         Apidoc.Function function,
+        JSONObject method,
         JSONObject refParameters,
-        JSONObject componentsSchemas,
-        boolean generateOrderByParameters) throws Exception
+        JSONObject componentsSchemas) throws Exception
     {
-        final JSONObject method = getObject(path, function.knownMethod());
-        if (!function.caption.isEmpty())
-            method.put("summary", function.caption);
-
-        String description = new String();
-
-        if (function.deprecated)
-        {
-            method.put("deprecated", true);
-            description += !function.deprecatedDescription.isEmpty() ?
-                String.format("<p><b>%s</b></p>", function.deprecatedDescription) : "";
-        }
-
-        description += (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
-            + Utils.cleanupDescription(function.description);
-
-        if (!description.isEmpty())
-            method.put("description", description);
-        if (function.permissions != null && !function.permissions.isEmpty())
-            method.put("x-permissions", function.permissions);
-        for (final Apidoc.Param param: function.params)
+        for (final Apidoc.Param param: function.input.params)
         {
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
             if (inPath)
@@ -243,6 +222,46 @@ public final class OpenApiSerializer
             }
             getArray(method, "parameters").put(parameter);
         }
+    }
+
+    private static JSONObject fillPath(
+        JSONObject path,
+        Apidoc.Function function,
+        JSONObject refParameters,
+        JSONObject componentsSchemas,
+        boolean generateOrderByParameters) throws Exception
+    {
+        final JSONObject method = getObject(path, function.knownMethod());
+        if (!function.caption.isEmpty())
+            method.put("summary", function.caption);
+
+        String description = new String();
+
+        if (function.deprecated)
+        {
+            method.put("deprecated", true);
+            description += !function.deprecatedDescription.isEmpty() ?
+                String.format("<p><b>%s</b></p>", function.deprecatedDescription) : "";
+        }
+
+        description += (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
+            + Utils.cleanupDescription(function.description);
+
+        if (!description.isEmpty())
+            method.put("description", description);
+        if (function.permissions != null && !function.permissions.isEmpty())
+            method.put("x-permissions", function.permissions);
+        if (function.input.type != Apidoc.Type.UNKNOWN)
+        {
+            assert function.areInBodyParameters();
+            final JSONObject requestBody = getObject(method, "requestBody");
+            if (!function.input.optional)
+                requestBody.put("required", true);
+            JSONObject schema = getObject(getObject(getObject(
+                requestBody, "content"), "application/json"), "schema");
+            fillSchemaType(schema, function.input.type);
+        }
+        processFunctionInputParams(function, method, refParameters, componentsSchemas);
         fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
         return method;
     }

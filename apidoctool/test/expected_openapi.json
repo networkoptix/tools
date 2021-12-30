@@ -6439,6 +6439,49 @@
       }},
       "tags": ["Server API"]
     }},
+    "/api/handlerWithType": {"patch": {
+      "description": "handlerWithType PATCH description",
+      "requestBody": {
+        "required": true,
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      },
+      "responses": {"default": {"description": ""}},
+      "tags": ["Server API"]
+    }},
+    "/api/handlerWithType/{id}": {
+      "post": {
+        "description": "handlerWithType POST description",
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {}}}
+        },
+        "parameters": [{
+          "name": "id",
+          "description": "Id in path of handlerWithType.",
+          "schema": {"type": "string"},
+          "in": "path",
+          "required": true
+        }],
+        "responses": {"default": {"description": ""}},
+        "tags": ["Server API"]
+      },
+      "put": {
+        "description": "handlerWithType PUT description",
+        "requestBody": {"content": {"application/json": {"schema": {
+          "type": "string",
+          "format": "uuid"
+        }}}},
+        "parameters": [{
+          "name": "id",
+          "description": "Id in path of handlerWithType.",
+          "schema": {"type": "string"},
+          "in": "path",
+          "required": true
+        }],
+        "responses": {"default": {"description": ""}},
+        "tags": ["Server API"]
+      }
+    },
     "/api/ifconfig": {"post": {
       "description": "Set new network settings (list of interfaces) for the server. Can be called only if server\nflags include \"SF_IfListCtrl\" (server flags can be obtained via /ec2/getMediaServersEx\nin \"flags\" field). <p> Parameters should be passed as a JSON array of objects in POST\nmessage body with content type \"application/json\". Example of such object can be seen in\nthe result of GET /api/iflist function. <\/p>",
       "x-permissions": "Administrator.",

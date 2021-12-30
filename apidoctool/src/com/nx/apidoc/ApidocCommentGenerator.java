@@ -63,7 +63,7 @@ public final class ApidocCommentGenerator
     private static void addParamsToComment(
         List<String> lines, Apidoc.Function function)
     {
-        for (Apidoc.Param param: function.params)
+        for (Apidoc.Param param: function.input.params)
         {
             if (PARAM_FORMAT.equals(param.name) &&
                 DEFAULT_FORMAT_DESCRIPTION.equals(param.description))

@@ -348,16 +348,16 @@ public final class Apidoc extends Serializable
         }
     }
 
-    public static final class Result extends Serializable
+    public static class InOutData extends Serializable
     {
-        public String outputStructName;
+        public String structName;
         public List<Param> unusedParams; ///< Internal field.
 
-        public String caption; ///< optional
-        public Type type;
+        public Type type = Type.UNKNOWN;
         public List<Param> params; ///< optional
+        public boolean optional; ///< attribute; optional(false)
 
-        public Result()
+        public InOutData()
         {
             params = new ArrayList<Param>();
             unusedParams = new ArrayList<Param>();
@@ -365,14 +365,12 @@ public final class Apidoc extends Serializable
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            caption = p.readInnerXml("caption", Presence.OPTIONAL);
             type = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeInnerXml("caption", caption, Emptiness.OMIT);
             g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
             for (Param param: params)
                 param.omitOptionalFieldIfFalse = true;
@@ -380,10 +378,25 @@ public final class Apidoc extends Serializable
         }
     }
 
+    public static final class Result extends InOutData
+    {
+        public String caption; ///< optional
+
+        protected void readFromParser(Parser p) throws Parser.Error
+        {
+            caption = p.readInnerXml("caption", Presence.OPTIONAL);
+            super.readFromParser(p);
+        }
+
+        protected void writeToGenerator(Generator g)
+        {
+            g.writeInnerXml("caption", caption, Emptiness.OMIT);
+            super.writeToGenerator(g);
+        }
+    }
+
     public static final class Function extends Serializable
     {
-        public List<Param> unusedParams; ///< Internal field.
-
         public boolean arrayParams; ///< optional(false)
         public boolean proprietary; ///< attribute; optional(false)
         public boolean deprecated; ///< attribute; optional(false)
@@ -394,14 +407,13 @@ public final class Apidoc extends Serializable
         public String permissions; ///< optional
         public String method; ///< optional
         public String deprecatedDescription = ""; ///< optional
-        public List<Param> params; ///< optional
+        public InOutData input; ///< optional
         public Result result; ///< optional
 
         public Function()
         {
             groups = new ArrayList<String>();
-            params = new ArrayList<Param>();
-            unusedParams = new ArrayList<Param>();
+            input = new InOutData();
         }
 
         public boolean areInBodyParameters()
@@ -428,7 +440,7 @@ public final class Apidoc extends Serializable
             description = p.readInnerXml("description", Presence.OPTIONAL);
             permissions = p.readString("permissions", Presence.OPTIONAL);
             method = p.readString("method", Presence.OPTIONAL);
-            p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
+            p.readObjectList("params", input.params, Param.class, Presence.OPTIONAL);
             result = p.readObject("result", Result.class, Presence.OPTIONAL);
         }
 
@@ -443,7 +455,7 @@ public final class Apidoc extends Serializable
             g.writeInnerXml("description", getDeprecatedString() + description, Emptiness.ALLOW);
             g.writeString("permissions", permissions, Emptiness.OMIT);
             g.writeString("method", method, Emptiness.ALLOW);
-            g.writeObjectList("params", params, Emptiness.ALLOW);
+            g.writeObjectList("params", input.params, Emptiness.ALLOW);
             g.writeObject("result", result, Emptiness.ALLOW);
         }
 
