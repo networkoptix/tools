@@ -8,6 +8,7 @@
      * %apidoc POST /api/testHandler
      * Test POST handler's description
      * %struct StructF
+     * %param[ref] _format
      * %return:string
      */
     reg("api/testHandler", new testHandler());

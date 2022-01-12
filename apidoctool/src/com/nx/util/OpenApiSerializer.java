@@ -185,7 +185,7 @@ public final class OpenApiSerializer
                 getArray(method, "parameters").put(parameter);
                 continue;
             }
-            if (function.areInBodyParameters())
+            if (function.areInBodyParameters() && !param.isRef)
             {
                 final JSONObject requestBody = getObject(method, "requestBody");
                 if (!param.optional)

@@ -1,0 +1,20 @@
+{
+  "paths" : {},
+  "components" : {
+    "schemas" : {},
+    "parameters" : {
+      "_format" : {
+        "name" : "_format",
+        "in" : "query",
+        "description" : "Response format type. The HTTP `Accept` header is used as the format if this parameter is unspecified. If the `Accept` header is unspecifed too, then `JSON` is used. Keys of the elements that do not start with a letter or an underscore are prefixed with an underscore for `XML`. Fields of the list type are skipped for `CSV`.",
+        "required" : false,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "type" : "string",
+          "enum" : [ "JSON", "XML", "CSV" ]
+        }
+      }
+    }
+  }
+}

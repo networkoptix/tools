@@ -13720,6 +13720,11 @@ system settings with their values</description>
                             <description/>
                             <optional>false</optional>
                         </param>
+                        <param>
+                            <name>_format</name>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
                     </params>
                     <result>
                         <type>string</type>

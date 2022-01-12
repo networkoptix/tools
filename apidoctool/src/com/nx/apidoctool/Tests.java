@@ -332,6 +332,7 @@ public final class Tests extends TestBase
         throws Exception
     {
         final File apiTemplateXmlFile = new File(testPath, "api_template.xml");
+        final File apiTemplateJsonFile = new File(testPath, "api_template.json");
         final File generatedApiXmlFile = new File(outputTestPath, "api.FROM_CPP.xml");
         final File generatedApiJsonFile = new File(outputTestPath, "api.FROM_CPP.json");
         final File generatedOpenApiJsonFile = new File(outputTestPath, "openapi.FROM_CPP.json");
@@ -340,6 +341,7 @@ public final class Tests extends TestBase
         executor.verbose = verbose;
         executor.vmsPath = vmsPath;
         executor.templateApiXmlFile = apiTemplateXmlFile;
+        executor.openApiTemplateJsonFile = apiTemplateJsonFile;
         executor.outputApiXmlFile = generatedApiXmlFile;
         executor.outputApiJsonFile = generatedApiJsonFile;
         executor.outputOpenApiJsonFile = generatedOpenApiJsonFile;
