@@ -80,7 +80,7 @@ public final class Apidoc extends Serializable
         }
     }
 
-    public static final class Value extends Serializable
+    public static final class Value extends Serializable implements Cloneable
     {
         public String name;
         public String description; ///< optional
@@ -88,6 +88,18 @@ public final class Apidoc extends Serializable
         public boolean deprecated; ///< optional
         public String deprecatedDescription = "";
         public boolean areQuotesRemovedFromName = false;
+
+        public Value clone()
+        {
+            try
+            {
+                return (Value) super.clone();
+            }
+            catch (CloneNotSupportedException e)
+            {
+                throw new IllegalStateException(e);
+            }
+        }
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
@@ -147,7 +159,7 @@ public final class Apidoc extends Serializable
 
         private void stripDeprecatedDescriptionFromDescription()
         {
-            Pattern pattern = Pattern.compile("<p>[ \\n]*<b>Deprecated\\.</b>(.)*</p>");
+            Pattern pattern = Pattern.compile("<p>[ \\n]*<b>Deprecated\\.</b>([ \\n]|.)*</p>");
             Matcher matcher = pattern.matcher(description);
             if (matcher.find())
             {
@@ -166,7 +178,7 @@ public final class Apidoc extends Serializable
     {
         public boolean isGeneratedFromStruct = false;
         public String structName;
-        protected boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
+        private boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
 
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
@@ -221,10 +233,20 @@ public final class Apidoc extends Serializable
             if (!hasRecursiveField)
                 hasRecursiveField = origin.hasRecursiveField;
 
-            if (this.type.equals(Type.ENUM) || this.type.equals(Type.FLAGS))
-                mergeEnumValues(origin.values);
-            else if (this.values == null || this.values.isEmpty())
-                this.values = origin.values;
+            if (origin.values == null || origin.values.isEmpty())
+                return;
+
+            if (this.values == null || this.values.isEmpty())
+            {
+                List<Apidoc.Value> tempValues = new ArrayList<Apidoc.Value>();
+                for (final Apidoc.Value originValue: origin.values)
+                    tempValues.add(originValue.clone());
+
+                this.values = tempValues;
+                return;
+            }
+
+            mergeEnumValues(origin.values);
         }
 
         public void normalizeProperties()
@@ -245,29 +267,26 @@ public final class Apidoc extends Serializable
 
         private void mergeEnumValues(List<Apidoc.Value> originValues) throws Error
         {
-            if (this.values == null || this.values.isEmpty())
-            {
-                this.values = originValues;
-                return;
-            }
-
             for (final Apidoc.Value value: this.values)
             {
                 if (originValues.stream().filter(val -> val.name.equals(value.name)).count() == 0)
                     throw new Error("Values of a parameter must be a subset of " + this.name);
             }
 
+            List<Apidoc.Value> tempValues = new ArrayList<Apidoc.Value>();
             for (final Apidoc.Value originValue: originValues)
             {
+                Apidoc.Value tempValue = originValue.clone();
                 final Object[] filteredByName = this.values.stream().filter(
-                    val -> val.name.equals(originValue.name)).toArray();
+                    val -> val.name.equals(tempValue.name)).toArray();
                 if (filteredByName.length > 0)
                 {
                     Apidoc.Value value = (Apidoc.Value) filteredByName[0];
-                    mergeEnumValue(originValue, value);
+                    mergeEnumValue(tempValue, value);
                 }
+                tempValues.add(tempValue);
             }
-            this.values = originValues;
+            this.values = tempValues;
         }
 
         private void mergeEnumValue(Apidoc.Value originValue, Apidoc.Value value)
@@ -285,7 +304,7 @@ public final class Apidoc extends Serializable
                 originValue.deprecatedDescription = value.deprecatedDescription;
             }
 
-            if (originValue.description == null || originValue.description.isEmpty())
+            if (value.description != null && !value.description.isEmpty())
                 originValue.description = value.description;
         }
 
@@ -306,15 +325,14 @@ public final class Apidoc extends Serializable
             }
 
             if (areAllValuesProprietary)
-            {
                 this.proprietary = true;
-                this.values.stream().forEach(val -> val.proprietary = false);
-            }
             if (areAllValuesDeprecated)
-            {
                 this.deprecated = true;
+
+            if (this.proprietary)
+                this.values.stream().forEach(val -> val.proprietary = false);
+            if (this.deprecated)
                 this.values.stream().forEach(val -> val.deprecated = false);
-            }
         }
 
         protected void readFromParser(Parser p) throws Parser.Error

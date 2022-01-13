@@ -13749,7 +13749,9 @@ system settings with their values</description>
                             <param>
                                 <name>error</name>
                                 <type>enum</type>
-                                <description>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
                                 <values>
                                     <value>
                                         <name>0</name>
@@ -13759,19 +13761,13 @@ system settings with their values</description>
                                         <name>2</name>
                                         <description/>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>3</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>
-                                        </description>
+                                        <description/>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>
-                                        </description>
+                                        <description/>
                                     </value>
                                 </values>
                             </param>
@@ -13805,6 +13801,39 @@ system settings with their values</description>
                                     <value>
                                         <name>test3</name>
                                         <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>PartiallyProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>PartiallyDeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>test8</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
                                     </value>
                                 </values>
                             </param>
@@ -13858,7 +13887,9 @@ system settings with their values</description>
                             <param>
                                 <name>error</name>
                                 <type>enum</type>
-                                <description>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
                                 <values>
                                     <value>
                                         <name>0</name>
@@ -13868,19 +13899,13 @@ system settings with their values</description>
                                         <name>2</name>
                                         <description/>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>3</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>
-                                        </description>
+                                        <description/>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>
-                                        </description>
+                                        <description/>
                                     </value>
                                 </values>
                             </param>
@@ -13914,6 +13939,39 @@ system settings with their values</description>
                                     <value>
                                         <name>test3</name>
                                         <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>PartiallyProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>PartiallyDeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>test8</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
                                     </value>
                                 </values>
                             </param>
@@ -13952,6 +14010,571 @@ system settings with their values</description>
                                 <description>Object with Engine settings model and values that the Engine
 returns after the values have been supplied.</description>
                                 <optional>true</optional>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler3</name>
+                    <description>testHandler3 GET description</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>3</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>4</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>PartiallyProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>Test that a partially deprecated enum param becomes fully
+deprecated.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description>Overridden value from an inherited enum.</description>
+                                    </value>
+                                    <value>
+                                        <name>test8</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Error message in English, or an empty string.</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler4</name>
+                    <description>testHandler4 GET description</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>3</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>4</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>Test that one of the enum values becomes deprecated.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description>Overridden value from an inherited enum.</description>
+                                    </value>
+                                    <value>
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>PartiallyDeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>test8</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Error message in English, or an empty string.</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler5</name>
+                    <description>testHandler5 GET description</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>3</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>4</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>PartiallyProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>PartiallyDeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>test8</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Error message in English, or an empty string.</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>inPlaceEnum</name>
+                                <type>enum</type>
+                                <description>Test in-place enum.</description>
+                                <values>
+                                    <value>
+                                        <name>value0</name>
+                                        <description>Value description</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>value1</name>
+                                        <description>Value description</description>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>value2</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b>
+                                            </p>Value description</description>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testHandler6</name>
+                    <description>testHandler6 GET description</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>JSON object including the error status.</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>error</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Use errorId instead.</p>Error code on failure (as an integer inside an enquoted string), or "0" on success.</description>
+                                <values>
+                                    <value>
+                                        <name>0</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>3</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>4</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryTest</name>
+                                <type>enum</type>
+                                <description>ProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test0</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test1</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>deprecatedTest</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>DeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test2</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>test3</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyProprietaryTest</name>
+                                <type>enum</type>
+                                <description>PartiallyProprietaryEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test4</name>
+                                        <description/>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>test5</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>partiallyDeprecatedTest</name>
+                                <type>enum</type>
+                                <description>PartiallyDeprecatedEnum description.</description>
+                                <values>
+                                    <value>
+                                        <name>test7</name>
+                                        <description/>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>test8</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>
+                                        </description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>errorString</name>
+                                <type>string</type>
+                                <description>Test enumerating values for a non-enum type.</description>
+                                <optional>true</optional>
+                                <values>
+                                    <value>
+                                        <name>val0</name>
+                                        <description>Value description</description>
+                                    </value>
+                                    <value>
+                                        <name>val1</name>
+                                        <description>Value description</description>
+                                    </value>
+                                    <value>
+                                        <name>val2</name>
+                                        <description>Value description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>errorId</name>
+                                <type>enum</type>
+                                <description>Mnemonic error id corresponding to the error code.</description>
+                                <values>
+                                    <value>
+                                        <name>ok</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>serviceUnavailable</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>unauthorized</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>sessionExpired</name>
+                                        <description/>
+                                    </value>
+                                </values>
                             </param>
                         </params>
                     </result>

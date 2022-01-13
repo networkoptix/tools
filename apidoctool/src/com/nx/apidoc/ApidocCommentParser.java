@@ -437,7 +437,6 @@ public final class ApidocCommentParser
     private static void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
-        param.deprecated = false;
         param.proprietary = false;
         param.optional = false;
         param.readonly = false;

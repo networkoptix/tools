@@ -434,7 +434,8 @@ public final class OpenApiSerializer
             boolean hasDescription = false;
             for (final Apidoc.Value value: param.values)
             {
-                if (value.description != null && !value.description.trim().isEmpty())
+                if ((value.description != null && !value.description.trim().isEmpty())
+                    || value.deprecated || value.proprietary)
                 {
                     hasDescription = true;
                     break;

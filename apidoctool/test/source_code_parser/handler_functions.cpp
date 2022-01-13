@@ -58,10 +58,14 @@ struct SomeStruct
     std::vector<ElementStruct> elements;
 
     /**%apidoc outputParam Param description
+     */
+    int outputParam;
+
+    /**%apidoc otherParam Param description
      * %value 1 one
      * %value 2 two
      */
-    int outputParam;
+    int otherParam;
 
     /**%apidoc enumParam param description
      * %deprecated Explanation why the param is deprecated
@@ -227,4 +231,17 @@ reg("urlPrefix/deprecatedFunctionWithoutExplanation", new handler());
  *         %struct Reply
  */
 reg("urlPrefix/deprecatedFunctionWithExplanation", new handler());
+
+/**%apidoc GET /urlPrefix/testMergeValuesOfNonEnumField
+ * Description of a deprecated function
+ * %deprecated Explanation why the function is deprecated
+ *
+ * %return
+ *     %struct SomeStruct
+ *     %param otherParam
+ *         %value[proprietary] 1 Overridden description
+ *         %value 2 Overridden description
+ *             %deprecated Deprecated description
+ */
+reg("urlPrefix/testMergeValuesOfNonEnumField", new handler());
 

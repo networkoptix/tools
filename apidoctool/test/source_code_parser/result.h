@@ -11,7 +11,6 @@ namespace nx::network::rest {
  */
 struct Result
 {
-    // TODO: Move out and use NX_REFLECTION_ENUM.
     enum Error
     {
         /**%apidoc
@@ -65,6 +64,33 @@ struct Result
         Test3
     };
 
+    enum PartiallyProprietaryEnum
+    {
+        /**%apidoc
+         * %caption test4
+         */
+        Test4,
+
+        /**%apidoc[proprietary]
+         * %caption test5
+         */
+        Test5,
+    };
+
+    enum PartiallyDeprecatedEnum
+    {
+        /**%apidoc
+         * %caption test7
+         */
+        Test6,
+
+        /**%apidoc
+         * %caption test8
+         * %deprecated Deprecated description
+         */
+        Test7,
+    };
+
     /**%apidoc
      * Error code on failure (as an integer inside an enquoted string), or "0" on success.
      * %deprecated Use errorId instead.
@@ -80,6 +106,16 @@ struct Result
      * DeprecatedEnum description.
      */
     DeprecatedEnum deprecatedTest = DeprecatedEnum::Test2;
+
+    /**%apidoc
+     * PartiallyProprietaryEnum description.
+     */
+    PartiallyProprietaryEnum partiallyProprietaryTest = PartiallyProprietaryEnum::Test4;
+
+    /**%apidoc
+     * PartiallyDeprecatedEnum description.
+     */
+    PartiallyDeprecatedEnum partiallyDeprecatedTest = PartiallyDeprecatedEnum::Test7;
 
     /**%apidoc[proprietary]
      * Error message in English, or an empty string.

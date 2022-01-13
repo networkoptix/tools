@@ -8996,7 +8996,7 @@
             "type": "object",
             "properties": {
               "error": {
-                "description": "Error code on failure (as an integer inside an enquoted string), or \"0\" on success.",
+                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
                 "enum": [
                   "0",
@@ -9019,6 +9019,22 @@
                 "enum": [
                   "test2",
                   "test3"
+                ]
+              },
+              "partiallyProprietaryTest": {
+                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+                "type": "string",
+                "enum": [
+                  "test4",
+                  "test5"
+                ]
+              },
+              "partiallyDeprecatedTest": {
+                "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
+                "type": "string",
+                "enum": [
+                  "test7",
+                  "test8"
                 ]
               },
               "errorString": {
@@ -9044,6 +9060,8 @@
               "error",
               "proprietaryTest",
               "deprecatedTest",
+              "partiallyProprietaryTest",
+              "partiallyDeprecatedTest",
               "errorId"
             ]
           }}}
@@ -9058,7 +9076,7 @@
             "type": "object",
             "properties": {
               "error": {
-                "description": "Error code on failure (as an integer inside an enquoted string), or \"0\" on success.",
+                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
                 "enum": [
                   "0",
@@ -9081,6 +9099,22 @@
                 "enum": [
                   "test2",
                   "test3"
+                ]
+              },
+              "partiallyProprietaryTest": {
+                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+                "type": "string",
+                "enum": [
+                  "test4",
+                  "test5"
+                ]
+              },
+              "partiallyDeprecatedTest": {
+                "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
+                "type": "string",
+                "enum": [
+                  "test7",
+                  "test8"
                 ]
               },
               "errorString": {
@@ -9106,6 +9140,8 @@
               "error",
               "proprietaryTest",
               "deprecatedTest",
+              "partiallyProprietaryTest",
+              "partiallyDeprecatedTest",
               "errorId"
             ]
           }}}
@@ -9113,6 +9149,320 @@
         "tags": ["Server API"]
       }
     },
+    "/api/testHandler3": {"get": {
+      "description": "testHandler3 GET description",
+      "responses": {"default": {
+        "description": "JSON object including the error status.",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "0",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "proprietaryTest": {
+              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "type": "string",
+              "enum": [
+                "test0",
+                "test1"
+              ]
+            },
+            "deprecatedTest": {
+              "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "type": "string",
+              "enum": [
+                "test2",
+                "test3"
+              ]
+            },
+            "partiallyProprietaryTest": {
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "test4",
+                "test5"
+              ]
+            },
+            "partiallyDeprecatedTest": {
+              "description": "<p><b>Deprecated.<\/b><\/p>Test that a partially deprecated enum param becomes fully\ndeprecated.\n\nPossible values are:\n- `\"test7\"` Overridden value from an inherited enum.\n- `\"test8\"`",
+              "type": "string",
+              "enum": [
+                "test7",
+                "test8"
+              ]
+            },
+            "errorString": {
+              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "type": "string"
+            },
+            "errorId": {
+              "description": "Mnemonic error id corresponding to the error code.",
+              "type": "string",
+              "enum": [
+                "ok",
+                "serviceUnavailable",
+                "unauthorized",
+                "sessionExpired"
+              ]
+            }
+          },
+          "required": [
+            "error",
+            "proprietaryTest",
+            "deprecatedTest",
+            "partiallyProprietaryTest",
+            "partiallyDeprecatedTest",
+            "errorId"
+          ]
+        }}}
+      }},
+      "tags": ["Server API"]
+    }},
+    "/api/testHandler4": {"get": {
+      "description": "testHandler4 GET description",
+      "responses": {"default": {
+        "description": "JSON object including the error status.",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "0",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "proprietaryTest": {
+              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "type": "string",
+              "enum": [
+                "test0",
+                "test1"
+              ]
+            },
+            "deprecatedTest": {
+              "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "type": "string",
+              "enum": [
+                "test2",
+                "test3"
+              ]
+            },
+            "partiallyProprietaryTest": {
+              "description": "<p><b>Proprietary.<\/b><\/p> Test that one of the enum values becomes deprecated.\n\nPossible values are:\n- `\"test4\"` Overridden value from an inherited enum.\n- `\"test5\"`",
+              "type": "string",
+              "enum": [
+                "test4",
+                "test5"
+              ]
+            },
+            "partiallyDeprecatedTest": {
+              "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
+              "type": "string",
+              "enum": [
+                "test7",
+                "test8"
+              ]
+            },
+            "errorString": {
+              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "type": "string"
+            },
+            "errorId": {
+              "description": "Mnemonic error id corresponding to the error code.",
+              "type": "string",
+              "enum": [
+                "ok",
+                "serviceUnavailable",
+                "unauthorized",
+                "sessionExpired"
+              ]
+            }
+          },
+          "required": [
+            "error",
+            "proprietaryTest",
+            "deprecatedTest",
+            "partiallyProprietaryTest",
+            "partiallyDeprecatedTest",
+            "errorId"
+          ]
+        }}}
+      }},
+      "tags": ["Server API"]
+    }},
+    "/api/testHandler5": {"get": {
+      "description": "testHandler5 GET description",
+      "responses": {"default": {
+        "description": "JSON object including the error status.",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "0",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "proprietaryTest": {
+              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "type": "string",
+              "enum": [
+                "test0",
+                "test1"
+              ]
+            },
+            "deprecatedTest": {
+              "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "type": "string",
+              "enum": [
+                "test2",
+                "test3"
+              ]
+            },
+            "partiallyProprietaryTest": {
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "test4",
+                "test5"
+              ]
+            },
+            "partiallyDeprecatedTest": {
+              "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
+              "type": "string",
+              "enum": [
+                "test7",
+                "test8"
+              ]
+            },
+            "errorString": {
+              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "type": "string"
+            },
+            "errorId": {
+              "description": "Mnemonic error id corresponding to the error code.",
+              "type": "string",
+              "enum": [
+                "ok",
+                "serviceUnavailable",
+                "unauthorized",
+                "sessionExpired"
+              ]
+            },
+            "inPlaceEnum": {
+              "description": "Test in-place enum.\n\nPossible values are:\n- `\"value0\"` Value description\n- `\"value1\"` <p><b>Proprietary.<\/b><\/p>Value description\n- `\"value2\"`<p><b>Deprecated.<\/b><\/p> Value description",
+              "type": "string",
+              "enum": [
+                "value0",
+                "value1",
+                "value2"
+              ]
+            }
+          },
+          "required": [
+            "error",
+            "proprietaryTest",
+            "deprecatedTest",
+            "partiallyProprietaryTest",
+            "partiallyDeprecatedTest",
+            "errorId",
+            "inPlaceEnum"
+          ]
+        }}}
+      }},
+      "tags": ["Server API"]
+    }},
+    "/api/testHandler6": {"get": {
+      "description": "testHandler6 GET description",
+      "responses": {"default": {
+        "description": "JSON object including the error status.",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "0",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "proprietaryTest": {
+              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "type": "string",
+              "enum": [
+                "test0",
+                "test1"
+              ]
+            },
+            "deprecatedTest": {
+              "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "type": "string",
+              "enum": [
+                "test2",
+                "test3"
+              ]
+            },
+            "partiallyProprietaryTest": {
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "type": "string",
+              "enum": [
+                "test4",
+                "test5"
+              ]
+            },
+            "partiallyDeprecatedTest": {
+              "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
+              "type": "string",
+              "enum": [
+                "test7",
+                "test8"
+              ]
+            },
+            "errorString": {
+              "description": "<p><b>Proprietary.<\/b><\/p> Test enumerating values for a non-enum type.\n\nPossible values are:\n- `\"val0\"` Value description\n- `\"val1\"` Value description\n- `\"val2\"` Value description",
+              "type": "string"
+            },
+            "errorId": {
+              "description": "Mnemonic error id corresponding to the error code.",
+              "type": "string",
+              "enum": [
+                "ok",
+                "serviceUnavailable",
+                "unauthorized",
+                "sessionExpired"
+              ]
+            }
+          },
+          "required": [
+            "error",
+            "proprietaryTest",
+            "deprecatedTest",
+            "partiallyProprietaryTest",
+            "partiallyDeprecatedTest",
+            "errorId"
+          ]
+        }}}
+      }},
+      "tags": ["Server API"]
+    }},
     "/cdb/maintenance/malloc_info": {"get": {
       "responses": {"default": {"description": "malloc_info(3) output. See https://man7.org/linux/man-pages/man3/malloc_info.3.html\nfor details."}},
       "tags": ["Cloud Db API"]

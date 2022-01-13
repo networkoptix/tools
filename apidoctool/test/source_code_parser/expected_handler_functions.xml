@@ -90,31 +90,45 @@ continue description</description>
                             </values>
                         </param>
                         <param>
+                            <name>otherParam</name>
+                            <type>integer</type>
+                            <description>otherParam Param description</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>1</name>
+                                    <description>one</description>
+                                </value>
+                                <value>
+                                    <name>2</name>
+                                    <description>two</description>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
                             <name>enumParam</name>
                             <type>enum</type>
-                            <description>enumParam param description</description>
+                            <description>
+                                <p>
+                                    <b>Deprecated.</b> Explanation why the param is deprecated</p>enumParam param description</description>
                             <optional>false</optional>
                             <values>
                                 <value>
                                     <name>value1</name>
                                     <description>value1 description</description>
                                 </value>
-                                <value deprecated="true">
+                                <value>
                                     <name>value2</name>
-                                    <description>
-                                        <p>
-                                            <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                    <description>value2 description</description>
                                 </value>
                                 <value proprietary="true">
                                     <name>value3</name>
                                     <description>value3 description
 Proprietary description</description>
                                 </value>
-                                <value deprecated="true" proprietary="true">
+                                <value proprietary="true">
                                     <name>value4</name>
-                                    <description>
-                                        <p>
-                                            <b>Deprecated.</b> Deprecated description</p>value3 description
+                                    <description>value3 description
 Proprietary description</description>
                                 </value>
                             </values>
@@ -122,7 +136,10 @@ Proprietary description</description>
                         <param>
                             <name>optUuid</name>
                             <type>uuid</type>
-                            <description>optUuid param description</description>
+                            <description>
+                                <p>
+                                    <b>Deprecated.</b>
+                                </p>optUuid param description</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -177,6 +194,11 @@ Proprietary description</description>
                                 <name>outputParam</name>
                                 <type>integer</type>
                                 <description>outputParam Param description</description>
+                            </param>
+                            <param>
+                                <name>otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
                                 <values>
                                     <value>
                                         <name>1</name>
@@ -191,28 +213,26 @@ Proprietary description</description>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>enumParam param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>enumParam param description</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -220,7 +240,10 @@ Proprietary description</description>
                             <param>
                                 <name>optUuid</name>
                                 <type>uuid</type>
-                                <description>optUuid param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>optUuid param description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
@@ -286,6 +309,21 @@ Proprietary description</description>
                                 <type>object</type>
                                 <description>List as object</description>
                                 <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>someParam.otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
                             </param>
                             <param>
                                 <name>someParam.enumParam</name>
@@ -387,30 +425,43 @@ Proprietary description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
+                                <name>otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>Overriding description in StructDerived for SomeStruct::enumParam</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>Overriding description in StructDerived for SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -418,34 +469,35 @@ Proprietary description</description>
                             <param>
                                 <name>optUuid</name>
                                 <type>uuid</type>
-                                <description>optUuid param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>optUuid param description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>Overriding description in StructDerived for SomeStruct::enumParam</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>Overriding description in StructDerived for SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -485,30 +537,43 @@ Proprietary description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
+                                <name>nested.otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
                                 <name>nested.enumParam</name>
                                 <type>enum</type>
-                                <description>Overriding description in StructNested for nested SomeStruct::enumParam</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>Overriding description in StructNested for nested SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -516,34 +581,35 @@ Proprietary description</description>
                             <param>
                                 <name>nested.optUuid</name>
                                 <type>uuid</type>
-                                <description>optUuid param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>optUuid param description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
                                 <name>nested.enumParam</name>
                                 <type>enum</type>
-                                <description>Overriding description in StructNested for nested SomeStruct::enumParam</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>Overriding description in StructNested for nested SomeStruct::enumParam</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -629,6 +695,12 @@ Proprietary description</description>
                             <type>integer</type>
                             <description>Param description overridden</description>
                             <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>otherParam</name>
+                            <type>integer</type>
+                            <description>otherParam Param description</description>
+                            <optional>false</optional>
                             <values>
                                 <value>
                                     <name>1</name>
@@ -643,29 +715,27 @@ Proprietary description</description>
                         <param>
                             <name>enumParam</name>
                             <type>enum</type>
-                            <description>enumParam param description</description>
+                            <description>
+                                <p>
+                                    <b>Deprecated.</b> Explanation why the param is deprecated</p>enumParam param description</description>
                             <optional>false</optional>
                             <values>
                                 <value>
                                     <name>value1</name>
                                     <description>value1 description</description>
                                 </value>
-                                <value deprecated="true">
+                                <value>
                                     <name>value2</name>
-                                    <description>
-                                        <p>
-                                            <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                    <description>value2 description</description>
                                 </value>
                                 <value proprietary="true">
                                     <name>value3</name>
                                     <description>value3 description
 Proprietary description</description>
                                 </value>
-                                <value deprecated="true" proprietary="true">
+                                <value proprietary="true">
                                     <name>value4</name>
-                                    <description>
-                                        <p>
-                                            <b>Deprecated.</b> Deprecated description</p>value3 description
+                                    <description>value3 description
 Proprietary description</description>
                                 </value>
                             </values>
@@ -673,7 +743,10 @@ Proprietary description</description>
                         <param>
                             <name>optUuid</name>
                             <type>uuid</type>
-                            <description>optUuid param description</description>
+                            <description>
+                                <p>
+                                    <b>Deprecated.</b>
+                                </p>optUuid param description</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -728,6 +801,11 @@ Proprietary description</description>
                                 <name>outputParam</name>
                                 <type>integer</type>
                                 <description>outputParam Param description</description>
+                            </param>
+                            <param>
+                                <name>otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
                                 <values>
                                     <value>
                                         <name>1</name>
@@ -742,28 +820,26 @@ Proprietary description</description>
                             <param>
                                 <name>enumParam</name>
                                 <type>enum</type>
-                                <description>enumParam param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>enumParam param description</description>
                                 <values>
                                     <value>
                                         <name>value1</name>
                                         <description>value1 description</description>
                                     </value>
-                                    <value deprecated="true">
+                                    <value>
                                         <name>value2</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                        <description>value2 description</description>
                                     </value>
                                     <value proprietary="true">
                                         <name>value3</name>
                                         <description>value3 description
 Proprietary description</description>
                                     </value>
-                                    <value deprecated="true" proprietary="true">
+                                    <value proprietary="true">
                                         <name>value4</name>
-                                        <description>
-                                            <p>
-                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+                                        <description>value3 description
 Proprietary description</description>
                                     </value>
                                 </values>
@@ -771,7 +847,10 @@ Proprietary description</description>
                             <param>
                                 <name>optUuid</name>
                                 <type>uuid</type>
-                                <description>optUuid param description</description>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>optUuid param description</description>
                                 <optional>true</optional>
                             </param>
                             <param>
@@ -917,6 +996,120 @@ Proprietary description</description>
                                 <name>reply.replyField</name>
                                 <type>integer</type>
                                 <description>Description of replyField.</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>testMergeValuesOfNonEnumField</name>
+                    <description>
+                        <p>
+                            <b>Deprecated.</b> Explanation why the function is deprecated</p>Description of a deprecated function</description>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <caption>SomeStruct description</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>elements</name>
+                                <type>object</type>
+                                <description>List as object</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>outputParam</name>
+                                <type>integer</type>
+                                <description>outputParam Param description</description>
+                            </param>
+                            <param>
+                                <name>otherParam</name>
+                                <type>integer</type>
+                                <description>otherParam Param description</description>
+                                <values>
+                                    <value proprietary="true">
+                                        <name>1</name>
+                                        <description>Overridden description</description>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>2</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>Overridden description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>enumParam</name>
+                                <type>enum</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b> Explanation why the param is deprecated</p>enumParam param description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>value3</name>
+                                        <description>value3 description
+Proprietary description</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>value4</name>
+                                        <description>value3 description
+Proprietary description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>optUuid</name>
+                                <type>uuid</type>
+                                <description>
+                                    <p>
+                                        <b>Deprecated.</b>
+                                    </p>optUuid param description</description>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>enumParam</name>
+                                <type>enum</type>
+                                <description>Enum
+description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value deprecated="true">
+                                        <name>value2</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Explanation why the enum value is deprecated</p>value2 description</description>
+                                    </value>
+                                    <value proprietary="true">
+                                        <name>value3</name>
+                                        <description>value3 description
+Proprietary description</description>
+                                    </value>
+                                    <value deprecated="true" proprietary="true">
+                                        <name>value4</name>
+                                        <description>
+                                            <p>
+                                                <b>Deprecated.</b> Deprecated description</p>value3 description
+Proprietary description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param proprietary="true">
+                                <name>optUuids</name>
+                                <type>uuidArray</type>
+                                <description>optUuids param description</description>
+                                <optional>true</optional>
                             </param>
                         </params>
                     </result>
