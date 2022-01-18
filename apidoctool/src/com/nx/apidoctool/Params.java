@@ -83,6 +83,17 @@ public class Params
 
     public String typeHeaderPaths() { return typeHeaderPaths.toString(); }
 
+    public boolean enableEnumValueMerge() throws Exception
+    {
+        return toBoolean(enableEnumValueMerge, "enableEnumValueMerge");
+    }
+
+    private final StringBuilder enableEnumValueMerge = regStringParam(
+        "enableEnumValueMerge",
+        "false",
+        "Merge enum values listed under the %value tag in a function comment with\n" +
+        "enum values that were found during parsing of a struct field comment or an enum comment");
+
     private final StringBuilder typeHeaderPaths = regStringParam("typeHeaderPaths",
         "",
         "A comma-separated list of dirs and/or .h files where C++ types are defined.");

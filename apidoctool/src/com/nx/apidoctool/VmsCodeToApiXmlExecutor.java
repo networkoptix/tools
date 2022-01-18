@@ -21,6 +21,7 @@ public final class VmsCodeToApiXmlExecutor
     public File outputApiJsonFile; //< Can be null if not needed.
     public File outputOpenApiJsonFile; //< Can be null if not needed.
     public List<Replacement> urlPrefixReplacements;
+    public boolean enableEnumValueMerge = false;
 
     protected Apidoc apidoc;
 
@@ -73,6 +74,8 @@ public final class VmsCodeToApiXmlExecutor
             ApidocUtils.getGroupByName(apidoc, "Server API").urlPrefix = "/api";
             ApidocUtils.getGroupByName(apidoc, "Proprietary Server API").urlPrefix = "/api";
         }
+
+        apidoc.enableEnumValueMerge = params.enableEnumValueMerge();
 
         TypeManager typeManager = null;
         if (!params.typeHeaderPaths().isEmpty())

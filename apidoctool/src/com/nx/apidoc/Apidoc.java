@@ -236,7 +236,7 @@ public final class Apidoc extends Serializable
             if (origin.values == null || origin.values.isEmpty())
                 return;
 
-            if (this.values == null || this.values.isEmpty())
+            if ((this.values == null || this.values.isEmpty()) && !Apidoc.enableEnumValueMerge)
             {
                 List<Apidoc.Value> tempValues = new ArrayList<Apidoc.Value>();
                 for (final Apidoc.Value originValue: origin.values)
@@ -246,7 +246,8 @@ public final class Apidoc extends Serializable
                 return;
             }
 
-            mergeEnumValues(origin.values);
+            if (Apidoc.enableEnumValueMerge)
+                mergeEnumValues(origin.values);
         }
 
         public void normalizeProperties()
@@ -270,7 +271,7 @@ public final class Apidoc extends Serializable
             for (final Apidoc.Value value: this.values)
             {
                 if (originValues.stream().filter(val -> val.name.equals(value.name)).count() == 0)
-                    throw new Error("Values of a parameter must be a subset of " + this.name);
+                    throw new Error("Value " + "\"" + value.name + "\" must be included in \"" + this.name + "\" enum");
             }
 
             List<Apidoc.Value> tempValues = new ArrayList<Apidoc.Value>();
@@ -521,6 +522,7 @@ public final class Apidoc extends Serializable
     //--------------------------------------------------------------------------
 
     public List<Group> groups;
+    public static boolean enableEnumValueMerge = false;
 
     public Apidoc()
     {
