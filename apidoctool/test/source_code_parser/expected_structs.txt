@@ -22,6 +22,9 @@ Description: InstrumentedEnum description
     Value: value2
     Description: value2 description
 
+Name: OutputStruct_NestedEnum
+    Value: nestedEnumValue
+
 -----------------------------------------------------------------------
 - Structs
 
@@ -54,6 +57,7 @@ Apidoc item: "Output description"
     Apidoc item: "1 one"
     Apidoc item: "2 two"
     Field:unknown(Enum) enumParam
+    Field:unknown(OutputStruct_NestedEnum) nestedEnumField
 
 Name: StructWithFantomParam
 Parents: null

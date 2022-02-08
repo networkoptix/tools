@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class VmsCodeToApiXmlExecutor
@@ -81,6 +82,15 @@ public final class VmsCodeToApiXmlExecutor
         if (!params.typeHeaderPaths().isEmpty())
         {
             List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
+            typeHeaders.sort(
+                new Comparator<File>()
+                {
+                    @Override
+                    public int compare(File lhs, File rhs)
+                    {
+                        return lhs.getName().compareTo(rhs.getName());
+                    }
+                });
             typeManager = new TypeManager(verbose, params.invalidChronoFieldSuffixIsError(),
                 params.unknownParamTypeIsError());
             typeManager.processFiles(typeHeaders);
@@ -99,23 +109,17 @@ public final class VmsCodeToApiXmlExecutor
                 new HandlerRegistrationMatcher(),
                 typeManager);
         }
-        for (final String token: params.handlerRegistrationCpp().split(","))
+
+        for (final String filename: splitOnTokensSorted(params.handlerRegistrationCpp()))
         {
-            final String source = token.trim();
-            if (!source.isEmpty())
-            {
-                processedFunctionsCount +=
-                    processCppFile(source, new HandlerRegistrationMatcher(), typeManager);
-            }
+            processedFunctionsCount +=
+                processCppFile(filename, new HandlerRegistrationMatcher(), typeManager);
         }
-        for (final String token: params.functionCommentSources().split(","))
+
+        for (final String filename: splitOnTokensSorted(params.functionCommentSources()))
         {
-            final String source = token.trim();
-            if (!source.isEmpty())
-            {
-                processedFunctionsCount +=
-                    processCppFile(source, new FunctionCommentMatcher(), typeManager);
-            }
+            processedFunctionsCount +=
+                processCppFile(filename, new FunctionCommentMatcher(), typeManager);
         }
 
         if (processedFunctionsCount == 0)
@@ -184,6 +188,26 @@ public final class VmsCodeToApiXmlExecutor
         }
 
         return processedFunctionsCount;
+    }
+
+    private static List<String> splitOnTokensSorted(final String tokensJoined)
+    {
+        final List<String> tokens = new ArrayList<String>();
+        for (final String token: tokensJoined.split(","))
+        {
+            final String tokenTrimmed = token.trim();
+            if (!tokenTrimmed.isEmpty())
+                tokens.add(tokenTrimmed);
+        }
+        tokens.sort(new Comparator<String>()
+        {
+            @Override
+            public int compare(String lhs, String rhs)
+            {
+                return lhs.compareTo(rhs);
+            }
+        });
+        return tokens;
     }
 
     private int processCppFile(

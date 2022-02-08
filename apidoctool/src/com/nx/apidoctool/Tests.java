@@ -285,8 +285,11 @@ public final class Tests extends TestBase
         System.out.println("    Output: " + outputStructDescriptionFile);
         final SourceCode reader = new SourceCode(structHeaderFile);
 
-        final EnumParser enumParser = new EnumParser(reader, true);
+        final EnumParser enumParser = new EnumParser(reader, true, 1);
         final Map<String, EnumParser.EnumInfo> enums = enumParser.parseEnums();
+        final StructParser structParser =
+            new StructParser(reader, /*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
+        final Map<String, StructParser.StructInfo> structs = structParser.parseStructs(enums);
 
         List<EnumParser.EnumInfo> enumList =
             new ArrayList<EnumParser.EnumInfo>(enums.values());
@@ -307,9 +310,6 @@ public final class Tests extends TestBase
 
         description += "-----------------------------------------------------------------------\n";
         description += "- Structs\n\n";
-        final StructParser structParser =
-            new StructParser(reader, /*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
-        final Map<String, StructParser.StructInfo> structs = structParser.parseStructs();
         List<StructParser.StructInfo> structList =
             new ArrayList<StructParser.StructInfo>(structs.values());
         Collections.sort(structList,

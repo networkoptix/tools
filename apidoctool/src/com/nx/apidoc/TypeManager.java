@@ -35,15 +35,23 @@ public final class TypeManager
         {
             final SourceCode sourceCode = new SourceCode(file);
 
-            final EnumParser enumParser = new EnumParser(sourceCode, verbose);
-            enums.putAll(enumParser.parseEnums());
+            final EnumParser enumParser = new EnumParser(sourceCode, verbose, 1);
+            final Map<String, EnumParser.EnumInfo> enumsInFile = enumParser.parseEnums();
 
             final FlagParser flagParser = new FlagParser(sourceCode, verbose);
-            flags.putAll(flagParser.parseFlags());
+            final Map<String, FlagParser.FlagInfo> flagsInFile = flagParser.parseFlags();
+            throwIfIntersects(flagsInFile.keySet(), flags.keySet(), "flags", file);
+            flags.putAll(flagsInFile);
 
             final StructParser structParser =
                 new StructParser(sourceCode, verbose, invalidChronoFieldSuffixIsError);
-            structs.putAll(structParser.parseStructs());
+            final Map<String, StructParser.StructInfo> structsInFile =
+                structParser.parseStructs(enumsInFile);
+            throwIfIntersects(structsInFile.keySet(), structs.keySet(), "structs", file);
+            structs.putAll(structsInFile);
+
+            throwIfIntersects(enumsInFile.keySet(), enums.keySet(), "enums", file);
+            enums.putAll(enumsInFile);
         }
         makeStructsFlat();
         fillUnknownTypes();
@@ -127,6 +135,17 @@ public final class TypeManager
             return "";
         }
         return structInfo.description();
+    }
+
+    private void throwIfIntersects(Set<String> current, Set<String> all, String setType, File file)
+        throws Error
+    {
+        final HashSet<String> copy = new HashSet<String>(current);
+        if (copy.retainAll(all) && !copy.isEmpty())
+        {
+            throw new Error("Found `" + setType + ": " + current +
+                " intersection in file " + file.getName() + ".");
+        }
     }
 
     private List<Apidoc.Param> mergeStructParams(

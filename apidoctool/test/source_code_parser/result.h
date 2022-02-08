@@ -122,4 +122,13 @@ struct Result
      */
     QString errorString;
 };
+
+struct ResultWithNestedSameNamedEnum
+{
+    enum Error
+    {
+        thisValueMustNotReplaceResultErrorEnum
+    };
+};
+
 } // namespace nx::network::rest

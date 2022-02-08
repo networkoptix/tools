@@ -19,10 +19,11 @@ public final class EnumParser
         }
     }
 
-    public EnumParser(SourceCode sourceCode, boolean verbose)
+    public EnumParser(SourceCode sourceCode, boolean verbose, int line)
     {
         this.sourceCode = sourceCode;
         this.verbose = verbose;
+        this.line = line;
     }
 
     public static final class EnumInfo
@@ -64,6 +65,20 @@ public final class EnumParser
         return enums;
     }
 
+    public final EnumInfo parseRegularEnum() throws Error, ApidocTagParser.Error, SourceCode.Error
+    {
+        final String[] values = sourceCode.matchMultiline(
+            line, enumFirstLineRegex, enumHeaderRegex, enumHeaderLastLineRegex);
+        if (values == null)
+            return null;
+
+        final EnumInfo enumInfo = new EnumInfo();
+        enumInfo.name = values[1].trim();
+        enumInfo.description = parseEnumDescription();
+        enumInfo.values = parseEnumValues();
+        return enumInfo;
+    }
+
     private final Map<String, EnumInfo> parseRegularEnums()
         throws Error, SourceCode.Error, ApidocTagParser.Error
     {
@@ -71,16 +86,9 @@ public final class EnumParser
         line = 1;
         while (line <= sourceCode.getLineCount())
         {
-            final String[] values = sourceCode.matchMultiline(
-                line, enumFirstLineRegex, enumHeaderRegex, enumHeaderLastLineRegex);
-            if (values != null)
-            {
-                final EnumInfo enumInfo = new EnumInfo();
-                enumInfo.name = values[1].trim();
-                enumInfo.description = parseEnumDescription();
-                enumInfo.values = parseEnumValues();
+            final EnumInfo enumInfo = parseRegularEnum();
+            if (enumInfo != null)
                 enums.put(enumInfo.name, enumInfo);
-            }
             ++line;
         }
         return enums;
@@ -108,6 +116,19 @@ public final class EnumParser
         return values;
     }
 
+    public final EnumInfo parseNxReflectEnum() throws Error, ApidocTagParser.Error
+    {
+        final String[] match = sourceCode.matchLine(line, nxReflectEnumHeaderRegex);
+        if (match == null)
+            return null;
+
+        final EnumInfo enumInfo = new EnumInfo();
+        enumInfo.name = match[0].trim();
+        enumInfo.description = parseEnumDescription();
+        enumInfo.values = parseNxReflectEnumValues();
+        return enumInfo;
+    }
+
     private final Map<String, EnumInfo> parseNxReflectEnums()
         throws Error, SourceCode.Error, ApidocTagParser.Error
     {
@@ -115,19 +136,15 @@ public final class EnumParser
         line = 1;
         while (line <= sourceCode.getLineCount())
         {
-            final String[] match = sourceCode.matchLine(line, nxReflectEnumHeaderRegex);
-            if (match != null)
-            {
-                final EnumInfo enumInfo = new EnumInfo();
-                enumInfo.name = match[0].trim();
-                enumInfo.description = parseEnumDescription();
-                enumInfo.values = parseNxReflectEnumValues();
+            final EnumInfo enumInfo = parseNxReflectEnum();
+            if (enumInfo != null)
                 enums.put(enumInfo.name, enumInfo);
-            }
             ++line;
         }
         return enums;
     }
+
+    public final int line() { return this.line; }
 
     /**
      * nx_reflect library provides a set of macros to declare enumerations which could be
@@ -148,7 +165,7 @@ public final class EnumParser
         final List<EnumInfo.Value> values = new ArrayList<EnumInfo.Value>();
         ++line;
         int parenthesesCount = 1; //< The first one was in the header.
-        while (line <= sourceCode.getLineCount() && parenthesesCount != 0)
+        while (line <= sourceCode.getLineCount())
         {
             final String lineStr = sourceCode.getLine(line);
             for (int i = 0; i < lineStr.length(); ++i)
@@ -174,6 +191,9 @@ public final class EnumParser
                 if (parseEnumValueDescription(value))
                     values.add(value);
             }
+
+            if (parenthesesCount == 0)
+                break;
 
             ++line;
         }

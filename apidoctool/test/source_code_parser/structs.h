@@ -72,6 +72,10 @@ struct OutputStruct
     {
         int y = 0;
     }
+
+    NX_REFLECTION_ENUM_CLASS_IN_CLASS(NestedEnum,
+        nestedEnumValue)
+    NestedEnum nestedEnumField;
 };
 
 /**%apidoc

@@ -87,6 +87,10 @@ struct OutputStruct
     int outputParam;
     Enum enumParam;
     Enums flagsParam;
+
+    NX_REFLECTION_ENUM_CLASS_IN_CLASS(NestedEnum,
+        nestedEnumValue)
+    NestedEnum nestedEnumField;
 };
 
 

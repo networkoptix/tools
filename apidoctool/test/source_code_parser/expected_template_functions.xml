@@ -173,6 +173,17 @@
                                     </value>
                                 </values>
                             </param>
+                            <param>
+                                <name>nestedEnumField</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>nestedEnumValue</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
                         </params>
                     </result>
                 </function>

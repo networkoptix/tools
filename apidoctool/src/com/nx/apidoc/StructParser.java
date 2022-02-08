@@ -75,22 +75,55 @@ public final class StructParser
         this.invalidChronoFieldSuffixIsError = invalidChronoFieldSuffixIsError;
     }
 
-    public final Map<String, StructInfo> parseStructs()
-        throws Error, SourceCode.Error, ApidocTagParser.Error
+    public final Map<String, StructInfo> parseStructs(Map<String, EnumParser.EnumInfo> enumsInFile)
+        throws Error, SourceCode.Error, ApidocTagParser.Error, EnumParser.Error
     {
         final Map<String, StructInfo> structs = new HashMap<String, StructInfo>();
-        line = 1;
-        while (line <= sourceCode.getLineCount())
+        for (line = 1; line <= sourceCode.getLineCount(); ++line)
         {
             final String[] values = sourceCode.matchMultiline(
                 line, structFirstLineRegex, structHeaderRegex, structHeaderLastLineRegex);
-            if (values != null)
+            if (values == null)
+                continue;
+
+            final StructInfo struct = parseStructHeader(values[0]);
+            struct.fields = new ArrayList<StructInfo.Field>();
+            final Set<String> enums = new HashSet<String>();
+            for (++line; line <= sourceCode.getLineCount(); ++line)
             {
-                StructInfo struct = parseStructHeader(values[0]);
-                struct.fields = parseStructFields();
-                structs.put(struct.name, struct);
+                if (sourceCode.lineMatches(line, structLastLineRegex))
+                    break;
+
+                EnumParser enumParser = new EnumParser(sourceCode, verbose, line);
+                EnumParser.EnumInfo enumInfo = enumParser.parseRegularEnum();
+                if (enumInfo == null)
+                    enumInfo = enumParser.parseNxReflectEnum();
+                if (enumInfo != null)
+                {
+                    final EnumParser.EnumInfo parsedEnum = enumsInFile.get(enumInfo.name);
+                    if (parsedEnum != null && parsedEnum.toString().equals(enumInfo.toString()))
+                        enumsInFile.remove(enumInfo.name);
+                    enums.add(enumInfo.name);
+                    enumInfo.name = struct.name + "_" + enumInfo.name;
+                    enumsInFile.put(enumInfo.name, enumInfo);
+                    line = enumParser.line();
+                }
+                else
+                {
+                    final String[] match = sourceCode.matchLine(line, fieldRegex);
+                    if (match != null && !"using".equals(match[0]))
+                    {
+                        final StructInfo.Field field = parseStructField();
+                        if (field != null)
+                        {
+                            if (enums.contains(field.typeName))
+                                field.typeName = struct.name + "_" + field.typeName;
+                            struct.fields.add(field);
+                        }
+                    }
+                }
             }
-            ++line;
+            structs.put(struct.name, struct);
         }
         return structs;
     }
@@ -121,22 +154,11 @@ public final class StructParser
         return struct;
     }
 
-    private List<StructInfo.Field> parseStructFields()
-        throws ApidocTagParser.Error, Error
+    private StructInfo.Field parseStructField() throws ApidocTagParser.Error, Error
     {
-        final List<StructInfo.Field> fields = new ArrayList<StructInfo.Field>();
-        while (line <= sourceCode.getLineCount())
-        {
-            if (sourceCode.lineMatches(line, structLastLineRegex))
-                return fields;
-
-            final String[] match = sourceCode.matchLine(line, fieldRegex);
-            if (match != null && !"using".equals(match[0]))
-                fields.add(parseField(match[0], match[1]));
-
-            ++line;
-        }
-        return fields;
+        final String[] match = sourceCode.matchLine(line, fieldRegex);
+        return match != null && !"using".equals(match[0]) ?
+            parseField(match[0], match[1]) : null;
     }
 
     private static boolean hasDeprecatedTag(List<ApidocTagParser.Item> items)
