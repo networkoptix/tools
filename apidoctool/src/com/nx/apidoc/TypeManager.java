@@ -143,7 +143,7 @@ public final class TypeManager
         final HashSet<String> copy = new HashSet<String>(current);
         if (copy.retainAll(all) && !copy.isEmpty())
         {
-            throw new Error("Found `" + setType + ": " + current +
+            throw new Error("Found " + setType + ": " + copy +
                 " intersection in file " + file.getName() + ".");
         }
     }
