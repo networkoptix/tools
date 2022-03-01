@@ -296,15 +296,7 @@ public final class OpenApiSerializer
                 : param.name.substring(0, lastCharOfArrayName);
             final JSONObject schema = orderBy.getJSONObject("schema");
             final JSONArray enum_ = getArray(schema.getJSONObject("items"), "enum");
-            boolean isFirstArrayItem = true;
-            for (int i = enum_.length() - 1; i >= 0 && isFirstArrayItem; --i)
-            {
-                if (enum_.getString(i).startsWith(arrayName))
-                    isFirstArrayItem = false;
-            }
             enum_.put(param.name);
-            if (isFirstArrayItem)
-                getArray(schema, "default").put(param.name);
         }
         return orderBy;
     }
