@@ -37,8 +37,7 @@ CDB_KNOWN_ERRORS = [
 ]
 
 DIST_URLS = [
-    'http://beta.enk.me/beta-builds/daily/',
-    'http://beta.networkoptix.com/beta-builds/daily/',
+    'http://beta-builds.lan.hdw.mx/beta-builds/daily/',
 ]
 
 DIST_SUFFIXES = [
