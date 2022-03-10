@@ -6,7 +6,7 @@ import re
 import requests
 import zipfile
 
-ROOT_URL = 'http://beta.networkoptix.com/beta-builds/daily/'
+ROOT_URL = 'http://beta-builds.lan.hdw.mx/beta-builds/daily/'
 
 CLIENT_FILENAMES = [
     'client_update',
