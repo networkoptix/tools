@@ -16,18 +16,10 @@ public final class PrintDepsExecutor
     {
         if (!params.templateRegistrationCpp().isEmpty())
             printVmsFile(params.templateRegistrationCpp());
-        for (String token: params.handlerRegistrationCpp().split(","))
-        {
-            final String source = token.trim();
-            if (!source.isEmpty())
-                printVmsFile(source);
-        }
-        for (String token: params.functionCommentSources().split(","))
-        {
-            final String source = token.trim();
-            if (!source.isEmpty())
-                printVmsFile(source);
-        }
+        for (final String source: Utils.splitOnTokensTrimmed(params.handlerRegistrationCpp()))
+            printVmsFile(source);
+        for (final String source: Utils.splitOnTokensTrimmed(params.functionCommentSources()))
+            printVmsFile(source);
         if (vmsPath != null && !params.typeHeaderPaths().isEmpty())
         {
             List<File> headers = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());

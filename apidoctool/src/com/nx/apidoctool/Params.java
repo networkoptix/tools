@@ -106,6 +106,12 @@ public class Params
         "and the replacement string to be applied to each API function URLs. The target will\n" +
         "match only if a slash appears before and after it.");
 
+    public String apiVersions() { return apiVersions.toString(); }
+
+    private final StringBuilder apiVersions = regStringParam("apiVersions",
+        "",
+        "A comma-separated list of prefixes with API versions like `/rest/v2`.");
+
     private static boolean toBoolean(StringBuilder param, String paramName) throws Exception
     {
         final String value = param.toString().trim();

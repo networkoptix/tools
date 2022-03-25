@@ -1,6 +1,7 @@
 package com.nx.apidoctool;
 
 import com.nx.apidoc.*;
+import com.nx.util.ApiVersion;
 import com.nx.util.SourceCode;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public final class SourceCodeParser
 {
     private int mainLine;
     private final List<Replacement> urlPrefixReplacements;
+    private final List<ApiVersion> apiVersions;
 
     public final class Error
         extends Exception
@@ -32,17 +34,24 @@ public final class SourceCodeParser
         boolean verbose,
         boolean unknownParamTypeIsError,
         SourceCode sourceCode,
-        List<Replacement> urlPrefixReplacements)
+        List<Replacement> urlPrefixReplacements,
+        List<ApiVersion> apiVersions)
     {
         this.verbose = verbose;
         this.unknownParamTypeIsError = unknownParamTypeIsError;
         this.sourceCode = sourceCode;
         this.urlPrefixReplacements = urlPrefixReplacements;
+        this.apiVersions = apiVersions;
     }
 
     public SourceCodeParser(boolean verbose, SourceCode sourceCode)
     {
-        this(verbose, /*unknownParamTypeIsError*/ false, sourceCode, new ArrayList<Replacement>());
+        this(
+            verbose,
+            /*unknownParamTypeIsError*/ false,
+            sourceCode,
+            new ArrayList<Replacement>(),
+            new ArrayList<ApiVersion>());
     }
 
     /**
@@ -99,6 +108,7 @@ public final class SourceCodeParser
                         typeManager,
                         apidoc.groups,
                         urlPrefixReplacements,
+                        apiVersions,
                         requiredFunctionCaptionLenLimit,
                         requiredGroupNameLenLimit);
                 if (functionDescriptions != null && !functionDescriptions.isEmpty())
@@ -273,6 +283,7 @@ public final class SourceCodeParser
         TypeManager typeManager,
         List<Apidoc.Group> groups,
         List<Replacement> urlPrefixReplacements,
+        List<ApiVersion> apiVersions,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws ApidocCommentParser.Error, ApidocTagParser.Error, TypeManager.Error
@@ -292,6 +303,7 @@ public final class SourceCodeParser
             typeManager,
             groups,
             urlPrefixReplacements,
+            apiVersions,
             requiredFunctionCaptionLenLimit,
             requiredGroupNameLenLimit);
 

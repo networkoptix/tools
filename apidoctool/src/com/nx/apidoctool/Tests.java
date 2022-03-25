@@ -179,6 +179,199 @@ public final class Tests extends TestBase
         assertEquals(stringValue, testParams.stringParam());
     }
 
+    private void testApiVersions() throws Exception
+    {
+        final ArrayList<ApiVersion> apiVersions = new ArrayList<>();
+        apiVersions.add(new ApiVersion("/jsonrpc/v3"));
+        apiVersions.add(new ApiVersion("/rest/v3"));
+
+        final String[] paths = {
+            "/old/api/path",
+            "/rest/v2/path",
+            "/rest/v3/path",
+            "/rest/v4/path",
+
+            "/rest/v{1-3}/path",
+            "/rest/v{1-2}/path",
+            "/rest/v{2-3}/path",
+            "/rest/v{3-4}/path",
+            "/rest/v{4-5}/path",
+            "/rest/v{3-5}/path",
+
+            "/rest/v{1-}/path",
+            "/rest/v{2-}/path",
+            "/rest/v{3-}/path",
+            "/rest/v{4-}/path",
+            "/rest/v{5-}/path"};
+
+        final String[] expectedPaths = {
+            "/old/api/path",
+            "/rest/v2/path",
+            "/rest/v3/path",
+            "/rest/v4/path",
+
+            "/rest/v3/path",
+            "/rest/v2/path",
+            "/rest/v3/path",
+            "/rest/v3/path",
+            "/rest/v4/path",
+            "/rest/v3/path",
+
+            "/rest/v3/path",
+            "/rest/v3/path",
+            "/rest/v3/path",
+            "/rest/v4/path",
+            "/rest/v5/path"};
+        for (int i = 0; i < paths.length; ++i)
+        {
+            String result = ApiVersion.applyExactOrNearestVersionToRange(paths[i], apiVersions);
+            if (!expectedPaths[i].equals(result))
+            {
+                throw new RuntimeException("expectedPaths[" + i + "] " + expectedPaths[i] +
+                    " is not equal to result " + result);
+            }
+        }
+
+        final String[] invalidPaths = {"/rest/v{3-1}/path"};
+        final String[] pathErrors = {
+            "/rest/v{3-1} is invalid: first version 3 is greater than last version 1."};
+        for (int i = 0; i < invalidPaths.length; ++i)
+        {
+            boolean isThrown = false;
+            try
+            {
+                ApiVersion.applyExactOrNearestVersionToRange(invalidPaths[i], apiVersions);
+            }
+            catch (Exception e)
+            {
+                isThrown = true;
+                if (!pathErrors[i].equals(e.getMessage()))
+                {
+                    throw new RuntimeException("pathErrors[" + i + "] \"" + pathErrors[i] +
+                        "\" is not equal to message \"" + e.getMessage() + '"');
+                }
+            }
+            finally
+            {
+                if (!isThrown)
+                {
+                    throw new RuntimeException("pathErrors[" + i + "] \"" + pathErrors[i] +
+                        "\" is not thrown");
+                }
+            }
+        }
+
+        final String[] requiredPaths = {
+            "/rest/v3/path",
+            "/old/api/path"};
+        for (int i = 0; i < requiredPaths.length; ++i)
+        {
+            if (ApiVersion.shouldPathBeIgnored(requiredPaths[i], apiVersions))
+            {
+                throw new RuntimeException("requiredPaths[" + i + "] " + requiredPaths[i] +
+                    " should not be ignored");
+            }
+        }
+
+        final String[] pathsToBeIgnored = {
+            "/rest/v2/path",
+            "/rest/v4/path"};
+        for (int i = 0; i < pathsToBeIgnored.length; ++i)
+        {
+            if (!ApiVersion.shouldPathBeIgnored(pathsToBeIgnored[i], apiVersions))
+            {
+                throw new RuntimeException("pathsToBeIgnored[" + i + "] " + pathsToBeIgnored[i] +
+                    " should be ignored");
+            }
+        }
+
+        final String textFormat =
+            "%s at the start of the first line, `%s` in the middle of line\n" +
+            "%s at the start of the second line, and at the line end %s\n";
+        final String[] textPaths = {
+            "/rest/v3",
+            "/rest/v{2-3}",
+            "/rest/v{3-4}",
+            "/rest/v{2-}",
+            "/rest/v{3-}",
+            "/jsonrpc/v3",
+            "/jsonrpc/v{2-3}",
+            "/jsonrpc/v{3-4}",
+            "/jsonrpc/v{2-}",
+            "/jsonrpc/v{3-}"};
+        final String[] expectedTextPaths = {
+            "/rest/v3",
+            "/rest/v3",
+            "/rest/v3",
+            "/rest/v3",
+            "/rest/v3",
+            "/jsonrpc/v3",
+            "/jsonrpc/v3",
+            "/jsonrpc/v3",
+            "/jsonrpc/v3",
+            "/jsonrpc/v3"};
+        for (int i = 0; i < textPaths.length; ++i)
+        {
+            final String expectedText = String.format(
+                textFormat,
+                expectedTextPaths[i],
+                expectedTextPaths[i],
+                expectedTextPaths[textPaths.length - i - 1],
+                expectedTextPaths[textPaths.length - i - 1]);
+            final String text = ApiVersion.applyExactVersion(
+                String.format(
+                    textFormat,
+                    textPaths[i],
+                    textPaths[i],
+                    textPaths[textPaths.length - i - 1],
+                    textPaths[textPaths.length - i - 1]),
+                apiVersions);
+            if (!expectedText.equals(text))
+                throw new RuntimeException("\nexpectedText:\n" + expectedText + "\ntext:\n" + text);
+        }
+
+        final String[] invalidPathTexts = {
+            "/rest/v{3-1}/path",
+            "/rest/v2",
+            "/rest/v4",
+            "/rest/v{1-2}/path",
+            "/rest/v{4-5}/path",
+            "/rest/v{4-}/path"};
+        final String[] textPathErrors = {
+            "/rest/v{3-1} is invalid: first version 3 is greater than last version 1.",
+            "/rest/v2 is invalid: only /rest/v3 is allowed.",
+            "/rest/v4 is invalid: only /rest/v3 is allowed.",
+            "/rest/v{1-2} is invalid: last version 2 is less than /rest/v3.",
+            "/rest/v{4-5} is invalid: first version 4 is greater than /rest/v3.",
+            "/rest/v{4-} is invalid: first version 4 is greater than /rest/v3.",
+        };
+        for (int i = 0; i < invalidPathTexts.length; ++i)
+        {
+            boolean isThrown = false;
+            try
+            {
+                ApiVersion.applyExactVersion(invalidPathTexts[i], apiVersions);
+            }
+            catch (Exception e)
+            {
+                isThrown = true;
+                if (!textPathErrors[i].equals(e.getMessage()))
+                {
+                    throw new RuntimeException("textPathErrors[" + i + "] \"" + textPathErrors[i] +
+                        "\" is not equal to message \"" + e.getMessage() + '"');
+                }
+            }
+            finally
+            {
+                if (!isThrown)
+                {
+                    throw new RuntimeException("textPathErrors[" + i + "] \"" + textPathErrors[i] +
+                        "\" is not thrown");
+                }
+            }
+        }
+    }
+
     private void testApidocSerialization()
         throws Exception
     {
@@ -403,6 +596,9 @@ public final class Tests extends TestBase
 
         run("ParamsBase", new Run() { public void run() throws Exception {
             testParamsBase(); } });
+
+        run("ApiVersions", new Run() { public void run() throws Exception {
+            testApiVersions(); } });
 
         run("ApidocSerialization", new Run() { public void run() throws Exception {
             testApidocSerialization(); } });

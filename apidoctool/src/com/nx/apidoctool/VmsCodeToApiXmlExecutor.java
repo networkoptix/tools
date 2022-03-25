@@ -23,6 +23,7 @@ public final class VmsCodeToApiXmlExecutor
     public File outputApiJsonFile; //< Can be null if not needed.
     public File outputOpenApiJsonFile; //< Can be null if not needed.
     public List<Replacement> urlPrefixReplacements;
+    public List<ApiVersion> apiVersions = new ArrayList<>();
     public boolean enableEnumValueMerge = false;
 
     protected Apidoc apidoc;
@@ -98,6 +99,9 @@ public final class VmsCodeToApiXmlExecutor
         }
 
         urlPrefixReplacements = Replacement.parse(params.urlPrefixReplacement());
+        for (final String value: Utils.splitOnTokensTrimmed(params.apiVersions()))
+            apiVersions.add(new ApiVersion(value));
+
         int processedFunctionsCount = 0;
         if (!params.templateRegistrationCpp().isEmpty())
         {
@@ -111,13 +115,13 @@ public final class VmsCodeToApiXmlExecutor
                 typeManager);
         }
 
-        for (final String filename: splitOnTokensSorted(params.handlerRegistrationCpp()))
+        for (final String filename: Utils.splitOnTokensTrimmed(params.handlerRegistrationCpp()))
         {
             processedFunctionsCount +=
                 processCppFile(filename, new HandlerRegistrationMatcher(), typeManager);
         }
 
-        for (final String filename: splitOnTokensSorted(params.functionCommentSources()))
+        for (final String filename: Utils.splitOnTokensTrimmed(params.functionCommentSources()))
         {
             processedFunctionsCount +=
                 processCppFile(filename, new FunctionCommentMatcher(), typeManager);
@@ -173,11 +177,13 @@ public final class VmsCodeToApiXmlExecutor
             String json;
             try
             {
-                json = OpenApiSerializer.toString(
-                    apidoc,
-                    openApi,
-                    params.requiredGroupNameLenLimit(),
-                    params.generateOrderByParameters());
+                json = ApiVersion.applyExactVersion(
+                    OpenApiSerializer.toString(
+                        apidoc,
+                        openApi,
+                        params.requiredGroupNameLenLimit(),
+                        params.generateOrderByParameters()),
+                    apiVersions);
             }
             catch (Exception e)
             {
@@ -191,26 +197,6 @@ public final class VmsCodeToApiXmlExecutor
         return processedFunctionsCount;
     }
 
-    private static List<String> splitOnTokensSorted(final String tokensJoined)
-    {
-        final List<String> tokens = new ArrayList<String>();
-        for (final String token: tokensJoined.split(","))
-        {
-            final String tokenTrimmed = token.trim();
-            if (!tokenTrimmed.isEmpty())
-                tokens.add(tokenTrimmed);
-        }
-        tokens.sort(new Comparator<String>()
-        {
-            @Override
-            public int compare(String lhs, String rhs)
-            {
-                return lhs.compareTo(rhs);
-            }
-        });
-        return tokens;
-    }
-
     private int processCppFile(
         String sourceCppFilename, RegistrationMatcher matcher, TypeManager typeManager)
         throws Exception
@@ -221,7 +207,11 @@ public final class VmsCodeToApiXmlExecutor
 
         SourceCode reader = new SourceCode(sourceCppFile);
         SourceCodeParser parser = new SourceCodeParser(
-            verbose, params.unknownParamTypeIsError(), reader, urlPrefixReplacements);
+            verbose,
+            params.unknownParamTypeIsError(),
+            reader,
+            urlPrefixReplacements,
+            apiVersions);
         return parser.parseApidocComments(apidoc, matcher, typeManager,
             params.requiredFunctionCaptionLenLimit(), params.requiredGroupNameLenLimit());
     }

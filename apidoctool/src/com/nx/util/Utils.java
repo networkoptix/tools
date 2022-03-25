@@ -124,6 +124,18 @@ public final class Utils
         return (length == value.length()) ? value : value.substring(0, length);
     }
 
+    public static List<String> splitOnTokensTrimmed(final String tokensJoined)
+    {
+        final List<String> tokens = new ArrayList<String>();
+        for (final String token: tokensJoined.split(","))
+        {
+            final String tokenTrimmed = token.trim();
+            if (!tokenTrimmed.isEmpty())
+                tokens.add(tokenTrimmed);
+        }
+        return tokens;
+    }
+
     public static String cleanupDescription(String description) throws Exception
     {
         if (description == null)

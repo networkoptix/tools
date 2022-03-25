@@ -1,7 +1,7 @@
 package com.nx.apidoc;
 
 import com.nx.apidoctool.Replacement;
-import com.nx.util.Utils;
+import com.nx.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -99,6 +99,7 @@ public final class ApidocCommentParser
         TypeManager typeManager,
         List<Apidoc.Group> groups,
         List<Replacement> urlPrefixReplacements,
+        List<ApiVersion> apiVersions,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws Error, TypeManager.Error
@@ -108,14 +109,16 @@ public final class ApidocCommentParser
         ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         while (tagIterator.hasNext())
         {
-            functionDescriptions.add(
-                createFunctionFromTags(
-                    tagIterator,
-                    typeManager,
-                    groups,
-                    urlPrefixReplacements,
-                    requiredFunctionCaptionLenLimit,
-                    requiredGroupNameLenLimit));
+            final FunctionDescription description = createFunctionFromTags(
+                tagIterator,
+                typeManager,
+                groups,
+                urlPrefixReplacements,
+                apiVersions,
+                requiredFunctionCaptionLenLimit,
+                requiredGroupNameLenLimit);
+            if (description != null)
+                functionDescriptions.add(description);
         }
 
         return functionDescriptions;
@@ -140,6 +143,7 @@ public final class ApidocCommentParser
         TypeManager typeManager,
         List<Apidoc.Group> groups,
         List<Replacement> urlPrefixReplacements,
+        List<ApiVersion> apiVersions,
         int requiredFunctionCaptionLenLimit,
         int requiredGroupNameLenLimit)
         throws Error, TypeManager.Error
@@ -159,7 +163,7 @@ public final class ApidocCommentParser
         boolean structParsed = false;
 
         FunctionDescription description =
-            createFunctionFromApidocItem(item, groups, urlPrefixReplacements);
+            createFunctionFromApidocItem(item, groups, urlPrefixReplacements, apiVersions);
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
@@ -252,6 +256,12 @@ public final class ApidocCommentParser
             }
         }
 
+        if (ApiVersion.shouldPathBeIgnored(
+            description.urlPrefix + '/' + description.function.name, apiVersions))
+        {
+            return null;
+        }
+
         if (requiredFunctionCaptionLenLimit >= 0 && description.function.caption.isEmpty())
             throw new Error(firstItemErrorPrefix + TAG_CAPTION + " unspecified.");
         if (requiredGroupNameLenLimit >= 0 && description.function.groups.isEmpty())
@@ -311,7 +321,8 @@ public final class ApidocCommentParser
     private FunctionDescription createFunctionFromApidocItem(
         ApidocTagParser.Item item,
         List<Apidoc.Group> groups,
-        List<Replacement> urlPrefixReplacements)
+        List<Replacement> urlPrefixReplacements,
+        List<ApiVersion> apiVersions)
         throws Error
     {
         String[] values = Utils.matchRegex(
@@ -321,6 +332,15 @@ public final class ApidocCommentParser
 
         for (Replacement r: urlPrefixReplacements)
             values[1] = values[1].replace('/' + r.target + '/', '/' + r.replacement + '/');
+
+        try
+        {
+            values[1] = ApiVersion.applyExactOrNearestVersionToRange(values[1], apiVersions);
+        }
+        catch (Exception e)
+        {
+            throw new Error(item.getErrorPrefix() + e.getMessage());
+        }
 
         FunctionDescription result = new FunctionDescription();
         result.urlPrefix = "";
