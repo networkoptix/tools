@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -82,7 +83,7 @@ public final class VmsCodeToApiXmlExecutor
         if (!params.typeHeaderPaths().isEmpty())
         {
             List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
-            typeHeaders.sort(
+            Collections.sort(typeHeaders,
                 new Comparator<File>()
                 {
                     @Override
