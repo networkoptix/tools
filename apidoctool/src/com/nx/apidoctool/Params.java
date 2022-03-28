@@ -102,9 +102,9 @@ public class Params
 
     private final StringBuilder urlPrefixReplacement = regStringParam("urlPrefixReplacement",
         "",
-        "A comma-separated list of API function URL prefix replacement string pairs, if\n" +
-        "specified. Each string replacement pair must be separated by space. The first part is\n" +
-        "the target, the second part is the replacement.");
+        "A comma-separated list of space-separated string pairs; each pair contains the target\n" +
+        "and the replacement string to be applied to each API function URLs. The target will\n" +
+        "match only if a slash appears before and after it.");
 
     private static boolean toBoolean(StringBuilder param, String paramName) throws Exception
     {
