@@ -187,10 +187,12 @@ public final class Tests extends TestBase
 
         final String[] paths = {
             "/old/api/path",
+            "/jsonrpc/v2",
             "/rest/v2/path",
             "/rest/v3/path",
             "/rest/v4/path",
 
+            "/jsonrpc/v{2-3}",
             "/rest/v{1-3}/path",
             "/rest/v{1-2}/path",
             "/rest/v{2-3}/path",
@@ -198,6 +200,7 @@ public final class Tests extends TestBase
             "/rest/v{4-5}/path",
             "/rest/v{3-5}/path",
 
+            "/jsonrpc/v{2-}",
             "/rest/v{1-}/path",
             "/rest/v{2-}/path",
             "/rest/v{3-}/path",
@@ -206,10 +209,12 @@ public final class Tests extends TestBase
 
         final String[] expectedPaths = {
             "/old/api/path",
+            "/jsonrpc/v2",
             "/rest/v2/path",
             "/rest/v3/path",
             "/rest/v4/path",
 
+            "/jsonrpc/v3",
             "/rest/v3/path",
             "/rest/v2/path",
             "/rest/v3/path",
@@ -217,6 +222,7 @@ public final class Tests extends TestBase
             "/rest/v4/path",
             "/rest/v3/path",
 
+            "/jsonrpc/v3",
             "/rest/v3/path",
             "/rest/v3/path",
             "/rest/v3/path",

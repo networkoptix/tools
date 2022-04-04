@@ -22,8 +22,8 @@ public class ApiVersion
         this.value = value;
         prefix = values[0];
         version = Integer.parseInt(values[1]);
-        pathVersionRegex = Pattern.compile(prefix + "(\\d+)/(.*)");
-        pathVersionRangeRegex = Pattern.compile("(" + prefix + "\\{(\\d+)-(\\d+)?\\})/(.*)");
+        pathVersionRegex = Pattern.compile(prefix + "(\\d+)(.*)");
+        pathVersionRangeRegex = Pattern.compile("(" + prefix + "\\{(\\d+)-(\\d+)?\\})(.*)");
         textPathVersionRegex = Pattern.compile(prefix + "(\\d+)");
         textPathVersionRangeRegex = Pattern.compile(prefix + "\\{(\\d+)-(\\d+)?\\}");
     }
