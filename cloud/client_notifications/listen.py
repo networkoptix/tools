@@ -22,12 +22,7 @@ def get_auth_token(user, password):
 
 
 async def listen_to_notifications(user, access_token):
-    print(access_token)
-    async with websockets.connect(f"wss://{CLOUD_HOST}/cloud_notifications/provider/api/v1/subscribe") as websocket:
-        await websocket.send(json.dumps({
-            "username": user,
-            "accessToken": access_token
-        }))
+    async with websockets.connect(f"wss://{CLOUD_HOST}/cloud_notifications/provider/api/v1/subscribe?access-token={access_token}") as websocket:
         while True:
             print(await websocket.recv())
 
