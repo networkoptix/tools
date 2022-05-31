@@ -411,12 +411,7 @@ do_gen() # [cache] "$@"
 
     if nx_is_cygwin
     then
-        if [[ -f "$VMS_DIR/CMakeSettings.json" ]] #< The branch supports Ninha, use it.
-        then
-            local -r GENERATOR_ARGS=( -GNinja -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" )
-        else
-            local -r GENERATOR_ARGS=( -G "Visual Studio 16 2019" -Ax64 -Thost=x64 )
-        fi
+        local -r GENERATOR_ARGS=( -GNinja -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe )
     else
         local -r GENERATOR_ARGS=( -GNinja )
     fi
@@ -477,7 +472,7 @@ do_build()
     fi
 
     local STOP_ON_BUILD_ERRORS_ARG=()
-    if [ "$TARGET" != "windows" ] && [ "$STOP_ON_ERROR" = "0" ]
+    if [ "$STOP_ON_ERROR" = "0" ]
     then
         STOP_ON_BUILD_ERRORS_ARG=( -- -k1000 )
     fi
@@ -2201,17 +2196,8 @@ main()
             ;;
         vs)
             nx_is_cygwin || nx_fail "This is a Windows-only command."
-            if [[ -f $VMS_DIR/CMakeSettings.json ]]
-            then #< ninja
-                local -r VS_OPEN_PATH=$(nx_path "$VMS_DIR")
-            else #< msbuild
-                local -r VS_OPEN_PATH=$(nx_path "$BUILD_DIR\vms.sln")
-                [[ ! -f $VS_OPEN_PATH ]] && nx_fail "Cannot find VS solution file: $VS_OPEN_PATH"
-            fi
-            local -r VS_EXE="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
-            [[ ! -f $VS_EXE ]] && nx_fail "Cannot find VS executable: $VS_EXE"
             # Empty arg of `start` stands for window title - needed to allow exe name in quotes.
-            nx_verbose cmd /c start "" "$VS_EXE" "$VS_OPEN_PATH" "$@"
+            nx_verbose cmd /c start "" "$VS_EXE" "$(nx_path "$VMS_DIR")" "$@"
             ;;
         thg)
             nx_is_cygwin || nx_fail "Linux support not implemented yet."
