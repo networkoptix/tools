@@ -331,7 +331,7 @@ set_up_vars()
     then #< This is a cmake build dir: find respective repo dir via CMakeCache.txt.
         BUILD_DIR="$VMS_DIR"
         VMS_DIR=$(printCmakeCacheValue "$VMS_DIR" CMAKE_HOME_DIRECTORY)
-        if [ -z "VMS_DIR" ]
+        if [ -z "$VMS_DIR" ]
         then
             nx_fail "CMAKE_HOME_DIRECTORY not found in $CMAKE_CACHE_TXT" "$HELP"
         fi
