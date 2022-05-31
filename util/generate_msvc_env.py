@@ -103,7 +103,7 @@ env_var_names_2022 = [
 
 env_var_names: list[str] = []
 
-base_drive_for_sh = "/c"
+base_drive_for_sh: str = ""
 
 
 def error(message: str) -> None:
@@ -201,6 +201,7 @@ def generate_bat(env_vars: Dict[str, str], out_file) -> None:
 
 
 def main():
+    global vcvars_script
     if os.path.exists(vcvars_script_2022):
         print("Detected MSVC 2022 (its vcvars64.bat exists).")
         vcvars_script = vcvars_script_2022
@@ -213,7 +214,7 @@ def main():
         print("ERROR: Unable to find vcvars64.bat for either MSVC 2019 or 2022.")
         exit(1);    
 
-    if len(sys.argv) != 2 or (len(sys.argv) > 1 and (
+    if len(sys.argv) != 3 or (len(sys.argv) > 1 and (
             sys.argv[1] == '-h' or sys.argv[1] == '--help' or sys.argv[1] == '/?')):
         print(
 f"""\
@@ -228,11 +229,14 @@ ATTENTION: The Developer Command Prompt would set the env vars for the 32-bit MS
 NOTE: This script only processes the hard-coded set of env vars, so it may need to be updated in
 case some newer MSVC starts using a new env var.
 
-Usage: {sys.argv[0]} msvc_env(.sh|.bat)\
+Usage: {sys.argv[0]} msvc_env(.sh|.bat) "/cygdrive/c"|"/c"\
 """)
         sys.exit(0)
             
     out_filename = sys.argv[1]
+    
+    global base_drive_for_sh
+    base_drive_for_sh = sys.argv[2]
     
     out_file = open(out_filename, "w", newline='\n')
     
