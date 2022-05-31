@@ -8,13 +8,19 @@ import sys
 import re
 import os
 from typing import List, Dict
+from os.path import exists
 
 
-vcvars_script = \
-"\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\""
+vcvars_script_2019 = \
+"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
+
+vcvars_script_2022 = \
+"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
+
+vcvars_script: str = ""
 
 
-env_var_names = [
+env_var_names_2019 = [
     "CommandPromptType",
     "DevEnvDir",
     "ExtensionSdkDir",
@@ -57,6 +63,48 @@ env_var_names = [
     "LIBPATH",
 ]
 
+env_var_names_2022 = [
+    "CommandPromptType",
+    "DevEnvDir",
+    "ExtensionSdkDir",
+    "Framework40Version",
+    "FrameworkDIR64",
+    "FrameworkDir",
+    "FrameworkVersion64",
+    "FrameworkVersion",
+    "INCLUDE",
+    "LIB",
+    "LIBPATH",
+    "Platform",
+    "UCRTVersion",
+    "UniversalCRTSdkDir",
+    "VCIDEInstallDir",
+    "VCINSTALLDIR",
+    "VCToolsInstallDir",
+    "VCToolsRedistDir",
+    "VCToolsVersion",
+    "VS170COMNTOOLS",
+    "VSCMD_ARG_HOST_ARCH",
+    "VSCMD_ARG_TGT_ARCH",
+    "VSCMD_ARG_app_plat",
+    "VSCMD_VER",
+    "VSINSTALLDIR",
+    "VisualStudioVersion",
+    "WindowsLibPath",
+    "WindowsSDKLibVersion",
+    "WindowsSDKVersion",
+    "WindowsSdkBinPath",
+    "WindowsSdkDir",
+    "WindowsSdkVerBinPath",
+    "__DOTNET_ADD_64BIT",
+    "__DOTNET_PREFERRED_BITNESS",
+    "__VSCMD_PREINIT_PATH",
+]
+
+env_var_names: list[str] = []
+
+base_drive_for_sh = "/c"
+
 
 def error(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
@@ -77,7 +125,7 @@ Env var {name!r} not found.
 
 Run this script from a cmd.exe console after executing the following MSVC script:
 
-{vcvars_script}
+"{vcvars_script}"
 
 ATTENTION: Do not run this script in the Developer Command Prompt because it sets env vars for a
 32-bit MSVC toolsrather than 64-bit.\
@@ -113,7 +161,7 @@ def obtain_path_items() -> List[str]:
 def build_path_lines_for_sh() -> str:
     result: str = ""
     for item in obtain_path_items():
-            item = item.replace('C:', '/cygdrive/c');
+            item = item.replace('C:', base_drive_for_sh);
             item = item.replace('\\', '/')
             result += ":" + item + "\\\n"
     
@@ -127,7 +175,7 @@ f"""\
 #!/bin/bash
 
 # Env vars obtained via the MSVC script:
-# {vcvars_script}
+# "{vcvars_script}"
 
 export PATH="$PATH\\
 {build_path_lines_for_sh()}
@@ -153,13 +201,26 @@ def generate_bat(env_vars: Dict[str, str], out_file) -> None:
 
 
 def main():
+    if os.path.exists(vcvars_script_2022):
+        print("Detected MSVC 2022 (its vcvars64.bat exists).")
+        vcvars_script = vcvars_script_2022
+        env_var_names = env_var_names_2022
+    elif os.path.exists(vcvars_script_2019):
+        print("Detected MSVC 2019 (its vcvars64.bat exists).")
+        vcvars_script = vcvars_script_2019
+        env_var_names = env_var_names_2019
+    else:
+        print("ERROR: Unable to find vcvars64.bat for either MSVC 2019 or 2022.")
+        exit(1);    
+
     if len(sys.argv) != 2 or (len(sys.argv) > 1 and (
             sys.argv[1] == '-h' or sys.argv[1] == '--help' or sys.argv[1] == '/?')):
         print(
 f"""\
+
 This is a Windows tool which generates .bat or .sh (for Cygwin environment) script that sets
 all needed env vars for 64-bit MSVC, like its script does:
-{vcvars_script}
+"{vcvars_script}"
 
 ATTENTION: The Developer Command Prompt would set the env vars for the 32-bit MSVC rather than
 64-bit, as opposed to the above mentioned vcvars64.bat.

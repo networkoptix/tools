@@ -31,6 +31,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${TUNNEL_SELF_IP_SUBNET_PREFIX="10\\.0\\."}
 : ${TESTCAMERA_SELF_IP_SUBNET_PREFIX="192\\.168\\."}
 : ${TEMP_DIR="$(dirname $(mktemp `# dry run #` -u))"}
+: ${VS_EXE=""} #< Empty means auto-detect MSVC 2019 vs 2022.
 if nx_is_cygwin
 then
     : ${INI_FILES_DIR=$(cygpath -u "$LOCALAPPDATA/nx_ini")}
@@ -347,6 +348,21 @@ set_up_vars()
 #        then
 #            nx_fail "The parent repo is not \"vms\" project." "$HELP"
 #        fi
+
+        local -r VS_EXE_2019="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
+        local -r VS_EXE_2022="C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe"
+        if [[ -z "$VS_EXE" ]]
+        then
+            if [[ -f "$VS_EXE_2022" ]]
+            then
+                VS_EXE="$VS_EXE_2022"
+            elif [[ -f "$VS_EXE_2019" ]]
+            then
+                VS_EXE="$VS_EXE_2019"
+            else
+                nx_fail "Cannot find VS executable - set env var VS_EXE."            
+            fi
+        fi
 
         get_TARGET_and_CUSTOMIZATION
         get_BUILD_DIR
