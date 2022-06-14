@@ -268,19 +268,9 @@ public final class SourceCodeParser
         String error = null;
         if (param.type.mapValueType == null)
         {
-            switch (param.type.fixed)
-            {
-                case UNKNOWN:
-                    error = "unknown type";
-                    break;
-                case OBJECT_JSON:
-                case ARRAY_JSON:
-                case TEXT:
-                    error = "unsupported type \"" + param.type.fixed.toString() + "\"";
-                    break;
-                default:
-                    return;
-            }
+            if (param.type.fixed != Apidoc.Type.UNKNOWN)
+                return;
+            error = "unknown type";
         }
         else
         {

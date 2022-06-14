@@ -178,6 +178,7 @@ milliseconds).</description>
                         </param>
                         <param>
                             <name>tag</name>
+                            <type>string</type>
                             <description>Applied tag. Several tag parameters could be used to specify multiple tags.</description>
                             <optional>true</optional>
                         </param>
@@ -847,7 +848,7 @@ only the top level data is provided.</description>
                         </param>
                         <param>
                             <name>id</name>
-                            <type>string</type>
+                            <type>uuid</type>
                             <description>Camera id (can be obtained from "id", "physicalId" or "logicalId"
 field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or MAC address (not
 supported for certain cameras). If omitted, return data for all cameras.</description>
@@ -1263,7 +1264,7 @@ only the top level data is provided.</description>
                         </param>
                         <param>
                             <name>id</name>
-                            <type>string</type>
+                            <type>uuid</type>
                             <description>Camera id (can be obtained from "id", "physicalId" or "logicalId"
 field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or MAC address (not
 supported for certain cameras). If omitted, return data for all cameras.</description>
@@ -2023,6 +2024,7 @@ are not used for event matching.</description>
                             </param>
                             <param>
                                 <name>eventCondition.resourceName</name>
+                                <type>string</type>
                                 <description>Substring to be found in the name of the resource
 (e.g. a camera) which caused the event. Empty string matches any value.</description>
                                 <values>
@@ -2110,16 +2112,19 @@ are not used for event matching.</description>
                             </param>
                             <param>
                                 <name>eventCondition.inputPortId</name>
+                                <type>string</type>
                                 <description>(string) Used for input events only. Empty string
 matches any value.</description>
                             </param>
                             <param>
                                 <name>eventCondition.caption</name>
+                                <type>string</type>
                                 <description>Substring to be found in the short event description.
 Empty string matches any value.</description>
                             </param>
                             <param>
                                 <name>eventCondition.description</name>
+                                <type>string</type>
                                 <description>Substring to be found in the long event
 description. Empty string matches any value.</description>
                             </param>
@@ -5364,6 +5369,7 @@ only the top level data is provided.</description>
                         </param>
                         <param>
                             <name>folder</name>
+                            <type>string</type>
                             <description>File name</description>
                             <optional>true</optional>
                         </param>
@@ -6016,13 +6022,21 @@ only the top level data is provided.</description>
                         </param>
                         <param>
                             <name>folder</name>
+                            <type>string</type>
                             <description>Folder name in a virtual FS</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
                         <caption>List of objects in the requested format.</caption>
-                        <type>object</type>
+                        <type>array</type>
+                        <params>
+                            <param>
+                                <name>path</name>
+                                <type>string</type>
+                                <description/>
+                            </param>
+                        </params>
                     </result>
                 </function>
                 <function>
@@ -14060,6 +14074,26 @@ system settings with their values</description>
                                 <description>Object with Engine settings model and values.</description>
                                 <optional>true</optional>
                             </param>
+                            <param>
+                                <name>reply.settingsValues</name>
+                                <type>object</type>
+                                <description>Name-value map with setting values, using JSON types corresponding to each setting type.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsModel</name>
+                                <type>object</type>
+                                <description>Model of settings containing setting names, types and value restrictions.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsModelId</name>
+                                <type>uuid</type>
+                                <description>Current id of the Settings Model. Such ids are used to check that values match the Model.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsErrors</name>
+                                <type>object</type>
+                                <description>Name-value map with errors that occurred while performing the current settings operation.</description>
+                            </param>
                         </params>
                     </result>
                 </function>
@@ -14067,7 +14101,26 @@ system settings with their values</description>
                     <name>testHandler2</name>
                     <description>testHandler2 POST description</description>
                     <method>POST</method>
-                    <params/>
+                    <params>
+                        <param>
+                            <name>analyticsEngineId</name>
+                            <type>uuid</type>
+                            <description>Unique id of an Analytics Engine.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>settingsModelId</name>
+                            <type>uuid</type>
+                            <description>Id of the Settings Model the values supposed to be applied to.</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>settingsValues</name>
+                            <type>object</type>
+                            <description>Name-value map with setting values, using JSON types corresponding to each setting type.</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
                     <result>
                         <caption>JSON object including the error status.</caption>
                         <type>object</type>
@@ -14198,6 +14251,26 @@ system settings with their values</description>
                                 <description>Object with Engine settings model and values that the Engine
 returns after the values have been supplied.</description>
                                 <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>reply.settingsValues</name>
+                                <type>object</type>
+                                <description>Name-value map with setting values, using JSON types corresponding to each setting type.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsModel</name>
+                                <type>object</type>
+                                <description>Model of settings containing setting names, types and value restrictions.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsModelId</name>
+                                <type>uuid</type>
+                                <description>Current id of the Settings Model. Such ids are used to check that values match the Model.</description>
+                            </param>
+                            <param>
+                                <name>reply.settingsErrors</name>
+                                <type>object</type>
+                                <description>Name-value map with errors that occurred while performing the current settings operation.</description>
                             </param>
                         </params>
                     </result>

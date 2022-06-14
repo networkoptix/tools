@@ -152,7 +152,7 @@
         {
           "name": "tag",
           "description": "Applied tag. Several tag parameters could be used to specify multiple tags.",
-          "schema": {},
+          "schema": {"type": "string"},
           "in": "query"
         },
         {
@@ -664,7 +664,10 @@
         {
           "name": "id",
           "description": "Camera id (can be obtained from \"id\", \"physicalId\" or \"logicalId\"\nfield via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or MAC address (not\nsupported for certain cameras). If omitted, return data for all cameras.",
-          "schema": {"type": "string"},
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
           "in": "query"
         }
       ],
@@ -884,7 +887,10 @@
         {
           "name": "id",
           "description": "Camera id (can be obtained from \"id\", \"physicalId\" or \"logicalId\"\nfield via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or MAC address (not\nsupported for certain cameras). If omitted, return data for all cameras.",
-          "schema": {"type": "string"},
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
           "in": "query"
         }
       ],
@@ -1311,12 +1317,24 @@
               },
               "eventCondition": {
                 "description": "String containing a JSON object, some fields of which\ndepend on eventType. Defines the filter for an event to make the rule applicable.\nNOTE: Other fields than the described below can be stored in this object, but they\nare not used for event matching.",
-                "type": "object",
+                "type": "string",
                 "properties": {
-                  "resourceName": {"description": "Substring to be found in the name of the resource\n(e.g. a camera) which caused the event. Empty string matches any value.\n\nPossible values are:\n- `none`\n- `networkNoFrame`\n- `networkConnectionClosed`\n- `networkRtpPacketLoss`\n- `serverTerminated`\n- `serverStarted`\n- `storageIoError`\n- `storageTooSlow`\n- `storageFull`\n- `systemStorageFull`\n- `licenseRemoved`\n- `backupFailedNoBackupStorageError`\n- `backupFailedSourceStorageError`\n- `backupFailedSourceFileError`\n- `backupFailedTargetFileError`\n- `backupFailedChunkError`\n- `backupEndOfPeriod`\n- `backupDone`\n- `backupCancelled`\n- `networkNoResponseFromDevice`"},
-                  "inputPortId": {"description": "(string) Used for input events only. Empty string\nmatches any value."},
-                  "caption": {"description": "Substring to be found in the short event description.\nEmpty string matches any value."},
-                  "description": {"description": "Substring to be found in the long event\ndescription. Empty string matches any value."}
+                  "resourceName": {
+                    "description": "Substring to be found in the name of the resource\n(e.g. a camera) which caused the event. Empty string matches any value.\n\nPossible values are:\n- `\"none\"`\n- `\"networkNoFrame\"`\n- `\"networkConnectionClosed\"`\n- `\"networkRtpPacketLoss\"`\n- `\"serverTerminated\"`\n- `\"serverStarted\"`\n- `\"storageIoError\"`\n- `\"storageTooSlow\"`\n- `\"storageFull\"`\n- `\"systemStorageFull\"`\n- `\"licenseRemoved\"`\n- `\"backupFailedNoBackupStorageError\"`\n- `\"backupFailedSourceStorageError\"`\n- `\"backupFailedSourceFileError\"`\n- `\"backupFailedTargetFileError\"`\n- `\"backupFailedChunkError\"`\n- `\"backupEndOfPeriod\"`\n- `\"backupDone\"`\n- `\"backupCancelled\"`\n- `\"networkNoResponseFromDevice\"`",
+                    "type": "string"
+                  },
+                  "inputPortId": {
+                    "description": "(string) Used for input events only. Empty string\nmatches any value.",
+                    "type": "string"
+                  },
+                  "caption": {
+                    "description": "Substring to be found in the short event description.\nEmpty string matches any value.",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "Substring to be found in the long event\ndescription. Empty string matches any value.",
+                    "type": "string"
+                  }
                 },
                 "required": [
                   "resourceName",
@@ -3426,7 +3444,7 @@
         {
           "name": "folder",
           "description": "File name",
-          "schema": {},
+          "schema": {"type": "string"},
           "in": "query"
         }
       ],
@@ -3860,13 +3878,20 @@
         {
           "name": "folder",
           "description": "Folder name in a virtual FS",
-          "schema": {},
+          "schema": {"type": "string"},
           "in": "query"
         }
       ],
       "responses": {"default": {
         "description": "List of objects in the requested format.",
-        "content": {"application/json": {"schema": {"type": "object"}}}
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {"path": {"type": "string"}},
+            "required": ["path"]
+          }
+        }}}
       }},
       "tags": ["System API"]
     }},
@@ -3895,7 +3920,7 @@
         {
           "name": "filter",
           "description": "This parameter is used for motion search (\"periodsType\" must\nbe 1). Match motion on a video by specified rectangle.\n<br/>Format: string with a JSON list of <i>sensors<\/i>,\neach <i>sensor<\/i> is a JSON list of <i>rects<\/i>, each <i>rect<\/i> is:\n<br/>\n<code>\n    {\"x\": <i>x<\/i>, \"y\": <i>y<\/i>, \"width\": <i>width<\/i>,\"height\": <i>height<\/i>}\n<\/code>\n<br/>All values are measured in relative portions of a video frame,\n<i>x<\/i> and <i>width<\/i> in range [0..43], <i>y<\/i> and <i>height<\/i> in range [0..31],\nzero is the left-top corner.\n<br/>Example of a full-frame rectangle for a single-sensor camera:\n<code>[[{\"x\":0,\"y\":0,\"width\":43,\"height\":31}]]<\/code>\n<br/>Example of two rectangles for a single-sensor camera:\n<code>[[{\"x\":0,\"y\":0,\"width\":5,\"height\":7},{\"x\":12,\"y\":10,\"width\":8,\"height\":6}]]<\/code>",
-          "schema": {},
+          "schema": {"type": "string"},
           "in": "query"
         },
         {
@@ -5530,7 +5555,7 @@
       ],
       "responses": {"default": {
         "description": "Tail of the server log file in text format",
-        "content": {"application/json": {"schema": {}}}
+        "content": {"application/json": {"schema": {"type": "string"}}}
       }},
       "tags": ["Server API"]
     }},
@@ -5646,7 +5671,7 @@
         {
           "name": "metadata",
           "description": "Additional information associated with the event, in the\nform of a JSON object. Currently this object can specify the only field \"cameraRefs\",\nbut other fields could be added in the future. <ul> <li>\"cameraRefs\" specifies a number\nof cameras which are linked to the event (e.g. the event will appear on their\ntimelines), in the form of a list of camera ids (can be obtained from \"id\" field via\n/ec2/getCamerasEx or /ec2/getCameras?extraFormatting). <\/li> <\/ul>",
-          "schema": {},
+          "schema": {"type": "string"},
           "in": "query"
         },
         {
@@ -5939,7 +5964,10 @@
                   "description": "Duration in milliseconds for Bookmark and\nShow Text Overlay.",
                   "type": "integer"
                 },
-                "additionalResources": {"description": "JSON list of ids of additional\nresources; user ids for Show On Alarm Layout."},
+                "additionalResources": {
+                  "description": "JSON list of ids of additional\nresources; user ids for Show On Alarm Layout.",
+                  "type": "string"
+                },
                 "forced": {
                   "description": "Alarm Layout - if it must be opened immediately.",
                   "type": "boolean"
@@ -6071,7 +6099,10 @@
                   "description": "Long event description. Used for\ncamera/server conflict as a long description (conflict list). Used in Reasoned\nEvents as reason description. Used in generic events as a long description.",
                   "type": "string"
                 },
-                "metadata": {"description": "Camera list which is associated with the\nevent. EventResourceId may be a POS terminal, but this is a camera list which\nshould be shown with this event."}
+                "metadata": {
+                  "description": "Camera list which is associated with the\nevent. EventResourceId may be a POS terminal, but this is a camera list which\nshould be shown with this event.",
+                  "type": "string"
+                }
               },
               "required": [
                 "eventType",
@@ -7111,7 +7142,7 @@
       ],
       "responses": {"default": {
         "description": "Tail of the server log file in text format",
-        "content": {"application/json": {"schema": {}}}
+        "content": {"application/json": {"schema": {"type": "string"}}}
       }},
       "tags": ["Server API"]
     }},
@@ -9190,7 +9221,32 @@
               },
               "reply": {
                 "description": "Object with Engine settings model and values.",
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "settingsValues": {
+                    "description": "Name-value map with setting values, using JSON types corresponding to each setting type.",
+                    "type": "object"
+                  },
+                  "settingsModel": {
+                    "description": "Model of settings containing setting names, types and value restrictions.",
+                    "type": "object"
+                  },
+                  "settingsModelId": {
+                    "description": "Current id of the Settings Model. Such ids are used to check that values match the Model.",
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "settingsErrors": {
+                    "description": "Name-value map with errors that occurred while performing the current settings operation.",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "settingsValues",
+                  "settingsModel",
+                  "settingsModelId",
+                  "settingsErrors"
+                ]
               }
             },
             "required": [
@@ -9208,8 +9264,31 @@
       "post": {
         "description": "testHandler2 POST description",
         "requestBody": {
-          "required": true,
-          "content": {"application/json": {"schema": {"type": "object"}}}
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "analyticsEngineId": {
+                "description": "Unique id of an Analytics Engine.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "settingsModelId": {
+                "description": "Id of the Settings Model the values supposed to be applied to.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "settingsValues": {
+                "description": "Name-value map with setting values, using JSON types corresponding to each setting type.",
+                "type": "object"
+              }
+            },
+            "required": [
+              "analyticsEngineId",
+              "settingsModelId",
+              "settingsValues"
+            ]
+          }}},
+          "required": true
         },
         "responses": {"default": {
           "description": "JSON object including the error status.",
@@ -9274,7 +9353,32 @@
               },
               "reply": {
                 "description": "Object with Engine settings model and values that the Engine\nreturns after the values have been supplied.",
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "settingsValues": {
+                    "description": "Name-value map with setting values, using JSON types corresponding to each setting type.",
+                    "type": "object"
+                  },
+                  "settingsModel": {
+                    "description": "Model of settings containing setting names, types and value restrictions.",
+                    "type": "object"
+                  },
+                  "settingsModelId": {
+                    "description": "Current id of the Settings Model. Such ids are used to check that values match the Model.",
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "settingsErrors": {
+                    "description": "Name-value map with errors that occurred while performing the current settings operation.",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "settingsValues",
+                  "settingsModel",
+                  "settingsModelId",
+                  "settingsErrors"
+                ]
               }
             },
             "required": [

@@ -111,6 +111,10 @@ public final class TypeInfo
         {
             fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.ANY : Apidoc.Type.ARRAY;
         }
+        else if (type.equals("QJsonObject"))
+        {
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.OBJECT : Apidoc.Type.ARRAY;
+        }
         else if (type.equals("QStringList"))
         {
             if (fixed == Apidoc.Type.UNKNOWN)

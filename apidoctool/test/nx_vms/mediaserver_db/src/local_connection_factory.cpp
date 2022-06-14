@@ -402,7 +402,7 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
     regUpdate<ApiCameraDataList>(p, ApiCommand::saveCameras);
 
     // AbstractCameraManager::getCameras
-    regGet<QnCameraUuid, ApiCameraDataList>(p, ApiCommand::getCameras);
+    regGet<QnUuid, ApiCameraDataList>(p, ApiCommand::getCameras);
 
     /**%apidoc:arrayParams POST /ec2/saveCameraUserAttributesList
      * Save additional camera attributes for a number of cameras.
@@ -683,7 +683,7 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *         %value CameraBackup_Default A default value is used for backup options.
      * %// AbstractCameraManager::getUserAttributes
      */
-    regGet<QnCameraUuid, ApiCameraAttributesDataList>(p, ApiCommand::getCameraUserAttributesList);
+    regGet<QnUuid, ApiCameraAttributesDataList>(p, ApiCommand::getCameraUserAttributesList);
 
     // AbstractCameraManager::addCameraHistoryItem
     regUpdate<ApiServerFootageData>(p, ApiCommand::addCameraHistoryItem);
@@ -824,7 +824,7 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *         such information as full ONVIF URL, camera maximum FPS, etc.
      * %// AbstractCameraManager::getCamerasEx
      */
-    regGet<QnCameraUuid, ApiCameraDataExList>(p, ApiCommand::getCamerasEx);
+    regGet<QnUuid, ApiCameraDataExList>(p, ApiCommand::getCamerasEx);
 
     /**%apidoc GET /ec2/getStorages
      * Read the list of current storages.
@@ -898,7 +898,7 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *             milliseconds). Default: 0.
      *         %//param eventCondition.eventResourceId (string) Event source - id of a camera or a
      *             server. Default: "{00000000-0000-0000-0000-000000000000}".
-     *         %param eventCondition.resourceName Substring to be found in the name of the resource
+     *         %param:string eventCondition.resourceName Substring to be found in the name of the resource
      *             (e.g. a camera) which caused the event. Empty string matches any value.
      *         %//param eventCondition.sourceServerId (string) Id of a server that generated the
      *             event. Default: "{00000000-0000-0000-0000-000000000000}".
@@ -924,11 +924,11 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      *             %value backupDone
      *             %value backupCancelled
      *             %value networkNoResponseFromDevice
-     *         %param eventCondition.inputPortId (string) Used for input events only. Empty string
+     *         %param:string eventCondition.inputPortId (string) Used for input events only. Empty string
      *             matches any value.
-     *         %param eventCondition.caption Substring to be found in the short event description.
+     *         %param:string eventCondition.caption Substring to be found in the short event description.
      *             Empty string matches any value.
-     *         %param eventCondition.description Substring to be found in the long event
+     *         %param:string eventCondition.description Substring to be found in the long event
      *             description. Empty string matches any value.
      *         %//param eventCondition.metadata (object) Imposes filtering based on the event
      *             metadata fields. The object contains the following fields:
@@ -1492,18 +1492,18 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
      * to database.
      * %param[default] format
      * %param[unused] path
-     * %param[opt] folder Folder name in a virtual FS
+     * %param[opt]:string folder Folder name in a virtual FS
      * %return List of objects in the requested format.
      *    %// TODO: Describe params.
      * %// AbstractStoredFileManager::listDirectory
      */
-    regGet<ApiStoredFilePath, ApiStoredDirContents>(p, ApiCommand::listDirectory);
+    regGet<ApiStoredFilePath, ApiStoredFilePathList>(p, ApiCommand::listDirectory);
 
     /**%apidoc GET /ec2/getStoredFile
      * Read file data from a virtual FS
      * %param[default] format
      * %param[unused] path
-     * %param[opt] folder File name
+     * %param[opt]:string folder File name
      * %return Object in the requested format.
      * %// AbstractStoredFileManager::getStoredFile
      */

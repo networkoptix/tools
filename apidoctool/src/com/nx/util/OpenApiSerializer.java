@@ -374,11 +374,11 @@ public final class OpenApiSerializer
         switch (type)
         {
             case UNKNOWN:
+            case ANY:
+                break;
             case OBJECT_JSON:
             case ARRAY_JSON:
             case TEXT:
-            case ANY:
-                break;
             case STRING:
             case ENUM:
             case FLAGS:
