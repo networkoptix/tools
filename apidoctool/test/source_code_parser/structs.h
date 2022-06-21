@@ -64,7 +64,7 @@ struct OutputStruct
 {
     /**%apidoc outputParam description
      * %value 1 one
-     * %TODO_UNEXPECTED_TAG 2 two
+     * %value 2 two
      */
     int outputParam;
     Enum enumParam;
@@ -87,6 +87,14 @@ struct StructWithFantomParam
 {
     /**%apidoc Description for StructWithFantomParam::field. */
     int field;
+};
+
+struct InputInheritedFromMap: std::map<std::string, InputStruct>
+{
+};
+
+struct OutputInheritedFromMap: std::map<std::string, OutputStruct>
+{
 };
 
 } // namespace ec2

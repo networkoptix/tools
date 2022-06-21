@@ -39,6 +39,9 @@ Apidoc item: "inner object description"
     Field:string innerParam
     Field:unknown(Enum) innerEnumParam
 
+Name: InputInheritedFromMap
+Parents: [InputStruct]
+
 Name: InputStruct
 Parents: [BaseStruct]
 Apidoc item: "Input struct description
@@ -48,6 +51,9 @@ multiline"
     Field:unknown(InnerStruct) innerObject
     Field:integer unusedField
     Apidoc item: "Will appear in the struct dump but not in api.xml."
+
+Name: OutputInheritedFromMap
+Parents: [OutputStruct]
 
 Name: OutputStruct
 Parents: null

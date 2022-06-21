@@ -87,3 +87,15 @@
      * handlerWithType PATCH description
      */
     reg("api/handlerWithType", new handlerWithType());
+
+    /**%apidoc:{std::map<QString, InputStruct>} PUT /api/handlerWithMap
+     * handlerWithMap PUT description
+     * %return:{std::map<QnUuid, OutputStruct>}
+     *
+     **%apidoc PATCH /api/handlerWithMap
+     * handlerWithMap PATCH description
+     * %struct InputInheritedFromMap
+     * %return
+     *     %struct OutputInheritedFromMap
+     */
+    reg("api/handlerWithMap", new handlerWithMap());

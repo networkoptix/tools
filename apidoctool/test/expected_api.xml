@@ -9849,6 +9849,194 @@ is added for convenience)</description>
                     </result>
                 </function>
                 <function>
+                    <name>handlerWithMap</name>
+                    <description>handlerWithMap PUT description</description>
+                    <method>PUT</method>
+                    <params>
+                        <param>
+                            <name>{}.baseValue</name>
+                            <type>integer</type>
+                            <description>base value description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.param1</name>
+                            <type>integer</type>
+                            <description>int param description</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject</name>
+                            <type>object</type>
+                            <description>inner object description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject.innerParam</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject.innerEnumParam</name>
+                            <type>enum</type>
+                            <description>Enum description</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>value1</name>
+                                    <description>value1 description</description>
+                                </value>
+                                <value>
+                                    <name>value2</name>
+                                    <description>value2 description</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>Output description</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>{}.outputParam</name>
+                                <type>integer</type>
+                                <description>outputParam description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>{}.enumParam</name>
+                                <type>enum</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>{}.nestedEnumField</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>nestedEnumValue</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>handlerWithMap</name>
+                    <description>handlerWithMap PATCH description</description>
+                    <method>PATCH</method>
+                    <params>
+                        <param>
+                            <name>{}.baseValue</name>
+                            <type>integer</type>
+                            <description>base value description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.param1</name>
+                            <type>integer</type>
+                            <description>int param description</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject</name>
+                            <type>object</type>
+                            <description>inner object description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject.innerParam</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>{}.innerObject.innerEnumParam</name>
+                            <type>enum</type>
+                            <description>Enum description</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>value1</name>
+                                    <description>value1 description</description>
+                                </value>
+                                <value>
+                                    <name>value2</name>
+                                    <description>value2 description</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>Output description</caption>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>{}.outputParam</name>
+                                <type>integer</type>
+                                <description>outputParam description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>{}.enumParam</name>
+                                <type>enum</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>{}.nestedEnumField</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>nestedEnumValue</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
                     <name>handlerWithType</name>
                     <description>handlerWithType PATCH description</description>
                     <method>PATCH</method>

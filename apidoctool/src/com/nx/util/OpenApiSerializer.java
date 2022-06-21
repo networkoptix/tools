@@ -35,10 +35,15 @@ public final class OpenApiSerializer
     {
         if (!schema.has("type"))
             schema.put("type", "object");
-        schema = getObject(schema, "properties");
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
+        if (item.equals("{}"))
+        {
+            schema = getObject(schema, "additionalProperties");
+            return getParamByPath(schema, path);
+        }
+        schema = getObject(schema, "properties");
         if (item.endsWith("[]"))
         {
             item = item.substring(0, item.length() - 2);
@@ -60,6 +65,12 @@ public final class OpenApiSerializer
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
+        if (item.equals("{}"))
+        {
+            schema = getObject(schema, "additionalProperties");
+            setRequired(schema, path);
+            return;
+        }
         if (item.endsWith("[]"))
         {
             item = item.substring(0, item.length() - 2);
@@ -198,10 +209,8 @@ public final class OpenApiSerializer
                     schema = getObject(schema, "items");
                 }
 
-                addStructParam(schema, param);
-
-                if (param.hasRecursiveField)
-                    addReferenceParam(schema, param, componentsSchemas);
+                if (param.recursiveName == null)
+                    addStructParam(schema, param);
 
                 continue;
             }
@@ -221,6 +230,26 @@ public final class OpenApiSerializer
                 parameter.put("in", "query");
             }
             getArray(method, "parameters").put(parameter);
+        }
+        for (final Apidoc.Param param: function.input.params)
+        {
+            final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
+            if (inPath)
+                continue;
+            if (function.areInBodyParameters() && !param.isRef && param.recursiveName != null)
+            {
+                final JSONObject requestBody = getObject(method, "requestBody");
+                if (!param.optional)
+                    requestBody.put("required", true);
+                JSONObject schema = getObject(getObject(getObject(
+                    requestBody, "content"), "application/json"), "schema");
+                if (function.arrayParams)
+                {
+                    schema.put("type", "array");
+                    schema = getObject(schema, "items");
+                }
+                addReferenceParam(schema, param, componentsSchemas);
+            }
         }
     }
 
@@ -251,15 +280,14 @@ public final class OpenApiSerializer
             method.put("description", description);
         if (function.permissions != null && !function.permissions.isEmpty())
             method.put("x-permissions", function.permissions);
-        if (function.input.type != Apidoc.Type.UNKNOWN)
+        if (function.input.type.fixed != Apidoc.Type.UNKNOWN && function.areInBodyParameters())
         {
-            assert function.areInBodyParameters();
             final JSONObject requestBody = getObject(method, "requestBody");
             if (!function.input.optional)
                 requestBody.put("required", true);
             JSONObject schema = getObject(getObject(getObject(
                 requestBody, "content"), "application/json"), "schema");
-            fillSchemaType(schema, function.input.type);
+            fillSchemaType(schema, function.input.type.fixed);
         }
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
         fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
@@ -279,10 +307,10 @@ public final class OpenApiSerializer
 
     private static JSONObject fillOrderBy(JSONObject orderBy, Apidoc.Param param)
     {
-        if (param.type == Apidoc.Type.ARRAY
-            || param.type == Apidoc.Type.STRING_ARRAY
-            || param.type == Apidoc.Type.UUID_ARRAY
-            || param.type == Apidoc.Type.OBJECT)
+        if (param.type.fixed == Apidoc.Type.ARRAY
+            || param.type.fixed == Apidoc.Type.STRING_ARRAY
+            || param.type.fixed == Apidoc.Type.UUID_ARRAY
+            || param.type.fixed == Apidoc.Type.OBJECT)
         {
             return orderBy;
         }
@@ -309,15 +337,15 @@ public final class OpenApiSerializer
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         default_.put("description", Utils.cleanupDescription(result.caption));
-        if (result.type == Apidoc.Type.UNKNOWN)
+        if (result.type.fixed == Apidoc.Type.UNKNOWN)
             return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
-        fillSchemaType(schema, result.type);
-        if (result.type == Apidoc.Type.ARRAY || result.type == Apidoc.Type.OBJECT)
+        fillSchemaType(schema, result.type.fixed);
+        if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
         {
             JSONObject orderBy = null;
-            if (result.type == Apidoc.Type.ARRAY)
+            if (result.type.fixed == Apidoc.Type.ARRAY)
             {
                 schema = schema.getJSONObject("items");
                 if (generateOrderByParameters)
@@ -325,15 +353,18 @@ public final class OpenApiSerializer
             }
             for (final Apidoc.Param param: result.params)
             {
-                addStructParam(schema, param);
-
-                if (param.hasRecursiveField)
-                    addReferenceParam(schema, param, componentsSchemas);
+                if (param.recursiveName == null)
+                    addStructParam(schema, param);
                 if (generateOrderByParameters)
                     orderBy = fillOrderBy(orderBy, param);
             }
             if (orderBy != null)
                 getArray(path, "parameters").put(orderBy);
+            for (final Apidoc.Param param: result.params)
+            {
+                if (param.recursiveName != null)
+                    addReferenceParam(schema, param, componentsSchemas);
+            }
         }
     }
 
@@ -399,8 +430,8 @@ public final class OpenApiSerializer
 
     private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
     {
-        fillSchemaType(schema, param.type);
-        if (param.type == Apidoc.Type.ENUM || param.type == Apidoc.Type.FLAGS)
+        fillSchemaType(schema, param.type.fixed);
+        if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
         {
             if (param.values.isEmpty())
                 return;
@@ -419,9 +450,9 @@ public final class OpenApiSerializer
             result += (param.proprietary ? " " : "") + cleanedDescription;
         if (param.values.isEmpty())
             return result;
-        if (param.type == Apidoc.Type.BOOLEAN
-            || param.type == Apidoc.Type.ENUM
-            || param.type == Apidoc.Type.FLAGS)
+        if (param.type.fixed == Apidoc.Type.BOOLEAN
+            || param.type.fixed == Apidoc.Type.ENUM
+            || param.type.fixed == Apidoc.Type.FLAGS)
         {
             boolean hasDescription = false;
             for (final Apidoc.Value value: param.values)
@@ -438,13 +469,13 @@ public final class OpenApiSerializer
         }
         if (!result.isEmpty())
             result += "\n\n";
-        if (param.type == Apidoc.Type.FLAGS)
+        if (param.type.fixed == Apidoc.Type.FLAGS)
             result += "Possible values are one of or the combination by `|` of the following:";
         else
             result += "Possible values are:";
         for (final Apidoc.Value value: param.values)
         {
-            result += "\n- `" + value.nameForDescription(param.type) + '`';
+            result += "\n- `" + value.nameForDescription(param.type.fixed) + '`';
             if (value.description == null)
                 continue;
 
@@ -478,38 +509,31 @@ public final class OpenApiSerializer
     }
 
     public static void addReferenceParam(
-        JSONObject schema,
-        Apidoc.Param param,
-        JSONObject componentsSchemas)
+        JSONObject schema, Apidoc.Param param, JSONObject componentsSchemas)
     {
-        final String[] list = param.name.replace("[]", "").split("\\.");
-
-        if (list.length == 0)
-            return;
-
-        final String topParamName = list.length > 1 ? list[list.length - 2] : list[0];
-        final String nestedParamName = list[list.length - 1];
-
-        JSONObject parentObj = schema.getJSONObject("properties");
-        JSONObject topObject = new JSONObject();
-        for (final String key: list)
+        String recursiveName = param.recursiveName;
+        if (recursiveName.endsWith("."))
+            recursiveName = recursiveName.substring(0, recursiveName.length() - 1);
+        if (recursiveName.endsWith("[]"))
+            recursiveName = recursiveName.substring(0, recursiveName.length() - 2);
+        final JSONObject recursive =
+            recursiveName.isEmpty() ? schema : getParamByPath(schema, recursiveName);
+        final JSONObject parameter = getParamByPath(schema, param.name);
+        if (param.readonly)
+            parameter.put("readOnly", true);
+        if (!param.optional)
+            setRequired(schema, param.name);
+        if (param.type.fixed == Apidoc.Type.ARRAY)
         {
-            final JSONObject obj = parentObj.getJSONObject(key);
-            final boolean isArray = obj.has("items");
-            if (key.equals(topParamName))
-            {
-                topObject = isArray ? getObject(obj, "items") : obj;
-                JSONObject innerObj = getObject(getObject(topObject, "properties"), nestedParamName);
-                innerObj = innerObj.has("items") ? innerObj.getJSONObject("items") : innerObj;
-                innerObj.remove("type");
-                innerObj.put("$ref", "#/components/schemas/" + param.structName);
-                break;
-            }
-            parentObj = isArray
-                ? obj.getJSONObject("items").getJSONObject("properties")
-                : obj.getJSONObject("properties");
+            parameter.put("type", "array");
+            getObject(parameter, "items").put("$ref", "#/components/schemas/" + param.type.name);
         }
-        componentsSchemas.put(param.structName, topObject);
+        else
+        {
+            parameter.put("$ref", "#/components/schemas/" + param.type.name);
+        }
+        componentsSchemas.put(
+            param.type.name, recursive.has("items") ? recursive.get("items") : recursive);
     }
 
     private static JSONObject toJson(Apidoc.Param param) throws Exception

@@ -177,19 +177,18 @@ public final class Apidoc extends Serializable
     public static final class Param extends Serializable
     {
         public boolean isGeneratedFromStruct = false;
-        public String structName;
         private boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
 
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
         public boolean isRef = false; ///< Internal field
-        public boolean hasRecursiveField = false; ///< Internal field
+        public String recursiveName; ///< Internal field
 
         public boolean proprietary = false; ///< attribute; optional(default=false)
         public boolean deprecated = false; ///< attribute; optional(default=false)
         public boolean readonly = false; ///< attribute; optional(default=false)
         public String name;
-        public Type type;
+        public TypeInfo type;
         public String description; ///< optional
         public String deprecatedDescription = ""; ///< optional
         public boolean optional = false; ///< attribute; optional(default=false)
@@ -197,6 +196,7 @@ public final class Apidoc extends Serializable
 
         public Param()
         {
+            type = new TypeInfo();
             values = new ArrayList<Value>();
         }
 
@@ -204,8 +204,10 @@ public final class Apidoc extends Serializable
         {
             if (!isGeneratedFromStruct)
                 isGeneratedFromStruct = origin.isGeneratedFromStruct;
-            if (structName == null || structName.isEmpty())
-                structName = origin.structName;
+            if (type.name == null)
+                type.name = origin.type.name;
+            if (type.fixed == Type.UNKNOWN)
+                type.fixed = origin.type.fixed;
             if (!omitOptionalFieldIfFalse)
                 omitOptionalFieldIfFalse = origin.omitOptionalFieldIfFalse;
             if (!unused)
@@ -224,14 +226,12 @@ public final class Apidoc extends Serializable
                 readonly = origin.readonly;
             if (name == null || name.isEmpty())
                 name = origin.name;
-            if (type == Type.values()[0])
-                type = origin.type;
             if (description == null || description.isEmpty())
                 description = origin.description;
             if (!optional)
                 optional = origin.optional;
-            if (!hasRecursiveField)
-                hasRecursiveField = origin.hasRecursiveField;
+            if (recursiveName == null)
+                recursiveName = origin.recursiveName;
 
             if (origin.values == null || origin.values.isEmpty())
                 return;
@@ -340,7 +340,7 @@ public final class Apidoc extends Serializable
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
-            type = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
+            type.fixed = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             description = p.readInnerXml("description", Presence.OPTIONAL);
             optional = p.readBoolean("optional", BooleanDefault.FALSE);
             p.readObjectList("values", values, Value.class, Presence.OPTIONAL);
@@ -352,7 +352,7 @@ public final class Apidoc extends Serializable
                 g.writeBooleanAttr("proprietary", true, BooleanDefault.NONE);
 
             g.writeString("name", name, Emptiness.PROHIBIT);
-            g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
+            g.writeEnum("type", type.fixed, Type.class, EnumDefault.OMIT);
             final String deprecatedString = getDeprecatedString();
             g.writeInnerXml(
                 "description",
@@ -369,28 +369,27 @@ public final class Apidoc extends Serializable
 
     public static class InOutData extends Serializable
     {
-        public String structName;
+        public TypeInfo type;
         public List<Param> unusedParams; ///< Internal field.
-
-        public Type type = Type.UNKNOWN;
         public List<Param> params; ///< optional
         public boolean optional; ///< attribute; optional(false)
 
         public InOutData()
         {
+            type = new TypeInfo();
             params = new ArrayList<Param>();
             unusedParams = new ArrayList<Param>();
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            type = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
+            type.fixed = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
+            g.writeEnum("type", type.fixed, Type.class, EnumDefault.OMIT);
             for (Param param: params)
                 param.omitOptionalFieldIfFalse = true;
             g.writeObjectList("params", params, Emptiness.OMIT);

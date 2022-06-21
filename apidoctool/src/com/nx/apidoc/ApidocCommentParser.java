@@ -167,7 +167,6 @@ public final class ApidocCommentParser
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
-        description.function.result.type = Apidoc.Type.values()[0];
 
         while (tagIterator.hasNext())
         {
@@ -192,7 +191,14 @@ public final class ApidocCommentParser
                     description.function.input.optional = true;
                 else
                     checkNoAttribute(item);
-                description.function.input.structName = item.getFullText(indentLevel);
+                try
+                {
+                    description.function.input.type.fillFromName(item.getFullText(indentLevel));
+                }
+                catch (Exception e)
+                {
+                    throw new Error(item.getErrorPrefix() + e.getMessage());
+                }
             }
             else if (TAG_CAPTION.equals(item.getTag()))
             {
@@ -278,30 +284,30 @@ public final class ApidocCommentParser
         ParamDirection paramDirection)
         throws TypeManager.Error, Error
     {
-        if (typeManager == null || param.structName == null)
+        if (typeManager == null || param.type.name == null)
             return;
 
         if (param.description.isEmpty())
-            param.description = typeManager.getStructDescription(param.structName);
+            param.description = typeManager.getStructDescription(param.type.name);
 
-        if (param.type != Apidoc.Type.ARRAY
-            && param.type != Apidoc.Type.OBJECT
-            && param.type != Apidoc.Type.UNKNOWN)
+        if (param.type.fixed != Apidoc.Type.ARRAY
+            && param.type.fixed != Apidoc.Type.OBJECT
+            && param.type.fixed != Apidoc.Type.UNKNOWN)
         {
             throw new Error(
                 "Param `" + param.name + "` has %struct tag, but the param type is `"
-                + param.type + "`" + ". "
+                + param.type.fixed + "`" + ". "
                 + "To use %struct tag, the type must be `object` or `array`.");
         }
 
         String prefix = param.name;
-        if (param.type == Apidoc.Type.ARRAY)
+        if (param.type.fixed == Apidoc.Type.ARRAY)
             prefix += "[].";
         else
             prefix += ".";
 
         final List<Apidoc.Param> structParams =
-            typeManager.getStructParams(param.structName, prefix, paramDirection);
+            typeManager.getStructParams(param.type, prefix, paramDirection);
         if (structParams != null)
         {
             for (Apidoc.Param structParam: structParams)
@@ -383,12 +389,12 @@ public final class ApidocCommentParser
             {
                 try
                 {
-                    result.function.input.type = Apidoc.Type.fromString(label);
+                    result.function.input.type.fillFromLabel(label);
                 }
                 catch (Exception e)
                 {
-                    throw new Error(item.getErrorPrefix() +
-                        "Invalid function type \"" + label + "\" found.");
+                    throw new Error(
+                        item.getErrorPrefix() + "Invalid function type \"" + label + "\" found.");
                 }
             }
         }
@@ -432,16 +438,17 @@ public final class ApidocCommentParser
         param.name = getInitialToken(item, paramMode);
         try
         {
-            param.type = Apidoc.Type.fromString(item.getLabel());
+            param.type.fillFromLabel(item.getLabel());
         }
         catch (Exception e)
         {
-            throw new Error(item.getErrorPrefix() + "Invalid param type \"" + item.getLabel()
-                + "\" found.");
+            throw new Error(
+                item.getErrorPrefix() + "Invalid param type \"" + item.getLabel() + "\" found.");
         }
         Param paramDescription = parseParamItems(tagIterator);
         param.values.addAll(paramDescription.values);
-        param.structName = paramDescription.structName;
+        if (paramDescription.structName != null && !paramDescription.structName.isEmpty())
+            param.type.name = paramDescription.structName;
         param.deprecated = paramDescription.deprecated;
         param.deprecatedDescription = paramDescription.deprecatedDescription;
 
@@ -567,7 +574,7 @@ public final class ApidocCommentParser
         }
 
         // TODO: Consider defining default "format" in the C++ source code.
-        param.type = Apidoc.Type.ENUM;
+        param.type.fixed = Apidoc.Type.ENUM;
         param.optional = true;
         param.description = DEFAULT_FORMAT_DESCRIPTION;
         param.values.add(createValue("ubjson",
@@ -602,12 +609,12 @@ public final class ApidocCommentParser
         result.caption = item.getFullText(indentLevel);
         try
         {
-            result.type = Apidoc.Type.fromString(item.getLabel());
+            result.type.fillFromLabel(item.getLabel());
         }
         catch (Exception e)
         {
-            throw new Error(
-                item.getErrorPrefix() + "Invalid result type \"" + item.getLabel() + "\" found.");
+            throw new Error(item.getErrorPrefix() +
+                "Invalid result type `" + item.getLabel() + "`: " + e.getMessage());
         }
 
         boolean deprecatedAttributeTagFound = false;
@@ -616,7 +623,14 @@ public final class ApidocCommentParser
             item = tagIterator.next();
             if (TAG_STRUCT.equals(item.getTag()))
             {
-                result.structName = item.getFullText(indentLevel);
+                try
+                {
+                    result.type.fillFromName(item.getFullText(indentLevel));
+                }
+                catch (Exception e)
+                {
+                    throw new Error(item.getErrorPrefix() + e.getMessage());
+                }
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {

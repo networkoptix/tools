@@ -327,8 +327,8 @@ public final class ApidocTagParser
     private static final Pattern itemStartRegex = Pattern.compile(
         "\\s*(?:/\\*)?\\*?\\*?(<)?\\s*(%[^\\s\\[:]+)\\s*(\\[\\w+\\])?\\s*" +
       //     /*       *               %tag              [attr]
-        "(:\\s*([_A-Za-z0-9]+))?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
-      // Label                      Token                  ...
+        "(:\\s*((?:[_A-Za-z0-9{}<>:]|, )+))?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
+      // Label                                 Token                  ...
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\* ([^%]*)");

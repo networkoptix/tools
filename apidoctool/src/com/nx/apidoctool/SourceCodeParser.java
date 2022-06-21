@@ -130,18 +130,55 @@ public final class SourceCodeParser
                         checkFunctionProperties(match, description.function);
                         if (typeManager != null)
                         {
-                            String inputStructName = description.function.input.structName;
-                            if (inputStructName == null)
-                                inputStructName = match.inputDataType;
+                            TypeInfo inputType = description.function.input.type;
+                            if (match.inputDataType != null && !match.inputDataType.isEmpty()
+                                && inputType.name == null)
+                            {
+                                try
+                                {
+                                    inputType.fillFromName(match.inputDataType);
+                                }
+                                catch (Exception e)
+                                {
+                                    throw new Error(e.getMessage());
+                                }
+                                if (inputType.fixed == Apidoc.Type.UUID)
+                                {
+                                    for (Apidoc.Param param: description.function.input.params)
+                                    {
+                                        if (param.name.equals("id"))
+                                        {
+                                            param.type.fixed = Apidoc.Type.UUID;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
 
-                            String outputStructName = null;
+                            TypeInfo outputType = null;
                             if (description.function.result != null)
-                                outputStructName = description.function.result.structName;
-                            if (outputStructName == null)
-                                outputStructName = match.outputDataType;
+                                outputType = description.function.result.type;
+                            if (match.outputDataType != null && !match.outputDataType.isEmpty())
+                            {
+                                if (description.function.result == null)
+                                {
+                                    description.function.result = new Apidoc.Result();
+                                    outputType = description.function.result.type;
+                                }
+                                if (outputType.name == null)
+                                {
+                                    try
+                                    {
+                                        outputType.fillFromName(match.outputDataType);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        throw new Error(e.getMessage());
+                                    }
+                                }
+                            }
 
-                            typeManager.mergeDescription(
-                                inputStructName, outputStructName, description.function);
+                            typeManager.mergeDescription(inputType, outputType, description.function);
 
                             if (description.function.input.optional)
                             {
@@ -228,7 +265,7 @@ public final class SourceCodeParser
         if (param.isRef)
             return;
         String error = null;
-        switch (param.type)
+        switch (param.type.fixed)
         {
             case UNKNOWN:
                 error = "unknown type";
@@ -236,7 +273,7 @@ public final class SourceCodeParser
             case OBJECT_JSON:
             case ARRAY_JSON:
             case TEXT:
-                error = "unsupported type \"" + param.type.toString() + "\"";
+                error = "unsupported type \"" + param.type.fixed.toString() + "\"";
                 break;
             default:
                 return;
@@ -249,19 +286,19 @@ public final class SourceCodeParser
     private void verifyParamValueNames(
         ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
     {
-        if (!param.type.mustBeQuotedInInput() && !param.type.mustBeUnquotedInInput())
+        if (!param.type.fixed.mustBeQuotedInInput() && !param.type.fixed.mustBeUnquotedInInput())
             return;
 
         for (final Apidoc.Value value: param.values)
         {
             String error = null;
-            if (param.type.mustBeQuotedInInput())
+            if (param.type.fixed.mustBeQuotedInInput())
             {
                 if (value.areQuotesRemovedFromName)
                     continue;
                 error = "must be quoted";
             }
-            if (param.type.mustBeUnquotedInInput())
+            if (param.type.fixed.mustBeUnquotedInInput())
             {
                 if (!value.areQuotesRemovedFromName)
                     continue;

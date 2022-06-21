@@ -22,16 +22,15 @@ public final class StructParser
         public static final class Field
         {
             public String name;
-            public Apidoc.Type type;
-            public String typeName;
+            public TypeInfo type = new TypeInfo();
             public List<ApidocTagParser.Item> items;
-            public boolean isStdOptional = false; ///< whether the field is std::optional
         }
 
         public String name;
         public List<String> baseTypeNames;
         public List<Field> fields;
         public List<ApidocTagParser.Item> items;
+        public boolean isMap = false;
 
         public final String description()
         {
@@ -52,9 +51,9 @@ public final class StructParser
             }
             for (Field field: fields)
             {
-                result += "    Field:" + field.type.toString();
-                if (field.typeName != null)
-                    result += "(" + field.typeName + ")";
+                result += "    Field:" + field.type.fixed.toString();
+                if (field.type.name != null)
+                    result += "(" + field.type.name + ")";
                 result += " " + field.name + "\n";
 
                 if (field.items != null)
@@ -116,8 +115,8 @@ public final class StructParser
                         final StructInfo.Field field = parseStructField();
                         if (field != null)
                         {
-                            if (enums.contains(field.typeName))
-                                field.typeName = struct.name + "_" + field.typeName;
+                            if (enums.contains(field.type.name))
+                                field.type.name = struct.name + "_" + field.type.name;
                             struct.fields.add(field);
                         }
                     }
@@ -137,13 +136,30 @@ public final class StructParser
 
         if (items.length == 2)
         {
+            String parents = items[1];
+            parents = parents.replace("public", "");
+            parents = parents.replace("private", "");
+            parents = parents.replace("protected", "");
+            parents = parents.trim();
             struct.baseTypeNames = new ArrayList<String>();
-            for (String base: items[1].split(","))
+            if (!parents.startsWith("std::map<"))
             {
-                base = base.replace("public", "");
-                base = base.replace("private", "");
-                base = base.replace("protected", "");
-                struct.baseTypeNames.add(Utils.removeCppNamespaces(base.trim()));
+                for (String base: parents.split(","))
+                    struct.baseTypeNames.add(Utils.removeCppNamespaces(base.trim()));
+            }
+            else
+            {
+                TypeInfo map = new TypeInfo();
+                try
+                {
+                    map.fillFromName(parents);
+                }
+                catch (Exception e)
+                {
+                    throw new Error(e.getMessage());
+                }
+                struct.baseTypeNames.add(map.mapValueType.name);
+                struct.isMap = true;
             }
         }
 
@@ -179,78 +195,23 @@ public final class StructParser
         final StructInfo.Field field = new StructInfo.Field();
         field.name = name;
         field.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
-
-        final String chronoSuffix = requiredChronoSuffixes.get(Utils.removeCppNamespaces(type));
-        if (chronoSuffix != null)
+        try
         {
-            if (invalidChronoFieldSuffixIsError && !name.endsWith(chronoSuffix)
-                && !hasDeprecatedTag(field.items))
-            {
-                throw new Error(
-                    "`" + type + " " + name + "` must end with '" + chronoSuffix + "' suffix.");
-            }
-            field.type = Apidoc.Type.STRING;
+            field.type.fillFromName(type);
         }
-        else if (integerAliases.contains(type))
+        catch (Exception e)
         {
-            field.type = Apidoc.Type.INTEGER;
+            throw new Error(e.getMessage());
         }
-        else if (typesRepresentedAsJsonString.contains(type))
+        final String chronoSuffix = TypeInfo.chronoSuffix(field.type.name);
+        if (chronoSuffix != null
+            && invalidChronoFieldSuffixIsError
+            && !name.endsWith(chronoSuffix)
+            && !hasDeprecatedTag(field.items))
         {
-            field.type = Apidoc.Type.STRING;
+            throw new Error(
+                "`" + type + " " + name + "` must end with '" + chronoSuffix + "' suffix.");
         }
-        else if (floatAliases.contains(type))
-        {
-            field.type = Apidoc.Type.FLOAT;
-        }
-        else if (booleanAliases.contains(type))
-        {
-            field.type = Apidoc.Type.BOOLEAN;
-        }
-        else if (uuidAliases.contains(type))
-        {
-            field.type = Apidoc.Type.UUID;
-        }
-        else if (type.equals("QStringList"))
-        {
-            field.type = Apidoc.Type.STRING_ARRAY;
-            field.typeName = "QString";
-        }
-        else if (type.endsWith("List") && !type.equals("QStringList"))
-        {
-            field.type = Apidoc.Type.ARRAY;
-            field.typeName = type.substring(0, type.length() - "List".length());
-        }
-        else if (type.equals("std::vector<QnUuid>"))
-        {
-            field.type = Apidoc.Type.UUID_ARRAY;
-        }
-        else if (type.startsWith("std::vector<"))
-        {
-            field.typeName = type.substring(
-                "std::vector<".length(), type.length() - ">".length()).trim();
-            if (typesRepresentedAsJsonString.contains(field.typeName))
-                field.type = Apidoc.Type.STRING_ARRAY;
-            else
-                field.type = Apidoc.Type.ARRAY;
-        }
-        else if (type.startsWith("std::optional<"))
-        {
-            final StructInfo.Field optField = parseField(
-                type.substring("std::optional<".length(), type.length() - ">".length()).trim(),
-                name);
-            optField.isStdOptional = true;
-            return optField;
-        }
-        else
-        {
-            field.type = Apidoc.Type.UNKNOWN;
-            field.typeName = type;
-        }
-
-        if (field.typeName != null)
-            field.typeName = Utils.removeCppNamespaces(field.typeName);
-
         return field;
     }
 
@@ -258,14 +219,6 @@ public final class StructParser
     private final boolean verbose;
     private final boolean invalidChronoFieldSuffixIsError;
     private int line;
-
-    private static final List<String> integerAliases = Arrays.asList(
-        "int", "qint32", "qint16", "qint8");
-    private static final List<String> typesRepresentedAsJsonString = Arrays.asList(
-        "QString", "QnLatin1Array", "QByteArray", "qint64", "size_t", "int64_t", "std::string");
-    private static final List<String> booleanAliases = Arrays.asList("bool");
-    private static final List<String> uuidAliases = Arrays.asList("QnUuid");
-    private static final List<String> floatAliases = Arrays.asList("float", "qreal");
 
     private static final Pattern structFirstLineRegex = Pattern.compile(
         "struct [^;]*");
@@ -282,17 +235,4 @@ public final class StructParser
     private static final Pattern fieldRegex = Pattern.compile(
         " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(?:\\s=\\s.*)?(?:\\s*\\{.*}\\s*)?;.*");
       //     0Type-----------------------------^    1Name Equals------^ Text-in-braces---^
-
-    private static final Map<String, String> requiredChronoSuffixes = new HashMap<String, String>()
-    {
-        {
-            put("seconds", "S");
-            put("milliseconds", "Ms");
-            put("microseconds", "Us");
-            put("nanoseconds", "Ns");
-            put("minutes", "M");
-            put("hours", "H");
-            put("time_point", "Ms");
-        }
-    };
 }
