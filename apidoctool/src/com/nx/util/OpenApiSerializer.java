@@ -2,6 +2,7 @@ package com.nx.util;
 
 import java.util.HashSet;
 
+import com.nx.apidoc.TypeInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -287,7 +288,7 @@ public final class OpenApiSerializer
                 requestBody.put("required", true);
             JSONObject schema = getObject(getObject(getObject(
                 requestBody, "content"), "application/json"), "schema");
-            fillSchemaType(schema, function.input.type.fixed);
+            fillSchemaType(schema, function.input.type);
         }
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
         fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
@@ -341,7 +342,7 @@ public final class OpenApiSerializer
             return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
-        fillSchemaType(schema, result.type.fixed);
+        fillSchemaType(schema, result.type);
         if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
         {
             JSONObject orderBy = null;
@@ -428,9 +429,20 @@ public final class OpenApiSerializer
         }
     }
 
+    private static void fillSchemaType(JSONObject schema, TypeInfo typeInfo)
+    {
+        fillSchemaType(schema, typeInfo.fixed);
+        if (typeInfo.mapValueType != null && typeInfo.mapValueType.fixed != Apidoc.Type.OBJECT)
+        {
+            assert typeInfo.mapValueType.fixed != Apidoc.Type.UNKNOWN;
+            assert typeInfo.fixed == Apidoc.Type.OBJECT;
+            fillSchemaType(getObject(schema, "additionalProperties"), typeInfo.mapValueType.fixed);
+        }
+    }
+
     private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
     {
-        fillSchemaType(schema, param.type.fixed);
+        fillSchemaType(schema, param.type);
         if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
         {
             if (param.values.isEmpty())

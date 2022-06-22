@@ -265,18 +265,27 @@ public final class SourceCodeParser
         if (param.isRef)
             return;
         String error = null;
-        switch (param.type.fixed)
+        if (param.type.mapValueType == null)
         {
-            case UNKNOWN:
-                error = "unknown type";
-                break;
-            case OBJECT_JSON:
-            case ARRAY_JSON:
-            case TEXT:
-                error = "unsupported type \"" + param.type.fixed.toString() + "\"";
-                break;
-            default:
+            switch (param.type.fixed)
+            {
+                case UNKNOWN:
+                    error = "unknown type";
+                    break;
+                case OBJECT_JSON:
+                case ARRAY_JSON:
+                case TEXT:
+                    error = "unsupported type \"" + param.type.fixed.toString() + "\"";
+                    break;
+                default:
+                    return;
+            }
+        }
+        else
+        {
+            if (param.type.mapValueType.fixed != Apidoc.Type.UNKNOWN)
                 return;
+            error = "unknown map value type";
         }
         throw new Error(description.function.method + " " + description.urlPrefix + "/" +
             description.function.name + ": " + error + " of " + (isResult ? "result " : "") +

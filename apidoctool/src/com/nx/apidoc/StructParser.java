@@ -142,24 +142,23 @@ public final class StructParser
             parents = parents.replace("protected", "");
             parents = parents.trim();
             struct.baseTypeNames = new ArrayList<String>();
-            if (!parents.startsWith("std::map<"))
+            try
             {
-                for (String base: parents.split(","))
-                    struct.baseTypeNames.add(Utils.removeCppNamespaces(base.trim()));
+                final String mapItem = TypeInfo.mapItem(parents);
+                if (mapItem == null)
+                {
+                    for (String base: parents.split(","))
+                        struct.baseTypeNames.add(Utils.removeCppNamespaces(base.trim()));
+                }
+                else
+                {
+                    struct.baseTypeNames.add(mapItem);
+                    struct.isMap = true;
+                }
             }
-            else
+            catch (Exception e)
             {
-                TypeInfo map = new TypeInfo();
-                try
-                {
-                    map.fillFromName(parents);
-                }
-                catch (Exception e)
-                {
-                    throw new Error(e.getMessage());
-                }
-                struct.baseTypeNames.add(map.mapValueType.name);
-                struct.isMap = true;
+                throw new Error(e.getMessage());
             }
         }
 

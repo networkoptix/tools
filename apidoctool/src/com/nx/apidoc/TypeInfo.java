@@ -34,10 +34,50 @@ public final class TypeInfo
         return requiredChronoSuffixes.get(type);
     }
 
+    public static String mapItem(final String type) throws Exception
+    {
+        for (final String mapAlias: mapAliases)
+        {
+            if (!type.startsWith(mapAlias))
+                continue;
+            if (!type.endsWith(">"))
+                throw new Exception("Invalid type `" + type + "`.");
+            final String[] keyValue =
+                type.substring(mapAlias.length(), type.length() - ">".length()).split(",");
+            if (keyValue.length != 2)
+                throw new Exception("Unsupported map type `" + type + "`.");
+            final String result = keyValue[1].trim();
+            if (result.isEmpty())
+                throw new Exception("Invalid type `" + type + "`.");
+            return result;
+        }
+        return null;
+    }
+
+    private String arrayItem(final String type) throws Exception
+    {
+        for (final String arrayAlias: arrayAliases)
+        {
+            if (!type.startsWith(arrayAlias))
+                continue;
+            if (!type.endsWith(">"))
+                throw new Exception("Invalid type `" + type + "`.");
+            if (fixed == Apidoc.Type.ARRAY)
+                throw new Exception("Arrays of `" + type + "` are unsupported.");
+            final String result =
+                type.substring(arrayAlias.length(), type.length() - ">".length()).trim();
+            if (result.isEmpty())
+                throw new Exception("Invalid type `" + type + "`.");
+            return result;
+        }
+        return null;
+    }
+
     private void fillFromNameRecursive(final String type) throws Exception
     {
         assert fixed == Apidoc.Type.UNKNOWN || fixed == Apidoc.Type.ARRAY;
 
+        String item = null;
         final String chronoSuffix = requiredChronoSuffixes.get(Utils.removeCppNamespaces(type));
         if (chronoSuffix != null)
         {
@@ -66,6 +106,10 @@ public final class TypeInfo
         {
             fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.UUID : Apidoc.Type.UUID_ARRAY;
         }
+        else if (type.equals("QJsonValue"))
+        {
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.ANY : Apidoc.Type.ARRAY;
+        }
         else if (type.equals("QStringList"))
         {
             if (fixed == Apidoc.Type.UNKNOWN)
@@ -76,44 +120,38 @@ public final class TypeInfo
             fixed = Apidoc.Type.ARRAY;
             fillFromNameRecursive(type.substring(0, type.length() - "List".length()));
         }
-        else if (type.equals("std::vector<QnUuid>"))
+        else if ((item = this.arrayItem(type)) != null)
         {
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.UUID_ARRAY;
-        }
-        else if (type.startsWith("std::vector<"))
-        {
-            if (!type.endsWith(">"))
-                throw new Exception("Invalid type " + type + " .");
-            if (fixed == Apidoc.Type.ARRAY)
-                throw new Exception("Arrays of " + type + " are unsupported.");
-            final String itemName = type.substring(
-                "std::vector<".length(), type.length() - ">".length()).trim();
-            if (typesRepresentedAsJsonString.contains(itemName))
+            if (typesRepresentedAsJsonString.contains(item))
             {
-                fixed = Apidoc.Type.STRING_ARRAY;
+                if (fixed == Apidoc.Type.UNKNOWN)
+                    fixed = Apidoc.Type.STRING_ARRAY;
+            }
+            else if (uuidAliases.contains(item))
+            {
+                if (fixed == Apidoc.Type.UNKNOWN)
+                    fixed = Apidoc.Type.UUID_ARRAY;
             }
             else
             {
                 fixed = Apidoc.Type.ARRAY;
-                fillFromNameRecursive(itemName);
+                fillFromNameRecursive(item);
             }
         }
-        else if (type.startsWith("std::map<"))
+        else if ((item = this.mapItem(type)) != null)
         {
-            if (!type.endsWith(">"))
-                throw new Exception("Invalid type `" + type + "`.");
-            final String[] keyValue =
-                type.substring("std::map<".length(), type.length() - ">".length()).split(",");
-            if (keyValue.length != 2)
-                throw new Exception("Unsupported map type `" + type + "`.");
             mapValueType = new TypeInfo();
-            mapValueType.fillFromNameRecursive(keyValue[1].trim());
+            mapValueType.fillFromNameRecursive(item);
+            if (mapValueType.fixed == Apidoc.Type.ANY)
+            {
+                fixed = Apidoc.Type.OBJECT;
+                mapValueType = null;
+            }
         }
         else if (type.startsWith("std::optional<"))
         {
             if (!type.endsWith(">"))
-                throw new Exception("Invalid type " + type + " .");
+                throw new Exception("Invalid type `" + type + "`.");
             isStdOptional = true;
             fillFromNameRecursive(
                 type.substring("std::optional<".length(), type.length() - ">".length()).trim());
@@ -130,10 +168,20 @@ public final class TypeInfo
     private static final List<String> integerAliases = Arrays.asList(
         "int", "qint32", "qint16", "qint8");
     private static final List<String> typesRepresentedAsJsonString = Arrays.asList(
-        "QString", "QnLatin1Array", "QByteArray", "qint64", "size_t", "int64_t", "std::string");
+        "QString",
+        "QnLatin1Array",
+        "QByteArray",
+        "qint64",
+        "size_t",
+        "int64_t",
+        "std::string",
+        "nx::utils::Url");
     private static final List<String> booleanAliases = Arrays.asList("bool");
     private static final List<String> uuidAliases = Arrays.asList("QnUuid");
     private static final List<String> floatAliases = Arrays.asList("float", "qreal");
+    private static final List<String> arrayAliases =
+        Arrays.asList("std::vector<", "QVector<", "QList<");
+    private static final List<String> mapAliases = Arrays.asList("std::map<", "QMap<");
     private static final Map<String, String> requiredChronoSuffixes = new HashMap<String, String>()
     {
         {

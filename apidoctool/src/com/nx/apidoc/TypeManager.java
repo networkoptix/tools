@@ -131,6 +131,8 @@ public final class TypeManager
     {
         if (type.mapValueType != null)
         {
+            if (type.mapValueType.fixed != Apidoc.Type.UNKNOWN && type.mapValueType.name == null)
+                return null;
             final StructParser.StructInfo origin = structs.get(type.mapValueType.name);
             if (origin == null)
             {
@@ -346,7 +348,8 @@ public final class TypeManager
             }
 
             if (param.recursiveName == null
-                && (field.type.fixed == Apidoc.Type.OBJECT || field.type.fixed == Apidoc.Type.ARRAY))
+                && (field.type.fixed == Apidoc.Type.OBJECT || field.type.fixed == Apidoc.Type.ARRAY)
+                && (field.type.name != null || field.type.mapValueType != null))
             {
                 StructParser.StructInfo innerStructInfo = structInfo(field.type);
                 if (innerStructInfo == null)
@@ -388,18 +391,16 @@ public final class TypeManager
         FlagParser.FlagInfo flag = flags.get(type.name);
         if (flag != null)
         {
-            if (type.fixed == Apidoc.Type.ARRAY)
-                throw new Error("Arrays of flags are unsupported: `" + type.name + "`.");
-            type.fixed = Apidoc.Type.FLAGS;
+            type.fixed =
+                (type.fixed == Apidoc.Type.ARRAY) ? Apidoc.Type.STRING_ARRAY : Apidoc.Type.FLAGS;
             type.name = flag.enumName;
         }
         else if (enums.get(type.name) != null)
         {
             if (type.fixed == Apidoc.Type.FLAGS)
                 return;
-            if (type.fixed == Apidoc.Type.ARRAY)
-                throw new Error("Arrays of enums are unsupported: `" + type.name + "`.");
-            type.fixed = Apidoc.Type.ENUM;
+            type.fixed =
+                (type.fixed == Apidoc.Type.ARRAY) ? Apidoc.Type.STRING_ARRAY : Apidoc.Type.ENUM;
         }
         else if (structs.get(type.name) != null)
         {
@@ -426,7 +427,7 @@ public final class TypeManager
             if (struct.baseTypeNames != null)
             {
                 List<ApidocTagParser.Item> items = new ArrayList<ApidocTagParser.Item>();
-                makeStructFlat(struct.fields, items, struct.baseTypeNames);
+                makeStructFlat(struct.fields, items, struct);
                 if (!items.isEmpty())
                 {
                     if (struct.items == null)
@@ -442,10 +443,10 @@ public final class TypeManager
     private void makeStructFlat(
         List<StructParser.StructInfo.Field> fields,
         List<ApidocTagParser.Item> items,
-        List<String> baseTypeNames)
+        StructParser.StructInfo struct)
         throws Error
     {
-        ListIterator<String> it = baseTypeNames.listIterator(baseTypeNames.size());
+        ListIterator<String> it = struct.baseTypeNames.listIterator(struct.baseTypeNames.size());
         while (it.hasPrevious())
         {
             TypeInfo type = new TypeInfo();
@@ -457,15 +458,20 @@ public final class TypeManager
             {
                 throw new Error(e.getMessage());
             }
-            StructParser.StructInfo baseStruct = structInfo(type);
-            if (baseStruct == null)
-                throw new Error("Base structure not found: \"" + type.name + "\"");
-
-            fields.addAll(0, baseStruct.fields);
-            if (baseStruct.items != null)
-                items.addAll(baseStruct.items);
-            if (baseStruct.baseTypeNames != null)
-                makeStructFlat(fields, items, baseStruct.baseTypeNames);
+            try
+            {
+                StructParser.StructInfo baseStruct = structInfo(type);
+                fields.addAll(0, baseStruct.fields);
+                if (baseStruct.items != null)
+                    items.addAll(baseStruct.items);
+                if (baseStruct.baseTypeNames != null)
+                    makeStructFlat(fields, items, baseStruct);
+            }
+            catch (Exception e)
+            {
+                throw new Error("Base structure `" + type.name + "` of `" + struct.name +
+                    "` not found: " + e.getMessage());
+            }
         }
     }
 
