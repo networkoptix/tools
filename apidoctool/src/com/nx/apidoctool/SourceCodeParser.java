@@ -95,7 +95,7 @@ public final class SourceCodeParser
         if (verbose)
             System.out.println("        Processed API functions:");
 
-        final boolean isApidocWithGroups = !apidoc.groups.isEmpty();
+        final boolean hasApidocLegacyGroups = !apidoc.groups.isEmpty();
         mainLine = 1;
         int processedFunctionCount = 0;
         while (mainLine <= sourceCode.getLineCount())
@@ -120,14 +120,15 @@ public final class SourceCodeParser
                             System.out.println("            " + description.function.name);
 
                         if (description.function.groups.isEmpty()
-                            && isApidocWithGroups
+                            && hasApidocLegacyGroups
                             && !urlPrefix.equals(description.urlPrefix))
                         {
                             throw new Error("URL prefix is differ in one apidoc comment: ["
                                 + urlPrefix + "] and [" + description.urlPrefix + "]");
                         }
 
-                        checkFunctionProperties(match, description.function);
+                        if (!hasApidocLegacyGroups)
+                            checkFunctionProperties(match, description.function);
                         if (typeManager != null)
                         {
                             TypeInfo inputType = description.function.input.type;
