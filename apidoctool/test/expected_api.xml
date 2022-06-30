@@ -9854,31 +9854,31 @@ is added for convenience)</description>
                     <method>PUT</method>
                     <params>
                         <param>
-                            <name>{}.baseValue</name>
+                            <name>*.baseValue</name>
                             <type>integer</type>
                             <description>base value description</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.param1</name>
+                            <name>*.param1</name>
                             <type>integer</type>
                             <description>int param description</description>
                             <optional>true</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject</name>
+                            <name>*.innerObject</name>
                             <type>object</type>
                             <description>inner object description</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject.innerParam</name>
+                            <name>*.innerObject.innerParam</name>
                             <type>string</type>
                             <description/>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject.innerEnumParam</name>
+                            <name>*.innerObject.innerEnumParam</name>
                             <type>enum</type>
                             <description>Enum description</description>
                             <optional>false</optional>
@@ -9899,7 +9899,7 @@ is added for convenience)</description>
                         <type>object</type>
                         <params>
                             <param>
-                                <name>{}.outputParam</name>
+                                <name>*.outputParam</name>
                                 <type>integer</type>
                                 <description>outputParam description</description>
                                 <values>
@@ -9914,7 +9914,7 @@ is added for convenience)</description>
                                 </values>
                             </param>
                             <param>
-                                <name>{}.enumParam</name>
+                                <name>*.enumParam</name>
                                 <type>enum</type>
                                 <description>Enum description</description>
                                 <values>
@@ -9929,7 +9929,7 @@ is added for convenience)</description>
                                 </values>
                             </param>
                             <param>
-                                <name>{}.nestedEnumField</name>
+                                <name>*.nestedEnumField</name>
                                 <type>enum</type>
                                 <description/>
                                 <values>
@@ -9948,31 +9948,31 @@ is added for convenience)</description>
                     <method>PATCH</method>
                     <params>
                         <param>
-                            <name>{}.baseValue</name>
+                            <name>*.baseValue</name>
                             <type>integer</type>
                             <description>base value description</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.param1</name>
+                            <name>*.param1</name>
                             <type>integer</type>
                             <description>int param description</description>
                             <optional>true</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject</name>
+                            <name>*.innerObject</name>
                             <type>object</type>
                             <description>inner object description</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject.innerParam</name>
+                            <name>*.innerObject.innerParam</name>
                             <type>string</type>
                             <description/>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>{}.innerObject.innerEnumParam</name>
+                            <name>*.innerObject.innerEnumParam</name>
                             <type>enum</type>
                             <description>Enum description</description>
                             <optional>false</optional>
@@ -9993,7 +9993,7 @@ is added for convenience)</description>
                         <type>object</type>
                         <params>
                             <param>
-                                <name>{}.outputParam</name>
+                                <name>*.outputParam</name>
                                 <type>integer</type>
                                 <description>outputParam description</description>
                                 <values>
@@ -10008,7 +10008,7 @@ is added for convenience)</description>
                                 </values>
                             </param>
                             <param>
-                                <name>{}.enumParam</name>
+                                <name>*.enumParam</name>
                                 <type>enum</type>
                                 <description>Enum description</description>
                                 <values>
@@ -10023,7 +10023,7 @@ is added for convenience)</description>
                                 </values>
                             </param>
                             <param>
-                                <name>{}.nestedEnumField</name>
+                                <name>*.nestedEnumField</name>
                                 <type>enum</type>
                                 <description/>
                                 <values>

@@ -39,7 +39,7 @@ public final class OpenApiSerializer
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
-        if (item.equals("{}"))
+        if (TypeInfo.mapKeyPlaceholder.equals(item))
         {
             schema = getObject(schema, "additionalProperties");
             return getParamByPath(schema, path);
@@ -66,7 +66,7 @@ public final class OpenApiSerializer
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
-        if (item.equals("{}"))
+        if (TypeInfo.mapKeyPlaceholder.equals(item))
         {
             schema = getObject(schema, "additionalProperties");
             setRequired(schema, path);

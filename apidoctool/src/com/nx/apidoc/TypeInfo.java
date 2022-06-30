@@ -13,6 +13,7 @@ public final class TypeInfo
     public String name;
     public boolean isStdOptional = false;
     public TypeInfo mapValueType = null;
+    public static final String mapKeyPlaceholder = "*";
 
     public void fillFromLabel(final String label) throws Exception
     {

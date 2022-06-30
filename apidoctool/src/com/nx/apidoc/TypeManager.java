@@ -307,7 +307,8 @@ public final class TypeManager
         List<Apidoc.Param> params = new ArrayList<Apidoc.Param>();
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
-            final String name = namePrefix + (structInfo.isMap ? "{}." : "") + field.name;
+            final String name =
+                namePrefix + (structInfo.isMap ? TypeInfo.mapKeyPlaceholder + "." : "") + field.name;
             final Apidoc.Param overriddenParam = findParam(overriddenParams, name);
             if (overriddenParam != null && overriddenParam.unused)
                 continue;
