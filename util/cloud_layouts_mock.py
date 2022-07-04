@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from pathlib import Path
 from tempfile import gettempdir
 
-'''
+help = '''
 Mock utility for emulating cloud layouts storage.
 Requires Python 3.10+, fastapi and uvicorn python modules.
 
@@ -42,3 +42,7 @@ async def save_layout(file_path: str, request: Request):
     with open(full_path, "w") as file:
         json.dump(data, file)
     return { "message": f"File saved to {full_path}" }
+
+
+if __name__ == "__main__":
+    print(help)
