@@ -90,7 +90,7 @@ class GenericHttpSigningClient():
 
             except requests.exceptions.ReadTimeout as e:
                 print('ERROR: Connection to the signing server has timed out'
-                      + f' ({self.request_timeout} seconds, {self.max_retries} retries) '
+                      + f' ({self.request_timeout} seconds, {self.retries} retries) '
                       + f'while signing {self.file}',
                       file=sys.stderr)
                 print(e, file=sys.stderr)
