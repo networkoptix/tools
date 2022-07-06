@@ -165,19 +165,43 @@ public final class TypeManager
         ApidocCommentParser.ParamDirection paramDirection)
         throws Error
     {
-        if ((type.name == null && type.mapValueType == null) || "nullptr_t".equals(type.name))
+        if ((type.name == null && type.mapValueType == null && type.variantValueTypes == null)
+            || TypeInfo.nullType.equals(type.name))
+        {
             return functionParams;
+        }
 
         correctType(type);
-        if (type.fixed == Apidoc.Type.UNKNOWN)
-            type.fixed = Apidoc.Type.OBJECT;
+        List<Apidoc.Param> structParams = null;
+        if (type.variantValueTypes != null)
+        {
+            for (int i = 0; i < type.variantValueTypes.size(); ++i)
+            {
+                final TypeInfo variantType = type.variantValueTypes.get(i);
+                final StructParser.StructInfo structInfo = structInfo(variantType);
+                if (structInfo == null)
+                    continue;
+                structParams.addAll(structToParams(
+                    "#" + i + (variantType.fixed == Apidoc.Type.ARRAY ? "[]." : "."),
+                    structInfo,
+                    paramDirection,
+                    new ArrayList<Apidoc.Param>(),
+                    new HashMap<String, String>()));
+            }
+        }
+        else
+        {
+            final StructParser.StructInfo structInfo = structInfo(type);
+            if (structInfo == null)
+                return functionParams;
 
-        final StructParser.StructInfo structInfo = structInfo(type);
-        if (structInfo == null)
-            return functionParams;
-
-        final List<Apidoc.Param> structParams = structToParams(
-            /*namePrefix*/ "", structInfo, paramDirection, new ArrayList<Apidoc.Param>(), new HashMap<String, String>());
+            structParams = structToParams(
+                /*namePrefix*/ "",
+                structInfo,
+                paramDirection,
+                new ArrayList<Apidoc.Param>(),
+                new HashMap<String, String>());
+        }
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
         for (Apidoc.Param structParam: structParams)
         {
@@ -335,7 +359,15 @@ public final class TypeManager
             else if (field.type.name != null)
                 param.recursiveName = processedStructs.get(field.type.name);
             if (param.type.fixed == Apidoc.Type.UNKNOWN)
+            {
                 param.type.fixed = field.type.fixed;
+                if (param.type.mapValueType == null)
+                    param.type.mapValueType = field.type.mapValueType;
+                if (param.type.variantValueTypes == null)
+                    param.type.variantValueTypes = field.type.variantValueTypes;
+                if (!param.type.canBeNull)
+                    param.type.canBeNull = field.type.canBeNull;
+            }
             if (field.type.isStdOptional)
                 param.optional = true;
             if (overriddenParam != null)
@@ -350,19 +382,55 @@ public final class TypeManager
 
             if (param.recursiveName == null
                 && (field.type.fixed == Apidoc.Type.OBJECT || field.type.fixed == Apidoc.Type.ARRAY)
-                && (field.type.name != null || field.type.mapValueType != null))
+                && (field.type.name != null
+                    || field.type.mapValueType != null
+                    || field.type.variantValueTypes != null))
             {
-                StructParser.StructInfo innerStructInfo = structInfo(field.type);
-                if (innerStructInfo == null)
-                    continue;
+                if (field.type.variantValueTypes != null)
+                {
+                    for (int i = 0; i < field.type.variantValueTypes.size(); ++i)
+                    {
+                        final TypeInfo innerType = field.type.variantValueTypes.get(i);
+                        if (!((innerType.fixed == Apidoc.Type.OBJECT || innerType.fixed == Apidoc.Type.ARRAY)
+                            && (innerType.name != null
+                                || innerType.mapValueType != null
+                                || innerType.variantValueTypes != null)))
+                        {
+                            continue;
+                        }
+                        StructParser.StructInfo innerStructInfo = structInfo(innerType);
+                        if (innerStructInfo == null)
+                            continue;
 
-                if (param.description == null || param.description.isEmpty())
-                    param.description = innerStructInfo.description();
+                        final String nextNamePrefix = param.name
+                            + (field.type.fixed == Apidoc.Type.ARRAY ? "[]." : ".")
+                            + "#" + i + (innerType.fixed == Apidoc.Type.ARRAY ? "[]." : ".");
+                        params.addAll(structToParams( //< Recursion.
+                            nextNamePrefix,
+                            innerStructInfo,
+                            paramDirection,
+                            overriddenParams,
+                            processedStructs));
+                    }
+                }
+                else
+                {
+                    StructParser.StructInfo innerStructInfo = structInfo(field.type);
+                    if (innerStructInfo == null)
+                        continue;
 
-                final String nextNamePrefix =
-                    param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]." : ".");
-                params.addAll(structToParams( //< Recursion.
-                    nextNamePrefix, innerStructInfo, paramDirection, overriddenParams, processedStructs));
+                    if (param.description == null || param.description.isEmpty())
+                        param.description = innerStructInfo.description();
+
+                    final String nextNamePrefix =
+                        param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]." : ".");
+                    params.addAll(structToParams( //< Recursion.
+                        nextNamePrefix,
+                        innerStructInfo,
+                        paramDirection,
+                        overriddenParams,
+                        processedStructs));
+                }
             }
         }
 
@@ -383,6 +451,14 @@ public final class TypeManager
     {
         if (type.mapValueType != null)
             correctType(type.mapValueType);
+
+        if (type.variantValueTypes != null)
+        {
+            for (final TypeInfo variantType: type.variantValueTypes)
+                correctType(variantType);
+            if (type.fixed == Apidoc.Type.UNKNOWN)
+                type.fixed = Apidoc.Type.OBJECT;
+        }
 
         if (type.name == null)
             return;

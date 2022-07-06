@@ -34,11 +34,30 @@ public final class OpenApiSerializer
 
     private static JSONObject getParamByPath(JSONObject schema, String path)
     {
-        if (!schema.has("type"))
-            schema.put("type", "object");
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
+        if (item.startsWith("#"))
+        {
+            if (item.endsWith("[]"))
+            {
+                schema = getObject(schema, "items");
+                item = item.substring(0, item.length() - 2);
+            }
+            JSONArray oneOf = getArray(schema, "oneOf");
+            int index = Integer.parseInt(item.substring(1));
+            schema = oneOf.optJSONObject(index);
+            if (schema == null)
+            {
+                schema = new JSONObject();
+                oneOf.put(index, schema);
+            }
+            if (path.isEmpty())
+                return schema;
+            return getParamByPath(schema, path);
+        }
+        if (!schema.has("type"))
+            schema.put("type", "object");
         if (TypeInfo.mapKeyPlaceholder.equals(item))
         {
             schema = getObject(schema, "additionalProperties");
@@ -66,6 +85,24 @@ public final class OpenApiSerializer
         final int subpathPos = path.indexOf('.');
         String item = (subpathPos < 0) ? path : path.substring(0, subpathPos);
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
+        if (item.startsWith("#"))
+        {
+            if (item.endsWith("[]"))
+            {
+                schema = getObject(schema, "items");
+                item = item.substring(0, item.length() - 2);
+            }
+            JSONArray oneOf = getArray(schema, "oneOf");
+            int index = Integer.parseInt(item.substring(1));
+            schema = oneOf.optJSONObject(index);
+            if (schema == null)
+            {
+                schema = new JSONObject();
+                oneOf.put(index, schema);
+            }
+            setRequired(schema, path);
+            return;
+        }
         if (TypeInfo.mapKeyPlaceholder.equals(item))
         {
             schema = getObject(schema, "additionalProperties");
@@ -404,7 +441,7 @@ public final class OpenApiSerializer
                 break;
             case ARRAY:
                 schema.put("type", "array");
-                getObject(schema, "items").put("type", "object");
+                getObject(schema, "items");
                 break;
             case STRING_ARRAY:
                 schema.put("type", "array");
@@ -431,6 +468,22 @@ public final class OpenApiSerializer
 
     private static void fillSchemaType(JSONObject schema, TypeInfo typeInfo)
     {
+        if (typeInfo.variantValueTypes != null)
+        {
+            if (typeInfo.canBeNull)
+                schema.put("nullable", true);
+            final JSONArray oneOf = getArray(schema, "oneOf");
+            for (int i = 0; i < typeInfo.variantValueTypes.size(); ++i)
+            {
+                TypeInfo type = typeInfo.variantValueTypes.get(i);
+                assert type.fixed != Apidoc.Type.UNKNOWN;
+                assert typeInfo.fixed == Apidoc.Type.OBJECT;
+                JSONObject internalSchema = new JSONObject();
+                fillSchemaType(internalSchema, type.fixed);
+                oneOf.put(i, internalSchema);
+            }
+            return;
+        }
         fillSchemaType(schema, typeInfo.fixed);
         if (typeInfo.mapValueType != null && typeInfo.mapValueType.fixed != Apidoc.Type.OBJECT)
         {

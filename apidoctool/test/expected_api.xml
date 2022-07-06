@@ -15209,5 +15209,111 @@ for details.</caption>
                 </function>
             </functions>
         </group>
+        <group>
+            <groupName>JSON-RPC</groupName>
+            <urlPrefix/>
+            <groupDescription/>
+            <functions>
+                <function>
+                    <name>jsonrpc</name>
+                    <caption>Single endpoint API interface</caption>
+                    <description/>
+                    <permissions>Depends on resource access rights.</permissions>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>jsonrpc</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>"2.0"</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>method</name>
+                            <type>string</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>params</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>id</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>true</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>jsonrpc</name>
+                                <type>string</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>"2.0"</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>id</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>result</name>
+                                <type>any</type>
+                                <description/>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>error</name>
+                                <type>object</type>
+                                <description/>
+                                <optional>true</optional>
+                            </param>
+                            <param>
+                                <name>error.code</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>error.message</name>
+                                <type>string</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>error.data</name>
+                                <type>any</type>
+                                <description/>
+                                <optional>true</optional>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>jsonrpc</name>
+                    <caption>Web socket API interface</caption>
+                    <description/>
+                    <permissions>Depends on resource access rights.</permissions>
+                    <method>OPTIONS</method>
+                    <params/>
+                    <result>
+                        <caption>Response with `switching protocols` HTTP status code.</caption>
+                    </result>
+                </function>
+            </functions>
+        </group>
     </groups>
 </apidoc>

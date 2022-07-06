@@ -144,15 +144,16 @@ public final class StructParser
             struct.baseTypeNames = new ArrayList<String>();
             try
             {
-                final String mapItem = TypeInfo.mapItem(parents);
-                if (mapItem == null)
+                final TypeInfo map = new TypeInfo();
+                map.extractMapType(parents);
+                if (map.mapValueType == null)
                 {
                     for (String base: parents.split(","))
                         struct.baseTypeNames.add(Utils.removeCppNamespaces(base.trim()));
                 }
                 else
                 {
-                    struct.baseTypeNames.add(mapItem);
+                    struct.baseTypeNames.add(map.mapValueType.name);
                     struct.isMap = true;
                 }
             }

@@ -7213,6 +7213,7 @@
             "properties": {
               "vectorB": {
                 "items": {
+                  "type": "object",
                   "properties": {
                     "fieldA": {
                       "type": "object",
@@ -7230,8 +7231,7 @@
                   "required": [
                     "fieldA",
                     "vectorB"
-                  ],
-                  "type": "object"
+                  ]
                 },
                 "type": "array"
               },
@@ -9883,7 +9883,84 @@
       "description": "For URL-based authentication and cookie-based authentication you need to calculate the hash manually, using the following algorithm:\n                        <ul>\n        <li>Call <code>GET /api/getNonce<\/code>\n        <\/li>\n        <li>In response you'll get a JSON object with <i>realm<\/i> and <i>nonce<\/i>\n        <\/li>\n        <li>Translate user's <i>username<\/i> to the lower case<\/li>\n        <li>Check the required <i>method<\/i> (\"GET\" for HTTP GET requests, \"POST\" for HTTP POST requests, \"PLAY\" for RTSP etc)<\/li>\n        <li>\n            <code>digest = md5_hex(user_name + \":\" + realm + \":\" + password)<\/code>\n        <\/li>\n        <li>\n            <code>partial_ha2 = md5_hex(method + \":\")<\/code>\n        <\/li>\n        <li>\n            <code>simplified_ha2 = md5_hex(digest + \":\" + nonce + \":\" + partial_ha2)<\/code>\n        <\/li>\n        <li>\n            <code>auth_digest = base64(user_name + \":\" + nonce + \":\" + simplified_ha2)<\/code>\n        <\/li>\n        <li>Here <i>auth_digest<\/i> is the required authentication hash<\/li>\n    <\/ul>",
       "responses": {"default": {"description": ""}},
       "tags": ["Authentication"]
-    }}
+    }},
+    "/jsonrpc": {
+      "post": {
+        "summary": "Single endpoint API interface",
+        "x-permissions": "Depends on resource access rights.",
+        "requestBody": {
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "jsonrpc": {
+                "description": "Possible values are:\n- `\"2.0\"`",
+                "type": "string"
+              },
+              "method": {"type": "string"},
+              "params": {"oneOf": [
+                {"type": "object"},
+                {
+                  "type": "array",
+                  "items": {}
+                }
+              ]},
+              "id": {"oneOf": [
+                {"type": "integer"},
+                {"type": "string"}
+              ]}
+            },
+            "required": [
+              "jsonrpc",
+              "method"
+            ]
+          }}},
+          "required": true
+        },
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "jsonrpc": {
+                "description": "Possible values are:\n- `\"2.0\"`",
+                "type": "string"
+              },
+              "id": {
+                "nullable": true,
+                "oneOf": [
+                  {"type": "integer"},
+                  {"type": "string"}
+                ]
+              },
+              "result": {},
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {"type": "integer"},
+                  "message": {"type": "string"},
+                  "data": {}
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            },
+            "required": [
+              "jsonrpc",
+              "id"
+            ]
+          }}}
+        }},
+        "tags": ["JSON-RPC"]
+      },
+      "options": {
+        "summary": "Web socket API interface",
+        "x-permissions": "Depends on resource access rights.",
+        "responses": {"default": {"description": "Response with `switching protocols` HTTP status code."}},
+        "tags": ["JSON-RPC"]
+      }
+    }
   },
   "components": {
     "schemas": {
@@ -9892,6 +9969,7 @@
         "properties": {
           "vectorB": {
             "items": {
+              "type": "object",
               "properties": {
                 "fieldA": {
                   "type": "object",
@@ -9909,8 +9987,7 @@
               "required": [
                 "fieldA",
                 "vectorB"
-              ],
-              "type": "object"
+              ]
             },
             "type": "array"
           },
@@ -12061,6 +12138,10 @@
     {
       "name": "Authentication",
       "description": "Request authentication methods supported by server."
+    },
+    {
+      "name": "JSON-RPC",
+      "description": ""
     }
   ]
 }

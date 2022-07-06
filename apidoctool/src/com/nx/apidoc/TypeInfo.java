@@ -2,24 +2,24 @@ package com.nx.apidoc;
 
 import com.nx.util.Utils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class TypeInfo
 {
     public Apidoc.Type fixed = Apidoc.Type.UNKNOWN;
     public String name;
     public boolean isStdOptional = false;
+    public boolean canBeNull = false;
     public TypeInfo mapValueType = null;
+    public List<TypeInfo> variantValueTypes = null;
     public static final String mapKeyPlaceholder = "*";
+    public static final String nullType = "nullptr_t";
 
     public void fillFromLabel(final String label) throws Exception
     {
         if (label.startsWith("{") && label.endsWith("}"))
         {
-            fillFromNameRecursive(label.substring(/*beginIndex*/ 1, /*endIndex*/ label.length() - 1));
+            extractType(label.substring(/*beginIndex*/ 1, /*endIndex*/ label.length() - 1));
             return;
         }
         fixed = Apidoc.Type.fromString(label);
@@ -27,7 +27,7 @@ public final class TypeInfo
 
     public void fillFromName(final String type) throws Exception
     {
-        fillFromNameRecursive(type);
+        extractType(type);
     }
 
     public static String chronoSuffix(final String type)
@@ -35,139 +35,236 @@ public final class TypeInfo
         return requiredChronoSuffixes.get(type);
     }
 
-    public static String mapItem(final String type) throws Exception
+    public String extractMapType(final String type) throws Exception
     {
         for (final String mapAlias: mapAliases)
         {
             if (!type.startsWith(mapAlias))
                 continue;
-            if (!type.endsWith(">"))
-                throw new Exception("Invalid type `" + type + "`.");
-            final String[] keyValue =
-                type.substring(mapAlias.length(), type.length() - ">".length()).split(",");
-            if (keyValue.length != 2)
-                throw new Exception("Unsupported map type `" + type + "`.");
-            final String result = keyValue[1].trim();
-            if (result.isEmpty())
-                throw new Exception("Invalid type `" + type + "`.");
-            return result;
-        }
-        return null;
-    }
-
-    private String arrayItem(final String type) throws Exception
-    {
-        for (final String arrayAlias: arrayAliases)
-        {
-            if (!type.startsWith(arrayAlias))
-                continue;
-            if (!type.endsWith(">"))
-                throw new Exception("Invalid type `" + type + "`.");
-            if (fixed == Apidoc.Type.ARRAY)
-                throw new Exception("Arrays of `" + type + "` are unsupported.");
-            final String result =
-                type.substring(arrayAlias.length(), type.length() - ">".length()).trim();
-            if (result.isEmpty())
-                throw new Exception("Invalid type `" + type + "`.");
-            return result;
-        }
-        return null;
-    }
-
-    private void fillFromNameRecursive(final String type) throws Exception
-    {
-        assert fixed == Apidoc.Type.UNKNOWN || fixed == Apidoc.Type.ARRAY;
-
-        String item = null;
-        final String chronoSuffix = requiredChronoSuffixes.get(Utils.removeCppNamespaces(type));
-        if (chronoSuffix != null)
-        {
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
-        }
-        else if (integerAliases.contains(type))
-        {
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.INTEGER;
-        }
-        else if (typesRepresentedAsJsonString.contains(type))
-        {
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
-        }
-        else if (floatAliases.contains(type))
-        {
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.FLOAT;
-        }
-        else if (booleanAliases.contains(type))
-        {
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.BOOLEAN;
-        }
-        else if (uuidAliases.contains(type))
-        {
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.UUID : Apidoc.Type.UUID_ARRAY;
-        }
-        else if (type.equals("QJsonValue"))
-        {
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.ANY : Apidoc.Type.ARRAY;
-        }
-        else if (type.equals("QJsonObject"))
-        {
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.OBJECT : Apidoc.Type.ARRAY;
-        }
-        else if (type.equals("QStringList"))
-        {
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.STRING_ARRAY;
-        }
-        else if (type.endsWith("List") && !type.equals("QStringList"))
-        {
-            fixed = Apidoc.Type.ARRAY;
-            fillFromNameRecursive(type.substring(0, type.length() - "List".length()));
-        }
-        else if ((item = this.arrayItem(type)) != null)
-        {
-            if (typesRepresentedAsJsonString.contains(item))
-            {
-                if (fixed == Apidoc.Type.UNKNOWN)
-                    fixed = Apidoc.Type.STRING_ARRAY;
-            }
-            else if (uuidAliases.contains(item))
-            {
-                if (fixed == Apidoc.Type.UNKNOWN)
-                    fixed = Apidoc.Type.UUID_ARRAY;
-            }
-            else
-            {
-                fixed = Apidoc.Type.ARRAY;
-                fillFromNameRecursive(item);
-            }
-        }
-        else if ((item = this.mapItem(type)) != null)
-        {
+            TypeInfo key = new TypeInfo();
+            String nextType = key.extractType(type.substring(mapAlias.length()).trim()).trim();
+            if (key.fixed != Apidoc.Type.STRING && key.fixed != Apidoc.Type.UUID)
+                throw new Exception("Unsupported key type of map `" + type + "`.");
+            if (!nextType.startsWith(","))
+                throw new Exception("Invalid map `" + type + "`.");
             mapValueType = new TypeInfo();
-            mapValueType.fillFromNameRecursive(item);
+            String result = mapValueType.extractType(nextType.substring(1).trim()).trim();
+            if (!result.startsWith(">"))
+                throw new Exception("Invalid map `" + type + "`.");
             if (mapValueType.fixed == Apidoc.Type.ANY)
             {
                 fixed = Apidoc.Type.OBJECT;
                 mapValueType = null;
             }
+            return result.substring(1);
         }
-        else if (type.startsWith("std::optional<"))
-        {
-            if (!type.endsWith(">"))
-                throw new Exception("Invalid type `" + type + "`.");
-            isStdOptional = true;
-            fillFromNameRecursive(
-                type.substring("std::optional<".length(), type.length() - ">".length()).trim());
-        }
-        else if (type != null)
-        {
-            name = type;
-        }
+        return null;
+    }
 
-        if (name != null)
-            name = Utils.removeCppNamespaces(name);
+    private String extractArrayType(final String type) throws Exception
+    {
+        for (final String arrayAlias: arrayAliases)
+        {
+            if (!type.startsWith(arrayAlias))
+                continue;
+            if (fixed == Apidoc.Type.ARRAY)
+                throw new Exception("Arrays of `" + type + "` are unsupported.");
+            fixed = Apidoc.Type.ARRAY;
+            String result = extractType(type.substring(arrayAlias.length()).trim()).trim();
+            if (!result.startsWith(">"))
+                throw new Exception("Invalid array `" + type + "`.");
+            return result.substring(1);
+        }
+        return null;
+    }
+
+    public String extractVariantType(final String type) throws Exception
+    {
+        if (!type.startsWith("std::variant<"))
+            return null;
+
+        variantValueTypes = new ArrayList<>();
+        String nextType = type.substring("std::variant<".length()).trim();
+        while (true)
+        {
+            TypeInfo variantType = new TypeInfo();
+            String result = variantType.extractType(nextType).trim();
+            if (nullType.equals(variantType.name))
+                canBeNull = true;
+            else
+                variantValueTypes.add(variantType);
+            if (result.startsWith(","))
+            {
+                nextType = result.substring(1).trim();
+            }
+            else
+            {
+                if (!result.startsWith(">"))
+                    throw new Exception("Invalid variant `" + type + "`.");
+                return result.substring(1);
+            }
+        }
+    }
+
+    public String extractOptionalType(final String type) throws Exception
+    {
+        if (!type.startsWith("std::optional<"))
+            return null;
+
+        isStdOptional = true;
+        String result = extractType(type.substring("std::optional<".length())).trim();
+        if (!result.startsWith(">"))
+            throw new Exception("Invalid optional `" + type + "`.");
+        return result.substring(1).trim();
+    }
+
+    private String extractChronoType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String chronoType: requiredChronoSuffixes.keySet())
+        {
+            if (!chronoType.equals(firstType))
+                continue;
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
+            return type.substring(chronoType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractIntegerType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String integerType: integerAliases)
+        {
+            if (!integerType.equals(firstType))
+                continue;
+            if (fixed == Apidoc.Type.UNKNOWN)
+                fixed = Apidoc.Type.INTEGER;
+            return type.substring(integerType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractStringType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String stringType: typesRepresentedAsJsonString)
+        {
+            if (!stringType.equals(firstType))
+                continue;
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
+            return type.substring(stringType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractFloatType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String floatType: floatAliases)
+        {
+            if (!floatType.equals(firstType))
+                continue;
+            if (fixed == Apidoc.Type.UNKNOWN)
+                fixed = Apidoc.Type.FLOAT;
+            return type.substring(floatType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractBooleanType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String booleanType: booleanAliases)
+        {
+            if (!booleanType.equals(firstType))
+                continue;
+            if (fixed == Apidoc.Type.UNKNOWN)
+                fixed = Apidoc.Type.BOOLEAN;
+            return type.substring(booleanType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractUuidType(final String type) throws Exception
+    {
+        final String firstType = type.split("[>, ]")[0].trim();
+        for (final String uuidType: uuidAliases)
+        {
+            if (!uuidType.equals(firstType))
+                continue;
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.UUID : Apidoc.Type.UUID_ARRAY;
+            return type.substring(uuidType.length()).trim();
+        }
+        return null;
+    }
+
+    private String extractType(final String type) throws Exception
+    {
+        assert type != null;
+        assert fixed == Apidoc.Type.UNKNOWN || fixed == Apidoc.Type.ARRAY;
+
+        String nextType = null;
+        nextType = extractMapType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractArrayType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractVariantType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractOptionalType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractChronoType(Utils.removeCppNamespaces(type));
+        if (nextType != null)
+            return nextType;
+        nextType = extractIntegerType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractStringType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractFloatType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractBooleanType(type);
+        if (nextType != null)
+            return nextType;
+        nextType = extractUuidType(type);
+        if (nextType != null)
+            return nextType;
+
+        final String firstType = type.split("[>, ]")[0].trim();
+        if ("QJsonValue".equals(firstType))
+        {
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.ANY : Apidoc.Type.ARRAY;
+        }
+        else if ("QJsonObject".equals(firstType))
+        {
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.OBJECT : Apidoc.Type.ARRAY;
+        }
+        else if ("QJsonArray".equals(firstType))
+        {
+            fixed = Apidoc.Type.ARRAY;
+        }
+        else if ("QStringList".equals(firstType))
+        {
+            if (fixed == Apidoc.Type.UNKNOWN)
+                fixed = Apidoc.Type.STRING_ARRAY;
+        }
+        else if (firstType.endsWith("List"))
+        {
+            fixed = Apidoc.Type.ARRAY;
+            name = Utils.removeCppNamespaces(
+                firstType.substring(0, firstType.length() - "List".length()));
+        }
+        else
+        {
+            name = Utils.removeCppNamespaces(firstType);
+        }
+        return type.substring(firstType.length()).trim();
     }
 
     private static final List<String> integerAliases = Arrays.asList(

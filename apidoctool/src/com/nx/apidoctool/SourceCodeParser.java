@@ -266,17 +266,30 @@ public final class SourceCodeParser
         if (param.isRef)
             return;
         String error = null;
-        if (param.type.mapValueType == null)
+        if (param.type.mapValueType == null && param.type.variantValueTypes == null)
         {
             if (param.type.fixed != Apidoc.Type.UNKNOWN)
                 return;
             error = "unknown type";
         }
-        else
+        else if (param.type.mapValueType != null)
         {
             if (param.type.mapValueType.fixed != Apidoc.Type.UNKNOWN)
                 return;
             error = "unknown map value type";
+        }
+        else if (param.type.variantValueTypes != null)
+        {
+            for (final TypeInfo variantType: param.type.variantValueTypes)
+            {
+                if (variantType.fixed == Apidoc.Type.UNKNOWN)
+                {
+                    error = "unknown variant value type `" + variantType.name + "`";
+                    break;
+                }
+            }
+            if (error == null)
+                return;
         }
         throw new Error(description.function.method + " " + description.urlPrefix + "/" +
             description.function.name + ": " + error + " of " + (isResult ? "result " : "") +
