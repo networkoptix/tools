@@ -450,7 +450,11 @@ public final class TypeManager
     private void correctType(TypeInfo type) throws Error
     {
         if (type.mapValueType != null)
+        {
             correctType(type.mapValueType);
+            if (type.fixed == Apidoc.Type.UNKNOWN)
+                type.fixed = Apidoc.Type.OBJECT;
+        }
 
         if (type.variantValueTypes != null)
         {

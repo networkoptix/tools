@@ -9960,7 +9960,105 @@
         "responses": {"default": {"description": "Response with `switching protocols` HTTP status code."}},
         "tags": ["JSON-RPC"]
       }
-    }
+    },
+    "/rest/v{2-}/system/metrics/rules": {"get": {
+      "summary": "Read metrics rules",
+      "description": "The rules to calculate the final manifest and raise alarms. See metrics.md for details.",
+      "x-permissions": "Admin.",
+      "parameters": [
+        {"$ref": "#/components/parameters/_local"},
+        {"$ref": "#/components/parameters/_keepDefault"},
+        {"$ref": "#/components/parameters/_with"}
+      ],
+      "responses": {"default": {
+        "description": "Structure of rules.",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "resource": {"type": "string"},
+              "values": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "name": {"type": "string"},
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "name": {"type": "string"},
+                          "description": {"type": "string"},
+                          "isOptional": {"type": "boolean"},
+                          "display": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "table",
+                              "panel",
+                              "both"
+                            ]
+                          },
+                          "format": {"type": "string"},
+                          "calculate": {"type": "string"},
+                          "insert": {"type": "string"},
+                          "alarms": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "level": {
+                                  "type": "string",
+                                  "enum": [
+                                    "none",
+                                    "warning",
+                                    "error"
+                                  ]
+                                },
+                                "condition": {"type": "string"},
+                                "text": {"type": "string"}
+                              },
+                              "required": [
+                                "level",
+                                "condition",
+                                "text"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "description",
+                          "isOptional",
+                          "display",
+                          "format",
+                          "calculate",
+                          "insert",
+                          "alarms"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "values"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "name",
+              "resource",
+              "values"
+            ]
+          }
+        }}}
+      }},
+      "tags": ["System"]
+    }}
   },
   "components": {
     "schemas": {
@@ -12097,22 +12195,84 @@
         ]
       }
     },
-    "parameters": {"_format": {
-      "name": "_format",
-      "in": "query",
-      "description": "Response format type. The HTTP `Accept` header is used as the format if this parameter is unspecified. If the `Accept` header is unspecifed too, then `JSON` is used. Keys of the elements that do not start with a letter or an underscore are prefixed with an underscore for `XML`. Fields of the list type are skipped for `CSV`.",
-      "required": false,
-      "style": "form",
-      "explode": true,
-      "schema": {
-        "type": "string",
-        "enum": [
-          "JSON",
-          "XML",
-          "CSV"
-        ]
+    "parameters": {
+      "_format": {
+        "name": "_format",
+        "in": "query",
+        "description": "Response format type. The HTTP `Accept` header is used as the format if this parameter is unspecified. If the `Accept` header is unspecifed too, then `JSON` is used. Keys of the elements that do not start with a letter or an underscore are prefixed with an underscore for `XML`. Fields of the list type are skipped for `CSV`.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "JSON",
+            "XML",
+            "CSV"
+          ]
+        }
+      },
+      "_with": {
+        "name": "_with",
+        "in": "query",
+        "description": "Comma-separated list of field names, which defines a filter for the response objects: only those objects will be included in the response which have at least one field from this list, and only such fields will be included (fields not on this list will be omitted). Nested fields must be referenced by joining their names via a period, for example: `_with=id,parameters.name`.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {"type": "string"}
+      },
+      "_filter": {
+        "name": "filter",
+        "in": "query",
+        "description": "This is a family of parameters rather than a fixed-name parameter: any number of response object fields can be specified as parameters, with the desired field values as parameter values. It defines a filter for the response objects: only objects having the specified field values will be included in the response. Nested fields must be referenced by joining their names via a period - see the example.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {"type": "object"}
+      },
+      "_keepDefault": {
+        "name": "_keepDefault",
+        "in": "query",
+        "description": "If `false` or unspecified, then in the response objects the Server will omit fields which have values equal to their default values. Otherwise, such fields will not be omitted.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "boolean",
+          "enum": [true]
+        }
+      },
+      "_language": {
+        "name": "_language",
+        "in": "query",
+        "description": "Preferred language for texts in the response body. If unspecified, then `en_US` is used.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {"type": "string"}
+      },
+      "_local": {
+        "name": "_local",
+        "in": "query",
+        "description": "If `false` or unspecified, the information in the response will be collected from other Servers in the System as well. If specified as empty or `true`, then only the Server processing the request will provide information.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "boolean",
+          "enum": [true]
+        }
+      },
+      "_strict": {
+        "name": "_strict",
+        "in": "query",
+        "description": "If `false` or unspecified, the Server will produce available results, ignoring minor errors. If specified as empty or `true`, then the request will fail on any error.",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "schema": {"type": "boolean"}
       }
-    }}
+    }
   },
   "tags": [
     {
@@ -12141,6 +12301,10 @@
     },
     {
       "name": "JSON-RPC",
+      "description": ""
+    },
+    {
+      "name": "System",
       "description": ""
     }
   ]

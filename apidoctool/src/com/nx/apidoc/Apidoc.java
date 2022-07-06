@@ -207,7 +207,11 @@ public final class Apidoc extends Serializable
             if (type.name == null)
                 type.name = origin.type.name;
             if (type.fixed == Type.UNKNOWN)
+            {
                 type.fixed = origin.type.fixed;
+                if (type.mapValueType == null)
+                    type.mapValueType = origin.type.mapValueType;
+            }
             if (!omitOptionalFieldIfFalse)
                 omitOptionalFieldIfFalse = origin.omitOptionalFieldIfFalse;
             if (!unused)
