@@ -9,10 +9,6 @@
 namespace ec2
 {
 
-struct QnTranState {
-    /** map<(peer, db), persistent sequence> */
-    QMap<ApiPersistentIdData, qint32> values;
-};
 /** @returns \a true if \a left represents more transactions then \a right. */
 bool operator<(const QnTranState& left, const QnTranState& right);
 bool operator>(const QnTranState& left, const QnTranState& right);
