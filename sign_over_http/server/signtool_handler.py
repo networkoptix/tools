@@ -25,7 +25,7 @@ async def print_certificate_info(certificate, password):
     printed_certificates.add(certificate)
 
     if not os.path.exists(certificate):
-        logging.warning('File {} was not found'.format(certificate))
+        logging.warning(f'Certificate file {certificate} was not found')
         return
 
     command = ['certutil', '-dump', '-p', password, certificate]
@@ -37,14 +37,12 @@ async def print_certificate_info(certificate, password):
 
 
 async def sign_binary(customization, trusted_timestamping, target_file, timeout_sec):
-    logging.info('Signing {0} with customization {1} {2}'.format(
-        target_file,
-        customization,
-        '(trusted)' if trusted_timestamping else '(no timestamp)'))
+    logging.info(f'Signing {target_file} with customization {customization}' +
+        ' (trusted)' if trusted_timestamping else ' (no timestamp)')
 
     default_config_file = os.path.join(certs_directory, CONFIG_NAME)
     with open(default_config_file, 'r') as f:
-        default_config = yaml.load(f)
+        default_config = yaml.safe_load(f)
 
     signing_path = os.path.join(certs_directory, customization)
     config_file = os.path.join(signing_path, CONFIG_NAME)
@@ -52,7 +50,7 @@ async def sign_binary(customization, trusted_timestamping, target_file, timeout_
     config = default_config.copy()
     try:
         with open(config_file, 'r') as f:
-            config.update(yaml.load(f))
+            config.update(yaml.safe_load(f))
     except FileNotFoundError:
         pass
 
@@ -60,12 +58,12 @@ async def sign_binary(customization, trusted_timestamping, target_file, timeout_
     if trusted_timestamping:
         timestamp_servers = config.get('timestamp_servers')
         timestamp_server = random.choice(timestamp_servers)
-        logging.info('Using trusted timestamping server {0}'.format(timestamp_server))
+        logging.info(f'Using trusted timestamping server {timestamp_server}')
 
     if config.get('software'):
         certificate = os.path.join(signing_path, config.get('file'))
         sign_password = config.get('password')
-        logging.info('Using certificate {0}'.format(certificate))
+        logging.info(f'Using certificate {certificate}')
         await print_certificate_info(certificate, sign_password)
         return await sign_software(
             target_file=target_file,

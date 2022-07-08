@@ -40,6 +40,9 @@ async def download_file(request, handler):
             if not chunk:
                 break
             target_file.write(chunk)
+        target_file.flush()
+        os.fsync(target_file.fileno())
+        target_file.close()
         return target_file_name
 
 
@@ -51,6 +54,7 @@ def make_handler(handler):
         async def complete_response(response):
             await response.prepare(request)
             await response.write_eof()
+            logging.info(f'Removing file {target_file_name}')
             os.remove(target_file_name)
             return response
 
@@ -66,9 +70,9 @@ def make_handler(handler):
             diagnostics = str(process_result)
 
         except Exception as e:
-            diagnostics = "{}\n{}".format(repr(e), str(e))
+            diagnostics = f"{e!r}\n{e}"
 
-        logging.warning('Signing failed: {}'.format(diagnostics))
+        logging.warning(f'Signing failed: {diagnostics}')
         logging.warning('================')
         return await complete_response(web.Response(status=FAILED_SIGNING_CODE, text=diagnostics))
     return sign_handler
@@ -76,7 +80,7 @@ def make_handler(handler):
 
 def main():
     with open(CONFIG_PATH / 'log.yaml', 'r') as f:
-        log_config = yaml.load(f)
+        log_config = yaml.safe_load(f)
         log_config['handlers']['file']['filename'] = os.path.expandvars(
             log_config['handlers']['file']['filename'])
         logging.config.dictConfig(log_config)
@@ -88,7 +92,7 @@ def main():
     args = parser.parse_args()
 
     logging.info('------------------------------ Process started ------------------------------')
-    logging.info('Using {} as a temporary directory'.format(tempfile.gettempdir()))
+    logging.info(f'Using {tempfile.gettempdir()} as a temporary directory')
     for handler in handlers:
         handler.initialize()
 
