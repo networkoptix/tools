@@ -43,8 +43,6 @@ public final class TypeInfo
                 continue;
             TypeInfo key = new TypeInfo();
             String nextType = key.extractType(type.substring(mapAlias.length()).trim()).trim();
-            if (key.fixed != Apidoc.Type.STRING && key.fixed != Apidoc.Type.UUID)
-                throw new Exception("Unsupported key type of map `" + type + "`.");
             if (!nextType.startsWith(","))
                 throw new Exception("Invalid map `" + type + "`.");
             mapValueType = new TypeInfo();
