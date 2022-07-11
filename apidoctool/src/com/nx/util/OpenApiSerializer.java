@@ -580,13 +580,13 @@ public final class OpenApiSerializer
     {
         final JSONObject parameter = getParamByPath(schema, param.name);
         putDescription(param, parameter);
+        putExample(param, parameter);
         if (param.deprecated)
             parameter.put("deprecated", true);
         if (param.readonly)
             parameter.put("readOnly", true);
         else if (!param.optional)
             setRequired(schema, param.name);
-
         fillSchemaType(parameter, param);
     }
 
@@ -623,6 +623,7 @@ public final class OpenApiSerializer
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
         putDescription(param, result);
+        putExample(param, result);
         if (param.deprecated)
             result.put("deprecated", true);
         if (param.readonly)
@@ -631,5 +632,42 @@ public final class OpenApiSerializer
             result.put("required", true);
         fillSchemaType(getObject(result, "schema"), param);
         return result;
+    }
+
+    private static void putExample(Apidoc.Param param, JSONObject result) throws Exception
+    {
+        if (!param.example.isEmpty())
+        {
+            putParsedExample(param.type.fixed, param.example, result);
+            return;
+        }
+
+        if (!param.needExample())
+            return;
+
+        for (final Apidoc.Value value: param.values)
+        {
+            if (value.deprecated || value.proprietary)
+                continue;
+
+            putParsedExample(param.type.fixed, value.name, result);
+            return;
+        }
+    }
+
+    private static void putParsedExample(Apidoc.Type type, String example, JSONObject result)
+    {
+        if (type == Apidoc.Type.INTEGER)
+            result.put("example", Integer.parseInt(example));
+        else if (type == Apidoc.Type.BOOLEAN)
+            result.put("example", Boolean.parseBoolean(example));
+        else if (type == Apidoc.Type.FLOAT)
+            result.put("example", Double.parseDouble(example));
+        else if (type == Apidoc.Type.ARRAY)
+            result.put("example", new JSONArray(example));
+        else if (type == Apidoc.Type.OBJECT)
+            result.put("example", new JSONObject(example));
+        else
+            result.put("example", example);
     }
 }

@@ -83,7 +83,7 @@ struct ApiMediaServerUserAttributesData: ApiData
 
     // Redundant storage settings.
     Qn::BackupType backupType;
-    int backupDaysOfTheWeek; //< Days of the week mask. See backup::DayOfWeek enum.
+    DayOfWeek backupDaysOfTheWeek; //< Days of the week mask. See backup::DayOfWeek enum.
     int backupStart; //< Seconds from 00:00:00. Error if bDOW set and this is not set.
     int backupDuration; //< Duration of synchronization period in seconds. -1 if not set.
     int backupBitrate; //< Bitrate cap in bytes per second. Negative value if not capped. Not capped by default.

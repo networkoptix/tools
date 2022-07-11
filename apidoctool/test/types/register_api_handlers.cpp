@@ -1,7 +1,9 @@
     /**%apidoc:{ExampleData} POST /rest/v2/example/{name}
      * %param:string name
+     *     %example Example param
      * %param:string funcParam
      * %param inner.i description
+     *     %example 1
      * %param variant.#1.i description
      * %param variantOfTwoStructs.#0.i description
      * %param variantOfTwoStructs.#1.i description

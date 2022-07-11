@@ -27,14 +27,15 @@
         }
       },
       "_filter" : {
-        "name" : "filter",
+        "name" : "_filter",
         "in" : "query",
         "description" : "This is a family of parameters rather than a fixed-name parameter: any number of response object fields can be specified as parameters, with the desired field values as parameter values. It defines a filter for the response objects: only objects having the specified field values will be included in the response. Nested fields must be referenced by joining their names via a period - see the example.",
         "required" : false,
         "style" : "form",
         "explode" : true,
         "schema" : {
-          "type" : "object"
+          "type" : "object",
+          "example" : "{\"name\": \"name\"}"
         }
       },
       "_keepDefault" : {

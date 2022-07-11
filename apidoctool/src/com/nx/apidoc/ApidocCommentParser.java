@@ -131,6 +131,7 @@ public final class ApidocCommentParser
         boolean proprietary = false;
         boolean deprecated = false;
         String deprecatedDescription = "";
+        String example = "";
     }
 
     //---------------------------------------------------------------------------------------------
@@ -451,6 +452,7 @@ public final class ApidocCommentParser
             param.type.name = paramDescription.structName;
         param.deprecated = paramDescription.deprecated;
         param.deprecatedDescription = paramDescription.deprecatedDescription;
+        param.example = paramDescription.example;
 
         if (paramDirection == ParamDirection.Output)
             parseFunctionResultParamAttr(item, param);
@@ -525,6 +527,10 @@ public final class ApidocCommentParser
             else if (TAG_STRUCT.equals(item.getTag()))
             {
                 paramDescription.structName = item.getFullText(indentLevel);
+            }
+            else if (TAG_EXAMPLE.equals(item.getTag()))
+            {
+                paramDescription.example = item.getFullText(indentLevel);
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {

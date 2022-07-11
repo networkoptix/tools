@@ -202,6 +202,11 @@ public final class SourceCodeParser
                         }
 
                         for (Apidoc.Param param: description.function.input.params)
+                            throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ false);
+                        for (Apidoc.Param param: description.function.result.params)
+                            throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ true);
+
+                        for (Apidoc.Param param: description.function.input.params)
                             verifyParamValueNames(description, param, /*isResult*/ false);
                         for (Apidoc.Param param: description.function.result.params)
                         {
@@ -299,6 +304,65 @@ public final class SourceCodeParser
         throw new Error(description.function.method + " " + description.urlPrefix + "/" +
             description.function.name + ": " + error + " of " + (isResult ? "result " : "") +
             "parameter \"" + param.name + "\".");
+    }
+
+    private static void throwErrorIfTypeParseFailed(Apidoc.Type type, String value)
+    {
+        if (type == Apidoc.Type.INTEGER)
+            Integer.parseInt(value);
+        else if (type == Apidoc.Type.BOOLEAN)
+            Boolean.parseBoolean(value);
+        else if (type == Apidoc.Type.FLOAT)
+            Double.parseDouble(value);
+        else if (type == Apidoc.Type.ARRAY)
+            new org.json.JSONArray(value);
+        else if (type == Apidoc.Type.OBJECT)
+            new org.json.JSONObject(value);
+    }
+
+    private void throwErrorIfExampleTypeInvalid(
+        ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
+        throws Error
+    {
+        String error = null;
+        if (!param.example.isEmpty())
+        {
+            try
+            {
+                throwErrorIfTypeParseFailed(param.type.fixed, param.example);
+            }
+            catch (Throwable e)
+            {
+                error = "\"%example " + param.example + "\" type is invalid.";
+            }
+        }
+        else
+        {
+            if (!param.needExample())
+                return;
+
+            for (final Apidoc.Value value: param.values)
+            {
+                if (value.deprecated || value.proprietary)
+                    continue;
+
+                try
+                {
+                    throwErrorIfTypeParseFailed(param.type.fixed, value.name);
+                    break;
+                }
+                catch (Throwable e)
+                {
+                    error = "\"%value " + value.name + "\" type is invalid.";
+                }
+            }
+        }
+        if (error == null)
+            return;
+
+        throw new Error(description.function.method + " " + description.urlPrefix + "/" +
+            description.function.name + ": " + (isResult ? "result " : "") + "parameter \"" +
+            param.name + "\" " + error);
     }
 
     private void verifyParamValueNames(

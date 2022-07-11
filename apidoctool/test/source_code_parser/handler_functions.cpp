@@ -83,7 +83,7 @@ struct SomeStruct
 /**%apidoc GET /urlPrefix/testFunction3
  * %struct SomeStruct
  * %param outputParam Param description overridden
- *     %value regularValue Appears in xml.
+ *     %value 0 Appears in xml.
  * %return some result description
  *     %struct SomeStruct
  */

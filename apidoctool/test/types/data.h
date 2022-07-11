@@ -7,8 +7,16 @@ enum class ExampleEnum
 
 struct ExampleStruct
 {
+    /**%apidoc
+     * %example Example id
+     */
     QnUuid id;
+
+    /**%apidoc
+     * %example 0
+     */
     int i;
+
     ExampleEnum e;
     std::chrono::seconds secondsS;
 };
@@ -23,6 +31,11 @@ struct NamedMap: std::map<QnUuid, ExampleStruct>
 
 struct ExampleData
 {
+    /**%apidoc
+     * %value Id value
+     */
+    QnUuid idWithValue;
+
     ExampleStruct inner;
     std::vector<std::chrono::seconds> secondListS;
     std::variant<int, ExampleStruct> variant;

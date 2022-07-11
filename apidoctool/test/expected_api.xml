@@ -2541,8 +2541,46 @@ only the top level data is provided.</description>
                             </param>
                             <param>
                                 <name>serversUserAttributesList[].backupDaysOfTheWeek</name>
-                                <type>integer</type>
+                                <type>enum</type>
                                 <description/>
+                                <values>
+                                    <value>
+                                        <name>Never</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Monday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Tuesday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Wednesday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Thursday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Friday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Saturday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Sunday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>AllDays</name>
+                                        <description/>
+                                    </value>
+                                </values>
                             </param>
                             <param>
                                 <name>serversUserAttributesList[].backupStart</name>
@@ -4437,10 +4475,14 @@ an offline server automatically.</description>
                             </param>
                             <param>
                                 <name>backupDaysOfTheWeek</name>
-                                <type>integer</type>
+                                <type>enum</type>
                                 <description>Combination (via "|") of the days of week on which the backup
 is active on.</description>
                                 <values>
+                                    <value>
+                                        <name>Never</name>
+                                        <description/>
+                                    </value>
                                     <value>
                                         <name>Monday</name>
                                         <description/>
@@ -4467,6 +4509,10 @@ is active on.</description>
                                     </value>
                                     <value>
                                         <name>Sunday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>AllDays</name>
                                         <description/>
                                     </value>
                                 </values>
@@ -4666,8 +4712,46 @@ only the top level data is provided.</description>
                             </param>
                             <param>
                                 <name>backupDaysOfTheWeek</name>
-                                <type>integer</type>
+                                <type>enum</type>
                                 <description/>
+                                <values>
+                                    <value>
+                                        <name>Never</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Monday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Tuesday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Wednesday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Thursday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Friday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Saturday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>Sunday</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>AllDays</name>
+                                        <description/>
+                                    </value>
+                                </values>
                             </param>
                             <param>
                                 <name>backupStart</name>
@@ -7754,11 +7838,15 @@ an offline server automatically.</description>
                         </param>
                         <param>
                             <name>backupDaysOfTheWeek</name>
-                            <type>integer</type>
+                            <type>enum</type>
                             <description>Combination (via "|") of the days of week on which the backup is
 active.</description>
                             <optional>false</optional>
                             <values>
+                                <value>
+                                    <name>Never</name>
+                                    <description/>
+                                </value>
                                 <value>
                                     <name>Monday</name>
                                     <description/>
@@ -7785,6 +7873,10 @@ active.</description>
                                 </value>
                                 <value>
                                     <name>Sunday</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>AllDays</name>
                                     <description/>
                                 </value>
                             </values>
@@ -7880,11 +7972,15 @@ an offline server automatically.</description>
                         </param>
                         <param>
                             <name>backupDaysOfTheWeek</name>
-                            <type>integer</type>
+                            <type>enum</type>
                             <description>Combination (via "|") of weekdays
 the backup is active on.</description>
                             <optional>false</optional>
                             <values>
+                                <value>
+                                    <name>Never</name>
+                                    <description/>
+                                </value>
                                 <value>
                                     <name>Monday</name>
                                     <description/>
@@ -7911,6 +8007,10 @@ the backup is active on.</description>
                                 </value>
                                 <value>
                                     <name>Sunday</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>AllDays</name>
                                     <description/>
                                 </value>
                             </values>
@@ -15475,6 +15575,18 @@ for details.</caption>
                     <method>POST</method>
                     <params>
                         <param>
+                            <name>idWithValue</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>Id</name>
+                                    <description>value</description>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
                             <name>inner</name>
                             <type>object</type>
                             <description/>
@@ -15976,6 +16088,17 @@ for details.</caption>
                     <result>
                         <type>object</type>
                         <params>
+                            <param>
+                                <name>idWithValue</name>
+                                <type>uuid</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>Id</name>
+                                        <description>value</description>
+                                    </value>
+                                </values>
+                            </param>
                             <param>
                                 <name>inner</name>
                                 <type>object</type>

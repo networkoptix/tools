@@ -193,6 +193,7 @@ public final class Apidoc extends Serializable
         public String deprecatedDescription = ""; ///< optional
         public boolean optional = false; ///< attribute; optional(default=false)
         public List<Value> values; ///< optional
+        public String example = ""; ///< optional
 
         public Param()
         {
@@ -229,6 +230,8 @@ public final class Apidoc extends Serializable
                 optional = origin.optional;
             if (recursiveName == null)
                 recursiveName = origin.recursiveName;
+            if (example.isEmpty())
+                example = origin.example;
 
             if (origin.values == null || origin.values.isEmpty())
                 return;
@@ -261,6 +264,27 @@ public final class Apidoc extends Serializable
                         ? " " + deprecatedDescription
                         : "")
                 : "";
+        }
+
+        public boolean needExample()
+        {
+            if (unused || isRef || proprietary || deprecated || readonly || optional)
+                return false;
+
+            if (type.mapValueType != null || type.variantValueTypes != null)
+                return false;
+
+            if (type.fixed == Type.UNKNOWN
+                || type.fixed == Type.BOOLEAN
+                || type.fixed == Type.ENUM
+                || type.fixed == Type.FLAGS
+                || type.fixed == Type.ARRAY
+                || type.fixed == Type.OBJECT)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void mergeEnumValues(List<Apidoc.Value> originValues) throws Error

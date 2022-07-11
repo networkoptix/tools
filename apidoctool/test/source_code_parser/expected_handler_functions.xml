@@ -84,7 +84,7 @@ continue description</description>
                             <optional>false</optional>
                             <values>
                                 <value>
-                                    <name>regularValue</name>
+                                    <name>0</name>
                                     <description>Appears in xml.</description>
                                 </value>
                             </values>

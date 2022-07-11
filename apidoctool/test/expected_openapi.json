@@ -745,6 +745,7 @@
                     },
                     "dayOfWeek": {
                       "description": "Weekday for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
+                      "example": 1,
                       "type": "integer"
                     },
                     "beforeThreshold": {
@@ -1027,6 +1028,7 @@
                     },
                     "dayOfWeek": {
                       "description": "Day of week for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
+                      "example": 1,
                       "type": "integer"
                     },
                     "beforeThreshold": {
@@ -1321,6 +1323,7 @@
                 "properties": {
                   "resourceName": {
                     "description": "Substring to be found in the name of the resource\n(e.g. a camera) which caused the event. Empty string matches any value.\n\nPossible values are:\n- `\"none\"`\n- `\"networkNoFrame\"`\n- `\"networkConnectionClosed\"`\n- `\"networkRtpPacketLoss\"`\n- `\"serverTerminated\"`\n- `\"serverStarted\"`\n- `\"storageIoError\"`\n- `\"storageTooSlow\"`\n- `\"storageFull\"`\n- `\"systemStorageFull\"`\n- `\"licenseRemoved\"`\n- `\"backupFailedNoBackupStorageError\"`\n- `\"backupFailedSourceStorageError\"`\n- `\"backupFailedSourceFileError\"`\n- `\"backupFailedTargetFileError\"`\n- `\"backupFailedChunkError\"`\n- `\"backupEndOfPeriod\"`\n- `\"backupDone\"`\n- `\"backupCancelled\"`\n- `\"networkNoResponseFromDevice\"`",
+                    "example": "none",
                     "type": "string"
                   },
                   "inputPortId": {
@@ -1570,7 +1573,20 @@
                       "Backup_Schedule"
                     ]
                   },
-                  "backupDaysOfTheWeek": {"type": "integer"},
+                  "backupDaysOfTheWeek": {
+                    "type": "string",
+                    "enum": [
+                      "Never",
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                      "Sunday",
+                      "AllDays"
+                    ]
+                  },
                   "backupStart": {"type": "integer"},
                   "backupDuration": {"type": "integer"},
                   "backupBitrate": {"type": "integer"}
@@ -2828,8 +2844,19 @@
                 ]
               },
               "backupDaysOfTheWeek": {
-                "description": "Combination (via \"|\") of the days of week on which the backup\nis active on.\n\nPossible values are:\n- `Monday`\n- `Tuesday`\n- `Wednesday`\n- `Thursday`\n- `Friday`\n- `Saturday`\n- `Sunday`",
-                "type": "integer"
+                "description": "Combination (via \"|\") of the days of week on which the backup\nis active on.",
+                "type": "string",
+                "enum": [
+                  "Never",
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                  "AllDays"
+                ]
               },
               "backupStart": {
                 "description": "Time of day when the backup starts (in seconds passed from 00:00:00).",
@@ -2933,7 +2960,20 @@
                   "Backup_Schedule"
                 ]
               },
-              "backupDaysOfTheWeek": {"type": "integer"},
+              "backupDaysOfTheWeek": {
+                "type": "string",
+                "enum": [
+                  "Never",
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                  "AllDays"
+                ]
+              },
               "backupStart": {"type": "integer"},
               "backupDuration": {"type": "integer"},
               "backupBitrate": {"type": "integer"},
@@ -3385,6 +3425,7 @@
               },
               "storageType": {
                 "description": "Type of the method to access the storage.\n\nPossible values are:\n- `\"local\"`\n- `\"smb\"`",
+                "example": "local",
                 "type": "string"
               },
               "addParams": {
@@ -4161,6 +4202,7 @@
                   },
                   "dayOfWeek": {
                     "description": "Weekday for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
+                    "example": 1,
                     "type": "integer"
                   },
                   "beforeThreshold": {
@@ -4358,6 +4400,7 @@
                     },
                     "dayOfWeek": {
                       "description": "Day of week for the recording task.\n\nPossible values are:\n- `1` Monday\n- `2` Tuesday\n- `3` Wednesday\n- `4` Thursday\n- `5` Friday\n- `6` Saturday\n- `7` Sunday",
+                      "example": 1,
                       "type": "integer"
                     },
                     "beforeThreshold": {
@@ -4538,6 +4581,7 @@
                   },
                   "flags": {
                     "description": "Should have fixed value.\n\nPossible values are:\n- `0`",
+                    "example": 0,
                     "type": "integer"
                   },
                   "left": {
@@ -4777,6 +4821,7 @@
                     },
                     "flags": {
                       "description": "Should have fixed value.\n\nPossible values are:\n- `0`",
+                      "example": 0,
                       "type": "integer"
                     },
                     "left": {
@@ -4938,8 +4983,19 @@
               ]
             },
             "backupDaysOfTheWeek": {
-              "description": "Combination (via \"|\") of the days of week on which the backup is\nactive.\n\nPossible values are:\n- `Monday`\n- `Tuesday`\n- `Wednesday`\n- `Thursday`\n- `Friday`\n- `Saturday`\n- `Sunday`",
-              "type": "integer"
+              "description": "Combination (via \"|\") of the days of week on which the backup is\nactive.",
+              "type": "string",
+              "enum": [
+                "Never",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+                "AllDays"
+              ]
             },
             "backupStart": {
               "description": "Time of day when the backup starts (in seconds passed from 00:00:00).",
@@ -5005,8 +5061,19 @@
                 ]
               },
               "backupDaysOfTheWeek": {
-                "description": "Combination (via \"|\") of weekdays\nthe backup is active on.\n\nPossible values are:\n- `Monday`\n- `Tuesday`\n- `Wednesday`\n- `Thursday`\n- `Friday`\n- `Saturday`\n- `Sunday`",
-                "type": "integer"
+                "description": "Combination (via \"|\") of weekdays\nthe backup is active on.",
+                "type": "string",
+                "enum": [
+                  "Never",
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                  "AllDays"
+                ]
               },
               "backupStart": {
                 "description": "Time of day when the backup starts (in seconds passed from 00:00:00).",
@@ -5079,6 +5146,7 @@
             },
             "storageType": {
               "description": "Type of the method to access the storage.\n\nPossible values are:\n- `\"local\"`\n- `\"network\"` (manually mounted NAS)\n- `\"smb\"` (auto mounted NAS)",
+              "example": "local",
               "type": "string"
             },
             "addParams": {
@@ -6290,6 +6358,7 @@
               "properties": {
                 "outputParam": {
                   "description": "outputParam description\n\nPossible values are:\n- `1` one\n- `2` two",
+                  "example": 1,
                   "type": "integer"
                 },
                 "enumParam": {
@@ -6368,6 +6437,7 @@
               "properties": {
                 "outputParam": {
                   "description": "outputParam description\n\nPossible values are:\n- `1` one\n- `2` two",
+                  "example": 1,
                   "type": "integer"
                 },
                 "enumParam": {
@@ -9907,6 +9977,7 @@
             "properties": {
               "jsonrpc": {
                 "description": "Possible values are:\n- `\"2.0\"`",
+                "example": "2.0",
                 "type": "string"
               },
               "method": {"type": "string"},
@@ -9936,6 +10007,7 @@
             "properties": {
               "jsonrpc": {
                 "description": "Possible values are:\n- `\"2.0\"`",
+                "example": "2.0",
                 "type": "string"
               },
               "id": {
@@ -10077,15 +10149,23 @@
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
+            "idWithValue": {
+              "description": "Possible values are:\n- `\"Id\"` value",
+              "example": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
             "inner": {
               "type": "object",
               "properties": {
                 "id": {
+                  "example": "Example id",
                   "type": "string",
                   "format": "uuid"
                 },
                 "i": {
                   "description": "description",
+                  "example": 1,
                   "type": "integer"
                 },
                 "e": {
@@ -10120,11 +10200,13 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
                   "i": {
                     "description": "description",
+                    "example": 0,
                     "type": "integer"
                   },
                   "e": {
@@ -10152,11 +10234,13 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
                   "i": {
                     "description": "description",
+                    "example": 0,
                     "type": "integer"
                   },
                   "e": {
@@ -10182,11 +10266,13 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
                   "i": {
                     "description": "description",
+                    "example": 0,
                     "type": "integer"
                   },
                   "e": {
@@ -10217,10 +10303,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10250,11 +10340,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
                     "i": {
                       "description": "description",
+                      "example": 0,
                       "type": "integer"
                     },
                     "e": {
@@ -10286,11 +10378,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
                     "i": {
                       "description": "description",
+                      "example": 0,
                       "type": "integer"
                     },
                     "e": {
@@ -10324,11 +10418,13 @@
                     "type": "object",
                     "properties": {
                       "id": {
+                        "example": "Example id",
                         "type": "string",
                         "format": "uuid"
                       },
                       "i": {
                         "description": "description",
+                        "example": 0,
                         "type": "integer"
                       },
                       "e": {
@@ -10366,11 +10462,13 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
                   "i": {
                     "description": "description",
+                    "example": 0,
                     "type": "integer"
                   },
                   "e": {
@@ -10401,11 +10499,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
                     "i": {
                       "description": "description",
+                      "example": 0,
                       "type": "integer"
                     },
                     "e": {
@@ -10436,11 +10536,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
                     "i": {
                       "description": "description",
+                      "example": 0,
                       "type": "integer"
                     },
                     "e": {
@@ -10471,11 +10573,13 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
                   "i": {
                     "description": "description",
+                    "example": 0,
                     "type": "integer"
                   },
                   "e": {
@@ -10501,6 +10605,7 @@
             "funcParam": {"type": "string"}
           },
           "required": [
+            "idWithValue",
             "inner",
             "secondListS",
             "variant",
@@ -10521,6 +10626,7 @@
       },
       "parameters": [{
         "name": "name",
+        "example": "Example param",
         "schema": {"type": "string"},
         "in": "path",
         "required": true
@@ -10530,14 +10636,24 @@
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
+            "idWithValue": {
+              "description": "Possible values are:\n- `\"Id\"` value",
+              "example": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
             "inner": {
               "type": "object",
               "properties": {
                 "id": {
+                  "example": "Example id",
                   "type": "string",
                   "format": "uuid"
                 },
-                "i": {"type": "integer"},
+                "i": {
+                  "example": 0,
+                  "type": "integer"
+                },
                 "e": {
                   "type": "string",
                   "enum": [
@@ -10564,10 +10680,14 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
-                  "i": {"type": "integer"},
+                  "i": {
+                    "example": 0,
+                    "type": "integer"
+                  },
                   "e": {
                     "type": "string",
                     "enum": [
@@ -10590,10 +10710,14 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
-                  "i": {"type": "integer"},
+                  "i": {
+                    "example": 0,
+                    "type": "integer"
+                  },
                   "e": {
                     "type": "string",
                     "enum": [
@@ -10614,10 +10738,14 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
-                  "i": {"type": "integer"},
+                  "i": {
+                    "example": 0,
+                    "type": "integer"
+                  },
                   "e": {
                     "type": "string",
                     "enum": [
@@ -10643,10 +10771,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10673,10 +10805,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10703,10 +10839,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10735,10 +10875,14 @@
                     "type": "object",
                     "properties": {
                       "id": {
+                        "example": "Example id",
                         "type": "string",
                         "format": "uuid"
                       },
-                      "i": {"type": "integer"},
+                      "i": {
+                        "example": 0,
+                        "type": "integer"
+                      },
                       "e": {
                         "type": "string",
                         "enum": [
@@ -10771,10 +10915,14 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
-                  "i": {"type": "integer"},
+                  "i": {
+                    "example": 0,
+                    "type": "integer"
+                  },
                   "e": {
                     "type": "string",
                     "enum": [
@@ -10800,10 +10948,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10829,10 +10981,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "example": "Example id",
                       "type": "string",
                       "format": "uuid"
                     },
-                    "i": {"type": "integer"},
+                    "i": {
+                      "example": 0,
+                      "type": "integer"
+                    },
                     "e": {
                       "type": "string",
                       "enum": [
@@ -10858,10 +11014,14 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "example": "Example id",
                     "type": "string",
                     "format": "uuid"
                   },
-                  "i": {"type": "integer"},
+                  "i": {
+                    "example": 0,
+                    "type": "integer"
+                  },
                   "e": {
                     "type": "string",
                     "enum": [
@@ -10881,6 +11041,7 @@
             }
           },
           "required": [
+            "idWithValue",
             "inner",
             "secondListS",
             "variant",
@@ -10944,10 +11105,14 @@
             "type": "object",
             "properties": {
               "id": {
+                "example": "Example id",
                 "type": "string",
                 "format": "uuid"
               },
-              "i": {"type": "integer"},
+              "i": {
+                "example": 0,
+                "type": "integer"
+              },
               "e": {
                 "type": "string",
                 "enum": [
@@ -10979,10 +11144,14 @@
               "type": "object",
               "properties": {
                 "id": {
+                  "example": "Example id",
                   "type": "string",
                   "format": "uuid"
                 },
-                "i": {"type": "integer"},
+                "i": {
+                  "example": 0,
+                  "type": "integer"
+                },
                 "e": {
                   "type": "string",
                   "enum": [
@@ -11014,10 +11183,14 @@
               "type": "object",
               "properties": {
                 "id": {
+                  "example": "Example id",
                   "type": "string",
                   "format": "uuid"
                 },
-                "i": {"type": "integer"},
+                "i": {
+                  "example": 0,
+                  "type": "integer"
+                },
                 "e": {
                   "type": "string",
                   "enum": [
@@ -11049,10 +11222,14 @@
             "type": "object",
             "properties": {
               "id": {
+                "example": "Example id",
                 "type": "string",
                 "format": "uuid"
               },
-              "i": {"type": "integer"},
+              "i": {
+                "example": 0,
+                "type": "integer"
+              },
               "e": {
                 "type": "string",
                 "enum": [
@@ -13236,13 +13413,16 @@
         "schema": {"type": "string"}
       },
       "_filter": {
-        "name": "filter",
+        "name": "_filter",
         "in": "query",
         "description": "This is a family of parameters rather than a fixed-name parameter: any number of response object fields can be specified as parameters, with the desired field values as parameter values. It defines a filter for the response objects: only objects having the specified field values will be included in the response. Nested fields must be referenced by joining their names via a period - see the example.",
         "required": false,
         "style": "form",
         "explode": true,
-        "schema": {"type": "object"}
+        "schema": {
+          "type": "object",
+          "example": "{\"name\": \"name\"}"
+        }
       },
       "_keepDefault": {
         "name": "_keepDefault",
