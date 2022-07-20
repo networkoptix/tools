@@ -565,9 +565,11 @@ public final class OpenApiSerializer
     {
         final JSONObject parameter = getParamByPath(schema, param.name);
         putDescription(param, parameter);
+        if (param.deprecated)
+            parameter.put("deprecated", true);
         if (param.readonly)
             parameter.put("readOnly", true);
-        if (!param.optional)
+        else if (!param.optional)
             setRequired(schema, param.name);
 
         fillSchemaType(parameter, param);
@@ -606,6 +608,8 @@ public final class OpenApiSerializer
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
         putDescription(param, result);
+        if (param.deprecated)
+            result.put("deprecated", true);
         if (param.readonly)
             result.put("readOnly", true);
         else if (!param.optional)

@@ -9165,6 +9165,7 @@
             "properties": {
               "error": {
                 "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+                "deprecated": true,
                 "type": "string",
                 "enum": [
                   "0",
@@ -9183,6 +9184,7 @@
               },
               "deprecatedTest": {
                 "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+                "deprecated": true,
                 "type": "string",
                 "enum": [
                   "test2",
@@ -9297,6 +9299,7 @@
             "properties": {
               "error": {
                 "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+                "deprecated": true,
                 "type": "string",
                 "enum": [
                   "0",
@@ -9315,6 +9318,7 @@
               },
               "deprecatedTest": {
                 "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+                "deprecated": true,
                 "type": "string",
                 "enum": [
                   "test2",
@@ -9403,6 +9407,7 @@
           "properties": {
             "error": {
               "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "0",
@@ -9421,6 +9426,7 @@
             },
             "deprecatedTest": {
               "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "test2",
@@ -9437,6 +9443,7 @@
             },
             "partiallyDeprecatedTest": {
               "description": "<p><b>Deprecated.<\/b><\/p>Test that a partially deprecated enum param becomes fully\ndeprecated.\n\nPossible values are:\n- `\"test7\"` Overridden value from an inherited enum.\n- `\"test8\"`",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "test7",
@@ -9479,6 +9486,7 @@
           "properties": {
             "error": {
               "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "0",
@@ -9497,6 +9505,7 @@
             },
             "deprecatedTest": {
               "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "test2",
@@ -9555,6 +9564,7 @@
           "properties": {
             "error": {
               "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "0",
@@ -9573,6 +9583,7 @@
             },
             "deprecatedTest": {
               "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "test2",
@@ -9641,6 +9652,7 @@
           "properties": {
             "error": {
               "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "0",
@@ -9659,6 +9671,7 @@
             },
             "deprecatedTest": {
               "description": "<p><b>Deprecated.<\/b><\/p>DeprecatedEnum description.",
+              "deprecated": true,
               "type": "string",
               "enum": [
                 "test2",
