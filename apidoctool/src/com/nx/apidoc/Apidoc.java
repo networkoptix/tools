@@ -204,14 +204,7 @@ public final class Apidoc extends Serializable
         {
             if (!isGeneratedFromStruct)
                 isGeneratedFromStruct = origin.isGeneratedFromStruct;
-            if (type.name == null)
-                type.name = origin.type.name;
-            if (type.fixed == Type.UNKNOWN)
-            {
-                type.fixed = origin.type.fixed;
-                if (type.mapValueType == null)
-                    type.mapValueType = origin.type.mapValueType;
-            }
+            type.fillMissingType(origin.type);
             if (!omitOptionalFieldIfFalse)
                 omitOptionalFieldIfFalse = origin.omitOptionalFieldIfFalse;
             if (!unused)

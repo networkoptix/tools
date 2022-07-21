@@ -7,7 +7,7 @@ import java.util.*;
 public final class TypeInfo
 {
     public Apidoc.Type fixed = Apidoc.Type.UNKNOWN;
-    public String name;
+    public String name = null;
     public boolean isStdOptional = false;
     public boolean canBeNull = false;
     public TypeInfo mapValueType = null;
@@ -30,9 +30,46 @@ public final class TypeInfo
         extractType(type);
     }
 
+    public void fillMissingType(final TypeInfo origin)
+    {
+        if (fixed == Apidoc.Type.UNKNOWN)
+            fixed = origin.fixed;
+        if (name == null)
+            name = origin.name;
+        if (!isStdOptional)
+            isStdOptional = origin.isStdOptional;
+        if (!canBeNull)
+            canBeNull = origin.canBeNull;
+        if (mapValueType == null)
+            mapValueType = origin.mapValueType;
+        if (variantValueTypes == null)
+            variantValueTypes = origin.variantValueTypes;
+    }
+
+    public void setFixedChrono(boolean asString)
+    {
+        if (!isChrono())
+            return;;
+        variantValueTypes = null;
+        if (fixed == Apidoc.Type.ARRAY)
+        {
+            if (asString)
+                fixed = Apidoc.Type.STRING_ARRAY;
+        }
+        else
+        {
+            fixed = asString ? Apidoc.Type.STRING : Apidoc.Type.INTEGER;
+        }
+    }
+
     public static String chronoSuffix(final String type)
     {
         return requiredChronoSuffixes.get(type);
+    }
+
+    public boolean isChrono()
+    {
+        return requiredChronoSuffixes.containsKey(name);
     }
 
     public String extractMapType(final String type) throws Exception
@@ -118,81 +155,42 @@ public final class TypeInfo
 
     private String extractChronoType(final String type) throws Exception
     {
-        final String firstType = type.split("[>, ]")[0].trim();
+        final String firstType = type.split("[>, ]")[0];
+        final String checkType = Utils.removeCppNamespaces(firstType.trim());
         for (final String chronoType: requiredChronoSuffixes.keySet())
         {
-            if (!chronoType.equals(firstType))
+            if (!chronoType.equals(checkType))
                 continue;
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
-            return type.substring(chronoType.length()).trim();
+            name = checkType;
+            variantValueTypes = new ArrayList<>();
+            TypeInfo variantInt = new TypeInfo();
+            variantInt.fixed = Apidoc.Type.INTEGER;
+            variantValueTypes.add(variantInt);
+            TypeInfo variantString = new TypeInfo();
+            variantString.fixed = Apidoc.Type.STRING;
+            variantValueTypes.add(variantString);
+            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.OBJECT : Apidoc.Type.ARRAY;
+            return type.substring(firstType.length()).trim();
         }
         return null;
     }
 
-    private String extractIntegerType(final String type) throws Exception
+    private String extractBasicType(
+        final String type, final Apidoc.Type basic, final List<String> aliases)
     {
-        final String firstType = type.split("[>, ]")[0].trim();
-        for (final String integerType: integerAliases)
+        final String firstType = type.split("[>, ]")[0];
+        final String checkType = firstType.trim();
+        for (final String alias: aliases)
         {
-            if (!integerType.equals(firstType))
+            if (!alias.equals(checkType))
                 continue;
             if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.INTEGER;
-            return type.substring(integerType.length()).trim();
-        }
-        return null;
-    }
-
-    private String extractStringType(final String type) throws Exception
-    {
-        final String firstType = type.split("[>, ]")[0].trim();
-        for (final String stringType: typesRepresentedAsJsonString)
-        {
-            if (!stringType.equals(firstType))
-                continue;
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.STRING : Apidoc.Type.STRING_ARRAY;
-            return type.substring(stringType.length()).trim();
-        }
-        return null;
-    }
-
-    private String extractFloatType(final String type) throws Exception
-    {
-        final String firstType = type.split("[>, ]")[0].trim();
-        for (final String floatType: floatAliases)
-        {
-            if (!floatType.equals(firstType))
-                continue;
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.FLOAT;
-            return type.substring(floatType.length()).trim();
-        }
-        return null;
-    }
-
-    private String extractBooleanType(final String type) throws Exception
-    {
-        final String firstType = type.split("[>, ]")[0].trim();
-        for (final String booleanType: booleanAliases)
-        {
-            if (!booleanType.equals(firstType))
-                continue;
-            if (fixed == Apidoc.Type.UNKNOWN)
-                fixed = Apidoc.Type.BOOLEAN;
-            return type.substring(booleanType.length()).trim();
-        }
-        return null;
-    }
-
-    private String extractUuidType(final String type) throws Exception
-    {
-        final String firstType = type.split("[>, ]")[0].trim();
-        for (final String uuidType: uuidAliases)
-        {
-            if (!uuidType.equals(firstType))
-                continue;
-            fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.UUID : Apidoc.Type.UUID_ARRAY;
-            return type.substring(uuidType.length()).trim();
+                fixed = basic;
+            else if (basic == Apidoc.Type.STRING)
+                fixed = Apidoc.Type.STRING_ARRAY;
+            else if (basic == Apidoc.Type.UUID)
+                fixed = Apidoc.Type.UUID_ARRAY;
+            return type.substring(firstType.length()).trim();
         }
         return null;
     }
@@ -215,70 +213,67 @@ public final class TypeInfo
         nextType = extractOptionalType(type);
         if (nextType != null)
             return nextType;
-        nextType = extractChronoType(Utils.removeCppNamespaces(type));
+        nextType = extractChronoType(type);
         if (nextType != null)
             return nextType;
-        nextType = extractIntegerType(type);
-        if (nextType != null)
-            return nextType;
-        nextType = extractStringType(type);
-        if (nextType != null)
-            return nextType;
-        nextType = extractFloatType(type);
-        if (nextType != null)
-            return nextType;
-        nextType = extractBooleanType(type);
-        if (nextType != null)
-            return nextType;
-        nextType = extractUuidType(type);
-        if (nextType != null)
-            return nextType;
+        for (final Map.Entry<Apidoc.Type, List<String>> basic: basicTypeAliases.entrySet())
+        {
+            nextType = extractBasicType(type, basic.getKey(), basic.getValue());
+            if (nextType != null)
+                return nextType;
+        }
 
-        final String firstType = type.split("[>, ]")[0].trim();
-        if ("QJsonValue".equals(firstType))
+        final String firstType = type.split("[>, ]")[0];
+        final String checkType = firstType.trim();
+        if ("QJsonValue".equals(checkType))
         {
             fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.ANY : Apidoc.Type.ARRAY;
         }
-        else if ("QJsonObject".equals(firstType))
+        else if ("QJsonObject".equals(checkType))
         {
             fixed = fixed == Apidoc.Type.UNKNOWN ? Apidoc.Type.OBJECT : Apidoc.Type.ARRAY;
         }
-        else if ("QJsonArray".equals(firstType))
+        else if ("QJsonArray".equals(checkType))
         {
             fixed = Apidoc.Type.ARRAY;
         }
-        else if ("QStringList".equals(firstType))
+        else if ("QStringList".equals(checkType))
         {
             if (fixed == Apidoc.Type.UNKNOWN)
                 fixed = Apidoc.Type.STRING_ARRAY;
         }
-        else if (firstType.endsWith("List"))
+        else if (checkType.endsWith("List"))
         {
             fixed = Apidoc.Type.ARRAY;
             name = Utils.removeCppNamespaces(
-                firstType.substring(0, firstType.length() - "List".length()));
+                checkType.substring(0, checkType.length() - "List".length()));
         }
         else
         {
-            name = Utils.removeCppNamespaces(firstType);
+            name = Utils.removeCppNamespaces(checkType);
         }
         return type.substring(firstType.length()).trim();
     }
 
-    private static final List<String> integerAliases = Arrays.asList(
-        "int", "qint32", "qint16", "qint8");
-    private static final List<String> typesRepresentedAsJsonString = Arrays.asList(
-        "QString",
-        "QnLatin1Array",
-        "QByteArray",
-        "qint64",
-        "size_t",
-        "int64_t",
-        "std::string",
-        "nx::utils::Url");
-    private static final List<String> booleanAliases = Arrays.asList("bool");
-    private static final List<String> uuidAliases = Arrays.asList("QnUuid");
-    private static final List<String> floatAliases = Arrays.asList("float", "qreal");
+    private static final Map<Apidoc.Type, List<String>> basicTypeAliases =
+        new HashMap<Apidoc.Type, List<String>>()
+        {
+            {
+                put(Apidoc.Type.BOOLEAN, Arrays.asList("bool"));
+                put(Apidoc.Type.INTEGER, Arrays.asList("int", "qint32", "qint16", "qint8"));
+                put(Apidoc.Type.FLOAT, Arrays.asList("float", "qreal"));
+                put(Apidoc.Type.UUID, Arrays.asList("QnUuid"));
+                put(Apidoc.Type.STRING, Arrays.asList(
+                    "QString",
+                    "QnLatin1Array",
+                    "QByteArray",
+                    "qint64",
+                    "size_t",
+                    "int64_t",
+                    "std::string",
+                    "nx::utils::Url"));
+            }
+        };
     private static final List<String> arrayAliases =
         Arrays.asList("std::vector<", "QVector<", "QList<");
     private static final List<String> mapAliases = Arrays.asList("std::map<", "QMap<");

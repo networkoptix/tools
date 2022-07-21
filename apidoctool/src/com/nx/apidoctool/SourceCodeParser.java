@@ -72,7 +72,8 @@ public final class SourceCodeParser
             matcher,
             typeManager,
             /*requiredFunctionCaptionLenLimit*/ -1,
-            /*requiredGroupNameLenLimit*/ -1);
+            /*requiredGroupNameLenLimit*/ -1,
+            /*responseChronoAsString*/ true);
     }
 
     /**
@@ -83,7 +84,8 @@ public final class SourceCodeParser
         RegistrationMatcher matcher,
         TypeManager typeManager,
         int requiredFunctionCaptionLenLimit,
-        int requiredGroupNameLenLimit)
+        int requiredGroupNameLenLimit,
+        boolean responseChronoAsString)
         throws
             Error,
             ApidocUtils.Error,
@@ -202,7 +204,10 @@ public final class SourceCodeParser
                         for (Apidoc.Param param: description.function.input.params)
                             verifyParamValueNames(description, param, /*isResult*/ false);
                         for (Apidoc.Param param: description.function.result.params)
+                        {
                             verifyParamValueNames(description, param, /*isResult*/ true);
+                            param.type.setFixedChrono(responseChronoAsString);
+                        }
 
                         if (description.function.groups.isEmpty())
                         {

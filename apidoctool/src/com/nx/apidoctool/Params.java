@@ -29,6 +29,16 @@ public class Params
         "Produce an error if a parameter type is unspecified and cannot be deduced from the " +
             "struct field.");
 
+    public boolean responseChronoAsString() throws Exception
+    {
+        return toBoolean(responseChronoAsString, "responseChronoAsString");
+    }
+
+    private final StringBuilder responseChronoAsString = regStringParam(
+        "responseChronoAsString",
+        "true",
+        "If true, then the type of the response chrono fields is string otherwise integer.");
+
     public boolean generateOrderByParameters() throws Exception
     {
         return toBoolean(generateOrderByParameters, "generateOrderByParameters");

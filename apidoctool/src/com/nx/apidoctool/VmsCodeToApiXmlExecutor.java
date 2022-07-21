@@ -213,6 +213,7 @@ public final class VmsCodeToApiXmlExecutor
             urlPrefixReplacements,
             apiVersions);
         return parser.parseApidocComments(apidoc, matcher, typeManager,
-            params.requiredFunctionCaptionLenLimit(), params.requiredGroupNameLenLimit());
+            params.requiredFunctionCaptionLenLimit(), params.requiredGroupNameLenLimit(),
+            params.responseChronoAsString());
     }
 }

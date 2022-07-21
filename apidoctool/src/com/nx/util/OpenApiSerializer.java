@@ -39,19 +39,7 @@ public final class OpenApiSerializer
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
         if (item.startsWith("#"))
         {
-            if (item.endsWith("[]"))
-            {
-                schema = getObject(schema, "items");
-                item = item.substring(0, item.length() - 2);
-            }
-            JSONArray oneOf = getArray(schema, "oneOf");
-            int index = Integer.parseInt(item.substring(1));
-            schema = oneOf.optJSONObject(index);
-            if (schema == null)
-            {
-                schema = new JSONObject();
-                oneOf.put(index, schema);
-            }
+            schema = oneOfSchema(schema, item);
             if (path.isEmpty())
                 return schema;
             return getParamByPath(schema, path);
@@ -87,19 +75,7 @@ public final class OpenApiSerializer
         path = (subpathPos < 0) ? "" : path.substring(subpathPos + 1);
         if (item.startsWith("#"))
         {
-            if (item.endsWith("[]"))
-            {
-                schema = getObject(schema, "items");
-                item = item.substring(0, item.length() - 2);
-            }
-            JSONArray oneOf = getArray(schema, "oneOf");
-            int index = Integer.parseInt(item.substring(1));
-            schema = oneOf.optJSONObject(index);
-            if (schema == null)
-            {
-                schema = new JSONObject();
-                oneOf.put(index, schema);
-            }
+            schema = oneOfSchema(schema, item);
             setRequired(schema, path);
             return;
         }
@@ -130,6 +106,24 @@ public final class OpenApiSerializer
             if (!requiredArray.toList().contains(item))
                 requiredArray.put(item);
         }
+    }
+
+    private static JSONObject oneOfSchema(JSONObject schema, String item)
+    {
+        final boolean isArray = item.endsWith("[]");
+        if (isArray)
+            item = item.substring(0, item.length() - 2);
+        JSONArray oneOf = getArray(schema, "oneOf");
+        int index = Integer.parseInt(item.substring(1));
+        schema = oneOf.optJSONObject(index);
+        if (schema == null)
+        {
+            schema = new JSONObject();
+            oneOf.put(index, schema);
+        }
+        if (isArray)
+            schema = getObject(schema, "items");
+        return schema;
     }
 
     public static String toString(
@@ -470,6 +464,11 @@ public final class OpenApiSerializer
     {
         if (typeInfo.variantValueTypes != null)
         {
+            if (typeInfo.fixed == Apidoc.Type.ARRAY)
+            {
+                schema.put("type", "array");
+                schema = getObject(schema, "items");
+            }
             if (typeInfo.canBeNull)
                 schema.put("nullable", true);
             final JSONArray oneOf = getArray(schema, "oneOf");
@@ -477,20 +476,26 @@ public final class OpenApiSerializer
             {
                 TypeInfo type = typeInfo.variantValueTypes.get(i);
                 assert type.fixed != Apidoc.Type.UNKNOWN;
-                assert typeInfo.fixed == Apidoc.Type.OBJECT;
                 JSONObject internalSchema = new JSONObject();
-                fillSchemaType(internalSchema, type.fixed);
+                fillSchemaType(internalSchema, type);
                 oneOf.put(i, internalSchema);
             }
             return;
         }
-        fillSchemaType(schema, typeInfo.fixed);
         if (typeInfo.mapValueType != null && typeInfo.mapValueType.fixed != Apidoc.Type.OBJECT)
         {
             assert typeInfo.mapValueType.fixed != Apidoc.Type.UNKNOWN;
             assert typeInfo.fixed == Apidoc.Type.OBJECT;
-            fillSchemaType(getObject(schema, "additionalProperties"), typeInfo.mapValueType.fixed);
+            fillSchemaType(getObject(schema, "additionalProperties"), typeInfo.mapValueType);
+            return;
         }
+        if (typeInfo.isChrono() && typeInfo.fixed == Apidoc.Type.ARRAY)
+        {
+            schema.put("type", "array");
+            getObject(schema, "items").put("type", "integer");
+            return;
+        }
+        fillSchemaType(schema, typeInfo.fixed);
     }
 
     private static void fillSchemaType(JSONObject schema, Apidoc.Param param)

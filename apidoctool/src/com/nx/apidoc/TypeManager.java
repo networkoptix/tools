@@ -133,18 +133,20 @@ public final class TypeManager
         {
             if (type.mapValueType.fixed != Apidoc.Type.UNKNOWN && type.mapValueType.name == null)
                 return null;
-            final StructParser.StructInfo origin = structs.get(type.mapValueType.name);
-            if (origin == null)
-            {
-                if (unknownParamTypeIsError)
-                    throw new Error("Map value type `" + type.name + "` not found.");
-                System.out.println("WARNING: Map value type `" + type.name + "` not found.");
-            }
+            final StructParser.StructInfo origin = structInfo(type.mapValueType);
             final StructParser.StructInfo result = new StructParser.StructInfo();
             result.fields = origin.fields;
             result.items = origin.items;
             result.name = origin.name;
             result.isMap = true;
+            return result;
+        }
+
+        if (type.isChrono())
+        {
+            final StructParser.StructInfo result = new StructParser.StructInfo();
+            result.name = type.name;
+            result.fields = new ArrayList<>();
             return result;
         }
 
@@ -350,24 +352,13 @@ public final class TypeManager
 
             if (param == null)
                 param = new Apidoc.Param();
-            if (param.type.name == null)
-                param.type.name = field.type.name;
             param.isGeneratedFromStruct = true;
             param.name = name;
             if (field.type.fixed == Apidoc.Type.ENUM || field.type.fixed == Apidoc.Type.FLAGS)
                 enumToParam(param, field.type.name);
             else if (field.type.name != null)
                 param.recursiveName = processedStructs.get(field.type.name);
-            if (param.type.fixed == Apidoc.Type.UNKNOWN)
-            {
-                param.type.fixed = field.type.fixed;
-                if (param.type.mapValueType == null)
-                    param.type.mapValueType = field.type.mapValueType;
-                if (param.type.variantValueTypes == null)
-                    param.type.variantValueTypes = field.type.variantValueTypes;
-                if (!param.type.canBeNull)
-                    param.type.canBeNull = field.type.canBeNull;
-            }
+            param.type.fillMissingType(field.type);
             if (field.type.isStdOptional)
                 param.optional = true;
             if (overriddenParam != null)
