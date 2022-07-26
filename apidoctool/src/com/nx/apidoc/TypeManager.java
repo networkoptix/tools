@@ -183,8 +183,17 @@ public final class TypeManager
                 final StructParser.StructInfo structInfo = structInfo(variantType);
                 if (structInfo == null)
                     continue;
+                String namePrefix = ".#" + i;
+                if (variantType.fixed == Apidoc.Type.ARRAY)
+                    namePrefix += "[]";
+                if (structInfo.isMap)
+                {
+                    namePrefix += "." + TypeInfo.mapKeyPlaceholder;
+                    if (variantType.mapValueType.fixed == Apidoc.Type.ARRAY)
+                        namePrefix += "[]";
+                }
                 structParams.addAll(structToParams(
-                    "#" + i + (variantType.fixed == Apidoc.Type.ARRAY ? "[]." : "."),
+                    namePrefix + ".",
                     structInfo,
                     paramDirection,
                     new ArrayList<Apidoc.Param>(),
@@ -197,8 +206,15 @@ public final class TypeManager
             if (structInfo == null)
                 return functionParams;
 
+            String namePrefix = "";
+            if (structInfo.isMap)
+            {
+                namePrefix += TypeInfo.mapKeyPlaceholder + ".";
+                if (type.mapValueType != null && type.mapValueType.fixed == Apidoc.Type.ARRAY)
+                    namePrefix += "[].";
+            }
             structParams = structToParams(
-                /*namePrefix*/ "",
+                namePrefix,
                 structInfo,
                 paramDirection,
                 new ArrayList<Apidoc.Param>(),
@@ -333,8 +349,7 @@ public final class TypeManager
         List<Apidoc.Param> params = new ArrayList<Apidoc.Param>();
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
-            final String name =
-                namePrefix + (structInfo.isMap ? TypeInfo.mapKeyPlaceholder + "." : "") + field.name;
+            final String name = namePrefix + field.name;
             final Apidoc.Param overriddenParam = findParam(overriddenParams, name);
             if (overriddenParam != null && overriddenParam.unused)
                 continue;
@@ -377,6 +392,8 @@ public final class TypeManager
                     || field.type.mapValueType != null
                     || field.type.variantValueTypes != null))
             {
+                String nextNamePrefix =
+                    param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]" : "");
                 if (field.type.variantValueTypes != null)
                 {
                     for (int i = 0; i < field.type.variantValueTypes.size(); ++i)
@@ -393,11 +410,20 @@ public final class TypeManager
                         if (innerStructInfo == null)
                             continue;
 
-                        final String nextNamePrefix = param.name
-                            + (field.type.fixed == Apidoc.Type.ARRAY ? "[]." : ".")
-                            + "#" + i + (innerType.fixed == Apidoc.Type.ARRAY ? "[]." : ".");
+                        nextNamePrefix += ".#" + i;
+                        if (innerType.fixed == Apidoc.Type.ARRAY)
+                            nextNamePrefix += "[]";
+                        if (innerStructInfo.isMap)
+                        {
+                            nextNamePrefix += "." + TypeInfo.mapKeyPlaceholder;
+                            if (innerType.mapValueType != null
+                                && innerType.mapValueType.fixed == Apidoc.Type.ARRAY)
+                            {
+                                nextNamePrefix += "[]";
+                            }
+                        }
                         params.addAll(structToParams( //< Recursion.
-                            nextNamePrefix,
+                            nextNamePrefix + ".",
                             innerStructInfo,
                             paramDirection,
                             overriddenParams,
@@ -413,10 +439,17 @@ public final class TypeManager
                     if (param.description == null || param.description.isEmpty())
                         param.description = innerStructInfo.description();
 
-                    final String nextNamePrefix =
-                        param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]." : ".");
+                    if (innerStructInfo.isMap)
+                    {
+                        nextNamePrefix += "." + TypeInfo.mapKeyPlaceholder;
+                        if (field.type.mapValueType != null
+                            && field.type.mapValueType.fixed == Apidoc.Type.ARRAY)
+                        {
+                            nextNamePrefix += "[]";
+                        }
+                    }
                     params.addAll(structToParams( //< Recursion.
-                        nextNamePrefix,
+                        nextNamePrefix + ".",
                         innerStructInfo,
                         paramDirection,
                         overriddenParams,

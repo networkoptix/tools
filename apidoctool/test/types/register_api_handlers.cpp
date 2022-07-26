@@ -8,6 +8,7 @@
      * %param variantWithMapList.#1[].*.i description
      * %param map.*.i description
      * %param mapList[].*.i description
+     * %param mapOfList.*[].i description
      * %param mapOfNamedMap.*.i description
      * %ingroup Test
      * %return:{ExampleData}

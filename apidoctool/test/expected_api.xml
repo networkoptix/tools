@@ -15807,6 +15807,46 @@ for details.</caption>
                             <optional>false</optional>
                         </param>
                         <param>
+                            <name>mapOfList</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfList.*[].id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfList.*[].i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfList.*[].e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapOfList.*[].secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
                             <name>mapOfNamedMap</name>
                             <type>object</type>
                             <description/>
@@ -16149,6 +16189,41 @@ for details.</caption>
                             </param>
                             <param>
                                 <name>mapList[].*.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfList</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfList.*[].id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfList.*[].i</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfList.*[].e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapOfList.*[].secondsS</name>
                                 <type>integer</type>
                                 <description/>
                             </param>

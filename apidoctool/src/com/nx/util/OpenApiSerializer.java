@@ -46,9 +46,11 @@ public final class OpenApiSerializer
         }
         if (!schema.has("type"))
             schema.put("type", "object");
-        if (TypeInfo.mapKeyPlaceholder.equals(item))
+        if (item.startsWith(TypeInfo.mapKeyPlaceholder))
         {
-            schema = getObject(schema, "additionalProperties");
+            schema = additionalPropertiesSchema(schema, item);
+            if (path.isEmpty())
+                return schema;
             return getParamByPath(schema, path);
         }
         schema = getObject(schema, "properties");
@@ -79,9 +81,9 @@ public final class OpenApiSerializer
             setRequired(schema, path);
             return;
         }
-        if (TypeInfo.mapKeyPlaceholder.equals(item))
+        if (item.startsWith(TypeInfo.mapKeyPlaceholder))
         {
-            schema = getObject(schema, "additionalProperties");
+            schema = additionalPropertiesSchema(schema, item);
             setRequired(schema, path);
             return;
         }
@@ -122,6 +124,14 @@ public final class OpenApiSerializer
             oneOf.put(index, schema);
         }
         if (isArray)
+            schema = getObject(schema, "items");
+        return schema;
+    }
+
+    private static JSONObject additionalPropertiesSchema(JSONObject schema, String item)
+    {
+        schema = getObject(schema, "additionalProperties");
+        if (item.endsWith("[]"))
             schema = getObject(schema, "items");
         return schema;
     }

@@ -34,6 +34,7 @@ struct ExampleData
 //    std::variant<int, std::variant<QString, ExampleStruct>>> variantWithVariant;
     std::map<QString, ExampleStruct> map;
     std::vector<std::map<QString, ExampleStruct>> mapList;
+    std::map<QString, std::vector<ExampleStruct>> mapOfList;
     std::map<QString, NamedMap> mapOfNamedMap;
 //    std::map<QString, std::chrono::seconds> chronoMap;
 //    std::map<QString, std::variant<QString, ExampleStruct>> mapWithVariant;

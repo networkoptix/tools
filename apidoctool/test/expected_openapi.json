@@ -10367,6 +10367,42 @@
                 }
               }
             },
+            "mapOfList": {
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {"oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]}
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              },
+              "type": "object"
+            },
             "mapOfNamedMap": {
               "type": "object",
               "additionalProperties": {
@@ -10413,6 +10449,7 @@
             "variantWithChrono",
             "map",
             "mapList",
+            "mapOfList",
             "mapOfNamedMap",
             "funcParam"
           ]
@@ -10672,6 +10709,36 @@
                 }
               }
             },
+            "mapOfList": {
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {"type": "integer"},
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {"type": "integer"}
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              },
+              "type": "object"
+            },
             "mapOfNamedMap": {
               "type": "object",
               "additionalProperties": {
@@ -10711,6 +10778,7 @@
             "variantWithChrono",
             "map",
             "mapList",
+            "mapOfList",
             "mapOfNamedMap"
           ]
         }}}
