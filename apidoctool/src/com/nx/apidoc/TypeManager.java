@@ -168,7 +168,8 @@ public final class TypeManager
         throws Error
     {
         if ((type.name == null && type.mapValueType == null && type.variantValueTypes == null)
-            || TypeInfo.nullType.equals(type.name))
+            || TypeInfo.nullType.equals(type.name)
+            || type.isChrono())
         {
             return functionParams;
         }
@@ -177,9 +178,12 @@ public final class TypeManager
         List<Apidoc.Param> structParams = null;
         if (type.variantValueTypes != null)
         {
+            structParams = new ArrayList<>();
             for (int i = 0; i < type.variantValueTypes.size(); ++i)
             {
                 final TypeInfo variantType = type.variantValueTypes.get(i);
+                if (variantType.fixed != Apidoc.Type.OBJECT || variantType.fixed != Apidoc.Type.ARRAY)
+                    continue;
                 final StructParser.StructInfo structInfo = structInfo(variantType);
                 if (structInfo == null)
                     continue;
@@ -209,9 +213,11 @@ public final class TypeManager
             String namePrefix = "";
             if (structInfo.isMap)
             {
-                namePrefix += TypeInfo.mapKeyPlaceholder + ".";
+                namePrefix += TypeInfo.mapKeyPlaceholder;
                 if (type.mapValueType != null && type.mapValueType.fixed == Apidoc.Type.ARRAY)
                     namePrefix += "[].";
+                else
+                    namePrefix += ".";
             }
             structParams = structToParams(
                 namePrefix,

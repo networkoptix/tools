@@ -49,7 +49,7 @@ public final class TypeInfo
     public void setFixedChrono(boolean asString)
     {
         if (!isChrono())
-            return;;
+            return;
         variantValueTypes = null;
         if (fixed == Apidoc.Type.ARRAY)
         {

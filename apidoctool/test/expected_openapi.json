@@ -10784,6 +10784,180 @@
         }}}
       }},
       "tags": ["Test"]
+    }},
+    "/rest/v2/example/secondS": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"oneOf": [
+          {"type": "integer"},
+          {"type": "string"}
+        ]}}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/secondListS": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {"oneOf": [
+            {"type": "integer"},
+            {"type": "string"}
+          ]}
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/variantWithChrono": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"oneOf": [
+          {"type": "integer"},
+          {"oneOf": [
+            {"type": "integer"},
+            {"type": "string"}
+          ]}
+        ]}}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/map": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "i": {"type": "integer"},
+              "e": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {"type": "integer"}
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          }
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/mapList": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "i": {"type": "integer"},
+                "e": {
+                  "type": "string",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {"type": "integer"}
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          }
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/mapOfList": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "i": {"type": "integer"},
+                "e": {
+                  "type": "string",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {"type": "integer"}
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          },
+          "type": "object"
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/mapOfNamedMap": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "i": {"type": "integer"},
+              "e": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {"type": "integer"}
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          }
+        }}}
+      }},
+      "tags": ["Test"]
     }}
   },
   "components": {
