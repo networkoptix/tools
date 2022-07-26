@@ -34,7 +34,8 @@ SIGNED_FILE = 'signed.exe'
 SIGNATURE_MARK = 'Issued by: GlobalSign'
 
 
-def enum_handler(hwnd, (password, entered_count)):
+def enum_handler(hwnd, params):
+    password, entered_count = params
     if (not win32gui.IsWindowVisible(hwnd) or
             win32gui.GetWindowText(hwnd) != PASSWORD_DIALOG_CAPTION or
             win32gui.GetClassName(hwnd) != PASSWORD_DIALOG_CLASS):
@@ -52,49 +53,49 @@ def clicker_thread(stop_flag, password, entered_count):
             win32gui.EnumWindows(enum_handler, (password, entered_count))
             time.sleep(1)
         except pywintypes.error as x:
-            print 'Error enumerating windows:', x.winerror, x
+            print('Error enumerating windows:', x.winerror, x)
             break
             # raise x
 
 
 
-print
-print 'Signing in at: %s (UTC+%d)' % (time.asctime(), -time.timezone/3600)
+print('')
+print('Signing in at: %s (UTC+%d)' % (time.asctime(), -time.timezone/3600))
 key_password = os.environ['KEY_PASSWORD']  # key is missing if not added from credentials
 
 signtool_path = subprocess.check_output(['where', 'signtool.exe'], shell=True).rstrip()
-print 'Copying %r -> %r' % (signtool_path, SIGNED_FILE)
+print('Copying %r -> %r' % (signtool_path, SIGNED_FILE))
 shutil.copyfile(signtool_path, SIGNED_FILE)
 
 stop_flag = [False]
 entered_count = [0]
 clicker = threading.Thread(target=clicker_thread, args=(stop_flag, key_password, entered_count))
 clicker.start()
-print 'Clicker thread is started.'
+print('Clicker thread is started.')
 
-print 'Signing using signtool.exe:'
+print('Signing using signtool.exe:')
 sys.stdout.flush()
 subprocess.check_call(['signtool.exe', 'sign', '/a', SIGNED_FILE], shell=True)
 
-print 'Stopping clicker thread...'
+print('Stopping clicker thread...')
 stop_flag[0] = True
 clicker.join()
-print 'Clicker thread is stopped.'
-print 'Password was entered %d times' % entered_count[0]
+print('Clicker thread is stopped.')
+print('Password was entered %d times' % entered_count[0])
 
-print 'Checking signature:'
+print('Checking signature:')
 p = subprocess.Popen(['signtool.exe', 'verify', '/v', SIGNED_FILE], stdout=subprocess.PIPE, shell=True)
 stdout, stderr = p.communicate()
 
 if stderr:
-    print 'signtool verify returned stderr:'
-    print stderr
+    print('signtool verify returned stderr:')
+    print(stderr)
     sys.exit(10)
 
 if SIGNATURE_MARK in stdout:
-    print 'Signature is in place; all OK'
+    print('Signature is in place; all OK')
 else:
-    print 'Signature is missing; signing is FAILED.'
+    print('Signature is missing; signing is FAILED.')
     sys.exit(10)
 
 if entered_count[0] > 0:
