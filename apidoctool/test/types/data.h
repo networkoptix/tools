@@ -26,6 +26,7 @@ struct ExampleData
     ExampleStruct inner;
     std::vector<std::chrono::seconds> secondListS;
     std::variant<int, ExampleStruct> variant;
+    std::variant<ExampleStruct, ExampleStruct> variantOfTwoStructs;
     std::vector<std::variant<int, ExampleStruct>> variantList;
     std::variant<int, std::map<QString, ExampleStruct>> variantWithMap;
     std::variant<int, std::vector<ExampleStruct>>> variantWithList;

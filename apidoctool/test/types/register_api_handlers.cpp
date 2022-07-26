@@ -3,6 +3,8 @@
      * %param:string funcParam
      * %param inner.i description
      * %param variant.#1.i description
+     * %param variantOfTwoStructs.#0.i description
+     * %param variantOfTwoStructs.#1.i description
      * %param variantWithMap.#1.*.i description
      * %param variantWithList.#1[].i description
      * %param variantWithMapList.#1[].*.i description

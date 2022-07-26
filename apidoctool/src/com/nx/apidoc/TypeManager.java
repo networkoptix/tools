@@ -398,7 +398,7 @@ public final class TypeManager
                     || field.type.mapValueType != null
                     || field.type.variantValueTypes != null))
             {
-                String nextNamePrefix =
+                final String commonNamePrefix =
                     param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]" : "");
                 if (field.type.variantValueTypes != null)
                 {
@@ -416,7 +416,7 @@ public final class TypeManager
                         if (innerStructInfo == null)
                             continue;
 
-                        nextNamePrefix += ".#" + i;
+                        String nextNamePrefix = commonNamePrefix + ".#" + i;
                         if (innerType.fixed == Apidoc.Type.ARRAY)
                             nextNamePrefix += "[]";
                         if (innerStructInfo.isMap)
@@ -445,6 +445,7 @@ public final class TypeManager
                     if (param.description == null || param.description.isEmpty())
                         param.description = innerStructInfo.description();
 
+                    String nextNamePrefix = commonNamePrefix;
                     if (innerStructInfo.isMap)
                     {
                         nextNamePrefix += "." + TypeInfo.mapKeyPlaceholder;

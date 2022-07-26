@@ -10147,6 +10147,68 @@
                 ]
               }
             ]},
+            "variantOfTwoStructs": {"oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {
+                    "description": "description",
+                    "type": "integer"
+                  },
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {"oneOf": [
+                    {"type": "integer"},
+                    {"type": "string"}
+                  ]}
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {
+                    "description": "description",
+                    "type": "integer"
+                  },
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {"oneOf": [
+                    {"type": "integer"},
+                    {"type": "string"}
+                  ]}
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
             "variantList": {
               "type": "array",
               "items": {"oneOf": [
@@ -10442,6 +10504,7 @@
             "inner",
             "secondListS",
             "variant",
+            "variantOfTwoStructs",
             "variantList",
             "variantWithMap",
             "variantWithList",
@@ -10497,6 +10560,56 @@
             },
             "variant": {"oneOf": [
               {"type": "integer"},
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {"type": "integer"},
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {"type": "integer"}
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
+            "variantOfTwoStructs": {"oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {"type": "integer"},
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {"type": "integer"}
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
               {
                 "type": "object",
                 "properties": {
@@ -10771,6 +10884,7 @@
             "inner",
             "secondListS",
             "variant",
+            "variantOfTwoStructs",
             "variantList",
             "variantWithMap",
             "variantWithList",
