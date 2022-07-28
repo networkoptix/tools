@@ -329,7 +329,7 @@ public final class OpenApiSerializer
                 requestBody, "content"), "application/json"), "schema");
             fillSchemaType(schema, function.input.type);
             if (!function.input.example.isEmpty())
-                putParsedExample(function.input.type.fixed, function.input.example, schema);
+                schema.put("example", function.input.type.parse(function.input.example));
         }
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
         fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
@@ -385,7 +385,7 @@ public final class OpenApiSerializer
             default_, "content"), "application/json"), "schema");
         fillSchemaType(schema, result.type);
         if (!result.example.isEmpty())
-            putParsedExample(result.type.fixed, result.example, schema);
+            schema.put("example", result.type.parse(result.example));
         if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
         {
             JSONObject orderBy = null;
@@ -640,7 +640,7 @@ public final class OpenApiSerializer
     {
         if (!param.example.isEmpty())
         {
-            putParsedExample(param.type.fixed, param.example, result);
+            result.put("example", param.type.parse(param.example));
             return;
         }
 
@@ -652,26 +652,8 @@ public final class OpenApiSerializer
             if (value.deprecated || value.proprietary)
                 continue;
 
-            putParsedExample(param.type.fixed, value.name, result);
+            result.put("example", param.type.parse(value.name));
             return;
         }
-    }
-
-    private static void putParsedExample(Apidoc.Type type, String example, JSONObject result)
-    {
-        if (type == Apidoc.Type.INTEGER)
-            result.put("example", Integer.parseInt(example));
-        else if (type == Apidoc.Type.BOOLEAN)
-            result.put("example", Boolean.parseBoolean(example));
-        else if (type == Apidoc.Type.FLOAT)
-            result.put("example", Double.parseDouble(example));
-        else if (type == Apidoc.Type.ARRAY)
-            result.put("example", new JSONArray(example));
-        else if (type == Apidoc.Type.OBJECT)
-            result.put("example", new JSONObject(example));
-        else if (type == Apidoc.Type.ANY)
-            result.put("example", new JSONTokener(example).nextValue());
-        else
-            result.put("example", example);
     }
 }

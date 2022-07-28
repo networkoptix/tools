@@ -4,6 +4,8 @@ import com.nx.util.Utils;
 
 import java.util.*;
 
+import org.json.*;
+
 public final class TypeInfo
 {
     public Apidoc.Type fixed = Apidoc.Type.UNKNOWN;
@@ -72,6 +74,39 @@ public final class TypeInfo
         return requiredChronoSuffixes.containsKey(name);
     }
 
+    public Object parse(final String value)
+    {
+        if (variantValueTypes != null)
+        {
+            for (int i = 0; i < variantValueTypes.size(); ++i)
+            {
+                final TypeInfo variantType = variantValueTypes.get(i);
+                if (i == variantValueTypes.size() - 1)
+                    return variantType.parse(value);
+                try
+                {
+                    return variantType.parse(value);
+                }
+                catch (Throwable e)
+                {
+                }
+            }
+        }
+        if (fixed == Apidoc.Type.INTEGER)
+            return Integer.parseInt(value);
+        if (fixed == Apidoc.Type.BOOLEAN)
+            return Boolean.parseBoolean(value);
+        if (fixed == Apidoc.Type.FLOAT)
+            return Double.parseDouble(value);
+        if (fixed == Apidoc.Type.ARRAY)
+            return new JSONArray(value);
+        if (fixed == Apidoc.Type.OBJECT)
+            return new JSONObject(value);
+        if (fixed == Apidoc.Type.ANY)
+            return new JSONTokener(value).nextValue();
+        return value;
+    }
+
     public String extractMapType(final String type) throws Exception
     {
         for (final String mapAlias: mapAliases)
@@ -113,7 +148,7 @@ public final class TypeInfo
         return null;
     }
 
-    public String extractVariantType(final String type) throws Exception
+    private String extractVariantType(final String type) throws Exception
     {
         if (!type.startsWith("std::variant<"))
             return null;
@@ -141,7 +176,7 @@ public final class TypeInfo
         }
     }
 
-    public String extractOptionalType(final String type) throws Exception
+    private String extractOptionalType(final String type) throws Exception
     {
         if (!type.startsWith("std::optional<"))
             return null;

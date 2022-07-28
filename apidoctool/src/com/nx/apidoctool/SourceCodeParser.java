@@ -310,23 +310,6 @@ public final class SourceCodeParser
             "parameter \"" + param.name + "\".");
     }
 
-    private static void throwErrorIfTypeParseFailed(Apidoc.Type type, String value)
-    {
-        if (type == Apidoc.Type.INTEGER)
-            Integer.parseInt(value);
-        else if (type == Apidoc.Type.BOOLEAN)
-            Boolean.parseBoolean(value);
-        else if (type == Apidoc.Type.FLOAT)
-            Double.parseDouble(value);
-        else if (type == Apidoc.Type.ARRAY)
-            new org.json.JSONArray(value);
-        else if (type == Apidoc.Type.OBJECT)
-            new org.json.JSONObject(value);
-        else if (type == Apidoc.Type.ANY)
-            new org.json.JSONTokener(value).nextValue();
-    }
-
-
     private void throwErrorIfExampleTypeInvalid(
         ApidocCommentParser.FunctionDescription description, Apidoc.InOutData data, boolean isResult)
         throws Error
@@ -335,7 +318,7 @@ public final class SourceCodeParser
             return;
         try
         {
-            throwErrorIfTypeParseFailed(data.type.fixed, data.example);
+            data.type.parse(data.example);
         }
         catch (Throwable e)
         {
@@ -354,7 +337,7 @@ public final class SourceCodeParser
         {
             try
             {
-                throwErrorIfTypeParseFailed(param.type.fixed, param.example);
+                param.type.parse(param.example);
             }
             catch (Throwable e)
             {
@@ -373,7 +356,7 @@ public final class SourceCodeParser
 
                 try
                 {
-                    throwErrorIfTypeParseFailed(param.type.fixed, value.name);
+                    param.type.parse(value.name);
                     break;
                 }
                 catch (Throwable e)

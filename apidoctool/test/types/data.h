@@ -18,6 +18,10 @@ struct ExampleStruct
     int i;
 
     ExampleEnum e;
+
+    /**%apidoc
+     * %example 0
+     */
     std::chrono::seconds secondsS;
 };
 

@@ -10182,10 +10182,13 @@
                     "two"
                   ]
                 },
-                "secondsS": {"oneOf": [
-                  {"type": "integer"},
-                  {"type": "string"}
-                ]}
+                "secondsS": {
+                  "example": 0,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string"}
+                  ]
+                }
               },
               "required": [
                 "id",
@@ -10223,10 +10226,13 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"oneOf": [
-                    {"type": "integer"},
-                    {"type": "string"}
-                  ]}
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
                 },
                 "required": [
                   "id",
@@ -10257,10 +10263,13 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"oneOf": [
-                    {"type": "integer"},
-                    {"type": "string"}
-                  ]}
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
                 },
                 "required": [
                   "id",
@@ -10289,10 +10298,13 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"oneOf": [
-                    {"type": "integer"},
-                    {"type": "string"}
-                  ]}
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
                 },
                 "required": [
                   "id",
@@ -10325,10 +10337,13 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]}
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
                   "required": [
                     "id",
@@ -10363,10 +10378,13 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]}
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
                   "required": [
                     "id",
@@ -10401,10 +10419,13 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]}
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
                   "required": [
                     "id",
@@ -10441,10 +10462,13 @@
                           "two"
                         ]
                       },
-                      "secondsS": {"oneOf": [
-                        {"type": "integer"},
-                        {"type": "string"}
-                      ]}
+                      "secondsS": {
+                        "example": 0,
+                        "oneOf": [
+                          {"type": "integer"},
+                          {"type": "string"}
+                        ]
+                      }
                     },
                     "required": [
                       "id",
@@ -10485,10 +10509,13 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"oneOf": [
-                    {"type": "integer"},
-                    {"type": "string"}
-                  ]}
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
                 },
                 "required": [
                   "id",
@@ -10522,10 +10549,13 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]}
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
                   "required": [
                     "id",
@@ -10559,10 +10589,13 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]}
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
                   "required": [
                     "id",
@@ -10596,10 +10629,13 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"oneOf": [
-                    {"type": "integer"},
-                    {"type": "string"}
-                  ]}
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
                 },
                 "required": [
                   "id",
@@ -10668,7 +10704,10 @@
                     "two"
                   ]
                 },
-                "secondsS": {"type": "integer"}
+                "secondsS": {
+                  "example": 0,
+                  "type": "integer"
+                }
               },
               "required": [
                 "id",
@@ -10702,7 +10741,10 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"type": "integer"}
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
                 },
                 "required": [
                   "id",
@@ -10732,7 +10774,10 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"type": "integer"}
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
                 },
                 "required": [
                   "id",
@@ -10760,7 +10805,10 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"type": "integer"}
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
                 },
                 "required": [
                   "id",
@@ -10793,7 +10841,10 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"type": "integer"}
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
                   "required": [
                     "id",
@@ -10827,7 +10878,10 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"type": "integer"}
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
                   "required": [
                     "id",
@@ -10861,7 +10915,10 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"type": "integer"}
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
                   "required": [
                     "id",
@@ -10897,7 +10954,10 @@
                           "two"
                         ]
                       },
-                      "secondsS": {"type": "integer"}
+                      "secondsS": {
+                        "example": 0,
+                        "type": "integer"
+                      }
                     },
                     "required": [
                       "id",
@@ -10937,7 +10997,10 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"type": "integer"}
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
                 },
                 "required": [
                   "id",
@@ -10970,7 +11033,10 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"type": "integer"}
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
                   "required": [
                     "id",
@@ -11003,7 +11069,10 @@
                         "two"
                       ]
                     },
-                    "secondsS": {"type": "integer"}
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
                   "required": [
                     "id",
@@ -11036,7 +11105,10 @@
                       "two"
                     ]
                   },
-                  "secondsS": {"type": "integer"}
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
                 },
                 "required": [
                   "id",
@@ -11127,7 +11199,10 @@
                   "two"
                 ]
               },
-              "secondsS": {"type": "integer"}
+              "secondsS": {
+                "example": 0,
+                "type": "integer"
+              }
             },
             "required": [
               "id",
@@ -11166,7 +11241,10 @@
                     "two"
                   ]
                 },
-                "secondsS": {"type": "integer"}
+                "secondsS": {
+                  "example": 0,
+                  "type": "integer"
+                }
               },
               "required": [
                 "id",
@@ -11205,7 +11283,10 @@
                     "two"
                   ]
                 },
-                "secondsS": {"type": "integer"}
+                "secondsS": {
+                  "example": 0,
+                  "type": "integer"
+                }
               },
               "required": [
                 "id",
@@ -11244,7 +11325,10 @@
                   "two"
                 ]
               },
-              "secondsS": {"type": "integer"}
+              "secondsS": {
+                "example": 0,
+                "type": "integer"
+              }
             },
             "required": [
               "id",
