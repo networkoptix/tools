@@ -6468,7 +6468,10 @@
       "description": "handlerWithType PATCH description",
       "requestBody": {
         "required": true,
-        "content": {"application/json": {"schema": {"type": "object"}}}
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "example": {"name": "value"}
+        }}}
       },
       "responses": {"default": {"description": ""}},
       "tags": ["Server API"]
@@ -6478,7 +6481,7 @@
         "description": "handlerWithType POST description",
         "requestBody": {
           "required": true,
-          "content": {"application/json": {"schema": {}}}
+          "content": {"application/json": {"schema": {"example": {"any": "object example in any"}}}}
         },
         "parameters": [{
           "name": "id",
@@ -6494,7 +6497,8 @@
         "description": "handlerWithType PUT description",
         "requestBody": {"content": {"application/json": {"schema": {
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "example": "id"
         }}}},
         "parameters": [{
           "name": "id",
@@ -9213,7 +9217,10 @@
         "parameters": [{"$ref": "#/components/parameters/_format"}],
         "responses": {"default": {
           "description": "",
-          "content": {"application/json": {"schema": {"type": "string"}}}
+          "content": {"application/json": {"schema": {
+            "type": "string",
+            "example": "String example"
+          }}}
         }},
         "tags": ["Server API"]
       }
@@ -10017,13 +10024,13 @@
                   {"type": "string"}
                 ]
               },
-              "result": {},
+              "result": {"example": "string example"},
               "error": {
                 "type": "object",
                 "properties": {
                   "code": {"type": "integer"},
                   "message": {"type": "string"},
-                  "data": {}
+                  "data": {"example": 0}
                 },
                 "required": [
                   "code",

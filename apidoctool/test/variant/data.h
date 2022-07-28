@@ -42,7 +42,9 @@ struct NX_VMS_API JsonRpcError
     int code = RequestError;
     std::string message;
 
-    /**%apidoc:any */
+    /**%apidoc:any
+     * %example 0
+     */
     std::optional<QJsonValue> data;
 };
 #define JsonRpcError_Fields (code)(message)(data)
@@ -58,7 +60,9 @@ struct NX_VMS_API JsonRpcResponse
 
     std::variant<int, std::string, nullptr_t> id;
 
-    /**%apidoc:any */
+    /**%apidoc:any
+     * %example string example
+     */
     std::optional<QJsonValue> result;
     std::optional<JsonRpcError> error;
 };

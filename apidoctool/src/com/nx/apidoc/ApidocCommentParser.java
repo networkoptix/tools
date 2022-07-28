@@ -162,6 +162,7 @@ public final class ApidocCommentParser
         boolean permissionsParsed = false;
         boolean returnParsed = false;
         boolean structParsed = false;
+        boolean exampleParsed = false;
 
         FunctionDescription description =
             createFunctionFromApidocItem(item, groups, urlPrefixReplacements, apiVersions);
@@ -256,6 +257,12 @@ public final class ApidocCommentParser
                 final Apidoc.Result result = parseFunctionResult(
                     item, tagIterator, typeManager);
                 description.function.result = result;
+            }
+            else if (TAG_EXAMPLE.equals(item.getTag()))
+            {
+                exampleParsed = checkTagOnce(item, exampleParsed, TAG_EXAMPLE);
+                checkNoAttribute(item);
+                description.function.input.example = item.getFullText(indentLevel).trim();
             }
             else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -624,6 +631,7 @@ public final class ApidocCommentParser
         }
 
         boolean deprecatedAttributeTagFound = false;
+        boolean exampleParsed = false;
         while (tagIterator.hasNext())
         {
             item = tagIterator.next();
@@ -655,6 +663,12 @@ public final class ApidocCommentParser
                     param,
                     typeManager,
                     ParamDirection.Output);
+            }
+            else if (TAG_EXAMPLE.equals(item.getTag()))
+            {
+                exampleParsed = checkTagOnce(item, exampleParsed, TAG_EXAMPLE);
+                checkNoAttribute(item);
+                result.example = item.getFullText(indentLevel).trim();
             }
             else if ("%attribute".equals(item.getTag()))
             {

@@ -2,11 +2,9 @@ package com.nx.util;
 
 import java.util.HashSet;
 
-import com.nx.apidoc.TypeInfo;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.nx.apidoc.Apidoc;
+import com.nx.apidoc.TypeInfo;
+import org.json.*;
 
 public final class OpenApiSerializer
 {
@@ -330,6 +328,8 @@ public final class OpenApiSerializer
             JSONObject schema = getObject(getObject(getObject(
                 requestBody, "content"), "application/json"), "schema");
             fillSchemaType(schema, function.input.type);
+            if (!function.input.example.isEmpty())
+                putParsedExample(function.input.type.fixed, function.input.example, schema);
         }
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
         fillResult(method, function.result, componentsSchemas, generateOrderByParameters);
@@ -384,6 +384,8 @@ public final class OpenApiSerializer
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
         fillSchemaType(schema, result.type);
+        if (!result.example.isEmpty())
+            putParsedExample(result.type.fixed, result.example, schema);
         if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
         {
             JSONObject orderBy = null;
@@ -667,6 +669,8 @@ public final class OpenApiSerializer
             result.put("example", new JSONArray(example));
         else if (type == Apidoc.Type.OBJECT)
             result.put("example", new JSONObject(example));
+        else if (type == Apidoc.Type.ANY)
+            result.put("example", new JSONTokener(example).nextValue());
         else
             result.put("example", example);
     }

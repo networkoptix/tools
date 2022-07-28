@@ -205,6 +205,10 @@ public final class SourceCodeParser
                             throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ false);
                         for (Apidoc.Param param: description.function.result.params)
                             throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ true);
+                        for (Apidoc.Param param: description.function.input.params)
+                            throwErrorIfExampleTypeInvalid(description, description.function.input, /*isResult*/ false);
+                        for (Apidoc.Param param: description.function.result.params)
+                            throwErrorIfExampleTypeInvalid(description, description.function.result, /*isResult*/ true);
 
                         for (Apidoc.Param param: description.function.input.params)
                             verifyParamValueNames(description, param, /*isResult*/ false);
@@ -318,6 +322,27 @@ public final class SourceCodeParser
             new org.json.JSONArray(value);
         else if (type == Apidoc.Type.OBJECT)
             new org.json.JSONObject(value);
+        else if (type == Apidoc.Type.ANY)
+            new org.json.JSONTokener(value).nextValue();
+    }
+
+
+    private void throwErrorIfExampleTypeInvalid(
+        ApidocCommentParser.FunctionDescription description, Apidoc.InOutData data, boolean isResult)
+        throws Error
+    {
+        if (data.example.isEmpty())
+            return;
+        try
+        {
+            throwErrorIfTypeParseFailed(data.type.fixed, data.example);
+        }
+        catch (Throwable e)
+        {
+            throw new Error(description.function.method + " " + description.urlPrefix + "/" +
+                description.function.name + ": " + (isResult ? "result " : "") + "\" \"%example " +
+                data.example + "\" type is invalid.");
+        }
     }
 
     private void throwErrorIfExampleTypeInvalid(

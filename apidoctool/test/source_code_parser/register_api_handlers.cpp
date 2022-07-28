@@ -10,6 +10,7 @@
      * %struct StructF
      * %param[ref] _format
      * %return:string
+     * %example String example
      */
     reg("api/testHandler", new testHandler());
 
@@ -77,14 +78,17 @@
 
     /**%apidoc:any POST /api/handlerWithType/{id}
      * handlerWithType POST description
+     * %example {"any": "object example in any"}
      * %param:string id Id in path of handlerWithType.
      *
      **%apidoc[opt]:uuid PUT /api/handlerWithType/{id}
      * handlerWithType PUT description
+     * %example id
      * %param:string id Id in path of handlerWithType.
      *
      **%apidoc:object PATCH /api/handlerWithType
      * handlerWithType PATCH description
+     * %example {"name": "value"}
      */
     reg("api/handlerWithType", new handlerWithType());
 

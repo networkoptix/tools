@@ -394,12 +394,14 @@ public final class Apidoc extends Serializable
         public List<Param> unusedParams; ///< Internal field.
         public List<Param> params; ///< optional
         public boolean optional; ///< attribute; optional(false)
+        public String example; ///< tag; optional
 
         public InOutData()
         {
             type = new TypeInfo();
             params = new ArrayList<Param>();
             unusedParams = new ArrayList<Param>();
+            example = "";
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
