@@ -34,8 +34,17 @@ public final class StructParser
 
         public final String description()
         {
-            if (items != null && !items.isEmpty())
-                return items.get(0).getFullText(0);
+            if (items == null)
+                return "";
+            for (ApidocTagParser.Item item: items)
+            {
+                if (ApidocComment.TAG_APIDOC.equals(item.getTag()))
+                {
+                    final String description = item.getFullText(0);
+                    if (!description.trim().isEmpty())
+                        return description;
+                }
+            }
             return "";
         }
 

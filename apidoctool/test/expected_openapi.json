@@ -6309,7 +6309,6 @@
         "description": "handlerWithMap PUT description",
         "requestBody": {
           "content": {"application/json": {"schema": {
-            "type": "object",
             "additionalProperties": {
               "type": "object",
               "properties": {
@@ -6345,14 +6344,14 @@
                 "baseValue",
                 "innerObject"
               ]
-            }
+            },
+            "type": "object"
           }}},
           "required": true
         },
         "responses": {"default": {
           "description": "Output description",
           "content": {"application/json": {"schema": {
-            "type": "object",
             "additionalProperties": {
               "type": "object",
               "properties": {
@@ -6379,7 +6378,8 @@
                 "enumParam",
                 "nestedEnumField"
               ]
-            }
+            },
+            "type": "object"
           }}}
         }},
         "tags": ["Server API"]
@@ -10065,20 +10065,17 @@
       "responses": {"default": {
         "description": "Structure of rules.",
         "content": {"application/json": {"schema": {
-          "type": "object",
           "additionalProperties": {
             "type": "object",
             "properties": {
               "name": {"type": "string"},
               "resource": {"type": "string"},
               "values": {
-                "type": "object",
                 "additionalProperties": {
                   "type": "object",
                   "properties": {
                     "name": {"type": "string"},
                     "values": {
-                      "type": "object",
                       "additionalProperties": {
                         "type": "object",
                         "properties": {
@@ -10131,14 +10128,16 @@
                           "insert",
                           "alarms"
                         ]
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "required": [
                     "name",
                     "values"
                   ]
-                }
+                },
+                "type": "object"
               }
             },
             "required": [
@@ -10146,7 +10145,8 @@
               "resource",
               "values"
             ]
-          }
+          },
+          "type": "object"
         }}}
       }},
       "tags": ["System"]
@@ -10327,6 +10327,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -10357,7 +10358,6 @@
             "variantWithMap": {"oneOf": [
               {"type": "integer"},
               {
-                "type": "object",
                 "additionalProperties": {
                   "type": "object",
                   "properties": {
@@ -10392,7 +10392,8 @@
                     "e",
                     "secondsS"
                   ]
-                }
+                },
+                "type": "object"
               }
             ]},
             "variantWithList": {"oneOf": [
@@ -10441,7 +10442,6 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "object",
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -10476,7 +10476,8 @@
                       "e",
                       "secondsS"
                     ]
-                  }
+                  },
+                  "type": "object"
                 }
               }
             ]},
@@ -10487,49 +10488,11 @@
                 {"type": "string"}
               ]}
             ]},
-            "map": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "Example id",
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "i": {
-                    "description": "description",
-                    "example": 0,
-                    "type": "integer"
-                  },
-                  "e": {
-                    "type": "string",
-                    "enum": [
-                      "one",
-                      "two"
-                    ]
-                  },
-                  "secondsS": {
-                    "example": 0,
-                    "oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
-                    ]
-                  }
-                },
-                "required": [
-                  "id",
-                  "i",
-                  "e",
-                  "secondsS"
-                ]
-              }
-            },
-            "mapList": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": {
+            "variantWithVariant": {"oneOf": [
+              {"type": "integer"},
+              {"oneOf": [
+                {"type": "string"},
+                {
                   "type": "object",
                   "properties": {
                     "id": {
@@ -10564,6 +10527,85 @@
                     "secondsS"
                   ]
                 }
+              ]}
+            ]},
+            "map": {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "Example id",
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {
+                    "description": "description",
+                    "example": 0,
+                    "type": "integer"
+                  },
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "example": 0,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {"type": "string"}
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            },
+            "mapList": {
+              "type": "array",
+              "items": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
               }
             },
             "mapOfList": {
@@ -10608,42 +10650,263 @@
               "type": "object"
             },
             "mapOfNamedMap": {
-              "type": "object",
               "additionalProperties": {
                 "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "Example id",
-                    "type": "string",
-                    "format": "uuid"
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
-                  "i": {
-                    "description": "description",
-                    "example": 0,
-                    "type": "integer"
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "chronoMap": {"additionalProperties": {"oneOf": [
+              {"type": "integer"},
+              {"type": "string"}
+            ]}},
+            "mapWithVariant": {
+              "additionalProperties": {"oneOf": [
+                {"type": "string"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
                   },
-                  "e": {
-                    "type": "string",
-                    "enum": [
-                      "one",
-                      "two"
-                    ]
-                  },
-                  "secondsS": {
-                    "example": 0,
-                    "oneOf": [
-                      {"type": "integer"},
-                      {"type": "string"}
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]},
+              "type": "object"
+            },
+            "mapListWithVariant": {
+              "type": "array",
+              "items": {
+                "additionalProperties": {"oneOf": [
+                  {"type": "string"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "oneOf": [
+                          {"type": "integer"},
+                          {"type": "string"}
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
                     ]
                   }
-                },
-                "required": [
-                  "id",
-                  "i",
-                  "e",
-                  "secondsS"
-                ]
+                ]},
+                "type": "object"
               }
+            },
+            "mapWithVariantList": {
+              "additionalProperties": {
+                "type": "array",
+                "items": {"oneOf": [
+                  {"type": "string"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "oneOf": [
+                          {"type": "integer"},
+                          {"type": "string"}
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
+                    ]
+                  }
+                ]}
+              },
+              "type": "object"
+            },
+            "mapOfMap": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {"type": "string"}
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "mapOfMapWithVariant": {
+              "additionalProperties": {
+                "additionalProperties": {"oneOf": [
+                  {"type": "integer"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "oneOf": [
+                          {"type": "integer"},
+                          {"type": "string"}
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
+                    ]
+                  }
+                ]},
+                "type": "object"
+              },
+              "type": "object"
             },
             "funcParam": {"type": "string"}
           },
@@ -10658,10 +10921,17 @@
             "variantWithList",
             "variantWithMapList",
             "variantWithChrono",
+            "variantWithVariant",
             "map",
             "mapList",
             "mapOfList",
             "mapOfNamedMap",
+            "chronoMap",
+            "mapWithVariant",
+            "mapListWithVariant",
+            "mapWithVariantList",
+            "mapOfMap",
+            "mapOfMapWithVariant",
             "funcParam"
           ]
         }}},
@@ -10694,6 +10964,7 @@
                   "format": "uuid"
                 },
                 "i": {
+                  "description": "description",
                   "example": 0,
                   "type": "integer"
                 },
@@ -10731,6 +11002,7 @@
                     "format": "uuid"
                   },
                   "i": {
+                    "description": "description",
                     "example": 0,
                     "type": "integer"
                   },
@@ -10764,6 +11036,7 @@
                     "format": "uuid"
                   },
                   "i": {
+                    "description": "description",
                     "example": 0,
                     "type": "integer"
                   },
@@ -10795,6 +11068,7 @@
                     "format": "uuid"
                   },
                   "i": {
+                    "description": "description",
                     "example": 0,
                     "type": "integer"
                   },
@@ -10831,6 +11105,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -10858,7 +11133,6 @@
             "variantWithMap": {"oneOf": [
               {"type": "integer"},
               {
-                "type": "object",
                 "additionalProperties": {
                   "type": "object",
                   "properties": {
@@ -10868,6 +11142,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -10889,7 +11164,8 @@
                     "e",
                     "secondsS"
                   ]
-                }
+                },
+                "type": "object"
               }
             ]},
             "variantWithList": {"oneOf": [
@@ -10905,6 +11181,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -10934,7 +11211,6 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "object",
                   "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -10944,6 +11220,7 @@
                         "format": "uuid"
                       },
                       "i": {
+                        "description": "description",
                         "example": 0,
                         "type": "integer"
                       },
@@ -10965,7 +11242,8 @@
                       "e",
                       "secondsS"
                     ]
-                  }
+                  },
+                  "type": "object"
                 }
               }
             ]},
@@ -10976,45 +11254,11 @@
                 {"type": "string"}
               ]}
             ]},
-            "map": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "Example id",
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "i": {
-                    "example": 0,
-                    "type": "integer"
-                  },
-                  "e": {
-                    "type": "string",
-                    "enum": [
-                      "one",
-                      "two"
-                    ]
-                  },
-                  "secondsS": {
-                    "example": 0,
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "id",
-                  "i",
-                  "e",
-                  "secondsS"
-                ]
-              }
-            },
-            "mapList": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "additionalProperties": {
+            "variantWithVariant": {"oneOf": [
+              {"type": "integer"},
+              {"oneOf": [
+                {"type": "string"},
+                {
                   "type": "object",
                   "properties": {
                     "id": {
@@ -11023,6 +11267,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -11045,6 +11290,79 @@
                     "secondsS"
                   ]
                 }
+              ]}
+            ]},
+            "map": {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "Example id",
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "i": {
+                    "description": "description",
+                    "example": 0,
+                    "type": "integer"
+                  },
+                  "e": {
+                    "type": "string",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "example": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            },
+            "mapList": {
+              "type": "array",
+              "items": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
               }
             },
             "mapOfList": {
@@ -11059,6 +11377,7 @@
                       "format": "uuid"
                     },
                     "i": {
+                      "description": "description",
                       "example": 0,
                       "type": "integer"
                     },
@@ -11085,38 +11404,245 @@
               "type": "object"
             },
             "mapOfNamedMap": {
-              "type": "object",
               "additionalProperties": {
                 "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "Example id",
-                    "type": "string",
-                    "format": "uuid"
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
-                  "i": {
-                    "example": 0,
-                    "type": "integer"
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            "chronoMap": {"additionalProperties": {"oneOf": [
+              {"type": "integer"},
+              {"type": "string"}
+            ]}},
+            "mapWithVariant": {
+              "additionalProperties": {"oneOf": [
+                {"type": "string"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
                   },
-                  "e": {
-                    "type": "string",
-                    "enum": [
-                      "one",
-                      "two"
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]},
+              "type": "object"
+            },
+            "mapListWithVariant": {
+              "type": "array",
+              "items": {
+                "additionalProperties": {"oneOf": [
+                  {"type": "string"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
                     ]
-                  },
-                  "secondsS": {
-                    "example": 0,
-                    "type": "integer"
                   }
-                },
-                "required": [
-                  "id",
-                  "i",
-                  "e",
-                  "secondsS"
-                ]
+                ]},
+                "type": "object"
               }
+            },
+            "mapWithVariantList": {
+              "additionalProperties": {
+                "type": "array",
+                "items": {"oneOf": [
+                  {"type": "string"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
+                    ]
+                  }
+                ]}
+              },
+              "type": "object"
+            },
+            "mapOfMap": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "example": "Example id",
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "i": {
+                      "description": "description",
+                      "example": 0,
+                      "type": "integer"
+                    },
+                    "e": {
+                      "type": "string",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "example": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "mapOfMapWithVariant": {
+              "additionalProperties": {
+                "additionalProperties": {"oneOf": [
+                  {"type": "integer"},
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "example": "Example id",
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "i": {
+                        "description": "description",
+                        "example": 0,
+                        "type": "integer"
+                      },
+                      "e": {
+                        "type": "string",
+                        "enum": [
+                          "one",
+                          "two"
+                        ]
+                      },
+                      "secondsS": {
+                        "example": 0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "i",
+                      "e",
+                      "secondsS"
+                    ]
+                  }
+                ]},
+                "type": "object"
+              },
+              "type": "object"
             }
           },
           "required": [
@@ -11130,10 +11656,17 @@
             "variantWithList",
             "variantWithMapList",
             "variantWithChrono",
+            "variantWithVariant",
             "map",
             "mapList",
             "mapOfList",
-            "mapOfNamedMap"
+            "mapOfNamedMap",
+            "chronoMap",
+            "mapWithVariant",
+            "mapListWithVariant",
+            "mapWithVariantList",
+            "mapOfMap",
+            "mapOfMapWithVariant"
           ]
         }}}
       }},
@@ -11162,25 +11695,12 @@
       }},
       "tags": ["Test"]
     }},
-    "/rest/v2/example/variantWithChrono": {"get": {
+    "/rest/v2/example/variant": {"get": {
       "responses": {"default": {
         "description": "",
         "content": {"application/json": {"schema": {"oneOf": [
           {"type": "integer"},
-          {"oneOf": [
-            {"type": "integer"},
-            {"type": "string"}
-          ]}
-        ]}}}
-      }},
-      "tags": ["Test"]
-    }},
-    "/rest/v2/example/map": {"get": {
-      "responses": {"default": {
-        "description": "",
-        "content": {"application/json": {"schema": {
-          "type": "object",
-          "additionalProperties": {
+          {
             "type": "object",
             "properties": {
               "id": {
@@ -11189,6 +11709,7 @@
                 "format": "uuid"
               },
               "i": {
+                "description": "description",
                 "example": 0,
                 "type": "integer"
               },
@@ -11211,18 +11732,90 @@
               "secondsS"
             ]
           }
-        }}}
+        ]}}}
       }},
       "tags": ["Test"]
     }},
-    "/rest/v2/example/mapList": {"get": {
+    "/rest/v2/example/variantOfTwoStructs": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "example": "Example id",
+                "type": "string",
+                "format": "uuid"
+              },
+              "i": {
+                "description": "description",
+                "example": 0,
+                "type": "integer"
+              },
+              "e": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {
+                "example": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "example": "Example id",
+                "type": "string",
+                "format": "uuid"
+              },
+              "i": {
+                "description": "description",
+                "example": 0,
+                "type": "integer"
+              },
+              "e": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {
+                "example": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          }
+        ]}}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/variantList": {"get": {
       "responses": {"default": {
         "description": "",
         "content": {"application/json": {"schema": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": {
+          "items": {"oneOf": [
+            {"type": "integer"},
+            {
               "type": "object",
               "properties": {
                 "id": {
@@ -11231,6 +11824,7 @@
                   "format": "uuid"
                 },
                 "i": {
+                  "description": "description",
                   "example": 0,
                   "type": "integer"
                 },
@@ -11253,6 +11847,104 @@
                 "secondsS"
               ]
             }
+          ]}
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/variantWithChrono": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"oneOf": [
+          {"type": "integer"},
+          {"oneOf": [
+            {"type": "integer"},
+            {"type": "string"}
+          ]}
+        ]}}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/map": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "example": "Example id",
+                "type": "string",
+                "format": "uuid"
+              },
+              "i": {
+                "description": "description",
+                "example": 0,
+                "type": "integer"
+              },
+              "e": {
+                "type": "string",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {
+                "example": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          },
+          "type": "object"
+        }}}
+      }},
+      "tags": ["Test"]
+    }},
+    "/rest/v2/example/mapList": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "Example id",
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "i": {
+                  "description": "description",
+                  "example": 0,
+                  "type": "integer"
+                },
+                "e": {
+                  "type": "string",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "example": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            },
+            "type": "object"
           }
         }}}
       }},
@@ -11273,6 +11965,7 @@
                   "format": "uuid"
                 },
                 "i": {
+                  "description": "description",
                   "example": 0,
                   "type": "integer"
                 },
@@ -11305,38 +11998,42 @@
       "responses": {"default": {
         "description": "",
         "content": {"application/json": {"schema": {
-          "type": "object",
           "additionalProperties": {
             "type": "object",
-            "properties": {
-              "id": {
-                "example": "Example id",
-                "type": "string",
-                "format": "uuid"
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "Example id",
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "i": {
+                  "description": "description",
+                  "example": 0,
+                  "type": "integer"
+                },
+                "e": {
+                  "type": "string",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "example": 0,
+                  "type": "integer"
+                }
               },
-              "i": {
-                "example": 0,
-                "type": "integer"
-              },
-              "e": {
-                "type": "string",
-                "enum": [
-                  "one",
-                  "two"
-                ]
-              },
-              "secondsS": {
-                "example": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id",
-              "i",
-              "e",
-              "secondsS"
-            ]
-          }
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          },
+          "type": "object"
         }}}
       }},
       "tags": ["Test"]

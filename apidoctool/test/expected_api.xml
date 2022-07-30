@@ -15761,7 +15761,7 @@ for details.</caption>
                         <param>
                             <name>variantList[].#1.i</name>
                             <type>integer</type>
-                            <description/>
+                            <description>description</description>
                             <optional>false</optional>
                         </param>
                         <param>
@@ -15913,6 +15913,46 @@ for details.</caption>
                             <optional>false</optional>
                         </param>
                         <param>
+                            <name>variantWithVariant</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>variantWithVariant.#1.#1.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>variantWithVariant.#1.#1.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>variantWithVariant.#1.#1.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>variantWithVariant.#1.#1.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
                             <name>map</name>
                             <type>object</type>
                             <description/>
@@ -16039,19 +16079,19 @@ for details.</caption>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>mapOfNamedMap.*.id</name>
+                            <name>mapOfNamedMap.*.*.id</name>
                             <type>uuid</type>
                             <description/>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>mapOfNamedMap.*.i</name>
+                            <name>mapOfNamedMap.*.*.i</name>
                             <type>integer</type>
                             <description>description</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>mapOfNamedMap.*.e</name>
+                            <name>mapOfNamedMap.*.*.e</name>
                             <type>enum</type>
                             <description/>
                             <optional>false</optional>
@@ -16067,7 +16107,213 @@ for details.</caption>
                             </values>
                         </param>
                         <param>
-                            <name>mapOfNamedMap.*.secondsS</name>
+                            <name>mapOfNamedMap.*.*.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>chronoMap</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariant</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariant.*.#1.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariant.*.#1.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariant.*.#1.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapWithVariant.*.#1.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapListWithVariant</name>
+                            <type>array</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapListWithVariant[].*.#1.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapListWithVariant[].*.#1.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapListWithVariant[].*.#1.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapListWithVariant[].*.#1.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariantList</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariantList.*[].#1.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariantList.*[].#1.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapWithVariantList.*[].#1.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapWithVariantList.*[].#1.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMap</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMap.*.*.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMap.*.*.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMap.*.*.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapOfMap.*.*.secondsS</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMapWithVariant</name>
+                            <type>object</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMapWithVariant.*.*.#1.id</name>
+                            <type>uuid</type>
+                            <description/>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMapWithVariant.*.*.#1.i</name>
+                            <type>integer</type>
+                            <description>description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>mapOfMapWithVariant.*.*.#1.e</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>one</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>two</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>mapOfMapWithVariant.*.*.#1.secondsS</name>
                             <type>object</type>
                             <description/>
                             <optional>false</optional>
@@ -16112,7 +16358,7 @@ for details.</caption>
                             <param>
                                 <name>inner.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>inner.e</name>
@@ -16152,7 +16398,7 @@ for details.</caption>
                             <param>
                                 <name>variant.#1.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variant.#1.e</name>
@@ -16187,7 +16433,7 @@ for details.</caption>
                             <param>
                                 <name>variantOfTwoStructs.#0.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantOfTwoStructs.#0.e</name>
@@ -16217,7 +16463,7 @@ for details.</caption>
                             <param>
                                 <name>variantOfTwoStructs.#1.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantOfTwoStructs.#1.e</name>
@@ -16252,7 +16498,7 @@ for details.</caption>
                             <param>
                                 <name>variantList[].#1.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantList[].#1.e</name>
@@ -16287,7 +16533,7 @@ for details.</caption>
                             <param>
                                 <name>variantWithMap.#1.*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantWithMap.#1.*.e</name>
@@ -16322,7 +16568,7 @@ for details.</caption>
                             <param>
                                 <name>variantWithList.#1[].i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantWithList.#1[].e</name>
@@ -16357,7 +16603,7 @@ for details.</caption>
                             <param>
                                 <name>variantWithMapList.#1[].*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>variantWithMapList.#1[].*.e</name>
@@ -16385,6 +16631,41 @@ for details.</caption>
                                 <description/>
                             </param>
                             <param>
+                                <name>variantWithVariant</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>variantWithVariant.#1.#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>variantWithVariant.#1.#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>variantWithVariant.#1.#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>variantWithVariant.#1.#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
                                 <name>map</name>
                                 <type>object</type>
                                 <description/>
@@ -16397,7 +16678,7 @@ for details.</caption>
                             <param>
                                 <name>map.*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>map.*.e</name>
@@ -16432,7 +16713,7 @@ for details.</caption>
                             <param>
                                 <name>mapList[].*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>mapList[].*.e</name>
@@ -16467,7 +16748,7 @@ for details.</caption>
                             <param>
                                 <name>mapOfList.*[].i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>mapOfList.*[].e</name>
@@ -16495,17 +16776,17 @@ for details.</caption>
                                 <description/>
                             </param>
                             <param>
-                                <name>mapOfNamedMap.*.id</name>
+                                <name>mapOfNamedMap.*.*.id</name>
                                 <type>uuid</type>
                                 <description/>
                             </param>
                             <param>
-                                <name>mapOfNamedMap.*.i</name>
+                                <name>mapOfNamedMap.*.*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
-                                <name>mapOfNamedMap.*.e</name>
+                                <name>mapOfNamedMap.*.*.e</name>
                                 <type>enum</type>
                                 <description/>
                                 <values>
@@ -16520,7 +16801,187 @@ for details.</caption>
                                 </values>
                             </param>
                             <param>
-                                <name>mapOfNamedMap.*.secondsS</name>
+                                <name>mapOfNamedMap.*.*.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>chronoMap</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariant</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariant.*.#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariant.*.#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>mapWithVariant.*.#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapWithVariant.*.#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapListWithVariant</name>
+                                <type>array</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapListWithVariant[].*.#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapListWithVariant[].*.#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>mapListWithVariant[].*.#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapListWithVariant[].*.#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariantList</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariantList.*[].#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapWithVariantList.*[].#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>mapWithVariantList.*[].#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapWithVariantList.*[].#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMap</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMap.*.*.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMap.*.*.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>mapOfMap.*.*.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapOfMap.*.*.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMapWithVariant</name>
+                                <type>object</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMapWithVariant.*.*.#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>mapOfMapWithVariant.*.*.#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>mapOfMapWithVariant.*.*.#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>mapOfMapWithVariant.*.*.#1.secondsS</name>
                                 <type>integer</type>
                                 <description/>
                             </param>
@@ -16543,6 +17004,159 @@ for details.</caption>
                     <params/>
                     <result>
                         <type>array</type>
+                    </result>
+                </function>
+                <function>
+                    <name>rest/v2/example/variant</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>rest/v2/example/variantOfTwoStructs</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <type>object</type>
+                        <params>
+                            <param>
+                                <name>#0.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>#0.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>#0.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>#0.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+                <function>
+                    <name>rest/v2/example/variantList</name>
+                    <description/>
+                    <method>GET</method>
+                    <params/>
+                    <result>
+                        <type>array</type>
+                        <params>
+                            <param>
+                                <name>#1.id</name>
+                                <type>uuid</type>
+                                <description/>
+                            </param>
+                            <param>
+                                <name>#1.i</name>
+                                <type>integer</type>
+                                <description>description</description>
+                            </param>
+                            <param>
+                                <name>#1.e</name>
+                                <type>enum</type>
+                                <description/>
+                                <values>
+                                    <value>
+                                        <name>one</name>
+                                        <description/>
+                                    </value>
+                                    <value>
+                                        <name>two</name>
+                                        <description/>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>#1.secondsS</name>
+                                <type>integer</type>
+                                <description/>
+                            </param>
+                        </params>
                     </result>
                 </function>
                 <function>
@@ -16570,7 +17184,7 @@ for details.</caption>
                             <param>
                                 <name>*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>*.e</name>
@@ -16611,7 +17225,7 @@ for details.</caption>
                             <param>
                                 <name>*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>*.e</name>
@@ -16652,7 +17266,7 @@ for details.</caption>
                             <param>
                                 <name>*[].i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
                                 <name>*[].e</name>
@@ -16686,17 +17300,17 @@ for details.</caption>
                         <type>object</type>
                         <params>
                             <param>
-                                <name>*.id</name>
+                                <name>*.*.id</name>
                                 <type>uuid</type>
                                 <description/>
                             </param>
                             <param>
-                                <name>*.i</name>
+                                <name>*.*.i</name>
                                 <type>integer</type>
-                                <description/>
+                                <description>description</description>
                             </param>
                             <param>
-                                <name>*.e</name>
+                                <name>*.*.e</name>
                                 <type>enum</type>
                                 <description/>
                                 <values>
@@ -16711,7 +17325,7 @@ for details.</caption>
                                 </values>
                             </param>
                             <param>
-                                <name>*.secondsS</name>
+                                <name>*.*.secondsS</name>
                                 <type>integer</type>
                                 <description/>
                             </param>

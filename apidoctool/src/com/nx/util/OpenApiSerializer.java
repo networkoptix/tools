@@ -494,10 +494,14 @@ public final class OpenApiSerializer
             }
             return;
         }
-        if (typeInfo.mapValueType != null && typeInfo.mapValueType.fixed != Apidoc.Type.OBJECT)
+        if (typeInfo.mapValueType != null)
         {
             assert typeInfo.mapValueType.fixed != Apidoc.Type.UNKNOWN;
-            assert typeInfo.fixed == Apidoc.Type.OBJECT;
+            if (typeInfo.fixed == Apidoc.Type.ARRAY)
+            {
+                schema.put("type", "array");
+                schema = getObject(schema, "items");
+            }
             fillSchemaType(getObject(schema, "additionalProperties"), typeInfo.mapValueType);
             return;
         }

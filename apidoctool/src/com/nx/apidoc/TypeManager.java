@@ -67,13 +67,10 @@ public final class TypeManager
                 function.result.params,
                 function.result.unusedParams,
                 ApidocCommentParser.ParamDirection.Input);
-            if (function.result.caption.isEmpty()
-                && (outputType.name != null || outputType.mapValueType != null))
+            if (function.result.caption.isEmpty())
             {
                 // Take the function result caption from the output struct description.
-                final StructParser.StructInfo structInfo = structInfo(outputType);
-                if (structInfo != null)
-                    function.result.caption = structInfo.description();
+                function.result.caption = getStructDescription(outputType);
             }
         }
 
@@ -92,27 +89,24 @@ public final class TypeManager
         throws Error
     {
         correctType(type);
-        final StructParser.StructInfo structInfo = structInfo(type);
-        if (structInfo == null)
-            return null;
-        return structToParams(
-            prefix, structInfo, paramDirection, new ArrayList<Apidoc.Param>(), new HashMap<String, String>());
+        return structToParams(prefix, type, paramDirection, new ArrayList<>(), new HashMap<>());
     }
 
     /**
      * @return Empty string if the struct was not found, or has no description.
      */
-    public String getStructDescription(String structName)
-        throws Error
+    public String getStructDescription(TypeInfo type) throws Error
     {
-        StructParser.StructInfo structInfo = structs.get(structName);
-        if (structInfo == null)
+        if (!(type.fixed == Apidoc.Type.OBJECT || type.fixed == Apidoc.Type.ARRAY)
+            || (type.name == null && type.mapValueType == null))
         {
-            if (unknownParamTypeIsError)
-                throw new Error("Struct `" + structName + "` not found.");
-            System.out.println("WARNING: Struct `" + structName + "` not found.");
             return "";
         }
+        if (type.mapValueType != null)
+            return getStructDescription(type.mapValueType);
+        StructParser.StructInfo structInfo = structInfo(type);
+        if (structInfo == null)
+            return "";
         return structInfo.description();
     }
 
@@ -127,21 +121,14 @@ public final class TypeManager
         }
     }
 
+    private StructParser.StructInfo structOrMapInfo(TypeInfo type) throws Error
+    {
+        return type.mapValueType == null ? structInfo(type) : structOrMapInfo(type.mapValueType);
+    }
+
     private StructParser.StructInfo structInfo(TypeInfo type) throws Error
     {
-        if (type.mapValueType != null)
-        {
-            if (type.mapValueType.fixed != Apidoc.Type.UNKNOWN && type.mapValueType.name == null)
-                return null;
-            final StructParser.StructInfo origin = structInfo(type.mapValueType);
-            final StructParser.StructInfo result = new StructParser.StructInfo();
-            result.fields = origin.fields;
-            result.items = origin.items;
-            result.name = origin.name;
-            result.isMap = true;
-            return result;
-        }
-
+        assert type.mapValueType == null;
         if (type.isChrono())
         {
             final StructParser.StructInfo result = new StructParser.StructInfo();
@@ -167,65 +154,10 @@ public final class TypeManager
         ApidocCommentParser.ParamDirection paramDirection)
         throws Error
     {
-        if ((type.name == null && type.mapValueType == null && type.variantValueTypes == null)
-            || TypeInfo.nullType.equals(type.name)
-            || type.isChrono())
-        {
+        List<Apidoc.Param> structParams = getStructParams(type, "", paramDirection);
+        if (structParams.isEmpty())
             return functionParams;
-        }
 
-        correctType(type);
-        List<Apidoc.Param> structParams = null;
-        if (type.variantValueTypes != null)
-        {
-            structParams = new ArrayList<>();
-            for (int i = 0; i < type.variantValueTypes.size(); ++i)
-            {
-                final TypeInfo variantType = type.variantValueTypes.get(i);
-                if (variantType.fixed != Apidoc.Type.OBJECT || variantType.fixed != Apidoc.Type.ARRAY)
-                    continue;
-                final StructParser.StructInfo structInfo = structInfo(variantType);
-                if (structInfo == null)
-                    continue;
-                String namePrefix = ".#" + i;
-                if (variantType.fixed == Apidoc.Type.ARRAY)
-                    namePrefix += "[]";
-                if (structInfo.isMap)
-                {
-                    namePrefix += "." + TypeInfo.mapKeyPlaceholder;
-                    if (variantType.mapValueType.fixed == Apidoc.Type.ARRAY)
-                        namePrefix += "[]";
-                }
-                structParams.addAll(structToParams(
-                    namePrefix + ".",
-                    structInfo,
-                    paramDirection,
-                    new ArrayList<Apidoc.Param>(),
-                    new HashMap<String, String>()));
-            }
-        }
-        else
-        {
-            final StructParser.StructInfo structInfo = structInfo(type);
-            if (structInfo == null)
-                return functionParams;
-
-            String namePrefix = "";
-            if (structInfo.isMap)
-            {
-                namePrefix += TypeInfo.mapKeyPlaceholder;
-                if (type.mapValueType != null && type.mapValueType.fixed == Apidoc.Type.ARRAY)
-                    namePrefix += "[].";
-                else
-                    namePrefix += ".";
-            }
-            structParams = structToParams(
-                namePrefix,
-                structInfo,
-                paramDirection,
-                new ArrayList<Apidoc.Param>(),
-                new HashMap<String, String>());
-        }
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
         for (Apidoc.Param structParam: structParams)
         {
@@ -330,13 +262,54 @@ public final class TypeManager
      */
     private List<Apidoc.Param> structToParams(
         String namePrefix,
-        StructParser.StructInfo structInfo,
+        TypeInfo type,
         ApidocCommentParser.ParamDirection paramDirection,
         List<Apidoc.Param> overriddenParams,
         HashMap<String, String> processedStructs)
         throws Error
     {
-        processedStructs.put(structInfo.name, namePrefix);
+        List<Apidoc.Param> structParams = new ArrayList<>();
+        if (type.fixed == Apidoc.Type.ARRAY && !namePrefix.isEmpty())
+            namePrefix += "[]";
+
+        if (!namePrefix.isEmpty())
+            namePrefix += '.';
+        if (type.variantValueTypes != null)
+        {
+            if (type.isChrono())
+                return structParams;
+            namePrefix += '#';
+            for (int i = 0; i < type.variantValueTypes.size(); ++i)
+            {
+                final TypeInfo subType = type.variantValueTypes.get(i);
+                if (subType.fixed != Apidoc.Type.OBJECT && subType.fixed != Apidoc.Type.ARRAY)
+                    continue;
+                structParams.addAll(structToParams(
+                    namePrefix + i, subType, paramDirection, overriddenParams, processedStructs));
+            }
+            return structParams;
+        }
+
+        if (type.mapValueType != null)
+        {
+            if (type.mapValueType.fixed == Apidoc.Type.OBJECT || type.mapValueType.fixed == Apidoc.Type.ARRAY)
+            {
+                structParams.addAll(structToParams(
+                    namePrefix + TypeInfo.mapKeyPlaceholder,
+                    type.mapValueType,
+                    paramDirection,
+                    overriddenParams,
+                    processedStructs));
+            }
+            return structParams;
+        }
+
+        if (type.name == null || TypeInfo.nullType.equals(type.name))
+            return structParams;
+
+        final StructParser.StructInfo structInfo = structInfo(type);
+        if (structInfo == null)
+            return structParams;
 
         List<Apidoc.Param> paramsFromItems;
         try
@@ -345,14 +318,18 @@ public final class TypeManager
                 structInfo.items,
                 namePrefix,
                 paramDirection,
-                ApidocCommentParser.ParamMode.WithToken);
+                ApidocCommentParser.ParamMode.WithToken,
+                this);
             overriddenParams.addAll(paramsFromItems);
         }
         catch (ApidocCommentParser.Error e)
         {
             throw new Error(e.getMessage());
         }
-        List<Apidoc.Param> params = new ArrayList<Apidoc.Param>();
+        processedStructs.put(structInfo.name, namePrefix);
+        if (structInfo.isMap)
+            namePrefix += TypeInfo.mapKeyPlaceholder + '.';
+        List<Apidoc.Param> params = new ArrayList<>();
         for (final StructParser.StructInfo.Field field: structInfo.fields)
         {
             final String name = namePrefix + field.name;
@@ -364,7 +341,7 @@ public final class TypeManager
             try
             {
                 param = ApidocCommentParser.parseParam(
-                    field.items, paramDirection, ApidocCommentParser.ParamMode.WithoutToken);
+                    field.items, paramDirection, ApidocCommentParser.ParamMode.WithoutToken, this);
             }
             catch (ApidocCommentParser.Error e)
             {
@@ -382,6 +359,8 @@ public final class TypeManager
             param.type.fillMissingType(field.type);
             if (field.type.isStdOptional)
                 param.optional = true;
+            if (param.description == null || param.description.isEmpty())
+                param.description = getStructDescription(param.type);
             if (overriddenParam != null)
             {
                 overriddenParam.fillMissingFieldsFrom(param);
@@ -393,75 +372,14 @@ public final class TypeManager
             }
 
             if (param.recursiveName == null
-                && (field.type.fixed == Apidoc.Type.OBJECT || field.type.fixed == Apidoc.Type.ARRAY)
-                && (field.type.name != null
-                    || field.type.mapValueType != null
-                    || field.type.variantValueTypes != null))
+                && (field.type.fixed == Apidoc.Type.OBJECT || field.type.fixed == Apidoc.Type.ARRAY))
             {
-                final String commonNamePrefix =
-                    param.name + (field.type.fixed == Apidoc.Type.ARRAY ? "[]" : "");
-                if (field.type.variantValueTypes != null)
-                {
-                    for (int i = 0; i < field.type.variantValueTypes.size(); ++i)
-                    {
-                        final TypeInfo innerType = field.type.variantValueTypes.get(i);
-                        if (!((innerType.fixed == Apidoc.Type.OBJECT || innerType.fixed == Apidoc.Type.ARRAY)
-                            && (innerType.name != null
-                                || innerType.mapValueType != null
-                                || innerType.variantValueTypes != null)))
-                        {
-                            continue;
-                        }
-                        StructParser.StructInfo innerStructInfo = structInfo(innerType);
-                        if (innerStructInfo == null)
-                            continue;
-
-                        String nextNamePrefix = commonNamePrefix + ".#" + i;
-                        if (innerType.fixed == Apidoc.Type.ARRAY)
-                            nextNamePrefix += "[]";
-                        if (innerStructInfo.isMap)
-                        {
-                            nextNamePrefix += "." + TypeInfo.mapKeyPlaceholder;
-                            if (innerType.mapValueType != null
-                                && innerType.mapValueType.fixed == Apidoc.Type.ARRAY)
-                            {
-                                nextNamePrefix += "[]";
-                            }
-                        }
-                        params.addAll(structToParams( //< Recursion.
-                            nextNamePrefix + ".",
-                            innerStructInfo,
-                            paramDirection,
-                            overriddenParams,
-                            processedStructs));
-                    }
-                }
-                else
-                {
-                    StructParser.StructInfo innerStructInfo = structInfo(field.type);
-                    if (innerStructInfo == null)
-                        continue;
-
-                    if (param.description == null || param.description.isEmpty())
-                        param.description = innerStructInfo.description();
-
-                    String nextNamePrefix = commonNamePrefix;
-                    if (innerStructInfo.isMap)
-                    {
-                        nextNamePrefix += "." + TypeInfo.mapKeyPlaceholder;
-                        if (field.type.mapValueType != null
-                            && field.type.mapValueType.fixed == Apidoc.Type.ARRAY)
-                        {
-                            nextNamePrefix += "[]";
-                        }
-                    }
-                    params.addAll(structToParams( //< Recursion.
-                        nextNamePrefix + ".",
-                        innerStructInfo,
-                        paramDirection,
-                        overriddenParams,
-                        processedStructs));
-                }
+                params.addAll(structToParams( //< Recursion.
+                    name,
+                    param.type,
+                    paramDirection,
+                    overriddenParams,
+                    processedStructs));
             }
         }
 
@@ -478,13 +396,14 @@ public final class TypeManager
         return params;
     }
 
-    private void correctType(TypeInfo type) throws Error
+    public void correctType(TypeInfo type)
     {
         if (type.mapValueType != null)
         {
             correctType(type.mapValueType);
             if (type.fixed == Apidoc.Type.UNKNOWN)
                 type.fixed = Apidoc.Type.OBJECT;
+            return;
         }
 
         if (type.variantValueTypes != null)
@@ -493,12 +412,16 @@ public final class TypeManager
                 correctType(variantType);
             if (type.fixed == Apidoc.Type.UNKNOWN)
                 type.fixed = Apidoc.Type.OBJECT;
+            return;
         }
 
         if (type.name == null)
             return;
 
         assert !type.name.isEmpty();
+
+        if (type.fixed != Apidoc.Type.UNKNOWN && type.fixed != Apidoc.Type.ARRAY)
+            return;
 
         FlagParser.FlagInfo flag = flags.get(type.name);
         if (flag != null)
@@ -509,8 +432,6 @@ public final class TypeManager
         }
         else if (enums.get(type.name) != null)
         {
-            if (type.fixed == Apidoc.Type.FLAGS)
-                return;
             type.fixed =
                 (type.fixed == Apidoc.Type.ARRAY) ? Apidoc.Type.STRING_ARRAY : Apidoc.Type.ENUM;
         }
@@ -572,7 +493,7 @@ public final class TypeManager
             }
             try
             {
-                StructParser.StructInfo baseStruct = structInfo(type);
+                StructParser.StructInfo baseStruct = structOrMapInfo(type);
                 fields.addAll(0, baseStruct.fields);
                 if (baseStruct.items != null)
                     items.addAll(baseStruct.items);

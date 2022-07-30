@@ -41,7 +41,10 @@ public final class ApidocCommentParser
     }
 
     public static Apidoc.Param parseParam(
-        List<ApidocTagParser.Item> tags, ParamDirection paramDirection, ParamMode paramMode)
+        List<ApidocTagParser.Item> tags,
+        ParamDirection paramDirection,
+        ParamMode paramMode,
+        TypeManager typeManager)
         throws Error
     {
         if (tags == null)
@@ -54,7 +57,7 @@ public final class ApidocCommentParser
             final ApidocTagParser.Item item = tagIterator.next();
 
             final Apidoc.Param result =
-                parser.parseParam(item, tagIterator, paramDirection, paramMode);
+                parser.parseParam(item, tagIterator, paramDirection, paramMode, typeManager);
 
             if (tagIterator.hasNext())
             {
@@ -68,7 +71,11 @@ public final class ApidocCommentParser
     }
 
     public static List<Apidoc.Param> parseParams(
-        List<ApidocTagParser.Item> tags, String namePrefix, ParamDirection paramDirection, ParamMode paramMode)
+        List<ApidocTagParser.Item> tags,
+        String namePrefix,
+        ParamDirection paramDirection,
+        ParamMode paramMode,
+        TypeManager typeManager)
         throws Error
     {
         List<Apidoc.Param> result = new ArrayList<Apidoc.Param>();
@@ -82,7 +89,7 @@ public final class ApidocCommentParser
             if (TAG_PARAM.equals(item.getTag()))
             {
                 final Apidoc.Param param =
-                    parser.parseParam(item, tagIterator, paramDirection, paramMode);
+                    parser.parseParam(item, tagIterator, paramDirection, paramMode, typeManager);
                 checkDuplicateParam(item, result, param.name);
                 param.name = namePrefix + param.name;
                 result.add(param);
@@ -236,7 +243,7 @@ public final class ApidocCommentParser
             else if (TAG_PARAM.equals(item.getTag()))
             {
                 final Apidoc.Param param = parseParam(
-                    item, tagIterator, ParamDirection.Input, ParamMode.WithToken);
+                    item, tagIterator, ParamDirection.Input, ParamMode.WithToken, typeManager);
 
                 checkDuplicateParam(item, description.function.input.params, param.name);
                 if (param.unused)
@@ -290,43 +297,23 @@ public final class ApidocCommentParser
         Apidoc.Param param,
         TypeManager typeManager,
         ParamDirection paramDirection)
-        throws TypeManager.Error, Error
+        throws TypeManager.Error
     {
-        if (typeManager == null || param.type.name == null)
+        if (typeManager == null)
             return;
 
-        if (param.description.isEmpty())
-            param.description = typeManager.getStructDescription(param.type.name);
-
-        if (param.type.fixed != Apidoc.Type.ARRAY
-            && param.type.fixed != Apidoc.Type.OBJECT
-            && param.type.fixed != Apidoc.Type.UNKNOWN)
-        {
-            throw new Error(
-                "Param `" + param.name + "` has %struct tag, but the param type is `"
-                + param.type.fixed + "`" + ". "
-                + "To use %struct tag, the type must be `object` or `array`.");
-        }
-
-        String prefix = param.name;
-        if (param.type.fixed == Apidoc.Type.ARRAY)
-            prefix += "[].";
-        else
-            prefix += ".";
-
         final List<Apidoc.Param> structParams =
-            typeManager.getStructParams(param.type, prefix, paramDirection);
-        if (structParams != null)
+            typeManager.getStructParams(param.type, param.name, paramDirection);
+        for (Apidoc.Param structParam: structParams)
         {
-            for (Apidoc.Param structParam: structParams)
-            {
-                structParam.isGeneratedFromStruct = true;
-                if (structParam.unused)
-                    unusedParams.add(structParam);
-                else
-                    params.add(structParam);
-            }
+            structParam.isGeneratedFromStruct = true;
+            if (structParam.unused)
+                unusedParams.add(structParam);
+            else
+                params.add(structParam);
         }
+        if (param.description.isEmpty())
+            param.description = typeManager.getStructDescription(param.type);
     }
 
     /**
@@ -427,7 +414,8 @@ public final class ApidocCommentParser
         ApidocTagParser.Item item,
         ListIterator<ApidocTagParser.Item> tagIterator,
         ParamDirection paramDirection,
-        ParamMode paramMode)
+        ParamMode paramMode,
+        TypeManager typeManager)
         throws Error
     {
         int paramIndentLevel = 0;
@@ -456,7 +444,19 @@ public final class ApidocCommentParser
         Param paramDescription = parseParamItems(tagIterator);
         param.values.addAll(paramDescription.values);
         if (paramDescription.structName != null && !paramDescription.structName.isEmpty())
+        {
             param.type.name = paramDescription.structName;
+            typeManager.correctType(param.type);
+            if (param.type.fixed != Apidoc.Type.ARRAY
+                && param.type.fixed != Apidoc.Type.OBJECT
+                && param.type.fixed != Apidoc.Type.UNKNOWN)
+            {
+                throw new Error(
+                    "Param `" + param.name + "` has %struct tag, but the param type is `"
+                        + param.type.fixed + "`" + ". "
+                        + "To use %struct tag, the type must be `object` or `array`.");
+            }
+        }
         param.deprecated = paramDescription.deprecated;
         param.deprecatedDescription = paramDescription.deprecatedDescription;
         param.example = paramDescription.example;
@@ -649,7 +649,7 @@ public final class ApidocCommentParser
             else if (TAG_PARAM.equals(item.getTag()))
             {
                 Apidoc.Param param = parseParam(
-                    item, tagIterator, ParamDirection.Output, ParamMode.WithToken);
+                    item, tagIterator, ParamDirection.Output, ParamMode.WithToken, typeManager);
 
                 checkDuplicateParam(item, result.params, param.name);
                 if (param.unused)
