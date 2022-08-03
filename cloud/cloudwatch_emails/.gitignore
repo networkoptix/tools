@@ -1,0 +1,9 @@
+env
+
+frontend/dist
+frontend/node_modules
+
+server/__pycache__
+server/static
+server/client_id.json
+server/token.json
