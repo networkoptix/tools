@@ -3,8 +3,7 @@
      * %caption Read metrics rules
      * %ingroup System
      * %permissions Admin.
-     * %param[ref] _local
-     * %param[ref] _keepDefault
+     * %param[ref] _local,_keepDefault
      * %param[ref] _with
      * %return:{std::map<QString, ResourceRules>} Structure of rules.
      */

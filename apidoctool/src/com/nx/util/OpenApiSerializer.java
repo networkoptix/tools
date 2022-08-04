@@ -257,10 +257,14 @@ public final class OpenApiSerializer
             JSONObject parameter;
             if (param.isRef)
             {
-                if (!refParameters.has(param.name))
-                    throw new Exception("Ref parameter '" + param.name + "' is missed");
-                parameter = new JSONObject();
-                parameter.put("$ref", "#/components/parameters/" + param.name);
+                for (final String ref: param.name.split(","))
+                {
+                    if (!refParameters.has(ref))
+                        throw new Exception("Ref parameter '" + ref + "' is missing");
+                    parameter = new JSONObject();
+                    parameter.put("$ref", "#/components/parameters/" + ref);
+                    getArray(method, "parameters").put(parameter);
+                }
             }
             else
             {
@@ -268,8 +272,8 @@ public final class OpenApiSerializer
                 if (parameter == null)
                     continue;
                 parameter.put("in", "query");
+                getArray(method, "parameters").put(parameter);
             }
-            getArray(method, "parameters").put(parameter);
         }
         for (final Apidoc.Param param: function.input.params)
         {

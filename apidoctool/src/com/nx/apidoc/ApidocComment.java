@@ -141,6 +141,10 @@ public abstract class ApidocComment
 //
 // Attribute "[opt]" may appear in "%param" or struct field's "%apidoc" to mark it as optional.
 //
+// Attribute "[ref]" can appear in "%param" to reference an actual parameter specified in the
+// OpenAPI schema provided as input. Can be a list of such references separated by comma without
+// spaces.
+//
 // Attribute "[default]" may appear only in "%param" with the name "format":
 //     %param[default] format
 // This line inserts into XML a hard-coded text which describes the "format" parameter which

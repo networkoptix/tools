@@ -15428,12 +15428,7 @@ for details.</caption>
                     <method>GET</method>
                     <params>
                         <param>
-                            <name>_local</name>
-                            <description/>
-                            <optional>false</optional>
-                        </param>
-                        <param>
-                            <name>_keepDefault</name>
+                            <name>_local,_keepDefault</name>
                             <description/>
                             <optional>false</optional>
                         </param>
