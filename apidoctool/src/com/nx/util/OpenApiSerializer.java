@@ -250,7 +250,7 @@ public final class OpenApiSerializer
                 }
 
                 if (param.recursiveName == null)
-                    addStructParam(schema, param);
+                    addStructParam(schema, param, /*fillDefaultExample*/ true);
 
                 continue;
             }
@@ -331,7 +331,7 @@ public final class OpenApiSerializer
                 requestBody.put("required", true);
             JSONObject schema = getObject(getObject(getObject(
                 requestBody, "content"), "application/json"), "schema");
-            fillSchemaTypeAndDefaultExample(schema, function.input.type);
+            fillSchemaType(schema, function.input.type, /*fillDefaultExample*/ true);
             if (!function.input.example.isEmpty())
                 schema.put("example", function.input.type.parse(function.input.example));
         }
@@ -387,7 +387,7 @@ public final class OpenApiSerializer
             return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
-        fillSchemaTypeAndDefaultExample(schema, result.type);
+        fillSchemaType(schema, result.type, /*fillDefaultExample*/ false);
         if (!result.example.isEmpty())
             schema.put("example", result.type.parse(result.example));
         if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
@@ -402,7 +402,7 @@ public final class OpenApiSerializer
             for (final Apidoc.Param param: result.params)
             {
                 if (param.recursiveName == null)
-                    addStructParam(schema, param);
+                    addStructParam(schema, param, /*fillDefaultExample*/ false);
                 if (generateOrderByParameters)
                     orderBy = fillOrderBy(orderBy, param);
             }
@@ -416,7 +416,8 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillSchemaTypeAndDefaultExample(JSONObject schema, Apidoc.Type type)
+    private static void fillSchemaType(
+        JSONObject schema, Apidoc.Type type, boolean fillDefaultExample)
     {
         switch (type)
         {
@@ -430,7 +431,7 @@ public final class OpenApiSerializer
             case ENUM:
             case FLAGS:
                 schema.put("type", "string");
-                if (type == Apidoc.Type.STRING)
+                if (fillDefaultExample && type == Apidoc.Type.STRING)
                     schema.put("example", "");
                 break;
             case OPTION:
@@ -459,7 +460,8 @@ public final class OpenApiSerializer
                 schema.put("type", "array");
                 schema = getObject(schema, "items");
                 schema.put("type", "string");
-                schema.put("example", "");
+                if (fillDefaultExample)
+                    schema.put("example", "");
                 break;
             case UUID_ARRAY:
                 schema.put("type", "array");
@@ -480,7 +482,8 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillSchemaTypeAndDefaultExample(JSONObject schema, TypeInfo typeInfo)
+    private static void fillSchemaType(
+        JSONObject schema, TypeInfo typeInfo, boolean fillDefaultExample)
     {
         if (typeInfo.variantValueTypes != null)
         {
@@ -497,7 +500,7 @@ public final class OpenApiSerializer
                 TypeInfo type = typeInfo.variantValueTypes.get(i);
                 assert type.fixed != Apidoc.Type.UNKNOWN;
                 JSONObject internalSchema = new JSONObject();
-                fillSchemaTypeAndDefaultExample(internalSchema, type);
+                fillSchemaType(internalSchema, type, fillDefaultExample);
                 oneOf.put(i, internalSchema);
             }
             return;
@@ -510,8 +513,10 @@ public final class OpenApiSerializer
                 schema.put("type", "array");
                 schema = getObject(schema, "items");
             }
-            fillSchemaTypeAndDefaultExample(
-                getObject(schema, "additionalProperties"), typeInfo.mapValueType);
+            fillSchemaType(
+                getObject(schema, "additionalProperties"),
+                typeInfo.mapValueType,
+                fillDefaultExample);
             return;
         }
         if (typeInfo.isChrono() && typeInfo.fixed == Apidoc.Type.ARRAY)
@@ -520,12 +525,13 @@ public final class OpenApiSerializer
             getObject(schema, "items").put("type", "integer");
             return;
         }
-        fillSchemaTypeAndDefaultExample(schema, typeInfo.fixed);
+        fillSchemaType(schema, typeInfo.fixed, fillDefaultExample);
     }
 
-    private static void fillSchemaTypeAndExample(JSONObject schema, Apidoc.Param param)
+    private static void fillSchemaType(
+        JSONObject schema, Apidoc.Param param, boolean fillDefaultExample)
     {
-        fillSchemaTypeAndDefaultExample(schema, param.type);
+        fillSchemaType(schema, param.type, fillDefaultExample);
         putExample(param, schema);
         if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
         {
@@ -592,7 +598,8 @@ public final class OpenApiSerializer
             object.put("description", result);
     }
 
-    private static void addStructParam(JSONObject schema, Apidoc.Param param) throws Exception
+    private static void addStructParam(
+        JSONObject schema, Apidoc.Param param, boolean fillDefaultExample) throws Exception
     {
         final JSONObject parameter = getParamByPath(schema, param.name);
         putDescription(param, parameter);
@@ -602,7 +609,7 @@ public final class OpenApiSerializer
             parameter.put("readOnly", true);
         else if (!param.optional)
             setRequired(schema, param.name);
-        fillSchemaTypeAndExample(parameter, param);
+        fillSchemaType(parameter, param, fillDefaultExample);
     }
 
     public static void addReferenceParam(
@@ -644,7 +651,7 @@ public final class OpenApiSerializer
             result.put("readOnly", true);
         else if (!param.optional)
             result.put("required", true);
-        fillSchemaTypeAndExample(getObject(result, "schema"), param);
+        fillSchemaType(getObject(result, "schema"), param, /*fillDefaultExample*/ true);
         return result;
     }
 

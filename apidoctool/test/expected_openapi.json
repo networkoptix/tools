@@ -733,13 +733,11 @@
               },
               "cameraName": {
                 "description": "Camera name.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "userDefinedGroupName": {
                 "description": "Name of the user-defined camera group.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "scheduleEnabled": {
                 "description": "Whether recording to the archive is enabled for the camera.",
@@ -762,8 +760,7 @@
               },
               "motionMask": {
                 "description": "List of motion detection areas and their\nsensitivity. The format is proprietary and is likely to change in\nfuture API versions. Currently, this string defines several rectangles separated\nwith \":\", each rectangle is described by 5 comma-separated numbers: sensitivity,\nx and y (for left top corner), width, height.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "scheduleTasks": {
                 "description": "List of scheduleTask objects which define the camera recording\nschedule.",
@@ -855,8 +852,7 @@
               },
               "dewarpingParams": {
                 "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "minArchiveDays": {
                 "description": "Minimum number of days to keep the archive for.\nIf the value is less than or equal zero, it is not used.",
@@ -893,10 +889,7 @@
                   "CameraBackup_Default"
                 ]
               },
-              "logicalId": {
-                "type": "string",
-                "example": ""
-              }
+              "logicalId": {"type": "string"}
             },
             "required": [
               "cameraId",
@@ -969,13 +962,11 @@
               },
               "name": {
                 "description": "Camera name.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "url": {
                 "description": "Camera IP address, or a complete HTTP URL if the camera was added manually.\nAlso, for multichannel encoders a complete URL is always used.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "typeId": {
                 "description": "Unique id of the camera type. A camera type can describe predefined\ninformation such as camera maximum resolution, FPS, etc. Detailed type information\ncan be obtained via GET /ec2/getResourceTypes request.",
@@ -984,13 +975,11 @@
               },
               "mac": {
                 "description": "Camera MAC address.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "physicalId": {
                 "description": "Camera unique identifier. This identifier can used in some requests\nrelated to a camera.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "manuallyAdded": {
                 "description": "Whether the user added the camera manually.",
@@ -998,18 +987,15 @@
               },
               "model": {
                 "description": "Camera model.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "groupId": {
                 "description": "Internal group identifier. It is used for grouping channels of\nmulti-channel cameras together.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "groupName": {
                 "description": "Group name. This name can be changed by users.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "statusFlags": {
                 "description": "Usually this field is zero. Non-zero value indicates that the camera\nis causing a lot of network issues.",
@@ -1021,8 +1007,7 @@
               },
               "vendor": {
                 "description": "Camera manufacturer.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "cameraId": {
                 "description": "Camera unique id. If such object exists, omitted fields will not be\n  changed.",
@@ -1031,13 +1016,11 @@
               },
               "cameraName": {
                 "description": "Camera name.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "userDefinedGroupName": {
                 "description": "Name of the user-defined camera group.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "scheduleEnabled": {
                 "description": "Whether recording to the archive is enabled for the camera.",
@@ -1060,8 +1043,7 @@
               },
               "motionMask": {
                 "description": "List of motion detection areas and their\nsensitivity. The format is proprietary and is likely to change in\nfuture API versions. Currently, this string defines several rectangles separated\nwith \":\", each rectangle is described by 5 comma-separated numbers: sensitivity,\nx and y (for the left top corner), width, height.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "scheduleTasks": {
                 "description": "List of scheduleTask objects which define the camera recording\nschedule.",
@@ -1153,8 +1135,7 @@
               },
               "dewarpingParams": {
                 "description": "Image dewarping parameters.\nThe format is proprietary and is likely to change in future API\nversions.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "minArchiveDays": {
                 "description": "Minimum number of days to keep the archive for.\nIf the value is less than or equal to zero, it is not used.",
@@ -1191,10 +1172,7 @@
                   "CameraBackup_Default"
                 ]
               },
-              "logicalId": {
-                "type": "string",
-                "example": ""
-              },
+              "logicalId": {"type": "string"},
               "status": {
                 "description": "Camera status.",
                 "type": "string",
@@ -1214,14 +1192,8 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "value": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    }
+                    "value": {"type": "string"},
+                    "name": {"type": "string"}
                   },
                   "required": [
                     "value",
@@ -1292,10 +1264,7 @@
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
-            "value": {
-              "type": "string",
-              "example": ""
-            },
+            "value": {"type": "string"},
             "isPrimaryTimeServer": {"type": "boolean"},
             "primaryTimeServerGuid": {
               "type": "string",
@@ -1407,18 +1376,15 @@
                   },
                   "inputPortId": {
                     "description": "(string) Used for input events only. Empty string\nmatches any value.",
-                    "type": "string",
-                    "example": ""
+                    "type": "string"
                   },
                   "caption": {
                     "description": "Substring to be found in the short event description.\nEmpty string matches any value.",
-                    "type": "string",
-                    "example": ""
+                    "type": "string"
                   },
                   "description": {
                     "description": "Substring to be found in the long event\ndescription. Empty string matches any value.",
-                    "type": "string",
-                    "example": ""
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1469,8 +1435,7 @@
               },
               "actionParams": {
                 "description": "String containing a JSON object which fields depend on actionType\nand thus are described next to the respective actionType values.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "aggregationPeriod": {
                 "description": "Period (in seconds) during which the consecutive similar events\nare aggregated into a single event.",
@@ -1482,13 +1447,11 @@
               },
               "comment": {
                 "description": "An arbitrary comment to the rule.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "schedule": {
                 "description": "String containing a lower-case hex array of 21 bytes, which is a bit\nmask for a week (starting on Monday), where each consecutive bit corresponds to an\nhour and equals 1 for \"enabled\" and 0 for \"disabled\".\nThus, the first byte describes the first 8 hours of Monday after midnight, and the\nlast byte describes the last 8 hours of Sunday before midnight; in a byte, the\nhighest significant bit corresponds to the earliest hour.\nExample: Enable all hours in a week except for the Monday interval from 7am to 9am:\n<code>fe7fffffffffffffffffffffffffffffffffffffff<\/code>",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "system": {
                 "description": "Whether the rule is a built-in one, which cannot be deleted.",
@@ -1545,14 +1508,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "vendor": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "vendor": {"type": "string"},
                   "parentId": {
                     "type": "array",
                     "items": {
@@ -1569,14 +1526,8 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "name": {
-                          "type": "string",
-                          "example": ""
-                        },
-                        "defaultValue": {
-                          "type": "string",
-                          "example": ""
-                        }
+                        "name": {"type": "string"},
+                        "defaultValue": {"type": "string"}
                       },
                       "required": [
                         "resourceTypeId",
@@ -1608,22 +1559,13 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
                   },
-                  "networkAddresses": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "networkAddresses": {"type": "string"},
                   "flags": {
                     "type": "string",
                     "enum": [
@@ -1641,18 +1583,9 @@
                       "SF_P2pSyncDone"
                     ]
                   },
-                  "version": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "systemInfo": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "authKey": {
-                    "type": "string",
-                    "example": ""
-                  }
+                  "version": {"type": "string"},
+                  "systemInfo": {"type": "string"},
+                  "authKey": {"type": "string"}
                 },
                 "required": [
                   "id",
@@ -1677,10 +1610,7 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "serverName": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "serverName": {"type": "string"},
                   "maxCameras": {"type": "integer"},
                   "allowAutoRedundancy": {"type": "boolean"},
                   "backupType": {
@@ -1735,39 +1665,18 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
                   },
-                  "mac": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "physicalId": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "mac": {"type": "string"},
+                  "physicalId": {"type": "string"},
                   "manuallyAdded": {"type": "boolean"},
-                  "model": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "groupId": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "groupName": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "model": {"type": "string"},
+                  "groupId": {"type": "string"},
+                  "groupName": {"type": "string"},
                   "statusFlags": {
                     "type": "string",
                     "enum": [
@@ -1775,10 +1684,7 @@
                       "CSF_HasIssuesFlag"
                     ]
                   },
-                  "vendor": {
-                    "type": "string",
-                    "example": ""
-                  }
+                  "vendor": {"type": "string"}
                 },
                 "required": [
                   "id",
@@ -1806,14 +1712,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "cameraName": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "userDefinedGroupName": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "cameraName": {"type": "string"},
+                  "userDefinedGroupName": {"type": "string"},
                   "scheduleEnabled": {"type": "boolean"},
                   "licenseUsed": {"type": "boolean"},
                   "motionType": {
@@ -1827,10 +1727,7 @@
                       "MT_NoMotion"
                     ]
                   },
-                  "motionMask": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "motionMask": {"type": "string"},
                   "scheduleTasks": {
                     "type": "array",
                     "items": {
@@ -1885,10 +1782,7 @@
                   "audioEnabled": {"type": "boolean"},
                   "disableDualStreaming": {"type": "boolean"},
                   "controlEnabled": {"type": "boolean"},
-                  "dewarpingParams": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "dewarpingParams": {"type": "string"},
                   "minArchiveDays": {"type": "integer"},
                   "maxArchiveDays": {"type": "integer"},
                   "preferredServerId": {
@@ -1915,10 +1809,7 @@
                       "CameraBackup_Default"
                     ]
                   },
-                  "logicalId": {
-                    "type": "string",
-                    "example": ""
-                  }
+                  "logicalId": {"type": "string"}
                 },
                 "required": [
                   "cameraId",
@@ -1955,14 +1846,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
@@ -1995,33 +1880,15 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "email": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "digest": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "hash": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "cryptSha512Hash": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "realm": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "email": {"type": "string"},
+                  "digest": {"type": "string"},
+                  "hash": {"type": "string"},
+                  "cryptSha512Hash": {"type": "string"},
+                  "realm": {"type": "string"},
                   "isLdap": {"type": "boolean"},
                   "isEnabled": {"type": "boolean"},
                   "isCloud": {"type": "boolean"},
-                  "fullName": {
-                    "type": "string",
-                    "example": ""
-                  }
+                  "fullName": {"type": "string"}
                 },
                 "required": [
                   "id",
@@ -2053,10 +1920,7 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
                   "permissions": {
                     "type": "string",
                     "enum": [
@@ -2124,14 +1988,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
@@ -2158,10 +2016,7 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "resourcePath": {
-                          "type": "string",
-                          "example": ""
-                        },
+                        "resourcePath": {"type": "string"},
                         "zoomLeft": {"type": "number"},
                         "zoomTop": {"type": "number"},
                         "zoomRight": {"type": "number"},
@@ -2170,14 +2025,8 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "contrastParams": {
-                          "type": "string",
-                          "example": ""
-                        },
-                        "dewarpingParams": {
-                          "type": "string",
-                          "example": ""
-                        },
+                        "contrastParams": {"type": "string"},
+                        "dewarpingParams": {"type": "string"},
                         "displayInfo": {"type": "boolean"}
                       },
                       "required": [
@@ -2202,10 +2051,7 @@
                     }
                   },
                   "locked": {"type": "boolean"},
-                  "backgroundImageFilename": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "backgroundImageFilename": {"type": "string"},
                   "backgroundWidth": {"type": "integer"},
                   "backgroundHeight": {"type": "integer"},
                   "backgroundOpacity": {"type": "number"}
@@ -2241,14 +2087,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
@@ -2271,10 +2111,7 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "name": {
-                          "type": "string",
-                          "example": ""
-                        },
+                        "name": {"type": "string"},
                         "snapLeft": {"type": "integer"},
                         "snapTop": {"type": "integer"},
                         "snapRight": {"type": "integer"},
@@ -2334,10 +2171,7 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "name": {
-                          "type": "string",
-                          "example": ""
-                        },
+                        "name": {"type": "string"},
                         "items": {
                           "type": "array",
                           "items": {
@@ -2421,10 +2255,7 @@
                       "format": "uuid"
                     }
                   },
-                  "eventCondition": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "eventCondition": {"type": "string"},
                   "eventState": {
                     "type": "string",
                     "enum": [
@@ -2461,20 +2292,11 @@
                       "format": "uuid"
                     }
                   },
-                  "actionParams": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "actionParams": {"type": "string"},
                   "aggregationPeriod": {"type": "integer"},
                   "disabled": {"type": "boolean"},
-                  "comment": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "schedule": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "comment": {"type": "string"},
+                  "schedule": {"type": "string"},
                   "system": {"type": "boolean"}
                 },
                 "required": [
@@ -2522,14 +2344,8 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "key": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "licenseBlock": {
-                    "type": "string",
-                    "example": ""
-                  }
+                  "key": {"type": "string"},
+                  "licenseBlock": {"type": "string"}
                 },
                 "required": [
                   "key",
@@ -2546,10 +2362,7 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "url": {"type": "string"},
                   "ignore": {"type": "boolean"}
                 },
                 "required": [
@@ -2564,14 +2377,8 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "value": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "value": {"type": "string"},
+                  "name": {"type": "string"},
                   "resourceId": {
                     "type": "string",
                     "format": "uuid"
@@ -2597,40 +2404,22 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
                   },
-                  "spaceLimit": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "spaceLimit": {"type": "string"},
                   "usedForWriting": {"type": "boolean"},
-                  "storageType": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "storageType": {"type": "string"},
                   "addParams": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
-                        "value": {
-                          "type": "string",
-                          "example": ""
-                        },
-                        "name": {
-                          "type": "string",
-                          "example": ""
-                        }
+                        "value": {"type": "string"},
+                        "name": {"type": "string"}
                       },
                       "required": [
                         "value",
@@ -2695,14 +2484,8 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
-                  "url": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
                     "format": "uuid"
@@ -2730,10 +2513,7 @@
                     "type": "string",
                     "format": "uuid"
                   },
-                  "name": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "name": {"type": "string"},
                   "items": {
                     "type": "array",
                     "items": {
@@ -2807,10 +2587,7 @@
             "hardwareIds": {
               "description": "All Hardware Ids of the server, as a list of strings.",
               "type": "array",
-              "items": {
-                "type": "string",
-                "example": ""
-              }
+              "items": {"type": "string"}
             }
           },
           "required": [
@@ -2852,10 +2629,7 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
               "items": {
                 "type": "array",
                 "items": {
@@ -2933,14 +2707,8 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "url": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "url": {"type": "string"},
               "typeId": {
                 "type": "string",
                 "format": "uuid"
@@ -2967,10 +2735,7 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "resourcePath": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "resourcePath": {"type": "string"},
                     "zoomLeft": {"type": "number"},
                     "zoomTop": {"type": "number"},
                     "zoomRight": {"type": "number"},
@@ -2979,14 +2744,8 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "contrastParams": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "dewarpingParams": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "contrastParams": {"type": "string"},
+                    "dewarpingParams": {"type": "string"},
                     "displayInfo": {"type": "boolean"}
                   },
                   "required": [
@@ -3011,10 +2770,7 @@
                 }
               },
               "locked": {"type": "boolean"},
-              "backgroundImageFilename": {
-                "type": "string",
-                "example": ""
-              },
+              "backgroundImageFilename": {"type": "string"},
               "backgroundWidth": {"type": "integer"},
               "backgroundHeight": {"type": "integer"},
               "backgroundOpacity": {"type": "number"}
@@ -3063,14 +2819,8 @@
           "items": {
             "type": "object",
             "properties": {
-              "key": {
-                "type": "string",
-                "example": ""
-              },
-              "licenseBlock": {
-                "type": "string",
-                "example": ""
-              }
+              "key": {"type": "string"},
+              "licenseBlock": {"type": "string"}
             },
             "required": [
               "key",
@@ -3122,8 +2872,7 @@
               },
               "serverName": {
                 "description": "Server name.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "maxCameras": {
                 "description": "Maximum number of cameras on the server.",
@@ -3217,22 +2966,13 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "url": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "url": {"type": "string"},
               "typeId": {
                 "type": "string",
                 "format": "uuid"
               },
-              "networkAddresses": {
-                "type": "string",
-                "example": ""
-              },
+              "networkAddresses": {"type": "string"},
               "flags": {
                 "type": "string",
                 "enum": [
@@ -3250,26 +2990,14 @@
                   "SF_P2pSyncDone"
                 ]
               },
-              "version": {
-                "type": "string",
-                "example": ""
-              },
-              "systemInfo": {
-                "type": "string",
-                "example": ""
-              },
-              "authKey": {
-                "type": "string",
-                "example": ""
-              },
+              "version": {"type": "string"},
+              "systemInfo": {"type": "string"},
+              "authKey": {"type": "string"},
               "serverId": {
                 "type": "string",
                 "format": "uuid"
               },
-              "serverName": {
-                "type": "string",
-                "example": ""
-              },
+              "serverName": {"type": "string"},
               "maxCameras": {"type": "integer"},
               "allowAutoRedundancy": {"type": "boolean"},
               "backupType": {
@@ -3314,14 +3042,8 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "value": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    }
+                    "value": {"type": "string"},
+                    "name": {"type": "string"}
                   },
                   "required": [
                     "value",
@@ -3342,40 +3064,22 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "url": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "name": {"type": "string"},
+                    "url": {"type": "string"},
                     "typeId": {
                       "type": "string",
                       "format": "uuid"
                     },
-                    "spaceLimit": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "spaceLimit": {"type": "string"},
                     "usedForWriting": {"type": "boolean"},
-                    "storageType": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "storageType": {"type": "string"},
                     "addParams": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "value": {
-                            "type": "string",
-                            "example": ""
-                          },
-                          "name": {
-                            "type": "string",
-                            "example": ""
-                          }
+                          "value": {"type": "string"},
+                          "name": {"type": "string"}
                         },
                         "required": [
                           "value",
@@ -3452,10 +3156,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
               "permissions": {
                 "type": "string",
                 "enum": [
@@ -3526,14 +3227,8 @@
           "items": {
             "type": "object",
             "properties": {
-              "value": {
-                "type": "string",
-                "example": ""
-              },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
+              "value": {"type": "string"},
+              "name": {"type": "string"},
               "resourceId": {
                 "type": "string",
                 "format": "uuid"
@@ -3576,14 +3271,8 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "vendor": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "vendor": {"type": "string"},
               "parentId": {
                 "type": "array",
                 "items": {
@@ -3600,14 +3289,8 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "defaultValue": {
-                      "type": "string",
-                      "example": ""
-                    }
+                    "name": {"type": "string"},
+                    "defaultValue": {"type": "string"}
                   },
                   "required": [
                     "resourceTypeId",
@@ -3652,14 +3335,8 @@
           "items": {
             "type": "object",
             "properties": {
-              "value": {
-                "type": "string",
-                "example": ""
-              },
-              "name": {
-                "type": "string",
-                "example": ""
-              }
+              "value": {"type": "string"},
+              "name": {"type": "string"}
             },
             "required": [
               "value",
@@ -3776,13 +3453,11 @@
               },
               "name": {
                 "description": "Storage name.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "url": {
                 "description": "Storage URL.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "typeId": {
                 "type": "string",
@@ -3790,8 +3465,7 @@
               },
               "spaceLimit": {
                 "description": "Storage space to leave free on the storage,\nin bytes.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "usedForWriting": {
                 "description": "Whether writing to the storage is allowed.",
@@ -3808,14 +3482,8 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "value": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    }
+                    "value": {"type": "string"},
+                    "name": {"type": "string"}
                   },
                   "required": [
                     "value",
@@ -3877,14 +3545,8 @@
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
-            "path": {
-              "type": "string",
-              "example": ""
-            },
-            "data": {
-              "type": "string",
-              "example": ""
-            }
+            "path": {"type": "string"},
+            "data": {"type": "string"}
           },
           "required": [
             "path",
@@ -3932,10 +3594,7 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
               "permissions": {
                 "type": "string",
                 "enum": [
@@ -4012,14 +3671,8 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "url": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "url": {"type": "string"},
               "typeId": {
                 "type": "string",
                 "format": "uuid"
@@ -4052,33 +3705,15 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "email": {
-                "type": "string",
-                "example": ""
-              },
-              "digest": {
-                "type": "string",
-                "example": ""
-              },
-              "hash": {
-                "type": "string",
-                "example": ""
-              },
-              "cryptSha512Hash": {
-                "type": "string",
-                "example": ""
-              },
-              "realm": {
-                "type": "string",
-                "example": ""
-              },
+              "email": {"type": "string"},
+              "digest": {"type": "string"},
+              "hash": {"type": "string"},
+              "cryptSha512Hash": {"type": "string"},
+              "realm": {"type": "string"},
               "isLdap": {"type": "boolean"},
               "isEnabled": {"type": "boolean"},
               "isCloud": {"type": "boolean"},
-              "fullName": {
-                "type": "string",
-                "example": ""
-              }
+              "fullName": {"type": "string"}
             },
             "required": [
               "id",
@@ -4135,14 +3770,8 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "url": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "url": {"type": "string"},
               "typeId": {
                 "type": "string",
                 "format": "uuid"
@@ -4165,10 +3794,7 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "name": {"type": "string"},
                     "snapLeft": {"type": "integer"},
                     "snapTop": {"type": "integer"},
                     "snapRight": {"type": "integer"},
@@ -4228,10 +3854,7 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "name": {"type": "string"},
                     "items": {
                       "type": "array",
                       "items": {
@@ -4308,14 +3931,8 @@
                 "type": "string",
                 "format": "uuid"
               },
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "url": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "url": {"type": "string"},
               "typeId": {
                 "type": "string",
                 "format": "uuid"
@@ -4366,10 +3983,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": {"path": {
-              "type": "string",
-              "example": ""
-            }},
+            "properties": {"path": {"type": "string"}},
             "required": ["path"]
           }
         }}}
@@ -6539,13 +6153,11 @@
                 },
                 "url": {
                   "description": "Play Sound / exec HTTP action.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "emailAddress": {
                   "description": "Email.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "userGroup": {
                   "description": "Popups and System Health.",
@@ -6582,22 +6194,16 @@
                 },
                 "relayOutputId": {
                   "description": "Camera Output.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
-                "sayText": {
-                  "type": "string",
-                  "example": ""
-                },
+                "sayText": {"type": "string"},
                 "tags": {
                   "description": "Bookmark.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "text": {
                   "description": "Text for Show Text Overlay, or message body for\nExec HTTP Action.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "durationMs": {
                   "description": "Duration in milliseconds for Bookmark and\nShow Text Overlay.",
@@ -6613,8 +6219,7 @@
                 },
                 "presetId": {
                   "description": "Execute PTZ preset action.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "useSource": {
                   "description": "Alarm Layout - if the source resource should\nalso be used.",
@@ -6630,8 +6235,7 @@
                 },
                 "contentType": {
                   "description": "HTTP action.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 }
               },
               "required": [
@@ -6696,8 +6300,7 @@
                 },
                 "resourceName": {
                   "description": "Name of the resource which caused the event.\nUsed if no resource is actually registered in the system. Generic event can\nprovide some resource name which doesn't match any resourceId in the system. In\nthis case resourceName is filled and resourceId remains empty.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "sourceServerId": {
                   "description": "Id of a server that generated the event.",
@@ -6731,18 +6334,15 @@
                 },
                 "inputPortId": {
                   "description": "Used for Input events only.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "caption": {
                   "description": "Short event description. Used for camera/server\nconflict as resource name which cause error. Used in generic events as a short\ndescription.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "description": {
                   "description": "Long event description. Used for\ncamera/server conflict as a long description (conflict list). Used in Reasoned\nEvents as reason description. Used in generic events as a long description.",
-                  "type": "string",
-                  "example": ""
+                  "type": "string"
                 },
                 "metadata": {
                   "description": "Camera list which is associated with the\nevent. EventResourceId may be a POS terminal, but this is a camera list which\nshould be shown with this event.",
@@ -6814,13 +6414,11 @@
           "properties": {
             "realm": {
               "description": "A string token used in authentication methods as \"realm\".",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "nonce": {
               "description": "A session key for the current user. The current server time is used\nas a nonce value, and the nonce is valid for about 5 minutes.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             }
           },
           "required": [
@@ -6840,13 +6438,11 @@
           "properties": {
             "comment": {
               "description": "Time zone description in English.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "displayName": {
               "description": "Time zone verbose name in English.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "hasDaylightTime": {
               "description": "Whether the time zone has the DST feature.",
@@ -6854,8 +6450,7 @@
             },
             "id": {
               "description": "Time zone identifier, to be used for e.g. /api/setTime.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "isDaylightTime": {
               "description": "Whether the time zone is on DST right now. To be reported\nproperly, the server machine should have the correct current time set.",
@@ -7176,28 +6771,23 @@
           "properties": {
             "name": {
               "description": "Interface name.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "ipAddr": {
               "description": "IP address with dot-separated decimal components.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "netMask": {
               "description": "Network mask with dot-separated decimal components.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "mac": {
               "description": "MAC address with colon-separated upper-case hex components.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "gateway": {
               "description": "IP address of the gateway with dot-separated decimal components.\nCan be empty.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "dhcp": {
               "description": "Possible values are:\n- `false` DHCP is not used, IP address and other parameters should be specified\nin the respective JSON fields.\n- `true` IP address and other parameters assigned via DHCP, the respective JSON\nfields can be empty.",
@@ -7209,8 +6799,7 @@
             },
             "dns_servers": {
               "description": "Space-separated list of IP addresses with dot-separated\ndecimal components.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             }
           },
           "required": [
@@ -9974,8 +9563,7 @@
               },
               "errorString": {
                 "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "errorId": {
                 "description": "Mnemonic error id corresponding to the error code.",
@@ -10109,8 +9697,7 @@
               },
               "errorString": {
                 "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
-                "type": "string",
-                "example": ""
+                "type": "string"
               },
               "errorId": {
                 "description": "Mnemonic error id corresponding to the error code.",
@@ -10219,8 +9806,7 @@
             },
             "errorString": {
               "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
@@ -10298,8 +9884,7 @@
             },
             "errorString": {
               "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
@@ -10377,8 +9962,7 @@
             },
             "errorString": {
               "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
@@ -10466,8 +10050,7 @@
             },
             "errorString": {
               "description": "<p><b>Proprietary.<\/b><\/p> Test enumerating values for a non-enum type.\n\nPossible values are:\n- `\"val0\"` Value description\n- `\"val1\"` Value description\n- `\"val2\"` Value description",
-              "type": "string",
-              "example": ""
+              "type": "string"
             },
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
@@ -10721,10 +10304,7 @@
                 "nullable": true,
                 "oneOf": [
                   {"type": "integer"},
-                  {
-                    "type": "string",
-                    "example": ""
-                  }
+                  {"type": "string"}
                 ]
               },
               "result": {"example": "string example"},
@@ -10732,10 +10312,7 @@
                 "type": "object",
                 "properties": {
                   "code": {"type": "integer"},
-                  "message": {
-                    "type": "string",
-                    "example": ""
-                  },
+                  "message": {"type": "string"},
                   "data": {"example": 0}
                 },
                 "required": [
@@ -10774,34 +10351,19 @@
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string",
-                "example": ""
-              },
-              "resource": {
-                "type": "string",
-                "example": ""
-              },
+              "name": {"type": "string"},
+              "resource": {"type": "string"},
               "values": {
                 "additionalProperties": {
                   "type": "object",
                   "properties": {
-                    "name": {
-                      "type": "string",
-                      "example": ""
-                    },
+                    "name": {"type": "string"},
                     "values": {
                       "additionalProperties": {
                         "type": "object",
                         "properties": {
-                          "name": {
-                            "type": "string",
-                            "example": ""
-                          },
-                          "description": {
-                            "type": "string",
-                            "example": ""
-                          },
+                          "name": {"type": "string"},
+                          "description": {"type": "string"},
                           "isOptional": {"type": "boolean"},
                           "display": {
                             "type": "string",
@@ -10812,18 +10374,9 @@
                               "both"
                             ]
                           },
-                          "format": {
-                            "type": "string",
-                            "example": ""
-                          },
-                          "calculate": {
-                            "type": "string",
-                            "example": ""
-                          },
-                          "insert": {
-                            "type": "string",
-                            "example": ""
-                          },
+                          "format": {"type": "string"},
+                          "calculate": {"type": "string"},
+                          "insert": {"type": "string"},
                           "alarms": {
                             "type": "array",
                             "items": {
@@ -10837,14 +10390,8 @@
                                     "error"
                                   ]
                                 },
-                                "condition": {
-                                  "type": "string",
-                                  "example": ""
-                                },
-                                "text": {
-                                  "type": "string",
-                                  "example": ""
-                                }
+                                "condition": {"type": "string"},
+                                "text": {"type": "string"}
                               },
                               "required": [
                                 "level",
@@ -12067,19 +11614,13 @@
               {"type": "integer"},
               {"oneOf": [
                 {"type": "integer"},
-                {
-                  "type": "string",
-                  "example": ""
-                }
+                {"type": "string"}
               ]}
             ]},
             "variantWithVariant": {"oneOf": [
               {"type": "integer"},
               {"oneOf": [
-                {
-                  "type": "string",
-                  "example": ""
-                },
+                {"type": "string"},
                 {
                   "type": "object",
                   "properties": {
@@ -12265,17 +11806,11 @@
             },
             "chronoMap": {"additionalProperties": {"oneOf": [
               {"type": "integer"},
-              {
-                "type": "string",
-                "example": ""
-              }
+              {"type": "string"}
             ]}},
             "mapWithVariant": {
               "additionalProperties": {"oneOf": [
-                {
-                  "type": "string",
-                  "example": ""
-                },
+                {"type": "string"},
                 {
                   "type": "object",
                   "properties": {
@@ -12315,10 +11850,7 @@
               "type": "array",
               "items": {
                 "additionalProperties": {"oneOf": [
-                  {
-                    "type": "string",
-                    "example": ""
-                  },
+                  {"type": "string"},
                   {
                     "type": "object",
                     "properties": {
@@ -12359,10 +11891,7 @@
               "additionalProperties": {
                 "type": "array",
                 "items": {"oneOf": [
-                  {
-                    "type": "string",
-                    "example": ""
-                  },
+                  {"type": "string"},
                   {
                     "type": "object",
                     "properties": {
@@ -12511,10 +12040,7 @@
         "description": "",
         "content": {"application/json": {"schema": {"oneOf": [
           {"type": "integer"},
-          {
-            "type": "string",
-            "example": ""
-          }
+          {"type": "string"}
         ]}}}
       }},
       "tags": ["Test"]
@@ -12526,10 +12052,7 @@
           "type": "array",
           "items": {"oneOf": [
             {"type": "integer"},
-            {
-              "type": "string",
-              "example": ""
-            }
+            {"type": "string"}
           ]}
         }}}
       }},
@@ -12699,10 +12222,7 @@
           {"type": "integer"},
           {"oneOf": [
             {"type": "integer"},
-            {
-              "type": "string",
-              "example": ""
-            }
+            {"type": "string"}
           ]}
         ]}}}
       }},
