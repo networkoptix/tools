@@ -331,7 +331,7 @@ public final class OpenApiSerializer
                 requestBody.put("required", true);
             JSONObject schema = getObject(getObject(getObject(
                 requestBody, "content"), "application/json"), "schema");
-            fillSchemaType(schema, function.input.type);
+            fillSchemaTypeAndDefaultExample(schema, function.input.type);
             if (!function.input.example.isEmpty())
                 schema.put("example", function.input.type.parse(function.input.example));
         }
@@ -387,7 +387,7 @@ public final class OpenApiSerializer
             return;
         JSONObject schema = getObject(getObject(getObject(
             default_, "content"), "application/json"), "schema");
-        fillSchemaType(schema, result.type);
+        fillSchemaTypeAndDefaultExample(schema, result.type);
         if (!result.example.isEmpty())
             schema.put("example", result.type.parse(result.example));
         if (result.type.fixed == Apidoc.Type.ARRAY || result.type.fixed == Apidoc.Type.OBJECT)
@@ -416,7 +416,7 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillSchemaType(JSONObject schema, Apidoc.Type type)
+    private static void fillSchemaTypeAndDefaultExample(JSONObject schema, Apidoc.Type type)
     {
         switch (type)
         {
@@ -430,6 +430,8 @@ public final class OpenApiSerializer
             case ENUM:
             case FLAGS:
                 schema.put("type", "string");
+                if (type == Apidoc.Type.STRING)
+                    schema.put("example", "");
                 break;
             case OPTION:
                 schema.put("enum", getArray(schema, "enum").put("true"));
@@ -455,7 +457,9 @@ public final class OpenApiSerializer
                 break;
             case STRING_ARRAY:
                 schema.put("type", "array");
-                getObject(schema, "items").put("type", "string");
+                schema = getObject(schema, "items");
+                schema.put("type", "string");
+                schema.put("example", "");
                 break;
             case UUID_ARRAY:
                 schema.put("type", "array");
@@ -476,7 +480,7 @@ public final class OpenApiSerializer
         }
     }
 
-    private static void fillSchemaType(JSONObject schema, TypeInfo typeInfo)
+    private static void fillSchemaTypeAndDefaultExample(JSONObject schema, TypeInfo typeInfo)
     {
         if (typeInfo.variantValueTypes != null)
         {
@@ -493,7 +497,7 @@ public final class OpenApiSerializer
                 TypeInfo type = typeInfo.variantValueTypes.get(i);
                 assert type.fixed != Apidoc.Type.UNKNOWN;
                 JSONObject internalSchema = new JSONObject();
-                fillSchemaType(internalSchema, type);
+                fillSchemaTypeAndDefaultExample(internalSchema, type);
                 oneOf.put(i, internalSchema);
             }
             return;
@@ -506,7 +510,8 @@ public final class OpenApiSerializer
                 schema.put("type", "array");
                 schema = getObject(schema, "items");
             }
-            fillSchemaType(getObject(schema, "additionalProperties"), typeInfo.mapValueType);
+            fillSchemaTypeAndDefaultExample(
+                getObject(schema, "additionalProperties"), typeInfo.mapValueType);
             return;
         }
         if (typeInfo.isChrono() && typeInfo.fixed == Apidoc.Type.ARRAY)
@@ -515,12 +520,13 @@ public final class OpenApiSerializer
             getObject(schema, "items").put("type", "integer");
             return;
         }
-        fillSchemaType(schema, typeInfo.fixed);
+        fillSchemaTypeAndDefaultExample(schema, typeInfo.fixed);
     }
 
-    private static void fillSchemaType(JSONObject schema, Apidoc.Param param)
+    private static void fillSchemaTypeAndExample(JSONObject schema, Apidoc.Param param)
     {
-        fillSchemaType(schema, param.type);
+        fillSchemaTypeAndDefaultExample(schema, param.type);
+        putExample(param, schema);
         if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
         {
             if (param.values.isEmpty())
@@ -590,14 +596,13 @@ public final class OpenApiSerializer
     {
         final JSONObject parameter = getParamByPath(schema, param.name);
         putDescription(param, parameter);
-        putExample(param, parameter);
         if (param.deprecated)
             parameter.put("deprecated", true);
         if (param.readonly)
             parameter.put("readOnly", true);
         else if (!param.optional)
             setRequired(schema, param.name);
-        fillSchemaType(parameter, param);
+        fillSchemaTypeAndExample(parameter, param);
     }
 
     public static void addReferenceParam(
@@ -633,18 +638,17 @@ public final class OpenApiSerializer
         final JSONObject result = new JSONObject();
         result.put("name", param.name);
         putDescription(param, result);
-        putExample(param, result);
         if (param.deprecated)
             result.put("deprecated", true);
         if (param.readonly)
             result.put("readOnly", true);
         else if (!param.optional)
             result.put("required", true);
-        fillSchemaType(getObject(result, "schema"), param);
+        fillSchemaTypeAndExample(getObject(result, "schema"), param);
         return result;
     }
 
-    private static void putExample(Apidoc.Param param, JSONObject result) throws Exception
+    private static void putExample(Apidoc.Param param, JSONObject result)
     {
         if (!param.example.isEmpty())
         {
