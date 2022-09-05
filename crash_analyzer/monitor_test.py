@@ -5,6 +5,7 @@ import os
 import multiprocessing
 import functools
 from typing import List, Dict
+from unittest.mock import Mock
 
 import pytest
 
@@ -34,7 +35,8 @@ class CrashServerMock:
 
 class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str, autoclose_indicators: Dict[str, str],
-                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = ''):
+                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = '',
+                 fallback_versions: list = []):
         self.issues = issues
         self.args = [url, login, password, file_limit, fix_versions, epic_link, prefix]
 
@@ -119,4 +121,5 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     actual = {k: v for k, v in monitor_fixture.issues.items()}
     possible = utils.Resource('expected_issues.yaml').parse()
     expected = {k: v for k, v in possible.items() if v['extension'].endswith(extension)}
+
     assert expected == actual

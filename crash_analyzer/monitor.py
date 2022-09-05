@@ -263,6 +263,7 @@ class Monitor:
             jira.autoclose_issue_if_required(issue, reason)
         else:
             jira.update_issue(issue, reports, directory=directory)
+
         return issue, reports
 
     @classmethod
