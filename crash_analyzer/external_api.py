@@ -242,7 +242,7 @@ class Jira:
             if issue.fields.resolution.name == 'Rejected':
                 return logger.debug('JIRA issue {} is rejected'.format(key))
 
-            if not fix_build:
+            if not fix_build and issue.fields.fixVersions:
                 min_fix_version = min(v.name for v in issue.fields.fixVersions)
                 max_report_version = max(r.version for r in reports)
                 if min_fix_version >= max_report_version:
