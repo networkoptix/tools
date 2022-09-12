@@ -18,9 +18,13 @@ import urllib.parse
 import urllib.request
 import http.client
 import traceback
+from pathlib import Path
 from typing import List, Callable
 if os.name == 'nt':
     import msvcrt
+
+from artifactory import ArtifactoryPath
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,19 +40,16 @@ CDB_KNOWN_ERRORS = [
     'Catastrophic failure',
 ]
 
-DIST_URLS = [
-    'http://beta-builds.lan.hdw.mx/beta-builds/daily/',
-]
+DEFAULT_ARTIFACTORY_URL = 'https://artifactory.ru.nxteam.dev/artifactory'
+DIST_ARTIFACTORY_REPO = 'release-vms'
 
-DIST_SUFFIXES = [
-    r'x64[a-z-_]+%s(-only)?\.(msi|exe)',
-    r'%s-[0-9\.-_]+-(win|windows_x)(86|64)[a-z-_]*\.(exe|msi)',
-]
+ADDITIONAL_APP_TYPES = {'libs_debug', 'misc_debug'}
 
-PDB_SUFFIXES = [
-    r'x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip',
-    r'(%(module)s|libs)_debug-[0-9\.-_]+-(win|windows_x)(86|64)[a-z-_]*\.zip',
-]
+PLATFORM_TO_RELEASE_DIR = {
+    'windows_x64': 'windows',
+    'macos_arm64': 'macos',
+}
+
 
 CUSTOMIZATIONS = (
     'cox',
@@ -126,6 +127,32 @@ def report_name(dump_path: str, empty_on_failure: bool = False) -> str:
 
 def shell_line(command: List[str]):
     return ' '.join('"%s"' % a if (' ' in a) or ('\\' in a) else a for a in command)
+
+
+def enum_debug_urls(artifactory_url, customization, version, binary_app_type, binary_platform):
+    release_dir = PLATFORM_TO_RELEASE_DIR[binary_platform]
+    dist_dir = artifactory_url / DIST_ARTIFACTORY_REPO / customization / version / release_dir
+    logger.debug("Looking for debug symbols for %s:%s:%s:%s at: %s",
+                  customization, version, binary_app_type, binary_platform, dist_dir)
+    for path in dist_dir:
+        parts = path.stem.split('-')  # nxwitness-client_debug-5.2.0.35169-windows_x64-private-prod
+        if len(parts) < 4:
+            continue  # Not properly-formed name.
+        app_type = parts[1]  # client_debug
+        platform = parts[3]  # windows_x64
+        if platform != binary_platform:
+            continue
+        if app_type in {f'{binary_app_type}_debug'} | ADDITIONAL_APP_TYPES:
+            logger.debug("Found debug symbols %s: %s", app_type, path)
+            yield path
+
+
+def download_file(url: ArtifactoryPath, target_path: Path) -> Path:
+    if target_path.exists():
+        logger.debug('Already downloaded: %s' % target_path)
+        return
+    logger.info('Download: %s -> %s' % (url, target_path))
+    url.writeto(out=target_path, chunk_size=102400, progress_func=None)
 
 
 class CdbSession:
@@ -246,6 +273,7 @@ class DumpAnalyzer:
     def __init__(
             self, cache_directory: str, dump_path: str,
             customization: str = '', version: str = '', build: str = None, branch: str = '',
+            artifactory_url: str = DEFAULT_ARTIFACTORY_URL,
             subprocess_timeout_s: int = 20, debug_mode: bool = False,
             visual_studio: bool = False):
         """Initializes analyzer with dump :path and :customization;
@@ -257,6 +285,7 @@ class DumpAnalyzer:
         self.version = version
         self.build = build
         self.branch = branch
+        self.artifactory_url = ArtifactoryPath(artifactory_url)
         self.debug_mode = debug_mode
         self.visual_studio = visual_studio
         self.subprocess_timeout_s = subprocess_timeout_s
@@ -298,77 +327,6 @@ class DumpAnalyzer:
         self.build = self.build or self.version.split('.')[-1]
         if not self.build or self.build == '0':
             raise UserError('Build number is not specified for: ' + self.dump_path)
-
-    def fetch_url_data(self, url: str, regexps: List[str], sub_url: str = '') -> List[str]:
-        """Fetches data from :url by :regexp (must contain single group!).
-        """
-        try:
-            page = urllib.request.urlopen(url).read().decode().replace('\r\n', '').replace('\n', '')
-        except (urllib.error.HTTPError, http.client.IncompleteRead, urllib.error.URLError) as error:
-            raise DistError('%s, url: %s' % (error, url))
-
-        results, failures = [], []
-        for regexp in regexps:
-            for m in re.finditer(regexp, page):
-                item = m.group(1)
-                logger.debug("Found distributive '%s' in: %s" % (item, url))
-                results.append((url, item))
-            else:
-                failures.append(regexp)
-
-        if sub_url and len(failures):
-            results += self.fetch_url_data(sub_url, failures)
-
-        return results
-
-    def fetch_urls(self) -> bool:
-        """Fetches URLs of required resources.
-        """
-        dist_url, out = None, None
-        for url in DIST_URLS:
-            logger.debug('Search for dist on {}'.format(url))
-            try:
-                out = self.fetch_url_data(
-                    url, [r'>(%s\-%s[^<]*)<' % (self.build, re.escape(self.branch))])
-                if len(out) > 0:
-                    dist_url = url
-                    break
-            except DistError as e:
-                logger.debug(e)
-
-        if not dist_url:
-            raise DistError("No distributive directory is found for build %s on %r" % (
-                self.build, DIST_URLS))
-
-        build_path = '%s/%s/windows/' % (out[0][1], self.customization)
-        update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
-        build_url = os.path.join(dist_url, build_path)
-        suffixes = list(s % self.dist for s in DIST_SUFFIXES) + list(s % {'module': self.dist} for s in PDB_SUFFIXES)
-
-        out = self.fetch_url_data(
-            build_url, (r'>([a-zA-Z0-9-_\.]+%s)<' % r for r in suffixes),
-            os.path.join(dist_url, update_path))
-
-        if not out:
-            raise DistError("No distributive files are found for build %s on %r" % (
-                self.build, DIST_URLS))
-
-        self.base_build_path = os.path.join(self.cache_directory, build_path)
-        return list(os.path.join(*url) for url in out)
-
-    @staticmethod
-    def download_url_data(url: str, local: str) -> str:
-        """Downloads file from :url to :local directory, apply :processor if any.
-        """
-        path = os.path.join(local, os.path.basename(url))
-        if not os.path.isfile(path):
-            logger.info('Download: %s to %s' % (url, path))
-            with open(path, 'wb') as f:
-                f.write(urllib.request.urlopen(url).read())
-        else:
-            logger.debug('Already downloaded: %s' % path)
-
-        return path
 
     def find_files_iter(self, condition: Callable, path: str = None):
         """Searches file by :condition in :path (build directory by default).
@@ -458,7 +416,14 @@ class DumpAnalyzer:
             raise UserError('Cache directory is required for: ' + self.dump_path)
 
         try:
-            urls = self.fetch_urls()
+            urls = list(enum_debug_urls(
+                self.artifactory_url,
+                self.customization,
+                self.version,
+                binary_app_type=self.dist,
+                binary_platform='windows_x64',
+            ))
+            self.base_build_path = os.path.join(self.cache_directory, self.dist, self.customization, 'windows')
         except (http.client.HTTPException, urllib.error.URLError) as e:
             raise DistError(str(e))
 
@@ -488,7 +453,8 @@ class DumpAnalyzer:
 
         try:
             for url in urls:
-                path = self.download_url_data(url, self.build_path)
+                path = os.path.join(self.build_path, url.name)
+                download_file(url, Path(path))
                 self.extract_dist(path)
 
         except Exception:
@@ -574,6 +540,7 @@ if __name__ == '__main__':
                         help='generate report instead of launching Visual Studio')
     parser.add_argument('-d', '--cache-directory', default='./dump_tool_cache')
     parser.add_argument('-b', '--branch', default='')
+    parser.add_argument('-a', '--artifactory-url', default=DEFAULT_ARTIFACTORY_URL)
     parser.add_argument('-V', '--version', default='')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable all logs')

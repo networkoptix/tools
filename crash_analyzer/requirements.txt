@@ -5,4 +5,4 @@ requests>=2.18.4
 watchtower>=0.5.3
 pytimeparse>=1.1.8
 graypy>=2.1.0
-
+dohq-artifactory==0.8.0
