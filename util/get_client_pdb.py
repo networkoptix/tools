@@ -6,7 +6,8 @@ import re
 import requests
 import zipfile
 
-ROOT_URL = 'http://beta-builds.lan.hdw.mx/beta-builds/daily/'
+ROOT_URL = 'https://artifactory.ru.nxteam.dev/artifactory/build-vms-release/'
+BRANCH_NAME_PATTERN = re.compile('<a href="(.*)/">')
 
 CLIENT_FILENAMES = [
     'client_update',
@@ -17,11 +18,20 @@ CLIENT_FILENAMES = [
 CHUNK_SIZE = 8192
 
 
-def detect_branch(build):
+def get_branch_list():
     r = requests.get(ROOT_URL)
-    pattern = '>{}-(.*?)<'.format(build)
-    match = re.search(pattern, r.text)
-    return match.group(1) if match else None
+    branches = sorted(BRANCH_NAME_PATTERN.findall(r.text), reverse=True)
+    return branches
+
+
+def detect_branch(build):
+    for branch in get_branch_list():
+        print(f"Checking branch {branch}")
+        r = requests.get(f'{ROOT_URL}/{branch}/')
+        pattern = f'<a href="({build})/">'
+        if re.search(pattern, r.text) is not None:
+            return branch
+    return None
 
 
 def download_file(file_url, output):
@@ -70,11 +80,8 @@ def download_build(build, customization, branch=None):
         print("Branch cannot be found")
         return
 
-    package_url = ROOT_URL + '{0}-{1}/{2}/updates/{0}/'.format(
-        build,
-        branch,
-        customization)
-    print(package_url)
+    package_url = f'{ROOT_URL}/{branch}/{build}/{customization}/windows-x64/distrib/'
+    print(f"Downloading from {package_url}")
     target_directory = '{}-{}'.format(build, customization)
     download_files(package_url, target_directory)
 
