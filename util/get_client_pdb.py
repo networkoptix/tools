@@ -1,98 +1,100 @@
 #!/bin/python
 
 import argparse
-import os
-import re
-import requests
+import logging
 import zipfile
 
-ROOT_URL = 'https://artifactory.ru.nxteam.dev/artifactory/build-vms-release/'
-BRANCH_NAME_PATTERN = re.compile('<a href="(.*)/">')
+from pathlib import Path
+from artifactory import ArtifactoryPath
 
-CLIENT_FILENAMES = [
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO)
+
+ARTIFACTORY_URL = ArtifactoryPath(
+    'https://artifactory.ru.nxteam.dev/artifactory/release-vms')
+RELEASE_DIR = 'windows'
+
+CLIENT_FILENAMES = {
     'client_update',
     'client_debug',
-    'libs_debug'
-]
-
-CHUNK_SIZE = 8192
+    'libs_debug',
+}
 
 
-def get_branch_list():
-    r = requests.get(ROOT_URL)
-    branches = sorted(BRANCH_NAME_PATTERN.findall(r.text), reverse=True)
-    return branches
-
-
-def detect_branch(build):
-    for branch in get_branch_list():
-        print(f"Checking branch {branch}")
-        r = requests.get(f'{ROOT_URL}/{branch}/')
-        pattern = f'<a href="({build})/">'
-        if re.search(pattern, r.text) is not None:
-            return branch
+def find_full_version(build: int, customization: str):
+    logger.info(f"Trying to find version for build {build} in {customization}")
+    for path in ARTIFACTORY_URL / customization:
+        if str(build) in path.stem:
+            full_version = path.stem
+            logger.info(f"Version {full_version} found")
+            return full_version
     return None
 
 
-def download_file(file_url, output):
-    r = requests.get(file_url)
-    if r.status_code == 200:
-        with open(output, 'wb') as fd:
-            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
-                fd.write(chunk)
-        return 0
-    return 1
+def enum_urls(dist_dir: ArtifactoryPath):
+    for path in dist_dir:
+        parts = path.stem.split('-')  # nxwitness-client_debug-5.2.0.35169-windows_x64-private-prod
+        if len(parts) < 4:
+            logger.error(f"Invalid artifactory path {path}")
+            continue  # Not properly-formed name.
+        app_type = parts[1]  # client_debug
+        platform = parts[3]  # windows_x64
+        if app_type in CLIENT_FILENAMES and platform.startswith('win'):
+            yield path
 
 
-def extract_file(filename, directory):
+def download_file(url: ArtifactoryPath, target_path: Path) -> Path:
+    if target_path.exists():
+        logger.debug('Already downloaded: %s' % target_path)
+        return
+    logger.info('Download: %s -> %s' % (url, target_path))
+    url.writeto(out=target_path, chunk_size=102400, progress_func=None)
+
+
+def extract_file(filename: Path, directory: Path):
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(directory)
-    os.remove(filename)
 
 
-def download_files(package_url, target_directory):
-    if not os.path.exists(target_directory):
-        os.makedirs(target_directory)
+def download_build(build, customization, version, force):
+    downloads_directory = Path().resolve() / 'downloads'
+    downloads_directory.mkdir(exist_ok=True)
 
-    r = requests.get(package_url)
-    for filename in CLIENT_FILENAMES:
-        pattern = r'"([^"]*{}-[\.\d]*-win[\.\w-]*zip)'.format(filename)
-        match = re.search(pattern, r.text)
-        if not match:
-            print("File {} could not be found".format(filename))
-            return
-        target_filename = match.group(1)
-        file_url = package_url + target_filename
-        print("Downloading {}".format(file_url))
-        if download_file(file_url, target_filename) != 0:
-            print("Download failed")
-            return
-        print("Extracting {}".format(file_url))
-        extract_file(target_filename, target_directory)
-
-
-def download_build(build, customization, branch=None):
-    if not branch:
-        branch = detect_branch(build)
-        if branch:
-            print("Branch {} was selected".format(branch))
-    if not branch:
-        print("Branch cannot be found")
+    full_version = f'{version}.0.{build}' if version else find_full_version(build, customization)
+    if not full_version:
+        logger.info(f"Cannot find any version for build {build}")
         return
 
-    package_url = f'{ROOT_URL}/{branch}/{build}/{customization}/windows-x64/distrib/'
-    print(f"Downloading from {package_url}")
-    target_directory = '{}-{}'.format(build, customization)
-    download_files(package_url, target_directory)
+    dist_dir = ARTIFACTORY_URL / customization / full_version / RELEASE_DIR
+    if not dist_dir.exists():
+        logger.info(f"Version {full_version} is not published")
+        return
+
+    target_directory = Path().resolve() / f'{full_version}-{customization}'
+    try:
+        target_directory.mkdir(exist_ok=force)
+    except FileExistsError:
+        logger.info(f"Version {target_directory} is already downloaded")
+        return
+
+    for url in enum_urls(dist_dir):
+        target_filename = downloads_directory / url.name
+        logger.info(f"Downloading {url} into {target_filename}")
+        download_file(url, target_filename)
+        logger.info(f"Extracting {target_filename} into {target_directory}")
+        extract_file(target_filename, target_directory)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('build', type=int, help="Build number")
     parser.add_argument('-c', '--customization', help="Customization", default='default')
-    parser.add_argument('-b', '--branch', help="Source branch")
+    parser.add_argument('-v', '--version', help="Release version")
+    parser.add_argument('-f', '--force', help="Force re-download", action='store_true')
     args = parser.parse_args()
-    download_build(args.build, args.customization, args.branch)
+    download_build(args.build, args.customization, args.version, args.force)
 
 
 if __name__ == "__main__":
