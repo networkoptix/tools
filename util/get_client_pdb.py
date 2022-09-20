@@ -44,6 +44,10 @@ def enum_urls(dist_dir: ArtifactoryPath):
         if app_type in CLIENT_FILENAMES and platform.startswith('win'):
             yield path
 
+    release_dir = dist_dir / RELEASE_DIR
+    if release_dir.exists():
+        yield from enum_urls(release_dir)
+
 
 def download_file(url: ArtifactoryPath, target_path: Path) -> Path:
     if target_path.exists():
@@ -67,7 +71,7 @@ def download_build(build, customization, version, force):
         logger.info(f"Cannot find any version for build {build}")
         return
 
-    dist_dir = ARTIFACTORY_URL / customization / full_version / RELEASE_DIR
+    dist_dir = ARTIFACTORY_URL / customization / full_version
     if not dist_dir.exists():
         logger.info(f"Version {full_version} is not published")
         return
