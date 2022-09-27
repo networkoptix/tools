@@ -2,10 +2,16 @@
 
 import argparse
 import logging
+import sys
 import zipfile
 
 from pathlib import Path
-from artifactory import ArtifactoryPath
+
+try:
+    from artifactory import ArtifactoryPath
+except ModuleNotFoundError:
+    print("Artifactory integration module not found. Run\npip install dohq-artifactory")
+    sys.exit(1)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
