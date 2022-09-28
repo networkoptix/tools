@@ -142,7 +142,7 @@ def enum_debug_urls(artifactory_url, customization, version, binary_app_type, bi
         platform = parts[3]  # windows_x64
         if platform != binary_platform:
             continue
-        if app_type in {f'{binary_app_type}_debug'} | ADDITIONAL_APP_TYPES:
+        if app_type in {f'{binary_app_type}_debug', 'server'} | ADDITIONAL_APP_TYPES:
             logger.debug("Found debug symbols %s: %s", app_type, path)
             yield path
 
@@ -423,6 +423,13 @@ class DumpAnalyzer:
                 binary_app_type=self.dist,
                 binary_platform='windows_x64',
             ))
+
+            def priority(u):
+                if u.name.endswith('.exe'): return 0
+                if self.dist in u.name: return 1
+                return 2
+            urls.sort(key=priority)
+
             self.base_build_path = os.path.join(self.cache_directory, self.dist, self.customization, 'windows')
         except (http.client.HTTPException, urllib.error.URLError) as e:
             raise DistError(str(e))
