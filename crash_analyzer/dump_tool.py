@@ -142,7 +142,7 @@ def enum_debug_urls(artifactory_url, customization, version, binary_app_type, bi
         platform = parts[3]  # windows_x64
         if platform != binary_platform:
             continue
-        if app_type in {f'{binary_app_type}_debug', 'server'} | ADDITIONAL_APP_TYPES:
+        if app_type in {f'{binary_app_type}_debug', 'server', 'client'} | ADDITIONAL_APP_TYPES:
             logger.debug("Found debug symbols %s: %s", app_type, path)
             yield path
 
