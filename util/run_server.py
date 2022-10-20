@@ -44,7 +44,7 @@ def runtime_config_file(config):
 def list_configs():
     for config in config_path.glob("*" + config_extension):
         if runtime_config_suffix not in config.name:
-            print(config.name.replace(config_extension, ""))
+            yield config.name.replace(config_extension, "")
 
 
 def delete_config(config):
@@ -96,13 +96,31 @@ def run_server(config, verbose, *args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("config", nargs=1, help="Server config.")
+    parser.add_argument(
+        "config", nargs='?', help="Server config. Use 'list' to list existing configs")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output.")
     parser.add_argument("--delete", action="store_true", help="Delete target config.")
     args, unknown = parser.parse_known_args()
-    config = args.config[0]
+
+    config = None
+    existing = list(list_configs())
+    if not args.config:
+        if len(existing) == 1:
+            config = existing[0]
+            print(f"Using default config {config}")
+        elif len(existing) == 0:
+            config = Path().absolute().parent.parent.name
+            print(f"Create default config {config}")
+        else:
+            parser.print_help()
+            return
+
+    if not config:
+        config = args.config[0]
+
     if config == "list":
-        list_configs()
+        for config in existing:
+            print(config)
         return
 
     if args.delete:
