@@ -116,7 +116,7 @@ def main():
             return
 
     if not config:
-        config = args.config[0]
+        config = args.config
 
     if config == "list":
         for config in existing:
