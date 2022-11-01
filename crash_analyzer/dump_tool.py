@@ -47,6 +47,7 @@ ADDITIONAL_APP_TYPES = {'libs_debug', 'misc_debug'}
 
 PLATFORM_TO_RELEASE_DIR = {
     'windows_x64': 'windows',
+    'win64': 'windows',
     'macos_arm64': 'macos',
 }
 
@@ -129,22 +130,23 @@ def shell_line(command: List[str]):
     return ' '.join('"%s"' % a if (' ' in a) or ('\\' in a) else a for a in command)
 
 
-def enum_debug_urls(artifactory_url, customization, version, binary_app_type, binary_platform):
-    release_dir = PLATFORM_TO_RELEASE_DIR[binary_platform]
-    dist_dir = artifactory_url / DIST_ARTIFACTORY_REPO / customization / version / release_dir
-    logger.debug("Looking for debug symbols for %s:%s:%s:%s at: %s",
-                  customization, version, binary_app_type, binary_platform, dist_dir)
-    for path in dist_dir:
-        parts = path.stem.split('-')  # nxwitness-client_debug-5.2.0.35169-windows_x64-private-prod
-        if len(parts) < 4:
-            continue  # Not properly-formed name.
-        app_type = parts[1]  # client_debug
-        platform = parts[3]  # windows_x64
-        if platform != binary_platform:
-            continue
-        if app_type in {binary_app_type, f'{binary_app_type}_debug'} | ADDITIONAL_APP_TYPES:
-            logger.debug("Found debug symbols %s: %s", app_type, path)
-            yield path
+def enum_debug_urls(artifactory_url, customization, version, binary_app_type, binary_platforms):
+    for binary_platform in binary_platforms:
+        release_dir = PLATFORM_TO_RELEASE_DIR[binary_platform]
+        dist_dir = artifactory_url / DIST_ARTIFACTORY_REPO / customization / version / release_dir
+        logger.debug("Looking for debug symbols for %s:%s:%s:%s at: %s",
+                      customization, version, binary_app_type, binary_platform, dist_dir)
+        for path in dist_dir:
+            parts = path.stem.split('-')  # nxwitness-client_debug-5.2.0.35169-windows_x64-private-prod
+            if len(parts) < 4:
+                continue  # Not properly-formed name.
+            app_type = parts[1]  # client_debug
+            platform = parts[3]  # windows_x64
+            if platform not in binary_platforms:
+                continue
+            if app_type in {binary_app_type, f'{binary_app_type}_debug'} | ADDITIONAL_APP_TYPES:
+                logger.debug("Found debug symbols %s: %s", app_type, path)
+                yield path
 
 
 def download_file(url: ArtifactoryPath, target_path: Path) -> Path:
@@ -421,7 +423,7 @@ class DumpAnalyzer:
                 self.customization,
                 self.version,
                 binary_app_type=self.dist,
-                binary_platform='windows_x64',
+                binary_platforms=('windows_x64', 'win64')
             ))
 
             def priority(u):
