@@ -63,6 +63,7 @@ CUSTOMIZATIONS = (
     'ionetworks',
     'ipera',
     'nutech',
+    'piko',
     'ras',
     'senturian',
     'systemk',
