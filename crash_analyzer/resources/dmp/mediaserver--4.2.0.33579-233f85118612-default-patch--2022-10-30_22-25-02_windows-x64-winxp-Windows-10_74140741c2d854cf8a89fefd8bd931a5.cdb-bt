@@ -118,7 +118,7 @@ Qt5Core!QThread::start
 kernel32!BaseThreadInitThunk
 ntdll!RtlUserThreadStart
 
-   6  Id: 17b8.15bc Suspend: 0 Teb: 0000007f`85389000 Unfrozen
+   6  Id: 17b8.15bc Suspend: 0 Teb: 0000007f`85389000 Unfrozen ""
 Call Site
 ntdll!NtWaitForAlertByThreadId
 ntdll!RtlSleepConditionVariableSRW

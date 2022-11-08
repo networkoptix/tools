@@ -1,0 +1,459 @@
+ExceptionAddress: 00000000591ed001 (Qt5Core!QMutex::lock+0x0000000000000011)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000001
+   Parameter[1]: 0000000000000028
+Attempt to write to address 0000000000000028
+
+rax=0000000000000000 rbx=0000000325afef68 rcx=0000000000000028
+rdx=0000000325afef68 rsi=0000000000000001 rdi=00000142c6ec3d80
+rip=00000000591ed001 rsp=0000000325afeeb0 rbp=0000000325aff049
+ r8=0000000325aff030  r9=0000000000000001 r10=0000000325afede8
+r11=0000000325afef80 r12=00000142c9461840 r13=00000142ca293700
+r14=00000142c9461840 r15=0000000000000001
+iopl=0         nv up ei pl zr na po nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010246
+Qt5Core!QMutex::lock+0x11:
+00000000`591ed001 f0480fb131      lock cmpxchg qword ptr [rcx],rsi ds:00000000`00000028=????????????????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+Qt5Core!QMutex::lock
+mediaserver
+mediaserver
+mediaserver
+hanwha_metadata_plugin
+hanwha_metadata_plugin!QnByteArray::write
+hanwha_metadata_plugin
+nx_network!nx_http::MultipartContentParser::readUnsizedBinaryData
+nx_network!nx_http::MultipartContentParser::processData
+hanwha_metadata_plugin!QnByteArray::write
+hanwha_metadata_plugin!QnByteArray::write
+Qt5Core!QMetaObject::activate
+nx_network!nx_http::AsyncHttpClient::someMessageBodyAvailable
+nx_network!nx_http::AsyncHttpClient::processResponseMessageBodyBytes
+nx_network!nx_http::AsyncHttpClient::processReceivedBytes
+nx_network!nx_http::AsyncHttpClient::onSomeBytesReadAsync
+nx_network!nx::network::UDPSocket::~UDPSocket
+nx_network!nx::network::StreamServerSocketToAcceptorWrapper::stopWhileInAioThread
+nx_network!nx::network::Socket<AbstractStreamSocket>::dispatch
+nx_network!nx::network::aio::detail::AioTaskQueue::processSocketEvents
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+
+   0  Id: c34.c38 Suspend: 0 Teb: 00000003`25003000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QThread::wait
+mediaserver
+mediaserver
+Qt5Core!QObject::event
+Qt5Core!QCoreApplication::notify
+Qt5Core!QCoreApplication::notifyInternal2
+Qt5Core!QCoreApplicationPrivate::sendPostedEvents
+Qt5Core!QEventDispatcherWin32::processEvents
+user32!UserCallWinProcCheckWow
+user32!DispatchMessageWorker
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+mediaserver
+mediaserver
+mediaserver
+mediaserver
+mediaserver
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   1  Id: c34.1594 Suspend: 0 Teb: 00000003`2500b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: c34.188c Suspend: 0 Teb: 00000003`2500f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+sechost!ScSendResponseReceiveControls
+sechost!ScDispatcherLoop
+sechost!StartServiceCtrlDispatcherW
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: c34.18ac Suspend: 0 Teb: 00000003`25013000 Unfrozen
+Call Site
+ntdll!NtClose
+KERNELBASE!CloseHandle
+Qt5Sql!QSQLiteDriver::tables
+Qt5Sql!QSQLiteDriver::tables
+Qt5Sql!QSQLiteDriver::tables
+Qt5Sql!QSQLiteDriver::tables
+Qt5Sql!QSQLiteDriver::tables
+Qt5Sql!QSQLiteDriver::close
+Qt5Sql!QSqlDatabase::removeDatabase
+mediaserver
+mediaserver
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+#  4  Id: c34.1900 Suspend: 0 Teb: 00000003`25015000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   5  Id: c34.1904 Suspend: 0 Teb: 00000003`25017000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   6  Id: c34.1908 Suspend: 0 Teb: 00000003`25019000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   7  Id: c34.190c Suspend: 0 Teb: 00000003`2501b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   8  Id: c34.1910 Suspend: 0 Teb: 00000003`2501d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   9  Id: c34.1914 Suspend: 0 Teb: 00000003`2501f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  10  Id: c34.1918 Suspend: 0 Teb: 00000003`25021000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  11  Id: c34.191c Suspend: 0 Teb: 00000003`25023000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::`default constructor closure'
+udt!CUDTException::getErrorMessage
+udt!UDT::epoll_wait2
+nx_network!nx::network::aio::UnifiedPollSet::end
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  12  Id: c34.1950 Suspend: 0 Teb: 00000003`25025000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  13  Id: c34.19d8 Suspend: 0 Teb: 00000003`25029000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!MSAFD_WSPPoll
+mswsock!WSPIoctl
+ws2_32!WSAIoctl
+ws2_32!WSAPoll
+nx_network!nx::network::TCPServerSocket::acceptAsync
+nx_network!nx::network::TCPServerSocket::accept
+nx_network!nx::network::TCPServerSocket::systemAccept
+nx_network!nx::network::deprecated::SslServerSocket::accept
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  14  Id: c34.1a5c Suspend: 0 Teb: 00000003`2502b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+mediaserver
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  15  Id: c34.1aac Suspend: 0 Teb: 00000003`2502d000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  16  Id: c34.1ae4 Suspend: 0 Teb: 00000003`2502f000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  17  Id: c34.1af8 Suspend: 0 Teb: 00000003`25031000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  18  Id: c34.840 Suspend: 0 Teb: 00000003`2503b000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  19  Id: c34.1d4 Suspend: 0 Teb: 00000003`25043000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  20  Id: c34.1e08 Suspend: 0 Teb: 00000003`25075000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  21  Id: c34.1e18 Suspend: 0 Teb: 00000003`25077000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: c34.1e48 Suspend: 0 Teb: 00000003`2507b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: c34.1e4c Suspend: 0 Teb: 00000003`2507d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: c34.1e54 Suspend: 0 Teb: 00000003`25081000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: c34.1e5c Suspend: 0 Teb: 00000003`25083000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+mediaserver
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: c34.f88 Suspend: 0 Teb: 00000003`2516d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+udt!UDT::epoll_wait
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: c34.15dc Suspend: 0 Teb: 00000003`251f1000 Unfrozen
+Call Site
+win32u!NtUserGetMessage
+user32!GetMessageW
+perfdisk!PerfdiskPnpNotification
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: c34.4290 Suspend: 0 Teb: 00000003`2513d000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: c34.2758 Suspend: 0 Teb: 00000003`2508d000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  30  Id: c34.3de8 Suspend: 0 Teb: 00000003`250d1000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

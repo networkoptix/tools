@@ -1,0 +1,1010 @@
+ExceptionAddress: 00007fffbf0b5548 (nx_network!nx::network::AbstractSocket::setRecvTimeout)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000000
+   Parameter[1]: 0000000000000000
+Attempt to read from address 0000000000000000
+
+rax=0000000000000004 rbx=00000198e7f9d210 rcx=0000000000000000
+rdx=000000000000000c rsi=0000000000000000 rdi=00000000ffffffff
+rip=00007fffbf0b5548 rsp=00000090014fdf50 rbp=00000090014fe050
+ r8=00000090014fe410  r9=00000090014fe450 r10=0000000000008000
+r11=00000090014fe420 r12=00000090014fe410 r13=00000198e443fa90
+r14=00000198e6221860 r15=00000090014fe450
+iopl=0         nv up ei ng nz ac pe cy
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010293
+nx_network!nx::network::AbstractSocket::setRecvTimeout [inlined in nx_network!nx::network::cloud::relay::detail::ReverseConnection::onConnectDone+0x4b8]:
+00007fff`bf0b5548 488b01          mov     rax,qword ptr [rcx] ds:00000000`00000000=????????????????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+nx_network!nx::network::AbstractSocket::setRecvTimeout
+nx_network!nx::network::cloud::relay::detail::ReverseConnection::onConnectDone
+nx_network!nx::network::cloud::relay::detail::ReverseConnection::connect::__l2::<lambda_1>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(enum nx::cloud::relay::api::ResultCode,nx::cloud::relay::api::BeginListeningResponse,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> >)>::MoveOnlyFuncWrapper<`nx::network::cloud::relay::detail::ReverseConnection::connect'::`2'::<lambda_1> >::operator()
+nx_network!std::invoke
+nx_network!std::_Invoker_ret<void,1>::_Call
+nx_network!std::_Func_impl_no_alloc<nx::utils::MoveOnlyFunc<void __cdecl(enum nx::cloud::relay::api::ResultCode,nx::cloud::relay::api::BeginListeningResponse,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> >)>::MoveOnlyFuncWrapper<`nx::network::cloud::relay::detail::ReverseConnection::connect'::`2'::<lambda_1> >,void,enum nx::cloud::relay::api::ResultCode,nx::cloud::relay::api::BeginListeningResponse,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > >::_Do_call
+nx_network!std::_Func_class<void,enum nx::cloud::relay::api::ResultCode,nx::cloud::relay::api::BeginListeningResponse,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > >::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(enum nx::cloud::relay::api::ResultCode,nx::cloud::relay::api::BeginListeningResponse,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> >)>::operator()
+nx_network!nx::cloud::relay::api::detail::ClientOverHttpTunnel::processServerTunnelResult
+nx_network!nx::cloud::relay::api::detail::ClientOverHttpTunnel::openServerTunnel::__l2::<lambda_3>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::Client const &,nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::cloud::relay::api::detail::ClientOverHttpTunnel::openServerTunnel'::`2'::<lambda_3> >::operator()
+nx_network!std::invoke
+nx_network!std::_Invoker_ret<void,1>::_Call
+nx_network!std::_Func_impl_no_alloc<nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::Client const &,nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::cloud::relay::api::detail::ClientOverHttpTunnel::openServerTunnel'::`2'::<lambda_3> >,void,nx::network::http::tunneling::Client const &,nx::network::http::tunneling::OpenTunnelResult>::_Do_call
+nx_network!std::_Func_class<void,nx::network::http::tunneling::Client const &,nx::network::http::tunneling::OpenTunnelResult>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::Client const &,nx::network::http::tunneling::OpenTunnelResult)>::operator()
+nx_network!nx::cloud::relay::api::detail::ClientOverHttpTunnel::openTunnel::__l2::<lambda_1>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::cloud::relay::api::detail::ClientOverHttpTunnel::openTunnel'::`2'::<lambda_1> >::operator()
+nx_network!std::invoke
+nx_network!std::_Invoker_ret<void,1>::_Call
+nx_network!std::_Func_impl_no_alloc<nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::cloud::relay::api::detail::ClientOverHttpTunnel::openTunnel'::`2'::<lambda_1> >,void,nx::network::http::tunneling::OpenTunnelResult>::_Do_call
+nx_network!std::_Func_class<void,nx::network::http::tunneling::OpenTunnelResult>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::operator()
+nx_network!nx::utils::swapAndCall<nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>,nx::network::http::tunneling::OpenTunnelResult>
+nx_network!nx::network::http::tunneling::Client::reportResult
+nx_network!nx::network::http::tunneling::Client::handleOpenTunnelCompletion
+nx_network!nx::network::http::tunneling::Client::openTunnel::__l13::<lambda_1>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::network::http::tunneling::Client::openTunnel'::`13'::<lambda_1> >::operator()
+nx_network!std::invoke
+nx_network!std::_Invoker_ret<void,1>::_Call
+nx_network!std::_Func_impl_no_alloc<nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::MoveOnlyFuncWrapper<`nx::network::http::tunneling::Client::openTunnel'::`13'::<lambda_1> >,void,nx::network::http::tunneling::OpenTunnelResult>::_Do_call
+nx_network!std::_Func_class<void,nx::network::http::tunneling::OpenTunnelResult>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>::operator()
+nx_network!nx::utils::swapAndCall<nx::utils::MoveOnlyFunc<void __cdecl(nx::network::http::tunneling::OpenTunnelResult)>,nx::network::http::tunneling::OpenTunnelResult>
+nx_network!nx::network::http::tunneling::detail::BaseTunnelClient::reportFailure
+nx_network!nx::network::http::tunneling::detail::BaseTunnelClient::cleanUpFailedTunnel
+nx_network!std::_Func_class<void>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()
+nx_network!nx::network::http::AsyncClient::invokeHandler<>
+nx_network!nx::network::http::AsyncClient::emitDone
+nx_network!nx::network::http::AsyncClient::onMessageEnd
+nx_network!nx::network::server::BaseStreamProtocolConnection<nx::network::server::StreamProtocolConnection<nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>,nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>::reportMessageEnd
+nx_network!nx::network::server::BaseStreamProtocolConnection<nx::network::server::StreamProtocolConnection<nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>,nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>::invokeMessageParser
+nx_network!nx::network::server::BaseStreamProtocolConnection<nx::network::server::StreamProtocolConnection<nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>,nx::network::http::Message,nx::network::http::MessageParser,nx::network::http::MessageSerializer>::bytesReceived
+nx_network!nx::network::server::BaseServerConnection::onBytesRead
+nx_network!std::_Func_class<void,unsigned long,unsigned __int64>::operator()
+nx_network!nx::utils::MoveOnlyFunc<void __cdecl(unsigned long,unsigned __int64)>::operator()
+nx_network!nx::utils::swapAndCall<nx::utils::MoveOnlyFunc<void __cdecl(unsigned long,unsigned __int64)>,unsigned long &,unsigned __int64 &>
+nx_network!nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket> >::reportReadCompletion
+nx_network!nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket> >::processRecvEvent
+nx_network!nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket> >::eventTriggered
+nx_network!nx::network::aio::detail::AioTaskQueue::processSocketEvents::__l4::<lambda_2>::operator()
+nx_network!nx::network::aio::detail::AioTaskQueue::callAndReportAbnormalProcessingTime
+nx_network!nx::network::aio::detail::AioTaskQueue::processSocketEvents
+nx_network!nx::network::aio::AioThread::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+
+   0  Id: 1a7c.22dc Suspend: 0 Teb: 00000090`00bbb000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+mediaserver!QnVideoService::executeApplication
+mediaserver!QtServiceBasePrivate::start
+mediaserver!QtServiceBase::exec
+mediaserver!MediaServerProcess::main
+mediaserver!invoke_main
+mediaserver!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   1  Id: 1a7c.c18 Suspend: 0 Teb: 00000090`00bc1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+sechost!ScSendResponseReceiveControls
+sechost!ScDispatcherLoop
+sechost!StartServiceCtrlDispatcherW
+mediaserver!HandlerThread::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: 1a7c.229c Suspend: 0 Teb: 00000090`00bc5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!QnSafeQueue<QSharedPointer<nx::speech_synthesizer::TextToWaveServer::SynthesizeSpeechTask> >::pop
+mediaserver!nx::speech_synthesizer::TextToWaveServer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: 1a7c.15d0 Suspend: 0 Teb: 00000090`00bc7000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!__crtSleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!do_wait
+udt!std::condition_variable::wait_until
+udt!std::condition_variable::wait_for
+udt!CUDTUnited::garbageCollect
+udt!std::invoke
+udt!std::_Invoker_ret<std::_Unforced,0>::_Call
+udt!std::_Call_binder
+udt!std::_Binder<std::_Unforced,void (__cdecl CUDTUnited::*)(void),CUDTUnited *>::operator()
+udt!std::invoke
+udt!std::thread::_Invoke<std::tuple<std::_Binder<std::_Unforced,void (__cdecl CUDTUnited::*)(void),CUDTUnited *> >,0>
+ucrtbase!thread_start<unsigned int (__cdecl*)(void *),1>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   4  Id: 1a7c.714 Suspend: 0 Teb: 00000090`00bc9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+udt!UDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AioThread::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+#  5  Id: 1a7c.b24 Suspend: 0 Teb: 00000090`00bcb000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   6  Id: 1a7c.213c Suspend: 0 Teb: 00000090`00bcd000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   7  Id: 1a7c.22e0 Suspend: 0 Teb: 00000090`00bcf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::waitForEvent
+nx_utils!nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::waitForNonEmptyQueue
+nx_utils!nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::popIf<`nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::pop'::`2'::<lambda_1> >
+nx_utils!nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::pop
+nx_utils!nx::utils::SyncQueueBase<std::unique_ptr<nx::utils::fs::AbstractTask,std::default_delete<nx::utils::fs::AbstractTask> > >::pop
+nx_utils!nx::utils::fs::FileAsyncIoScheduler::taskProcessingThread
+nx_utils!nx::utils::fs::FileAsyncIoScheduler::{ctor}::__l2::<lambda_1>::operator()
+nx_utils!std::invoke
+nx_utils!std::thread::_Invoke<std::tuple<`nx::utils::fs::FileAsyncIoScheduler::FileAsyncIoScheduler'::`2'::<lambda_1> >,0>
+ucrtbase!thread_start<unsigned int (__cdecl*)(void *),1>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   8  Id: 1a7c.1224 Suspend: 0 Teb: 00000090`00bd1000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+mediaserver!MediaServerProcess::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   9  Id: 1a7c.1cb8 Suspend: 0 Teb: 00000090`00bd3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  10  Id: 1a7c.3b0 Suspend: 0 Teb: 00000090`00bdb000 Unfrozen
+Call Site
+win32u!NtUserGetMessage
+user32!GetMessageW
+perfdisk!PerfdiskPnpNotification
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  11  Id: 1a7c.1bc8 Suspend: 0 Teb: 00000090`00bdd000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!__crtSleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::condition_variable::wait
+nx_network!std::_Associated_state<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::_Get_value
+nx_network!std::_State_manager<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::_Get_value
+nx_network!std::future<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::get
+nx_network!nx::network::ssl::StreamServerSocket::acceptBlocking
+nx_network!nx::network::ssl::StreamServerSocket::accept
+nx_vms_common!QnTcpListener::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  12  Id: 1a7c.74 Suspend: 0 Teb: 00000090`00bdf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+nx_onvif!soap_xop_forward
+nx_onvif!soap_accept
+mediaserver!QnSoapServer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  13  Id: 1a7c.1d80 Suspend: 0 Teb: 00000090`00be1000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  14  Id: 1a7c.a7c Suspend: 0 Teb: 00000090`00be3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::waitForEvent
+nx_utils!nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::waitForNonEmptyQueue
+nx_utils!nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::popIf<`nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::pop'::`2'::<lambda_1> >
+nx_utils!nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::pop
+nx_utils!nx::utils::SyncQueueBase<nx::utils::MoveOnlyFunc<void __cdecl(void)> >::pop
+nx_utils!nx::utils::detail::Impl::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  15  Id: 1a7c.1694 Suspend: 0 Teb: 00000090`00be5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!StreamingChunkTranscoderThread::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  16  Id: 1a7c.1c0c Suspend: 0 Teb: 00000090`00be7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  17  Id: 1a7c.1f84 Suspend: 0 Teb: 00000090`00be9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  18  Id: 1a7c.f9c Suspend: 0 Teb: 00000090`00beb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!ArchiveIndexer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  19  Id: 1a7c.1e04 Suspend: 0 Teb: 00000090`00bed000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  20  Id: 1a7c.146c Suspend: 0 Teb: 00000090`00bef000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  21  Id: 1a7c.3fc Suspend: 0 Teb: 00000090`00bf1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!ArchiveIndexer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: 1a7c.1bac Suspend: 0 Teb: 00000090`00bf3000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: 1a7c.1d88 Suspend: 0 Teb: 00000090`00bf5000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: 1a7c.152c Suspend: 0 Teb: 00000090`00bf7000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: 1a7c.1210 Suspend: 0 Teb: 00000090`00bf9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!QnServerDb::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: 1a7c.f38 Suspend: 0 Teb: 00000090`00bfb000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: 1a7c.99c Suspend: 0 Teb: 00000090`00a04000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!ec2::detail::TransactionExecutor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: 1a7c.10fc Suspend: 0 Teb: 00000090`00a08000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: 1a7c.1824 Suspend: 0 Teb: 00000090`00a28000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnFileDeletor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  30  Id: 1a7c.150 Suspend: 0 Teb: 00000090`00a2a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  31  Id: 1a7c.1a30 Suspend: 0 Teb: 00000090`00a2c000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+nx_vms_common!QnResourceDiscoveryManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  32  Id: 1a7c.b78 Suspend: 0 Teb: 00000090`00a2e000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  33  Id: 1a7c.1344 Suspend: 0 Teb: 00000090`00a30000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnSleep::msleep
+mediaserver!QnMServerResourceSearcher::readDataFromSocket
+mediaserver!QnMServerResourceSearcher::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  34  Id: 1a7c.c68 Suspend: 0 Teb: 00000090`00a34000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  35  Id: 1a7c.22bc Suspend: 0 Teb: 00000090`00a36000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  36  Id: 1a7c.260 Suspend: 0 Teb: 00000090`00a38000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+nx_network!nx::network::aio::PollSet::poll
+nx_vms_common!nx::vms::discovery::DeprecatedMulticastFinder::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  37  Id: 1a7c.17d4 Suspend: 0 Teb: 00000090`00a52000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  38  Id: 1a7c.8e4 Suspend: 0 Teb: 00000090`00a54000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::TimerManager::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  39  Id: 1a7c.1de0 Suspend: 0 Teb: 00000090`00a56000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_sql!nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::waitForEvent
+nx_sql!nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::waitForNonEmptyQueue
+nx_sql!nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::popIf<`nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::pop'::`2'::<lambda_1> >
+nx_sql!nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::pop
+nx_sql!nx::utils::SyncQueueBase<std::unique_ptr<nx::sql::detail::BaseQueryExecutor,std::default_delete<nx::sql::detail::BaseQueryExecutor> > >::pop
+nx_sql!nx::sql::AsyncSqlQueryExecutor::dropExpiredConnectionsThreadFunc
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  40  Id: 1a7c.18e8 Suspend: 0 Teb: 00000090`00a58000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_sql!nx::sql::detail::QueryQueue::pop
+nx_sql!nx::sql::detail::QueryExecutionThread::queryExecutionThreadMain
+nx_sql!std::invoke
+nx_sql!std::_Invoker_ret<std::_Unforced,0>::_Call
+nx_sql!std::_Call_binder
+nx_sql!std::_Binder<std::_Unforced,void (__cdecl nx::sql::detail::QueryExecutionThread::*)(void),nx::sql::detail::QueryExecutionThread *>::operator()
+nx_sql!std::invoke
+nx_sql!std::thread::_Invoke<std::tuple<std::_Binder<std::_Unforced,void (__cdecl nx::sql::detail::QueryExecutionThread::*)(void),nx::sql::detail::QueryExecutionThread *> >,0>
+ucrtbase!thread_start<unsigned int (__cdecl*)(void *),1>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  41  Id: 1a7c.1548 Suspend: 0 Teb: 00000090`00a5a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  42  Id: 1a7c.11ac Suspend: 0 Teb: 00000090`00a5c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  43  Id: 1a7c.1f44 Suspend: 0 Teb: 00000090`00a5e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  44  Id: 1a7c.1d60 Suspend: 0 Teb: 00000090`00a60000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  45  Id: 1a7c.1774 Suspend: 0 Teb: 00000090`00a62000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  46  Id: 1a7c.64 Suspend: 0 Teb: 00000090`00a64000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  47  Id: 1a7c.814 Suspend: 0 Teb: 00000090`00a66000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  48  Id: 1a7c.ca4 Suspend: 0 Teb: 00000090`00a68000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  49  Id: 1a7c.1a94 Suspend: 0 Teb: 00000090`00a6a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  50  Id: 1a7c.f8 Suspend: 0 Teb: 00000090`00a6c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  51  Id: 1a7c.182c Suspend: 0 Teb: 00000090`00a6e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  52  Id: 1a7c.165c Suspend: 0 Teb: 00000090`00a70000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  53  Id: 1a7c.1750 Suspend: 0 Teb: 00000090`00a72000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  54  Id: 1a7c.1ff0 Suspend: 0 Teb: 00000090`00a74000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::cloud::CloudStreamSocket::recv
+nx_vms_common!QnRtspClient::readSocketWithBuffering
+nx_vms_common!QnRtspClient::readBinaryResponse
+mediaserver!QnMulticodecRtpReader::getNextDataTCP
+mediaserver!QnMulticodecRtpReader::getNextData
+mediaserver!nx::vms::server::plugins::onvif::StreamReader::getNextData
+mediaserver!CLServerPushStreamReader::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  55  Id: 1a7c.4ec Suspend: 0 Teb: 00000090`00a76000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  56  Id: 1a7c.108c Suspend: 0 Teb: 00000090`00a78000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_vms_common!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+nx_vms_common!QnAbstractDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  57  Id: 1a7c.2d0 Suspend: 0 Teb: 00000090`00a7a000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!__crtSleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::condition_variable::wait
+nx_network!std::_Associated_state<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::_Get_value
+nx_network!std::_State_manager<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::_Get_value
+nx_network!std::future<std::tuple<unsigned long,std::unique_ptr<nx::network::AbstractStreamSocket,std::default_delete<nx::network::AbstractStreamSocket> > > >::get
+nx_network!nx::network::ssl::StreamServerSocket::acceptBlocking
+nx_network!nx::network::ssl::StreamServerSocket::accept
+nx_vms_common!QnTcpListener::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  58  Id: 1a7c.1a88 Suspend: 0 Teb: 00000090`00a90000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  59  Id: 1a7c.6d4 Suspend: 0 Teb: 00000090`00aae000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver!nx::vms::server::archive::QueueFileWriter::popData
+mediaserver!nx::vms::server::archive::QueueFileWriter::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  60  Id: 1a7c.1b54 Suspend: 0 Teb: 00000090`00ab2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+nx_network!nx::network::ProtocolDetectingStreamSocket<nx::network::AbstractEncryptedStreamSocket>::recv
+mediaserver!QnRtspConnectionProcessor::run
+nx_vms_common!QnTCPConnectionProcessor::execute
+mediaserver!QnUniversalRequestProcessor::processRequest
+mediaserver!QnUniversalRequestProcessor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  61  Id: 1a7c.70c Suspend: 0 Teb: 00000090`00aba000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnSleep::msleep
+mediaserver!QnRtspDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  62  Id: 1a7c.1ae8 Suspend: 0 Teb: 00000090`00b4e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+nx_network!nx::network::ProtocolDetectingStreamSocket<nx::network::AbstractEncryptedStreamSocket>::recv
+mediaserver!QnRtspConnectionProcessor::run
+nx_vms_common!QnTCPConnectionProcessor::execute
+mediaserver!QnUniversalRequestProcessor::processRequest
+mediaserver!QnUniversalRequestProcessor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  63  Id: 1a7c.1d3c Suspend: 0 Teb: 00000090`00b50000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnSleep::msleep
+mediaserver!QnRtspDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  64  Id: 1a7c.1650 Suspend: 0 Teb: 00000090`00b80000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  65  Id: 1a7c.1254 Suspend: 0 Teb: 00000090`00b90000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+nx_network!nx::network::ProtocolDetectingStreamSocket<nx::network::AbstractEncryptedStreamSocket>::recv
+mediaserver!QnRtspConnectionProcessor::run
+nx_vms_common!QnTCPConnectionProcessor::execute
+mediaserver!QnUniversalRequestProcessor::processRequest
+mediaserver!QnUniversalRequestProcessor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  66  Id: 1a7c.a0c Suspend: 0 Teb: 00000090`00b92000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnSleep::msleep
+mediaserver!QnRtspDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  67  Id: 1a7c.23cc Suspend: 0 Teb: 00000090`00b94000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+nx_network!nx::network::ProtocolDetectingStreamSocket<nx::network::AbstractEncryptedStreamSocket>::recv
+mediaserver!QnRtspConnectionProcessor::run
+nx_vms_common!QnTCPConnectionProcessor::execute
+mediaserver!QnUniversalRequestProcessor::processRequest
+mediaserver!QnUniversalRequestProcessor::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  68  Id: 1a7c.53c Suspend: 0 Teb: 00000090`00b96000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver!QnSleep::msleep
+mediaserver!QnRtspDataConsumer::runCycle
+nx_vms_common!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  69  Id: 1a7c.b0c Suspend: 0 Teb: 00000090`00a14000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  70  Id: 1a7c.778 Suspend: 0 Teb: 00000090`00a82000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  71  Id: 1a7c.1920 Suspend: 0 Teb: 00000090`00a84000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPRecv
+ws2_32!recv
+nx_network!nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+nx_network!nx::network::ssl::detail::StreamSocketToTwoWayPipelineAdapter::read
+nx_network!nx::network::ssl::Pipeline::bioRead
+nx_network!nx::network::ssl::Pipeline::bioRead
+libcrypto_1_1_x64
+0x0
+0x0
+0x0
+libcrypto_1_1_x64
+0x0
+libcrypto_1_1_x64
+0x0
+ntdll!RtlpLowFragHeapAllocFromContext
+0x0
+0x0
+0x0
+
+  72  Id: 1a7c.9b8 Suspend: 0 Teb: 00000090`00a88000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
