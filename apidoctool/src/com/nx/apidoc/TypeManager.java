@@ -142,7 +142,8 @@ public final class TypeManager
         {
             if (unknownParamTypeIsError)
                 throw new Error("Struct `" + type.name + "` not found.");
-            System.out.println("WARNING: Struct `" + type.name + "` not found.");
+            if (verbose)
+                System.out.println("WARNING: Struct `" + type.name + "` not found.");
         }
         return structInfo;
     }
@@ -215,12 +216,16 @@ public final class TypeManager
             if (param.name.equals("format"))
                 mergedParams.add(0, param);
 
+            // Ignore built-in parameters started with "_" prefix and not presented in structs.
+            if (param.name.startsWith("_"))
+                continue;
+
             if (findParam(mergedParams, param.name) == null)
             {
                 if (verbose)
                 {
                     System.out.println(
-                        "            WARNING: Param in function apidoc comment: \"" + param.name
+                        "WARNING: Param in function apidoc comment: \"" + param.name
                             + "\" not found in structure: " + type.name);
                 }
                 mergedParams.add(param);

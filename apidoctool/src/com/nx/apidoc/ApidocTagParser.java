@@ -125,7 +125,7 @@ public final class ApidocTagParser
                 }
                 else if (verbose)
                 {
-                    System.out.println("    WARNING: " + filename + ":" + (firstLineOfItem + line)
+                    System.out.println("WARNING: " + filename + ":" + (firstLineOfItem + line)
                             + ": Too small indent.");
                 }
                 b.append(Utils.trimRight(continuationTrimmed));

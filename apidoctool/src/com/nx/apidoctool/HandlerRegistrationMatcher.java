@@ -27,11 +27,7 @@ public final class HandlerRegistrationMatcher implements RegistrationMatcher
 
         params = sourceCode.matchLine(line, regHandlerRegexForFunctorWithInvalidName);
         if (params != null)
-        {
-            System.out.println("WARNING: " + sourceCode.getFilename() + ":" + line + ": "
-                + "Invalid API function name.");
             return new RegistrationMatch(null, null, null, null);
-        }
 
         return null;
     }

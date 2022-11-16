@@ -210,13 +210,15 @@ public final class SourceCodeParser
                         for (Apidoc.Param param: description.function.result.params)
                             throwErrorIfExampleTypeInvalid(description, description.function.result, /*isResult*/ true);
 
-                        for (Apidoc.Param param: description.function.input.params)
-                            verifyParamValueNames(description, param, /*isResult*/ false);
-                        for (Apidoc.Param param: description.function.result.params)
+                        if (verbose)
                         {
-                            verifyParamValueNames(description, param, /*isResult*/ true);
-                            param.type.setFixedChrono(responseChronoAsString);
+                            for (Apidoc.Param param : description.function.input.params)
+                                verifyParamValueNames(description, param, /*isResult*/ false);
+                            for (Apidoc.Param param : description.function.result.params)
+                                verifyParamValueNames(description, param, /*isResult*/ true);
                         }
+                        for (Apidoc.Param param : description.function.result.params)
+                            param.type.setFixedChrono(responseChronoAsString);
 
                         if (description.function.groups.isEmpty())
                         {
@@ -258,7 +260,7 @@ public final class SourceCodeParser
                 {
                     if (verbose && match.functionName != null)
                     {
-                        System.out.println("NOTE: " + sourceCode.getFilename() + ":" + mainLine
+                        System.out.println("WARNING: " + sourceCode.getFilename() + ":" + mainLine
                             + ": Skipping undocumented function: "
                             + ((match.method == null) ? "" : (match.method + " "))
                             + match.functionName);
