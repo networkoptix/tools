@@ -216,13 +216,10 @@ public final class TypeManager
             if (param.name.equals("format"))
                 mergedParams.add(0, param);
 
-            // Ignore built-in parameters starting with the "_" prefix and not present in structs.
-            if (param.name.startsWith("_"))
-                continue;
-
             if (findParam(mergedParams, param.name) == null)
             {
-                if (verbose)
+                // Ignore built-in parameters starting with the "_" prefix and not present in structs.
+                if (verbose && !param.name.startsWith("_"))
                 {
                     System.out.println(
                         "WARNING: Param in function apidoc comment: \"" + param.name
