@@ -40,7 +40,7 @@ CDB_KNOWN_ERRORS = [
     'Catastrophic failure',
 ]
 
-DEFAULT_ARTIFACTORY_URL = 'https://artifactory.ru.nxteam.dev/artifactory'
+DEFAULT_ARTIFACTORY_URL = 'https://artifactory.us.nxteam.dev/artifactory'
 DIST_ARTIFACTORY_REPO = 'release-vms'
 
 ADDITIONAL_APP_TYPES = {'libs_debug', 'misc_debug'}
