@@ -19,7 +19,7 @@ logging.basicConfig(
     level=logging.INFO)
 
 ARTIFACTORY_URL = ArtifactoryPath(
-    'https://artifactory.ru.nxteam.dev/artifactory/release-vms')
+    'https://artifactory.us.nxteam.dev/artifactory/release-vms')
 RELEASE_DIR = 'windows'
 
 CLIENT_FILENAMES = {
