@@ -11,6 +11,7 @@ import mmap
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -143,6 +144,73 @@ def make_output_dir(source_dir, output_dir_base, packages_json):
         json.dump(packages_json, json_file, indent=2)
 
 
+def update_releases_json(
+        releases_json_file, packages, release_date=None, release_delivery_days=None):
+    logging.info(f"Updating releases info in {releases_json_file}")
+
+    releases_info = {}
+    if Path(releases_json_file).exists():
+        with open(releases_json_file) as file:
+            releases_info = json.load(file)
+
+    if not releases_info.get("packages_urls"):
+        logging.warning(f"{releases_json_file} does not contain any package URLs. "
+            "You need to put at least one URL into 'packages_urls' list.")
+        releases_info["packages_urls"] = []
+
+    for package in packages:
+        logging.debug(f"Loading build information from {package}")
+        try:
+            with ZipFile(package) as zip:
+                with zip.open("build_info.json", "r") as build_info_json:
+                    info = json.load(build_info_json)
+                    publication_info = {
+                        "product": info["productType"],
+                        "version": info["vmsVersion"],
+                        "protocol_version": info["protoVersion"],
+                        "publication_type": info["publicationType"]
+                    }
+                    break
+        except KeyError:
+            pass
+
+    if not publication_info:
+        logging.error("Cannot extract publication information. 'build_info.json' is not found in "
+            "any of the update files.")
+        return
+
+    if release_delivery_days:
+        release_date_timestamp = None
+        if release_date:
+            try:
+                release_date_timestamp = int(release_date)
+            except ValueError:
+                logging.warning("Release date should be a timestamp in milliseconds. "
+                    f"Given: '{release_date}'. Using current date.")
+
+        if not release_date_timestamp:
+            release_date_timestamp = round(time.time()) * 1000
+
+        publication_info["release_date"] = str(release_date_timestamp)
+        publication_info["release_delivery_days"] = release_delivery_days
+
+    version_prefix = publication_info["version"]
+    version_prefix = version_prefix[:version_prefix.rindex(".") - 1]
+    product = publication_info["product"]
+
+    releases = list(filter(
+        lambda release:
+            not release["version"].startswith(version_prefix) or release["product"] != product,
+        releases_info.get("releases", [])))
+
+    releases.insert(0, publication_info)
+    releases_info["releases"] = releases
+
+    with open(releases_json_file, "w") as file:
+        json.dump(releases_info, file, indent=4)
+        file.write("\n")
+
+
 def main():
     logging.basicConfig(
         level=os.getenv("PREPARE_VMS_UPDATE_LOG_LEVEL", "INFO"), format='%(message)s')
@@ -169,12 +237,28 @@ def main():
         help="Sign update packages using this key. When not specified, the program will attempt "
             "to find the prepeared signatures in files named as update ZIPs with addition of "
             "\".sig\" suffix.")
+    parser.add_argument("--releases-json",
+        help="Path to 'releases.json' file. When specified, the release information will be added "
+            "into the releases list. If there are releases with the same patch version and the "
+            "same product type, they will be replaced with the new release.")
+    parser.add_argument("--release-date",
+        help="When updating 'releases.json', this value will be used as a start date of the "
+            "update rollout period. The velue should be a timestamp in milliseconds.")
+    parser.add_argument("--release-delivery-days",
+        help="When updating 'releases.json', this value will be used as the update rollout period "
+            "length.")
 
     args = parser.parse_args()
 
     packages = gather_packages(args.source_dir, signature_key=args.signature_key)
     packages_json = make_packages_json(args.source_dir, packages)
     make_output_dir(args.source_dir, args.output_dir, packages_json)
+    if args.releases_json:
+        update_releases_json(
+            args.releases_json,
+            packages,
+            release_date=args.release_date,
+            release_delivery_days=args.release_delivery_days)
 
 
 if __name__ == "__main__":
