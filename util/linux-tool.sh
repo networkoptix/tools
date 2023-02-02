@@ -349,18 +349,21 @@ set_up_vars()
 #            nx_fail "The parent repo is not \"vms\" project." "$HELP"
 #        fi
 
-        local -r VS_EXE_2019="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
-        local -r VS_EXE_2022="C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe"
-        if [[ -z "$VS_EXE" ]]
+        if nx_is_cygwin
         then
-            if [[ -f "$VS_EXE_2022" ]]
+            local -r VS_EXE_2019="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\devenv.exe"
+            local -r VS_EXE_2022="C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe"
+            if [[ -z "$VS_EXE" ]]
             then
-                VS_EXE="$VS_EXE_2022"
-            elif [[ -f "$VS_EXE_2019" ]]
-            then
-                VS_EXE="$VS_EXE_2019"
-            else
-                nx_fail "Cannot find VS executable - set env var VS_EXE."            
+                if [[ -f "$VS_EXE_2022" ]]
+                then
+                    VS_EXE="$VS_EXE_2022"
+                elif [[ -f "$VS_EXE_2019" ]]
+                then
+                    VS_EXE="$VS_EXE_2019"
+                else
+                    nx_fail "Cannot find VS executable - set env var VS_EXE."            
+                fi
             fi
         fi
 
