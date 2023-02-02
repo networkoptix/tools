@@ -61,7 +61,7 @@ Here <command> can be one of the following:
  apidoc-rdep <ver> # Run dev apidoctool tests, deploy to packages/any/ and upload via "rdep -u".
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
- sdk [metadata] # Rebuild nx_*_sdk zip archives - all, or only Metadata SDK.
+ sdk [sdk_name] # Rebuild nx_*_sdk zip archives - all, or only the specified one.
  benchmark [run|build] # Rebuild (if "run" is not specified), unzip and run (if "build" is not
      specified) vms_benchmark, deleting the old one but keeping .conf and .ini.
  copyright [add|remove] # Check and add or remove (if requested) copyright notice in all files in
@@ -870,22 +870,27 @@ do_kit() # "$@"
     fi
 }
 
-do_sdk() # [metadata] "$@"
+do_sdk() # [sdk_name] "$@"
 {
-    if [[ $# > 0 && $1 == "metadata" ]]
+    if [[ $# > 0 ]]
     then
+        local -r SPECIFIER="$1"
         shift
-        local -r SPECIFIER="metadata"
-        local -r TARGETS=( nx_metadata_sdk )
+        local -r TARGETS=( nx_${SPECIFIER}_sdk )
     else
         local -r SPECIFIER=""
-        local -r TARGETS=( nx_metadata_sdk nx_video_source_sdk nx_storage_sdk )
+        local TARGETS=( nx_metadata_sdk nx_video_source_sdk nx_storage_sdk )
+        if [[ -d "$VMS_DIR/vms/server/nx_cloud_storage_sdk" ]]
+        then
+            TARGETS+=( nx_cloud_storage_sdk )
+        fi
     fi
 
     local -r DISTRIB_DIR="$BUILD_DIR/distrib"
 
     nx_verbose rm -rf "$DISTRIB_DIR"/*${SPECIFIER}_sdk* `#< Delete zips and unpacked SDKs. #`
     nx_verbose rm -rf "$BUILD_DIR/vms/server"/nx_*${SPECIFIER}_sdk `#< Ensure clean build. #`
+    nx_verbose rm -rf "$BUILD_DIR/open/vms/server"/nx_*${SPECIFIER}_sdk `#< Ensure clean build. #`
 
     SDK=1 do_gen "$@" || exit $?
 
