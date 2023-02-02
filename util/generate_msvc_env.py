@@ -101,7 +101,7 @@ env_var_names_2022 = [
     "__VSCMD_PREINIT_PATH",
 ]
 
-env_var_names: list[str] = []
+env_var_names: List[str] = []
 
 base_drive_for_sh: str = ""
 
