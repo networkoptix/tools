@@ -2132,7 +2132,8 @@ main()
             esac
 
             local LOG_FILE
-            nx_find_file LOG_FILE "main log file" "$BASE_DIR" -name "log_file.log"
+            nx_find_file LOG_FILE "main log file" "$BASE_DIR" \
+                -name "log_file.log" -o -name "main.log"
             if [[ $FIND == 1 ]]
             then
                 echo "$LOG_FILE"
