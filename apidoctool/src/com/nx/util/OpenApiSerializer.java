@@ -330,7 +330,11 @@ public final class OpenApiSerializer
             if (!function.input.optional)
                 requestBody.put("required", true);
             JSONObject schema = getObject(getObject(getObject(
-                requestBody, "content"), "application/json"), "schema");
+                requestBody, "content"),
+                function.input.type.fixed == Apidoc.Type.BINARY
+                    ? "application/octet-stream"
+                    : "application/json"),
+                "schema");
             fillSchemaType(schema, function.input.type, /*fillDefaultExample*/ true);
             if (!function.input.example.isEmpty())
                 schema.put("example", function.input.type.parse(function.input.example));
