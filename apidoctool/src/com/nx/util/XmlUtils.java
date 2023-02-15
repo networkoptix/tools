@@ -73,7 +73,7 @@ public final class XmlUtils
     public static void writeXmlFile(File xmlFile, Document document)
         throws IOException
     {
-        OutputFormat format = new OutputFormat(document);
+        OutputFormat format = new OutputFormat();
         format.setIndenting(true);
         format.setIndent(4);
         format.setLineWidth(1000); //< Needed to avoid limit on max indentation.
