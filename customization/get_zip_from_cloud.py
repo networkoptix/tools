@@ -13,7 +13,7 @@ FETCH_BY_TYPE = 'type'
 FETCH_BY_ID = 'id'
 DEFAULT_INSTANCE = "https://nxvms.com"
 FILE_NAME_PATTERN = re.compile("filename=(.+).zip")
-DOWNLOAD_ATTEMPTS = 24 # With a timeout of 5s its 2 minutes.
+DOWNLOAD_ATTEMPTS = 24  # With a timeout of 5s its 2 minutes.
 
 
 def create_package(args, fs):
@@ -22,7 +22,7 @@ def create_package(args, fs):
     except Exception as e:
         print(e)
         print(f"Reason: {fs.text}")
-        return
+        raise e
 
     package_name = re.findall(FILE_NAME_PATTERN, fs.headers.get("Content-Disposition", ""))
     package_name = f"{package_name[0] if len(package_name) else 'package'}"
@@ -36,6 +36,7 @@ def create_package(args, fs):
     with open(f"{package_name}.zip", "wb") as f:
         shutil.copyfileobj(fs.raw, f)
 
+
 def download_package_async(session, args, asset_id):
     draft = "?draft" if args.draft else ""
     async_package_url = f"{args.instance}/admin/cms/async_package/{asset_id}/{draft}"
@@ -48,7 +49,7 @@ def download_package_async(session, args, asset_id):
     except Exception as e:
         print(e)
         print(f"Reason: {res.text}")
-        return
+        raise e
 
     # Poll for package every 5 seconds
     for _ in range(DOWNLOAD_ATTEMPTS):
@@ -58,7 +59,7 @@ def download_package_async(session, args, asset_id):
         except Exception as e:
             print(e)
             print(f"Reason: {res.text}")
-            return
+            raise e
 
         data = res.json()
         if data["is_ready"]:
@@ -148,6 +149,7 @@ def main(argv):
     args = get_cmd_args(argv)
     with requests.Session() as session:
         # Login and start session
+        session.headers.update({'Referer': args.instance})
         try:
             res = session.post(f"{args.instance}/api/account/login", json={"email": args.login, "password": args.password})
             res.raise_for_status()
@@ -163,9 +165,9 @@ def main(argv):
 
             download_packages(session, args, asset_ids)
         except requests.HTTPError as e:
-            if __name__ != "__main__":
-                raise e
-            print(e)
+            if __name__ == "__main__":
+                print(e)
+            raise e
 
 
 if __name__ == "__main__":
