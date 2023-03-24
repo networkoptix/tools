@@ -1954,6 +1954,8 @@ doRsync() # "$@"
         --exclude="*.orig" \
         --exclude="/.vs" \
         --exclude="/_ReSharper.Caches" \
+        --exclude="*.pyc" \
+        --exclude="__pycache__" \
         $(cygpath -u "$VMS_DIR/") "$sshVmsDir/" || exit $?
 
     if (($# > 0))
