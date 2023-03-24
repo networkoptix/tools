@@ -19,6 +19,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 : ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
+: ${EXTRA_GEN_ARG=""} #< Extra arg for cmake generation (not an array because of shell limitation).
 : ${GO_USER="$USER"}
 : ${GO_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${GO_DEVELOP_DIR="/home/$GO_USER/develop"}
@@ -458,7 +459,8 @@ do_gen() # [cache] "$@"
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         "${GENERATOR_ARGS[@]}" \
-        $CUSTOMIZATION_ARG "${TARGET_ARGS[@]}" $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@"
+        $CUSTOMIZATION_ARG "${TARGET_ARGS[@]}" $CONFIG_ARG "${COMPOSITION_ARG[@]}" $DEV_ARG "$@" \
+        "$EXTRA_GEN_ARG"
 }
 
 do_build()
