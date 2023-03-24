@@ -20,6 +20,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 : ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
 : ${EXTRA_GEN_ARG=""} #< Extra arg for cmake generation (not an array because of shell limitation).
+: ${GO_BASE_DIR="$HOME"} #< Local dir to keep the relative path for "go".
 : ${GO_USER="$USER"}
 : ${GO_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${GO_DEVELOP_DIR="/home/$GO_USER/develop"}
@@ -1845,9 +1846,8 @@ doMountRepo() # win-repo [mnt-point]
 doGo() # "$@"
 {
     local -r CURRENT_DIR=$(pwd)
-    [[ $CURRENT_DIR/ != $HOME/* ]] && nx_fail "Current dir is not inside the home dir."
-    local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$HOME/"} #< Remove prefix.
-
+    [[ $CURRENT_DIR/ != $GO_BASE_DIR/* ]] && nx_fail "Current dir is not inside the base dir."
+    local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$GO_BASE_DIR/"} #< Remove prefix.
     if (($# > 0))
     then
         nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
