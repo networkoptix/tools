@@ -1947,13 +1947,14 @@ doRsync() # "$@"
 
     nx_echo "Rsyncing to" $(nx_lcyan)"$sshVmsDir/"$(nx_nocolor)
     # ATTENTION: Trailing slashes are essential for rsync to work properly.
-    nx_rsync --delete \
+    MSYS_NO_PATHCONV=1 nx_rsync \
+        --delete \
         --exclude="/$gitInfoTxt" \
         --exclude="/.git" \
         --exclude="*.orig" \
         --exclude="/.vs" \
         --exclude="/_ReSharper.Caches" \
-        "$VMS_DIR/" "$sshVmsDir/" || exit $?
+        $(cygpath -u "$VMS_DIR/") "$sshVmsDir/" || exit $?
 
     if (($# > 0))
     then

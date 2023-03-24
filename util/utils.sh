@@ -68,6 +68,9 @@ nx_handle_mock_rsync() # "$@" && shift
             nx_echo
             nx_echo "$(nx_dred)MOCKED:$(nx_nocolor)"
             nx_echo "$(nx_dgreen)rsync $*$(nx_nocolor)"
+            nx_echo "$(nx_dyellow)"
+            args_c "$@"
+            nx_echo "$(nx_nocolor)"
             nx_echo
             # Check that all local files exist.
             local FILE
@@ -748,7 +751,7 @@ nx_get_SELF_IP() # subnet-regex
     local AWK
     local TOOL
     case "$(uname -s)" in
-        CYGWIN*) TOOL="ipconfig"; AWK='/  IPv4 Address/{print $14}';;
+        CYGWIN*|MINGW*) TOOL="ipconfig"; AWK='/  IPv4 Address/{print $14}';;
         *) TOOL="ifconfig"; AWK='/inet addr/{print substr($2,6)}';;
     esac
 
