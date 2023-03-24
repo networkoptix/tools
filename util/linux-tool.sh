@@ -20,6 +20,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 : ${STOP_ON_ERROR=1} #< (Except Windows) Whether to stop build at first compile/link error.
 : ${EXTRA_GEN_ARG=""} #< Extra arg for cmake generation (not an array because of shell limitation).
+: ${SERVER_CONF_FILE=""} #< Value for "--conf-file" option for running the Server.
 : ${GO_BASE_DIR="$HOME"} #< Local dir to keep the relative path for "go".
 : ${GO_USER="$USER"}
 : ${GO_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
@@ -2015,17 +2016,22 @@ main()
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
+            if [[ -z "${SERVER_CONF_FILE}" ]]; then
+                local -r conf_file_args=()
+            else
+                local -r conf_file_args=(--conf-file "${SERVER_CONF_FILE}")
+            fi
             case "$TARGET" in
                 windows)
                     get_QT_DIR
                     local -r QT_PATH="$QT_DIR/bin"
                     nx_append_path "$QT_PATH"
-                    nx_verbose bin/mediaserver -e "$@"
+                    nx_verbose bin/mediaserver -e "${conf_file_args[@]}" "$@"
                     ;;
                 linux)
                     # root-tool support commented out.
                     #sudo chown root:root bin/root_tool && sudo chmod u+s bin/root_tool
-                    nx_verbose bin/mediaserver -e "$@"
+                    nx_verbose bin/mediaserver -e "${conf_file_args[@]}" "$@"
                     ;;
                 *) nx_fail "Target [$TARGET] not supported yet.";;
             esac
