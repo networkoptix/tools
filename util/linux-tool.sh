@@ -22,6 +22,7 @@ nx_load_config "${RC=?.linux-toolrc}"
 : ${EXTRA_GEN_ARG=""} #< Extra arg for cmake generation (not an array because of shell limitation).
 : ${SERVER_CONF_FILE=""} #< Value for "--conf-file" option for running the Server.
 : ${GO_BASE_DIR="$HOME"} #< Local dir to keep the relative path for "go".
+: ${GO_SHELL="$SHELL"} #< Shell for "go".
 : ${GO_USER="$USER"}
 : ${GO_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
 : ${GO_DEVELOP_DIR="/home/$GO_USER/develop"}
@@ -1848,14 +1849,14 @@ doGo() # "$@"
 {
     local -r CURRENT_DIR=$(pwd)
     [[ $CURRENT_DIR/ != $GO_BASE_DIR/* ]] && nx_fail "Current dir is not inside the base dir."
-    local -r DIR_RELATIVE_TO_HOME=${CURRENT_DIR/#"$GO_BASE_DIR/"} #< Remove prefix.
+    local -r DIR_RELATIVE_TO_BASE=${CURRENT_DIR/#"$GO_BASE_DIR/"} #< Remove prefix.
     if (($# > 0))
     then
-        nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" '[&&]' "$@"
+        nx_go_verbose cd "$DIR_RELATIVE_TO_BASE" '[&&]' "$@"
     else
         # If there is no path on the remote host corresponding to the local path, use the default
         # directory ($HOME, if it isn't overridden by some shell init script).
-        nx_go_verbose cd "$DIR_RELATIVE_TO_HOME" "[>/dev/null 2>&1; \"$SHELL\" --login]"
+        nx_go_verbose cd "$DIR_RELATIVE_TO_BASE" "[>/dev/null 2>&1; \"$GO_SHELL\" --login]"
     fi
 }
 
