@@ -24,15 +24,16 @@ DepfileLineData = namedtuple('DepfileLineData', 'depfile')
 
 @dataclass
 class BuildLineData:
-    outputs: set
-    implicit_outputs: set
+    outputs: list
+    implicit_outputs: list
     command: str
-    dependencies: set
-    implicit_dependencies: set
-    order_only_dependencies: set
+    dependencies: list
+    implicit_dependencies: list
+    order_only_dependencies: list
 
     def all_dependencies(self) -> set:
-        return self.dependencies | self.implicit_dependencies | self.order_only_dependencies
+        return (set(self.dependencies) | set(self.implicit_dependencies) |
+                set(self.order_only_dependencies))
 
 
 class BuildNinjaFileProcessor(NinjaFileProcessor):
@@ -105,12 +106,12 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
         build_sources = self._parse_build_sources_string(sources)
 
         return BuildLineData(
-            outputs=set(build_results.outputs),
-            implicit_outputs=set(build_results.implicit_outputs),
+            outputs=build_results.outputs,
+            implicit_outputs=build_results.implicit_outputs,
             command=build_sources.command,
-            dependencies=set(build_sources.dependencies),
-            implicit_dependencies=set(build_sources.implicit_dependencies),
-            order_only_dependencies=set(build_sources.order_only_dependencies))
+            dependencies=build_sources.dependencies,
+            implicit_dependencies=build_sources.implicit_dependencies,
+            order_only_dependencies=build_sources.order_only_dependencies)
 
     def _split_build_line(self, line: str) -> Tuple[str, str]:
         """Splits build line into "results" and "sources" parts.
@@ -202,7 +203,7 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
                 tokens.append(token)
                 continue
 
-            # This is needed because the " " symbol (fileds separator) can be escaped by an odd
+            # This is needed because the " " symbol (field separator) can be escaped by an odd
             # number of the "$" symbols. So we check the previous token, and if it ends with an odd
             # number of escaping symbols, then the new token is not a separate token but is a
             # continuation of the previous one. Thus we should concatenate these tokens instead of
@@ -214,7 +215,7 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
         return tokens
 
     def strengthen_dependencies(self, targets: set) -> None:
-        """Patch build.ninja file so the targets from the "targets" set become immediatelly
+        """Patch build.ninja file so the targets from the "targets" set become immediately
         dependent on all the dependencies of their dependencies (transitively).
 
         Parameters:
@@ -228,7 +229,7 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
             transitive_dependencies = self._collect_transitive_dependencies(target)
             self._replace_target(target,
                 implicit_dependencies=transitive_dependencies,
-                order_only_dependencies=set())
+                order_only_dependencies=[])
 
         self._is_patch_applied = True  # pylint:disable=attribute-defined-outside-init
 
@@ -263,7 +264,7 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
         return target_line.parsed.command == "phony"
 
     def _collect_transitive_dependencies(self, target: str) -> set:
-        """Recursivly gets all the dependencies that are targets themselves."""
+        """Recursively gets all the dependencies that are targets themselves."""
 
         transitive_dependencies = set()
         target_line = self._get_target_line_by_name(target)
@@ -284,8 +285,8 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
             current_target_data = current_target_line.parsed
             unchecked_targets.extend(list(current_target_data.all_dependencies()))
 
-        # Don't need explicit dependecies of the target in the result.
-        transitive_dependencies -= first_target_data.dependencies
+        # Don't need explicit dependencies of the target in the result.
+        transitive_dependencies -= set(first_target_data.dependencies)
 
         # Remove phony targets and non-targets from the dependencies.
         for dep in list(transitive_dependencies):
@@ -297,9 +298,9 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
 
     def _replace_target(self,
             target: str,
-            dependencies: set = None,
-            implicit_dependencies: set = None,
-            order_only_dependencies: set = None) -> None:
+            dependencies: list = None,
+            implicit_dependencies: list = None,
+            order_only_dependencies: list = None) -> None:
 
         target_line = self._get_target_line_by_name(target)
         if target_line is None:
