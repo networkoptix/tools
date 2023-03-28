@@ -129,7 +129,7 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
 
         [results, sources] = (tokens.pop(0), "")
 
-        # This is needed because the ":" symbol (fileds separator) can be escaped by an odd number
+        # This is needed because the ":" symbol (field separator) can be escaped by an odd number
         # of "$" symbols. So we go through all tokens and check - if the previous one ends with the
         # odd number of escaping symbols, then the new one is not a separate token but is a
         # continuation of the previous one (and, by transitivity, is a continuation of the
@@ -223,32 +223,13 @@ class BuildNinjaFileProcessor(NinjaFileProcessor):
         """
 
         escaped_targets = self._escape_set(targets)
-        dereferenced_targets = self._dereference_targets(escaped_targets)
-
-        for target in dereferenced_targets:
+        for target in escaped_targets:
             transitive_dependencies = self._collect_transitive_dependencies(target)
             self._replace_target(target,
                 implicit_dependencies=transitive_dependencies,
                 order_only_dependencies=[])
 
         self._is_patch_applied = True  # pylint:disable=attribute-defined-outside-init
-
-    def _dereference_targets(self, targets: set) -> set:
-        """If there are "phony" targets, get the real targets for them."""
-
-        real_targets = set()
-        for target in targets:
-            target_line = self._get_target_line_by_name(target)
-            if target_line is None:
-                print(f"Unknown target {target}")
-                continue
-
-            if self._is_target_phony(target_line):
-                real_targets.update(self._dereference_targets(target_line.parsed.dependencies))
-            else:
-                real_targets.add(target)
-
-        return real_targets
 
     def _get_target_line_by_name(self, target: str) -> Line:
         target_line_idx = self._line_number_by_output.get(target, None)
