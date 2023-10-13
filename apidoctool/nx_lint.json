@@ -1,0 +1,10 @@
+{
+  "exclude": [
+    "artifacts/**",
+    ".gradle/**",
+    "build/**",
+    "out_test/**",
+    "out/**",
+    ".idea/**"
+  ]
+}

@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run print-deps" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.nx.apidoctool.Main" />
+    <module name="apidoctool" />
+    <option name="PROGRAM_PARAMETERS" value="-verbose print-deps -vms-path test/nx_vms" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

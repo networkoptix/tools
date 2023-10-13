@@ -1,0 +1,197 @@
+{"groups": [{
+  "groupName": "testGroup",
+  "urlPrefix": "/urlPrefix",
+  "groupDescription": "testGroupDescription",
+  "functions": [
+    {
+      "name": "testFunction1",
+      "description": {"xml": ""},
+      "method": "POST",
+      "params": [{
+        "name": "withProprietaryValues",
+        "description": {"xml": ""},
+        "optional": false,
+        "values": [
+          {
+            "name": "regularValue",
+            "description": {"xml": "Appears in json."}
+          },
+          {
+            "proprietary": true,
+            "name": "proprietaryValue",
+            "description": {"xml": "Description of a proprietary value"}
+          }
+        ]
+      }],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "params": [
+          {
+            "name": "someParam",
+            "description": {"xml": "some result param"}
+          },
+          {
+            "proprietary": true,
+            "name": "proprietaryParam",
+            "description": {"xml": "proprietary result param"}
+          }
+        ]
+      }
+    },
+    {
+      "arrayParams": true,
+      "name": "getStorages",
+      "description": {"xml": "Read the list of current storages."},
+      "method": "GET",
+      "params": [
+        {
+          "name": "baseValue",
+          "type": "integer",
+          "description": {"xml": "base value description"},
+          "optional": false
+        },
+        {
+          "name": "param1",
+          "type": "integer",
+          "description": {"xml": "int param description"},
+          "optional": true
+        },
+        {
+          "name": "innerObject",
+          "type": "object",
+          "description": {"xml": "inner object description"},
+          "optional": false
+        },
+        {
+          "name": "innerObject.innerParam",
+          "type": "string",
+          "description": {"xml": "override description from function comment"},
+          "optional": false
+        },
+        {
+          "name": "innerObject.innerEnumParam",
+          "type": "enum",
+          "description": {"xml": "Enum description."},
+          "optional": false,
+          "values": [
+            {
+              "name": "value1",
+              "description": {"xml": "value1 description"}
+            },
+            {
+              "name": "value2",
+              "description": {"xml": "Description of value2."}
+            }
+          ]
+        },
+        {
+          "name": "innerObject.status",
+          "type": "enum",
+          "description": {"xml": ""},
+          "optional": false,
+          "values": [
+            {
+              "name": "Offline",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "Unauthorized",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "Online",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "Recording",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "NotDefined",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "Incompatible",
+              "description": {"xml": ""}
+            },
+            {
+              "name": "AnyStatus",
+              "description": {"xml": ""}
+            }
+          ]
+        }
+      ],
+      "result": {
+        "caption": {"xml": "Output description"},
+        "type": "array",
+        "params": [
+          {
+            "name": "outputParam",
+            "type": "integer",
+            "description": {"xml": "outputParam description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "Enum description."},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "Description of value2."}
+              }
+            ]
+          },
+          {
+            "name": "flagsParam",
+            "type": "flags",
+            "description": {"xml": "Enum description."},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "Description of value2."}
+              }
+            ]
+          },
+          {
+            "name": "nestedEnumField",
+            "type": "enum",
+            "description": {"xml": ""},
+            "values": [{
+              "name": "nestedEnumValue",
+              "description": {"xml": ""}
+            }]
+          }
+        ]
+      }
+    },
+    {
+      "name": "testFunction2",
+      "description": {"xml": "Read the list of current storages."},
+      "method": "POST",
+      "params": [{
+        "name": "MyParam",
+        "description": {"xml": "param description"},
+        "optional": false
+      }],
+      "result": {}
+    }
+  ]
+}]}

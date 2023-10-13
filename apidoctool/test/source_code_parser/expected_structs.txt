@@ -1,0 +1,76 @@
+-----------------------------------------------------------------------
+- Enums
+
+Name: Enum
+Description: Enum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
+Name: IndentedEnum
+Description: Enum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
+Name: InstrumentedEnum
+Description: InstrumentedEnum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
+Name: OutputStruct_NestedEnum
+    Value: nestedEnumValue
+
+-----------------------------------------------------------------------
+- Structs
+
+Name: BaseStruct
+Parents: null
+    Field:integer baseValue
+    Apidoc item: "base value description"
+
+Name: InnerStruct
+Parents: null
+Apidoc item: "inner object description"
+    Field:string innerParam
+    Field:unknown(Enum) innerEnumParam
+
+Name: InputInheritedFromMap
+Parents: [InputStruct]
+
+Name: InputStruct
+Parents: [BaseStruct]
+Apidoc item: "Input struct description
+multiline"
+    Field:integer param1
+    Apidoc item: "int param description"
+    Field:unknown(InnerStruct) innerObject
+    Field:integer unusedField
+    Apidoc item: "Will appear in the struct dump but not in api.json."
+
+Name: OutputInheritedFromMap
+Parents: [OutputStruct]
+
+Name: OutputStruct
+Parents: null
+Apidoc item: "Output description"
+    Field:integer outputParam
+    Apidoc item: "outputParam description"
+    Apidoc item: "1 one"
+    Apidoc item: "2 two"
+    Field:unknown(Enum) enumParam
+    Field:unknown(OutputStruct_NestedEnum) nestedEnumField
+
+Name: StructWithFantomParam
+Parents: null
+Apidoc item: "Description for StructWithFantomParam."
+Apidoc item: "field Overridden description of StructWithFantomParam::field."
+Apidoc item: "fantomParam Description of fantomParam which is absent in the struct definition."
+    Field:integer field
+    Apidoc item: "Description for StructWithFantomParam::field."
+
+-----------------------------------------------------------------------

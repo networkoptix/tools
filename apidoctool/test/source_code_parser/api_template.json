@@ -1,0 +1,5 @@
+{"groups": [{
+  "groupName": "testGroup",
+  "urlPrefix": "/urlPrefix",
+  "groupDescription": "testGroupDescription"
+}]}

@@ -1,0 +1,1026 @@
+{"groups": [{
+  "groupName": "testGroup",
+  "urlPrefix": "/urlPrefix",
+  "groupDescription": "testGroupDescription",
+  "functions": [
+    {
+      "name": "testFunction2",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [{
+        "name": "someParam",
+        "description": {"xml": ""},
+        "optional": false,
+        "values": [{
+          "name": "regularValue",
+          "description": {"xml": "Appears in json."}
+        }]
+      }],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "params": [{
+          "name": "someParam",
+          "description": {"xml": "some result param"}
+        }]
+      }
+    },
+    {
+      "name": "testFunction2/add",
+      "description": {"xml": "some function description\n{\n    test: \"test\"\n}"},
+      "method": "GET",
+      "params": [
+        {
+          "name": "someParam",
+          "type": "object",
+          "description": {"xml": "some\nparam description\n    with indent\ncontinue description\ncontinue description"},
+          "optional": false
+        },
+        {
+          "name": "someParam.field",
+          "type": "integer",
+          "description": {"xml": "description\ncontinue description\n    with indent\ncontinue description"},
+          "optional": false
+        }
+      ],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "type": "string"
+      }
+    },
+    {
+      "name": "testFunction3",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [
+        {
+          "name": "elements",
+          "type": "object",
+          "description": {"xml": "List as object"},
+          "optional": true
+        },
+        {
+          "name": "outputParam",
+          "type": "integer",
+          "description": {"xml": "Param description overridden"},
+          "optional": false,
+          "values": [{
+            "name": "0",
+            "description": {"xml": "Appears in json."}
+          }]
+        },
+        {
+          "name": "otherParam",
+          "type": "integer",
+          "description": {"xml": "otherParam Param description"},
+          "optional": false,
+          "values": [
+            {
+              "name": "1",
+              "description": {"xml": "one"}
+            },
+            {
+              "name": "2",
+              "description": {"xml": "two"}
+            }
+          ]
+        },
+        {
+          "name": "enumParam",
+          "type": "enum",
+          "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+          "optional": false,
+          "values": [
+            {
+              "name": "value1",
+              "description": {"xml": "value1 description"}
+            },
+            {
+              "name": "value2",
+              "description": {"xml": "value2 description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value3",
+              "description": {"xml": "value3 description\nProprietary description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value4",
+              "description": {"xml": "value3 description\nProprietary description"}
+            }
+          ]
+        },
+        {
+          "name": "optUuid",
+          "type": "uuid",
+          "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+          "optional": true
+        },
+        {
+          "name": "enumParam",
+          "type": "enum",
+          "description": {"xml": "Enum\ndescription"},
+          "optional": false,
+          "values": [
+            {
+              "name": "value1",
+              "description": {"xml": "value1 description"}
+            },
+            {
+              "deprecated": true,
+              "name": "value2",
+              "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value3",
+              "description": {"xml": "value3 description\nProprietary description"}
+            },
+            {
+              "proprietary": true,
+              "deprecated": true,
+              "name": "value4",
+              "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+            }
+          ]
+        },
+        {
+          "proprietary": true,
+          "name": "optUuids",
+          "type": "uuidArray",
+          "description": {"xml": "optUuids param description"},
+          "optional": true
+        }
+      ],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "type": "object",
+        "params": [
+          {
+            "name": "elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "outputParam",
+            "type": "integer",
+            "description": {"xml": "outputParam Param description"}
+          },
+          {
+            "name": "otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "Enum\ndescription"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "deprecated": true,
+                "name": "value2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "deprecated": true,
+                "name": "value4",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "testFunction4",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [{
+        "name": "outputParam",
+        "description": {"xml": "Param description"},
+        "optional": false
+      }],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "params": [
+          {
+            "name": "someParam",
+            "type": "object",
+            "description": {"xml": "description"}
+          },
+          {
+            "name": "someParam.elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "someParam.otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "someParam.enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "deprecated": true,
+                "name": "value2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "deprecated": true,
+                "name": "value4",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "someParam.optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "someParam.enumParam",
+            "type": "enum",
+            "description": {"xml": "Enum\ndescription"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "deprecated": true,
+                "name": "value2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "deprecated": true,
+                "name": "value4",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "someParam.optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          },
+          {
+            "name": "someParam.outputParam",
+            "type": "integer",
+            "description": {"xml": "overridden description"}
+          }
+        ]
+      }
+    },
+    {
+      "name": "testFunction5",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Derived description"},
+        "type": "object",
+        "params": [
+          {
+            "name": "elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructDerived for SomeStruct::enumParam"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructDerived for SomeStruct::enumParam"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          },
+          {
+            "name": "addParam",
+            "type": "integer",
+            "description": {"xml": "Additional param"}
+          }
+        ]
+      }
+    },
+    {
+      "name": "testFunction6",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Nested description"},
+        "type": "object",
+        "params": [
+          {
+            "name": "nested",
+            "type": "object",
+            "description": {"xml": "Nested overriden description"}
+          },
+          {
+            "name": "nested.elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "nested.otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "nested.enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructNested for nested SomeStruct::enumParam"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "nested.optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "nested.enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructNested for nested SomeStruct::enumParam"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "nested.optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          },
+          {
+            "name": "addParam",
+            "type": "integer",
+            "description": {"xml": "Additional param"}
+          }
+        ]
+      }
+    },
+    {
+      "name": "testReturnStructWithOverriddenDescription",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Overridden description."},
+        "type": "object",
+        "params": [{
+          "name": "field",
+          "type": "integer",
+          "description": {"xml": "Description for StructWithDescription::field."}
+        }]
+      }
+    },
+    {
+      "name": "testReturnStructWithDescription",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Description for StructWithDescription."},
+        "type": "object",
+        "params": [{
+          "name": "field",
+          "type": "integer",
+          "description": {"xml": "Description for StructWithDescription::field."}
+        }]
+      }
+    },
+    {
+      "name": "testReturnStructArray",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Description for StructWithDescription."},
+        "type": "array",
+        "params": [{
+          "name": "field",
+          "type": "integer",
+          "description": {"xml": "Description for StructWithDescription::field."}
+        }]
+      }
+    },
+    {
+      "name": "testValuesFromParamStruct",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [
+        {
+          "name": "elements",
+          "type": "object",
+          "description": {"xml": "List as object"},
+          "optional": true
+        },
+        {
+          "name": "outputParam",
+          "type": "integer",
+          "description": {"xml": "Param description overridden"},
+          "optional": false
+        },
+        {
+          "name": "otherParam",
+          "type": "integer",
+          "description": {"xml": "otherParam Param description"},
+          "optional": false,
+          "values": [
+            {
+              "name": "1",
+              "description": {"xml": "one"}
+            },
+            {
+              "name": "2",
+              "description": {"xml": "two"}
+            }
+          ]
+        },
+        {
+          "name": "enumParam",
+          "type": "enum",
+          "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+          "optional": false,
+          "values": [
+            {
+              "name": "value1",
+              "description": {"xml": "value1 description"}
+            },
+            {
+              "name": "value2",
+              "description": {"xml": "value2 description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value3",
+              "description": {"xml": "value3 description\nProprietary description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value4",
+              "description": {"xml": "value3 description\nProprietary description"}
+            }
+          ]
+        },
+        {
+          "name": "optUuid",
+          "type": "uuid",
+          "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+          "optional": true
+        },
+        {
+          "name": "enumParam",
+          "type": "enum",
+          "description": {"xml": "Enum\ndescription"},
+          "optional": false,
+          "values": [
+            {
+              "name": "value1",
+              "description": {"xml": "value1 description"}
+            },
+            {
+              "deprecated": true,
+              "name": "value2",
+              "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+            },
+            {
+              "proprietary": true,
+              "name": "value3",
+              "description": {"xml": "value3 description\nProprietary description"}
+            },
+            {
+              "proprietary": true,
+              "deprecated": true,
+              "name": "value4",
+              "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+            }
+          ]
+        },
+        {
+          "proprietary": true,
+          "name": "optUuids",
+          "type": "uuidArray",
+          "description": {"xml": "optUuids param description"},
+          "optional": true
+        }
+      ],
+      "result": {
+        "caption": {"xml": "some result description"},
+        "type": "object",
+        "params": [
+          {
+            "name": "elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "outputParam",
+            "type": "integer",
+            "description": {"xml": "outputParam Param description"}
+          },
+          {
+            "name": "otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "name": "1",
+                "description": {"xml": "one"}
+              },
+              {
+                "name": "2",
+                "description": {"xml": "two"}
+              }
+            ]
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "Enum\ndescription"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "deprecated": true,
+                "name": "value2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "deprecated": true,
+                "name": "value4",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "testStructWithFantomParam",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "Description for StructWithFantomParam."},
+        "type": "object",
+        "params": [
+          {
+            "name": "field",
+            "type": "integer",
+            "description": {"xml": "Description for StructWithFantomParam::field."}
+          },
+          {
+            "name": "fantomParam",
+            "description": {"xml": "Description of fantomParam which is absent in the struct definition."}
+          }
+        ]
+      }
+    },
+    {
+      "name": "testResultWithReply",
+      "description": {"xml": ""},
+      "method": "GET",
+      "params": [
+        {
+          "name": "resultField",
+          "type": "integer",
+          "description": {"xml": "Description of resultField."},
+          "optional": false
+        },
+        {
+          "name": "reply",
+          "type": "object",
+          "description": {"xml": "Description of Reply."},
+          "optional": false
+        },
+        {
+          "name": "reply.replyField",
+          "type": "integer",
+          "description": {"xml": "Description of replyField."},
+          "optional": false
+        }
+      ],
+      "result": {
+        "caption": {"xml": "Description of Result."},
+        "type": "object",
+        "params": [
+          {
+            "name": "resultField",
+            "type": "integer",
+            "description": {"xml": "Description of resultField."}
+          },
+          {
+            "name": "reply",
+            "type": "object",
+            "description": {"xml": "Description of Reply."}
+          },
+          {
+            "name": "reply.replyField",
+            "type": "integer",
+            "description": {"xml": "Description of replyField."}
+          }
+        ]
+      }
+    },
+    {
+      "name": "deprecatedFunctionWithoutExplanation",
+      "description": {"xml": "<p><b>Deprecated.<\/b><\/p>Description of a deprecated function"},
+      "method": "GET",
+      "params": [],
+      "result": {"params": [
+        {
+          "name": "reply",
+          "type": "object",
+          "description": {"xml": "Description of Reply."}
+        },
+        {
+          "name": "reply.replyField",
+          "type": "integer",
+          "description": {"xml": "Description of replyField."}
+        }
+      ]}
+    },
+    {
+      "name": "deprecatedFunctionWithExplanation",
+      "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the function is deprecated<\/p>Description of a deprecated function"},
+      "method": "GET",
+      "params": [],
+      "result": {"params": [
+        {
+          "name": "reply",
+          "type": "object",
+          "description": {"xml": "Description of Reply."}
+        },
+        {
+          "name": "reply.replyField",
+          "type": "integer",
+          "description": {"xml": "Description of replyField."}
+        }
+      ]}
+    },
+    {
+      "name": "testMergeValuesOfNonEnumField",
+      "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the function is deprecated<\/p>Description of a deprecated function"},
+      "method": "GET",
+      "params": [],
+      "result": {
+        "caption": {"xml": "SomeStruct description"},
+        "type": "object",
+        "params": [
+          {
+            "name": "elements",
+            "type": "object",
+            "description": {"xml": "List as object"},
+            "optional": true
+          },
+          {
+            "name": "outputParam",
+            "type": "integer",
+            "description": {"xml": "outputParam Param description"}
+          },
+          {
+            "name": "otherParam",
+            "type": "integer",
+            "description": {"xml": "otherParam Param description"},
+            "values": [
+              {
+                "proprietary": true,
+                "name": "1",
+                "description": {"xml": "Overridden description"}
+              },
+              {
+                "deprecated": true,
+                "name": "2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>Overridden description"}
+              }
+            ]
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "name": "value2",
+                "description": {"xml": "value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value4",
+                "description": {"xml": "value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "name": "optUuid",
+            "type": "uuid",
+            "description": {"xml": "<p><b>Deprecated.<\/b><\/p>optUuid param description"},
+            "optional": true
+          },
+          {
+            "name": "enumParam",
+            "type": "enum",
+            "description": {"xml": "Enum\ndescription"},
+            "values": [
+              {
+                "name": "value1",
+                "description": {"xml": "value1 description"}
+              },
+              {
+                "deprecated": true,
+                "name": "value2",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
+              },
+              {
+                "proprietary": true,
+                "name": "value3",
+                "description": {"xml": "value3 description\nProprietary description"}
+              },
+              {
+                "proprietary": true,
+                "deprecated": true,
+                "name": "value4",
+                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
+              }
+            ]
+          },
+          {
+            "proprietary": true,
+            "name": "optUuids",
+            "type": "uuidArray",
+            "description": {"xml": "optUuids param description"},
+            "optional": true
+          }
+        ]
+      }
+    }
+  ]
+}]}

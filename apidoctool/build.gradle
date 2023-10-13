@@ -1,0 +1,57 @@
+// Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
+
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+task generateVersionProperties(type: WriteProperties) {
+    outputFile = "${buildDir}/version.properties"
+    property("gitSha", 'git describe --match="" --always --dirty'.execute([], project.rootDir).text.trim())
+}
+
+processResources {
+    from(generateVersionProperties)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src', 'artifacts']
+        }
+    }
+}
+
+jar {
+    archiveBaseName = "apidoctool"
+    manifest {
+        from file("${rootDir}/src/META-INF/MANIFEST.MF")
+    }
+}
+
+task runTest {
+    dependsOn = [jar]
+    doLast {
+        javaexec {
+            main = "-jar";
+            args = [
+                    jar.outputs.files.getFiles()[0],
+                    "-verbose",
+                    "test",
+                    "-test-path", "${rootDir}/test",
+                    "-output-test-path", "${rootDir}/out_test",
+                    "-config", "${rootDir}/test/apidoctool.properties"
+                ]
+        }
+    }
+}
+
+test {
+    dependsOn = [runTest]
+}
+
+clean {
+    delete "${rootDir}/out_test"
+}

@@ -1,0 +1,24 @@
+// Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
+
+#pragma once
+
+#include "media_settings.h"
+
+namespace nx::vms::api {
+
+struct NX_VMS_API WebRtcTrackerSettings: public MediaSettings
+{
+    /**%apidoc
+     * If specified, regulates the speed of streaming from the Archive. Has no effect for live
+     * streaming.
+     *
+     * %value 1.0 Default value.
+     * %value unlimited Stream with the maximum possible speed.
+     */
+    std::optional<std::string> speed{"1.0"};
+};
+#define WebRtcTrackerSettings_Fields MediaSettings_Fields(speed)
+QN_FUSION_DECLARE_FUNCTIONS(WebRtcTrackerSettings, (json), NX_VMS_API)
+NX_REFLECTION_INSTRUMENT(WebRtcTrackerSettings, WebRtcTrackerSettings_Fields)
+
+} // namespace nx::vms::api

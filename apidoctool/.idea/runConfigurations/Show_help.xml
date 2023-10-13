@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Show help" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.nx.apidoctool.Main" />
+    <module name="apidoctool" />
+    <option name="PROGRAM_PARAMETERS" value="-help" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
