@@ -1,0 +1,19 @@
+# IDE and misc software files.
+.idea
+.vs
+.vscode
+.gradle
+gradle
+gradlew*
+
+# Precompiled files.
+*.pyc
+
+# Build and test output files.
+**/apidoctool/build/
+**/apidoctool/out_test/
+**/apidoctool/out/
+
+**/sign_over_http/dist/**
+**/sign_over_http/*.egg-info/**
+**/sign_over_http/build/**
