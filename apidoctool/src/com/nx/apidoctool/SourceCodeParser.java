@@ -183,10 +183,8 @@ public final class SourceCodeParser
             throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ false);
         for (Apidoc.Param param: description.function.result.params)
             throwErrorIfExampleTypeInvalid(description, param, /*isResult*/ true);
-        for (Apidoc.Param param: description.function.input.params)
-            throwErrorIfExampleTypeInvalid(description, description.function.input, /*isResult*/ false);
-        for (Apidoc.Param param: description.function.result.params)
-            throwErrorIfExampleTypeInvalid(description, description.function.result, /*isResult*/ true);
+        throwErrorIfExampleTypeInvalid(description, description.function.input, /*isResult*/ false);
+        throwErrorIfExampleTypeInvalid(description, description.function.result, /*isResult*/ true);
 
         if (verbose)
         {

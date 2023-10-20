@@ -100,6 +100,8 @@ public final class TypeInfo
             return Boolean.parseBoolean(value);
         if (fixed == Apidoc.Type.FLOAT)
             return Double.parseDouble(value);
+        if (fixed == Apidoc.Type.UUID)
+            return UUID.fromString(value);
         if (fixed == Apidoc.Type.ARRAY)
             return new JSONArray(value);
         if (fixed == Apidoc.Type.OBJECT)

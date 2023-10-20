@@ -6620,7 +6620,7 @@
         "requestBody": {"content": {"application/json": {"schema": {
           "type": "string",
           "format": "uuid",
-          "example": "id"
+          "example": "01234567-89ab-cdef-0123-456789abcdef"
         }}}},
         "parameters": [{
           "name": "id",
@@ -10270,10 +10270,10 @@
           "type": "object",
           "properties": {
             "idWithValue": {
-              "description": "Possible values are:\n- `\"Id\"` value",
+              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` value",
               "type": "string",
               "format": "uuid",
-              "example": "Id"
+              "example": "01234567-89ab-cdef-0123-456789abcdef"
             },
             "inner": {
               "type": "object",
@@ -10281,7 +10281,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",
@@ -10331,7 +10331,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -10371,7 +10371,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -10409,7 +10409,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -10452,7 +10452,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10495,7 +10495,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10540,7 +10540,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10585,7 +10585,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -10644,7 +10644,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10685,7 +10685,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -10728,7 +10728,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10772,7 +10772,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10816,7 +10816,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10870,7 +10870,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -10919,7 +10919,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -10969,7 +10969,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11013,7 +11013,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11059,7 +11059,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11150,10 +11150,10 @@
           "type": "object",
           "properties": {
             "idWithValue": {
-              "description": "Possible values are:\n- `\"Id\"` value",
+              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` value",
               "type": "string",
               "format": "uuid",
-              "example": "Id"
+              "example": "01234567-89ab-cdef-0123-456789abcdef"
             },
             "inner": {
               "type": "object",
@@ -11161,7 +11161,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",
@@ -11199,7 +11199,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -11233,7 +11233,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -11265,7 +11265,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -11302,7 +11302,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11339,7 +11339,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11378,7 +11378,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11417,7 +11417,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11464,7 +11464,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11499,7 +11499,7 @@
                   "id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "Example id"
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
                   },
                   "i": {
                     "description": "description",
@@ -11536,7 +11536,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11574,7 +11574,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11612,7 +11612,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11654,7 +11654,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11694,7 +11694,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11735,7 +11735,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11773,7 +11773,7 @@
                     "id": {
                       "type": "string",
                       "format": "uuid",
-                      "example": "Example id"
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
                     },
                     "i": {
                       "description": "description",
@@ -11813,7 +11813,7 @@
                       "id": {
                         "type": "string",
                         "format": "uuid",
-                        "example": "Example id"
+                        "example": "01234567-89ab-cdef-0123-456789abcdef"
                       },
                       "i": {
                         "description": "description",
@@ -11917,7 +11917,7 @@
               "id": {
                 "type": "string",
                 "format": "uuid",
-                "example": "Example id"
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
               },
               "i": {
                 "description": "description",
@@ -11957,7 +11957,7 @@
               "id": {
                 "type": "string",
                 "format": "uuid",
-                "example": "Example id"
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
               },
               "i": {
                 "description": "description",
@@ -11989,7 +11989,7 @@
               "id": {
                 "type": "string",
                 "format": "uuid",
-                "example": "Example id"
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
               },
               "i": {
                 "description": "description",
@@ -12032,7 +12032,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",
@@ -12086,7 +12086,7 @@
               "id": {
                 "type": "string",
                 "format": "uuid",
-                "example": "Example id"
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
               },
               "i": {
                 "description": "description",
@@ -12129,7 +12129,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",
@@ -12173,7 +12173,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",
@@ -12217,7 +12217,7 @@
                 "id": {
                   "type": "string",
                   "format": "uuid",
-                  "example": "Example id"
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
                 },
                 "i": {
                   "description": "description",

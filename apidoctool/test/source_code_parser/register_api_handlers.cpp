@@ -85,7 +85,7 @@
      *
      **%apidoc[opt]:uuid PUT /api/handlerWithType/{id}
      * handlerWithType PUT description
-     * %example id
+     * %example 01234567-89ab-cdef-0123-456789abcdef
      * %param:string id Id in path of handlerWithType.
      *
      **%apidoc:object PATCH /api/handlerWithType

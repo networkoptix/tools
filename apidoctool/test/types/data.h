@@ -10,7 +10,7 @@ enum class ExampleEnum
 struct ExampleStruct
 {
     /**%apidoc
-     * %example Example id
+     * %example 01234567-89ab-cdef-0123-456789abcdef
      */
     QnUuid id;
 
@@ -44,7 +44,7 @@ struct ImmutableStruct
 struct ExampleData
 {
     /**%apidoc
-     * %value Id value
+     * %value 01234567-89ab-cdef-0123-456789abcdef value
      */
     QnUuid idWithValue;
 
