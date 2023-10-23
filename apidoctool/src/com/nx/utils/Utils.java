@@ -138,7 +138,7 @@ public final class Utils
         return tokens;
     }
 
-    public static String cleanupDescription(String description) throws Exception
+    public static String cleanUpDescription(String description) throws Exception
     {
         if (description == null)
             return "";

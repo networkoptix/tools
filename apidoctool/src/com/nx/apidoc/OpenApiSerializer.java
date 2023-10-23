@@ -190,7 +190,7 @@ public final class OpenApiSerializer
                 }
                 tag = new JSONObject();
                 tag.put("name", group.groupName);
-                tag.put("description", Utils.cleanupDescription(group.groupDescription));
+                tag.put("description", Utils.cleanUpDescription(group.groupDescription));
                 tags.put(tag);
             }
         }
@@ -344,12 +344,17 @@ public final class OpenApiSerializer
         if (function.deprecated)
         {
             method.put("deprecated", true);
-            description += !function.deprecatedDescription.isEmpty() ?
-                String.format("<p><b>%s</b></p>", function.deprecatedDescription) : "";
+            String cleanedDescription = Utils.cleanUpDescription(function.deprecatedDescription);
+            if (!cleanedDescription.isEmpty())
+                description += String.format("<p><b>%s</b></p>", cleanedDescription);
         }
 
-        description += (function.proprietary ? "<p><b>Proprietary.</b></p>" : "")
-            + Utils.cleanupDescription(function.description);
+        if (function.proprietary)
+            description += "<p><b>Proprietary.</b></p>";
+
+        String cleanedDescription = Utils.cleanUpDescription(function.description);
+        if (!cleanedDescription.isEmpty())
+            description += cleanedDescription;
 
         if (!description.isEmpty())
             method.put("description", description);
@@ -418,7 +423,7 @@ public final class OpenApiSerializer
     {
         final JSONObject default_ = getObject(getObject(path, "responses"), "default");
         final Apidoc.Result result = function.result;
-        default_.put("description", Utils.cleanupDescription(result.caption));
+        default_.put("description", Utils.cleanUpDescription(result.caption));
         if (result.type.fixed == Apidoc.Type.UNKNOWN)
             return;
         JSONObject schema = getObject(getObject(getObject(
@@ -584,13 +589,25 @@ public final class OpenApiSerializer
         }
     }
 
+    private static String description(
+        boolean proprietary, String description, boolean deprecated, String deprecatedDescription)
+        throws Exception
+    {
+        String result = proprietary ? "<p><b>Proprietary.</b></p>" : "";
+        if (deprecated)
+        {
+            String cleanedDescription = Utils.cleanUpDescription(deprecatedDescription);
+            result += String.format("<p><b>Deprecated.</b>%s</p>",
+                !cleanedDescription.isEmpty() ? " " + cleanedDescription : "");
+        }
+        result += Utils.cleanUpDescription(description);
+        return result;
+    }
+
     private static String description(Apidoc.Param param) throws Exception
     {
-        String result = param.proprietary ? "<p><b>Proprietary.</b></p>" : "";
-        result += param.getDeprecatedString();
-        String cleanedDescription = Utils.cleanupDescription(param.description);
-        if (!cleanedDescription.isEmpty())
-            result += (param.proprietary ? " " : "") + cleanedDescription;
+        String result = description(
+            param.proprietary, param.description, param.deprecated, param.deprecatedDescription);
         if (param.values.isEmpty())
             return result;
         if (param.type.fixed == Apidoc.Type.BOOLEAN
@@ -600,8 +617,13 @@ public final class OpenApiSerializer
             boolean hasDescription = false;
             for (final Apidoc.Value value: param.values)
             {
-                if ((value.description != null && !value.description.trim().isEmpty())
-                    || value.deprecated || value.proprietary)
+                if (value.deprecated
+                    || value.proprietary
+                    || !description(
+                        value.proprietary,
+                        value.description,
+                        value.deprecated,
+                        value.deprecatedDescription).isEmpty())
                 {
                     hasDescription = true;
                     break;
@@ -619,15 +641,17 @@ public final class OpenApiSerializer
         for (final Apidoc.Value value: param.values)
         {
             result += "\n- `" + value.nameForDescription(param.type.fixed) + '`';
-            if (value.description == null)
-                continue;
-
-            String description = value.proprietary ? "<p><b>Proprietary.</b></p>" : "";
-
-            result += value.getDeprecatedString();
-            description += value.description.trim();
+            String description = description(
+                value.proprietary,
+                value.description,
+                value.deprecated,
+                value.deprecatedDescription);
             if (!description.isEmpty())
-                result += ' ' + description;
+            {
+                if (!value.deprecated && !value.proprietary)
+                    result += ' ';
+                result += description;
+            }
         }
         return result;
     }

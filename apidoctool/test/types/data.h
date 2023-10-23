@@ -1,9 +1,16 @@
 // Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
 
 
+/**%apidoc Enum &ast;. */
 enum class ExampleEnum
 {
+    /**%apidoc Enum value &ast;. */
     one = 1,
+
+    /**%apidoc
+     * Enum value with deprecated &ast;.
+     * %deprecated Deprecated enum value &ast;.
+     */
     two = 2,
 };
 
@@ -22,6 +29,8 @@ struct ExampleStruct
     ExampleEnum e;
 
     /**%apidoc
+     * Field with deprecated &ast;.
+     * %deprecated Deprecated field &ast;.
      * %example 0
      */
     std::chrono::seconds secondsS;
@@ -41,13 +50,18 @@ struct ImmutableStruct
 //{
 //};
 
+/**%apidoc
+ * Struct with deprecated &ast;.
+ * %deprecated Deprecated struct &ast;.
+ */
 struct ExampleData
 {
     /**%apidoc
-     * %value 01234567-89ab-cdef-0123-456789abcdef value
+     * %value 01234567-89ab-cdef-0123-456789abcdef Value &ast;.
      */
     QnUuid idWithValue;
 
+    /**%apidoc Field of struct &ast;. */
     ExampleStruct inner;
     std::vector<std::chrono::seconds> secondListS;
     std::variant<int, ExampleStruct> variant;
@@ -72,6 +86,10 @@ struct ExampleData
 
     ImmutableStruct immutableStruct;
 
-    /**%apidoc[immutable] */
+    /**%apidoc[immutable]
+     * %value 0 Value with deprecated &ast;.
+     *     %deprecated Deprecated value &ast;.
+     * %value 1
+     */
     int immutableField;
 };

@@ -74,7 +74,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -83,7 +83,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -181,7 +181,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -190,7 +190,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -230,7 +230,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -239,7 +239,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -275,7 +275,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -284,7 +284,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -382,7 +382,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -391,7 +391,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -497,7 +497,7 @@
         },
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -506,7 +506,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -1259,7 +1259,7 @@
                 "format": "uuid"
               },
               "eventType": {
-                "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"analyticsSdkEvent\"`\n- `\"systemHealthEvent\"` <p><b>Proprietary.<\/b><\/p>Equals 500. First system health message.\n- `\"maxSystemHealthEvent\"` <p><b>Proprietary.<\/b><\/p>Equals 599. Last possible system health\nmessage.\n- `\"anyCameraEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyServerEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyEvent\"` <p><b>Proprietary.<\/b><\/p>Event group.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
+                "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"analyticsSdkEvent\"`\n- `\"systemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 500. First system health message.\n- `\"maxSystemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 599. Last possible system health\nmessage.\n- `\"anyCameraEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyServerEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
                 "type": "string",
                 "enum": [
                   "undefinedEvent",
@@ -3962,7 +3962,7 @@
         },
         {
           "name": "format",
-          "description": "<p><b>Proprietary.<\/b><\/p> Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
+          "description": "<p><b>Proprietary.<\/b><\/p>Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
           "schema": {
             "type": "string",
             "enum": [
@@ -4564,7 +4564,7 @@
               "example": ""
             },
             "typeId": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
               "type": "string",
               "format": "uuid"
             },
@@ -4814,7 +4814,7 @@
                 "example": ""
               },
               "typeId": {
-                "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
+                "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
                 "type": "string",
                 "format": "uuid"
               },
@@ -5252,12 +5252,12 @@
               "example": ""
             },
             "typeId": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
               "type": "string",
               "format": "uuid"
             },
             "isAdmin": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
+              "description": "<p><b>Proprietary.<\/b><\/p>Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
               "type": "boolean"
             },
             "permissions": {
@@ -5426,12 +5426,12 @@
                 "example": ""
               },
               "typeId": {
-                "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
+                "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
                 "type": "string",
                 "format": "uuid"
               },
               "isAdmin": {
-                "description": "<p><b>Proprietary.<\/b><\/p> Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
+                "description": "<p><b>Proprietary.<\/b><\/p>Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
                 "type": "boolean"
               },
               "permissions": {
@@ -5546,7 +5546,7 @@
               "example": ""
             },
             "typeId": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Should have fixed value.\n\nPossible values are:\n- `\"{57d7112a-b9c3-247b-c045-1660250adae5}\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{57d7112a-b9c3-247b-c045-1660250adae5}\"`",
               "type": "string",
               "format": "uuid"
             }
@@ -5671,7 +5671,7 @@
       "parameters": [
         {
           "name": "local",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present, the request should not be redirected to another\nserver.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -5680,7 +5680,7 @@
         },
         {
           "name": "extraFormatting",
-          "description": "<p><b>Proprietary.<\/b><\/p> If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
+          "description": "<p><b>Proprietary.<\/b><\/p>If present and the requested result format is\nnon-binary, indentation and spacing will be used to improve readability.",
           "schema": {
             "enum": ["true"],
             "type": "boolean"
@@ -6316,7 +6316,7 @@
               "type": "integer"
             },
             "flags": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Combination (via \"|\") or the following flags:",
+              "description": "<p><b>Proprietary.<\/b><\/p>Combination (via \"|\") or the following flags:",
               "type": "string",
               "enum": ["VideoLinkExists"]
             }
@@ -9389,7 +9389,7 @@
             "type": "object",
             "properties": {
               "error": {
-                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
                 "deprecated": true,
                 "type": "string",
                 "enum": [
@@ -9400,7 +9400,7 @@
                 ]
               },
               "proprietaryTest": {
-                "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+                "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
                 "type": "string",
                 "enum": [
                   "test0",
@@ -9417,7 +9417,7 @@
                 ]
               },
               "partiallyProprietaryTest": {
-                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
                 "enum": [
                   "test4",
@@ -9433,7 +9433,7 @@
                 ]
               },
               "errorString": {
-                "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+                "description": "<p><b>Proprietary.<\/b><\/p>Error message in English, or an empty string.",
                 "type": "string"
               },
               "errorId": {
@@ -9523,7 +9523,7 @@
             "type": "object",
             "properties": {
               "error": {
-                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+                "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
                 "deprecated": true,
                 "type": "string",
                 "enum": [
@@ -9534,7 +9534,7 @@
                 ]
               },
               "proprietaryTest": {
-                "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+                "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
                 "type": "string",
                 "enum": [
                   "test0",
@@ -9551,7 +9551,7 @@
                 ]
               },
               "partiallyProprietaryTest": {
-                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+                "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
                 "enum": [
                   "test4",
@@ -9567,7 +9567,7 @@
                 ]
               },
               "errorString": {
-                "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+                "description": "<p><b>Proprietary.<\/b><\/p>Error message in English, or an empty string.",
                 "type": "string"
               },
               "errorId": {
@@ -9631,7 +9631,7 @@
           "type": "object",
           "properties": {
             "error": {
-              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
               "deprecated": true,
               "type": "string",
               "enum": [
@@ -9642,7 +9642,7 @@
               ]
             },
             "proprietaryTest": {
-              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
               "type": "string",
               "enum": [
                 "test0",
@@ -9659,7 +9659,7 @@
               ]
             },
             "partiallyProprietaryTest": {
-              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
               "enum": [
                 "test4",
@@ -9676,7 +9676,7 @@
               ]
             },
             "errorString": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "description": "<p><b>Proprietary.<\/b><\/p>Error message in English, or an empty string.",
               "type": "string"
             },
             "errorId": {
@@ -9710,7 +9710,7 @@
           "type": "object",
           "properties": {
             "error": {
-              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
               "deprecated": true,
               "type": "string",
               "enum": [
@@ -9721,7 +9721,7 @@
               ]
             },
             "proprietaryTest": {
-              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
               "type": "string",
               "enum": [
                 "test0",
@@ -9738,7 +9738,7 @@
               ]
             },
             "partiallyProprietaryTest": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Test that one of the enum values becomes deprecated.\n\nPossible values are:\n- `\"test4\"` Overridden value from an inherited enum.\n- `\"test5\"`",
+              "description": "<p><b>Proprietary.<\/b><\/p>Test that one of the enum values becomes deprecated.\n\nPossible values are:\n- `\"test4\"` Overridden value from an inherited enum.\n- `\"test5\"`",
               "type": "string",
               "enum": [
                 "test4",
@@ -9754,7 +9754,7 @@
               ]
             },
             "errorString": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "description": "<p><b>Proprietary.<\/b><\/p>Error message in English, or an empty string.",
               "type": "string"
             },
             "errorId": {
@@ -9788,7 +9788,7 @@
           "type": "object",
           "properties": {
             "error": {
-              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
               "deprecated": true,
               "type": "string",
               "enum": [
@@ -9799,7 +9799,7 @@
               ]
             },
             "proprietaryTest": {
-              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
               "type": "string",
               "enum": [
                 "test0",
@@ -9816,7 +9816,7 @@
               ]
             },
             "partiallyProprietaryTest": {
-              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
               "enum": [
                 "test4",
@@ -9832,7 +9832,7 @@
               ]
             },
             "errorString": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Error message in English, or an empty string.",
+              "description": "<p><b>Proprietary.<\/b><\/p>Error message in English, or an empty string.",
               "type": "string"
             },
             "errorId": {
@@ -9846,7 +9846,7 @@
               ]
             },
             "inPlaceEnum": {
-              "description": "Test in-place enum.\n\nPossible values are:\n- `\"value0\"` Value description\n- `\"value1\"` <p><b>Proprietary.<\/b><\/p>Value description\n- `\"value2\"`<p><b>Deprecated.<\/b><\/p> Value description",
+              "description": "Test in-place enum.\n\nPossible values are:\n- `\"value0\"` Value description\n- `\"value1\"`<p><b>Proprietary.<\/b><\/p>Value description\n- `\"value2\"`<p><b>Deprecated.<\/b><\/p>Value description",
               "type": "string",
               "enum": [
                 "value0",
@@ -9876,7 +9876,7 @@
           "type": "object",
           "properties": {
             "error": {
-              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"` <p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "<p><b>Deprecated.<\/b> Use errorId instead.<\/p>Error code on failure (as an integer inside an enquoted string), or \"0\" on success.\n\nPossible values are:\n- `\"0\"`\n- `\"2\"`<p><b>Proprietary.<\/b><\/p>\n- `\"3\"`\n- `\"4\"`<p><b>Proprietary.<\/b><\/p>",
               "deprecated": true,
               "type": "string",
               "enum": [
@@ -9887,7 +9887,7 @@
               ]
             },
             "proprietaryTest": {
-              "description": "<p><b>Proprietary.<\/b><\/p> ProprietaryEnum description.",
+              "description": "<p><b>Proprietary.<\/b><\/p>ProprietaryEnum description.",
               "type": "string",
               "enum": [
                 "test0",
@@ -9904,7 +9904,7 @@
               ]
             },
             "partiallyProprietaryTest": {
-              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"` <p><b>Proprietary.<\/b><\/p>",
+              "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
               "enum": [
                 "test4",
@@ -9920,7 +9920,7 @@
               ]
             },
             "errorString": {
-              "description": "<p><b>Proprietary.<\/b><\/p> Test enumerating values for a non-enum type.\n\nPossible values are:\n- `\"val0\"` Value description\n- `\"val1\"` Value description\n- `\"val2\"` Value description",
+              "description": "<p><b>Proprietary.<\/b><\/p>Test enumerating values for a non-enum type.\n\nPossible values are:\n- `\"val0\"` Value description\n- `\"val1\"` Value description\n- `\"val2\"` Value description",
               "type": "string"
             },
             "errorId": {
@@ -10265,17 +10265,20 @@
       "tags": ["System"]
     }},
     "/rest/v2/example/{name}": {"post": {
+      "deprecated": true,
+      "description": "<p><b>Deprecated function &ast;.<\/b><\/p>Function with deprecated &ast;.",
       "requestBody": {
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
             "idWithValue": {
-              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` value",
+              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` Value &ast;.",
               "type": "string",
               "format": "uuid",
               "example": "01234567-89ab-cdef-0123-456789abcdef"
             },
             "inner": {
+              "description": "Field of struct &ast;.",
               "type": "object",
               "properties": {
                 "id": {
@@ -10289,6 +10292,7 @@
                   "example": 1
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -10296,6 +10300,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "oneOf": [
                     {"type": "integer"},
                     {
@@ -10339,6 +10345,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -10346,6 +10353,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "oneOf": [
                       {"type": "integer"},
                       {
@@ -10379,6 +10388,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -10386,6 +10396,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "oneOf": [
                       {"type": "integer"},
                       {
@@ -10417,6 +10429,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -10424,6 +10437,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "oneOf": [
                       {"type": "integer"},
                       {
@@ -10460,6 +10475,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10467,6 +10483,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10503,6 +10521,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10510,6 +10529,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10548,6 +10569,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10555,6 +10577,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10593,6 +10617,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -10600,6 +10625,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "oneOf": [
                           {"type": "integer"},
                           {
@@ -10652,6 +10679,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10659,6 +10687,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10693,6 +10723,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -10700,6 +10731,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "oneOf": [
                       {"type": "integer"},
                       {
@@ -10736,6 +10769,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10743,6 +10777,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10780,6 +10816,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10787,6 +10824,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10824,6 +10863,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10831,6 +10871,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10878,6 +10920,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -10885,6 +10928,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -10927,6 +10972,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -10934,6 +10980,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "oneOf": [
                           {"type": "integer"},
                           {
@@ -10977,6 +11025,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -10984,6 +11033,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "oneOf": [
                           {"type": "integer"},
                           {
@@ -11021,6 +11072,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11028,6 +11080,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "oneOf": [
                         {"type": "integer"},
                         {
@@ -11067,6 +11121,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -11074,6 +11129,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "oneOf": [
                           {"type": "integer"},
                           {
@@ -11102,7 +11159,10 @@
               "properties": {"i": {"type": "integer"}},
               "required": ["i"]
             },
-            "immutableField": {"type": "integer"},
+            "immutableField": {
+              "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
+              "type": "integer"
+            },
             "funcParam": {
               "type": "string",
               "example": ""
@@ -11145,17 +11205,18 @@
         "required": true
       }],
       "responses": {"default": {
-        "description": "",
+        "description": "Function response &ast;.",
         "content": {"application/json": {"schema": {
           "type": "object",
           "properties": {
             "idWithValue": {
-              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` value",
+              "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` Value &ast;.",
               "type": "string",
               "format": "uuid",
               "example": "01234567-89ab-cdef-0123-456789abcdef"
             },
             "inner": {
+              "description": "Field of struct &ast;.",
               "type": "object",
               "properties": {
                 "id": {
@@ -11169,6 +11230,7 @@
                   "example": 0
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -11176,6 +11238,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "type": "integer",
                   "example": 0
                 }
@@ -11207,6 +11271,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -11214,6 +11279,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "type": "integer",
                     "example": 0
                   }
@@ -11241,6 +11308,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -11248,6 +11316,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "type": "integer",
                     "example": 0
                   }
@@ -11273,6 +11343,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -11280,6 +11351,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "type": "integer",
                     "example": 0
                   }
@@ -11310,6 +11383,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11317,6 +11391,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11347,6 +11423,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11354,6 +11431,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11386,6 +11465,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11393,6 +11473,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11425,6 +11507,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -11432,6 +11515,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "type": "integer",
                         "example": 0
                       }
@@ -11472,6 +11557,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11479,6 +11565,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11507,6 +11595,7 @@
                     "example": 0
                   },
                   "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
                     "enum": [
                       "one",
@@ -11514,6 +11603,8 @@
                     ]
                   },
                   "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
                     "type": "integer",
                     "example": 0
                   }
@@ -11544,6 +11635,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11551,6 +11643,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11582,6 +11676,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11589,6 +11684,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11620,6 +11717,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11627,6 +11725,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11662,6 +11762,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11669,6 +11770,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11702,6 +11805,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -11709,6 +11813,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "type": "integer",
                         "example": 0
                       }
@@ -11743,6 +11849,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -11750,6 +11857,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "type": "integer",
                         "example": 0
                       }
@@ -11781,6 +11890,7 @@
                       "example": 0
                     },
                     "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
                       "enum": [
                         "one",
@@ -11788,6 +11898,8 @@
                       ]
                     },
                     "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
                       "type": "integer",
                       "example": 0
                     }
@@ -11821,6 +11933,7 @@
                         "example": 0
                       },
                       "e": {
+                        "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
                         "enum": [
                           "one",
@@ -11828,6 +11941,8 @@
                         ]
                       },
                       "secondsS": {
+                        "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                        "deprecated": true,
                         "type": "integer",
                         "example": 0
                       }
@@ -11852,6 +11967,7 @@
               "required": ["i"]
             },
             "immutableField": {
+              "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
               "readOnly": true,
               "type": "integer"
             }
@@ -11925,6 +12041,7 @@
                 "example": 0
               },
               "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
                 "enum": [
                   "one",
@@ -11932,6 +12049,8 @@
                 ]
               },
               "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
                 "type": "integer",
                 "example": 0
               }
@@ -11965,6 +12084,7 @@
                 "example": 0
               },
               "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
                 "enum": [
                   "one",
@@ -11972,6 +12092,8 @@
                 ]
               },
               "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
                 "type": "integer",
                 "example": 0
               }
@@ -11997,6 +12119,7 @@
                 "example": 0
               },
               "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
                 "enum": [
                   "one",
@@ -12004,6 +12127,8 @@
                 ]
               },
               "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
                 "type": "integer",
                 "example": 0
               }
@@ -12040,6 +12165,7 @@
                   "example": 0
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -12047,6 +12173,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "type": "integer",
                   "example": 0
                 }
@@ -12094,6 +12222,7 @@
                 "example": 0
               },
               "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
                 "enum": [
                   "one",
@@ -12101,6 +12230,8 @@
                 ]
               },
               "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
                 "type": "integer",
                 "example": 0
               }
@@ -12137,6 +12268,7 @@
                   "example": 0
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -12144,6 +12276,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "type": "integer",
                   "example": 0
                 }
@@ -12181,6 +12315,7 @@
                   "example": 0
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -12188,6 +12323,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "type": "integer",
                   "example": 0
                 }
@@ -12225,6 +12362,7 @@
                   "example": 0
                 },
                 "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
                   "enum": [
                     "one",
@@ -12232,6 +12370,8 @@
                   ]
                 },
                 "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
                   "type": "integer",
                   "example": 0
                 }

@@ -87,13 +87,13 @@ public final class Tests extends TestBase
 "-2CEC537D0248\",\"3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240\"]}\n" +
 "</pre>\n" +
 "    This example triggers a generic event informing the system that a";
-        assertEquals(cleanedDescription, Utils.cleanupDescription(description));
+        assertEquals(cleanedDescription, Utils.cleanUpDescription(description));
         assertEquals("<pre>ab</pre>",
-            Utils.cleanupDescription("<pre><![CDATA[a]]><![CDATA[b]]></pre>"));
+            Utils.cleanUpDescription("<pre><![CDATA[a]]><![CDATA[b]]></pre>"));
         final String test1 = "<pre><![CDATA[a]]><![CDATA[b</pre>";
         try
         {
-            Utils.cleanupDescription(test1);
+            Utils.cleanUpDescription(test1);
         }
         catch (Exception e)
         {
@@ -103,7 +103,7 @@ public final class Tests extends TestBase
         final String test2 = "<pre><![CDATA[a]]></pre><![CDATA[b]]>";
         try
         {
-            Utils.cleanupDescription(test2);
+            Utils.cleanUpDescription(test2);
         }
         catch (Exception e)
         {

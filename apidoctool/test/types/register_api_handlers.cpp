@@ -1,6 +1,8 @@
 // Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
 
     /**%apidoc:{ExampleData} POST /rest/v2/example/{name}
+     * Function with deprecated &ast;.
+     * %deprecated Deprecated function &ast;.
      * %param:string name
      *     %example Example param
      * %param:string funcParam
@@ -25,6 +27,7 @@
      * %param mapOfMapWithVariant.*.*.#1.i description
      * %ingroup Test
      * %return:{ExampleData}
+     *     Function response &ast;.
      *     %param inner.i description
      *     %param variant.#1.i description
      *     %param variantOfTwoStructs.#0.i description
