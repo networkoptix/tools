@@ -587,7 +587,18 @@ public final class ApidocCommentParser
         value.description = valueItem.getTextAfterInitialToken(indentLevel);
 
         if (ATTR_PROPRIETARY.equals(valueItem.getAttribute()))
+        {
             value.proprietary = true;
+        }
+        else if (ATTR_UNUSED.equals(valueItem.getAttribute()))
+        {
+            value.unused = true;
+        }
+        else if (!valueItem.getAttribute().isEmpty())
+        {
+            throw new Error(valueItem.getErrorPrefix() + "unexpected attribute \""
+                + valueItem.getAttribute() + "\".");
+        }
 
         while (itemIterator.hasNext())
         {

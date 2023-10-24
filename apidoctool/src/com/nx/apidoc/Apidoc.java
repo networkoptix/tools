@@ -88,6 +88,7 @@ public final class Apidoc extends Serializable
         public String description; ///< optional
         public boolean proprietary; ///< optional
         public boolean deprecated; ///< optional
+        public boolean unused; ///< optional
         public String deprecatedDescription = "";
         public boolean areQuotesRemovedFromName = false;
 
@@ -106,6 +107,7 @@ public final class Apidoc extends Serializable
         protected void readFromParser(Parser p) throws Parser.Error
         {
             setName(p.readString("name", Presence.REQUIRED));
+            unused = p.readBooleanAttr("unused", BooleanDefault.FALSE);
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
             deprecated = p.readBooleanAttr("deprecated", BooleanDefault.FALSE);
             description = p.readInnerXml("description", Presence.OPTIONAL);
@@ -114,6 +116,7 @@ public final class Apidoc extends Serializable
 
         protected void writeToGenerator(Generator g)
         {
+            g.writeBooleanAttr("unused", unused, BooleanDefault.FALSE);
             g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
             g.writeBooleanAttr("deprecated", deprecated, BooleanDefault.FALSE);
 
@@ -281,8 +284,6 @@ public final class Apidoc extends Serializable
 
             if (type.fixed == Type.UNKNOWN
                 || type.fixed == Type.BOOLEAN
-                || type.fixed == Type.ENUM
-                || type.fixed == Type.FLAGS
                 || type.fixed == Type.ARRAY
                 || type.fixed == Type.OBJECT)
             {
@@ -318,6 +319,9 @@ public final class Apidoc extends Serializable
 
         private void mergeEnumValue(Apidoc.Value originValue, Apidoc.Value value)
         {
+            if (!originValue.unused || this.unused)
+                originValue.unused = !this.unused && value.unused;
+
             if (!originValue.proprietary || this.proprietary)
                 originValue.proprietary = !this.proprietary && value.proprietary;
 
@@ -344,6 +348,9 @@ public final class Apidoc extends Serializable
             boolean areAllValuesDeprecated = true;
             for (final Apidoc.Value value: this.values)
             {
+                if (value.unused)
+                    continue;
+
                 areAllValuesProprietary &= value.proprietary;
                 areAllValuesDeprecated &= value.deprecated;
 

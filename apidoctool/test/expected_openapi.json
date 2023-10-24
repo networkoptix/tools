@@ -684,6 +684,7 @@
               "motionType": {
                 "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
                 "type": "string",
+                "example": "DEFAULT_ALT_CAPTION",
                 "enum": [
                   "DEFAULT_ALT_CAPTION",
                   "MT_HardwareGrid",
@@ -717,6 +718,7 @@
                     "recordingType": {
                       "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                       "type": "string",
+                      "example": "RT_Always",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
@@ -741,6 +743,7 @@
                     "streamQuality": {
                       "description": "Quality of the recording.",
                       "type": "string",
+                      "example": "QualityLowest",
                       "enum": [
                         "QualityLowest",
                         "QualityLow",
@@ -805,6 +808,7 @@
               "failoverPriority": {
                 "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
                 "type": "string",
+                "example": "FP_Never",
                 "enum": [
                   "FP_Never",
                   "FP_Low",
@@ -816,6 +820,7 @@
               "backupType": {
                 "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
                 "type": "string",
+                "example": "CameraBackup_Disabled",
                 "enum": [
                   "CameraBackup_Disabled",
                   "CameraBackup_HighQuality",
@@ -939,6 +944,7 @@
               "statusFlags": {
                 "description": "Usually this field is zero. Non-zero value indicates that the camera\nis causing a lot of network issues.",
                 "type": "string",
+                "example": "CSF_NoFlags",
                 "enum": [
                   "CSF_NoFlags",
                   "CSF_HasIssuesFlag"
@@ -973,6 +979,7 @@
               "motionType": {
                 "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
                 "type": "string",
+                "example": "DEFAULT_ALT_CAPTION",
                 "enum": [
                   "DEFAULT_ALT_CAPTION",
                   "MT_HardwareGrid",
@@ -1006,6 +1013,7 @@
                     "recordingType": {
                       "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                       "type": "string",
+                      "example": "RT_Always",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
@@ -1030,6 +1038,7 @@
                     "streamQuality": {
                       "description": "Quality of the recording.",
                       "type": "string",
+                      "example": "QualityLowest",
                       "enum": [
                         "QualityLowest",
                         "QualityLow",
@@ -1094,6 +1103,7 @@
               "failoverPriority": {
                 "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
                 "type": "string",
+                "example": "FP_Never",
                 "enum": [
                   "FP_Never",
                   "FP_Low",
@@ -1105,6 +1115,7 @@
               "backupType": {
                 "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
                 "type": "string",
+                "example": "CameraBackup_Disabled",
                 "enum": [
                   "CameraBackup_Disabled",
                   "CameraBackup_HighQuality",
@@ -1117,6 +1128,7 @@
               "status": {
                 "description": "Camera status.",
                 "type": "string",
+                "example": "Offline",
                 "enum": [
                   "Offline",
                   "Unauthorized",
@@ -1214,6 +1226,7 @@
             },
             "syncTimeFlags": {
               "type": "string",
+              "example": "TF_none",
               "enum": [
                 "TF_none",
                 "TF_peerIsNotEdgeServer",
@@ -1278,6 +1291,7 @@
               "eventType": {
                 "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"analyticsSdkEvent\"`\n- `\"systemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 500. First system health message.\n- `\"maxSystemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 599. Last possible system health\nmessage.\n- `\"anyCameraEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyServerEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
                 "type": "string",
+                "example": "undefinedEvent",
                 "enum": [
                   "undefinedEvent",
                   "cameraMotionEvent",
@@ -1341,6 +1355,7 @@
               "eventState": {
                 "description": "One of the fixed values.\n\nPossible values are:\n- `\"inactive\"`\n- `\"active\"`\n- `\"undefined\"` Also used in event rule to associate non-toggle action with event\nwith any toggle state.",
                 "type": "string",
+                "example": "inactive",
                 "enum": [
                   "inactive",
                   "active",
@@ -1350,6 +1365,7 @@
               "actionType": {
                 "description": "Type of the action. The object fields in actionParams field depend on\nthis value, as shown in particular values description.\n\nPossible values are:\n- `\"undefinedAction\"`\n- `\"cameraOutputAction\"` Change camera output state.\nactionParams:\n- relayOutputID (string, required) - Id of output to trigger.\n- durationMs (uint, optional) - Timeout (in milliseconds) to reset the camera\nstate back.\n- `\"bookmarkAction\"`\n- `\"cameraRecordingAction\"` Start camera recording.\n- `\"panicRecordingAction\"` Activate panic recording mode.\n- `\"sendMailAction\"` Send an email. This action can be executed from any endpoint.\nactionParams:\n- emailAddress (string, required)\n- `\"diagnosticsAction\"` Write a record to the server log.\n- `\"showPopupAction\"`\n- `\"playSoundAction\"` actionParams:\n- url (string, required) - Url of the sound, contains path to the sound on the\nserver.\n- `\"playSoundOnceAction\"` actionParams:\n- url (string, required) - Url of the sound, contains path to the sound on the\nserver.\n- `\"sayTextAction\"` actionParams:\n- sayText (string, required) - Text that will be provided to TTS engine.\n- `\"executePtzPresetAction\"` Execute given PTZ preset.\nactionParams:\n- resourceId\n- presetId\n- `\"showTextOverlayAction\"` Show text overlay over the given camera(s).\nactionParams:\n- text (string, required) - Text that will be displayed.\n- `\"showOnAlarmLayoutAction\"` Put the given camera(s) to the Alarm Layout.\nactionParams:\n- users - List of users which will receive this alarm notification.\n- `\"execHttpRequestAction\"` Send HTTP request as an action.\nactionParams:\n- url - Full HTTP url to execute. Username/password are stored as part of the\nURL.\n- text - HTTP message body for POST method.\n- `\"acknowledgeAction\"`",
                 "type": "string",
+                "example": "undefinedAction",
                 "enum": [
                   "undefinedAction",
                   "cameraOutputAction",
@@ -1517,6 +1533,7 @@
                   "networkAddresses": {"type": "string"},
                   "flags": {
                     "type": "string",
+                    "example": "SF_None",
                     "enum": [
                       "SF_None",
                       "SF_Edge",
@@ -1565,6 +1582,7 @@
                   "allowAutoRedundancy": {"type": "boolean"},
                   "backupType": {
                     "type": "string",
+                    "example": "Backup_Manual",
                     "enum": [
                       "Backup_Manual",
                       "Backup_RealTime",
@@ -1573,6 +1591,7 @@
                   },
                   "backupDaysOfTheWeek": {
                     "type": "string",
+                    "example": "Never",
                     "enum": [
                       "Never",
                       "Monday",
@@ -1632,6 +1651,7 @@
                   "groupName": {"type": "string"},
                   "statusFlags": {
                     "type": "string",
+                    "example": "CSF_NoFlags",
                     "enum": [
                       "CSF_NoFlags",
                       "CSF_HasIssuesFlag"
@@ -1673,6 +1693,7 @@
                   "motionType": {
                     "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
                     "type": "string",
+                    "example": "DEFAULT_ALT_CAPTION",
                     "enum": [
                       "DEFAULT_ALT_CAPTION",
                       "MT_HardwareGrid",
@@ -1692,6 +1713,7 @@
                         "recordAudio": {"type": "boolean"},
                         "recordingType": {
                           "type": "string",
+                          "example": "RT_Always",
                           "enum": [
                             "RT_Always",
                             "RT_MotionOnly",
@@ -1705,6 +1727,7 @@
                         "afterThreshold": {"type": "integer"},
                         "streamQuality": {
                           "type": "string",
+                          "example": "QualityLowest",
                           "enum": [
                             "QualityLowest",
                             "QualityLow",
@@ -1746,6 +1769,7 @@
                   },
                   "failoverPriority": {
                     "type": "string",
+                    "example": "FP_Never",
                     "enum": [
                       "FP_Never",
                       "FP_Low",
@@ -1756,6 +1780,7 @@
                   },
                   "backupType": {
                     "type": "string",
+                    "example": "CameraBackup_Disabled",
                     "enum": [
                       "CameraBackup_Disabled",
                       "CameraBackup_HighQuality",
@@ -1813,6 +1838,7 @@
                   "isAdmin": {"type": "boolean"},
                   "permissions": {
                     "type": "string",
+                    "example": "NoGlobalPermissions",
                     "enum": [
                       "NoGlobalPermissions",
                       "GlobalAdminPermission",
@@ -1886,6 +1912,7 @@
                   "name": {"type": "string"},
                   "permissions": {
                     "type": "string",
+                    "example": "NoGlobalPermissions",
                     "enum": [
                       "NoGlobalPermissions",
                       "GlobalAdminPermission",
@@ -2206,6 +2233,7 @@
                   },
                   "eventType": {
                     "type": "string",
+                    "example": "undefinedEvent",
                     "enum": [
                       "undefinedEvent",
                       "cameraMotionEvent",
@@ -2239,6 +2267,7 @@
                   "eventCondition": {"type": "string"},
                   "eventState": {
                     "type": "string",
+                    "example": "inactive",
                     "enum": [
                       "inactive",
                       "active",
@@ -2247,6 +2276,7 @@
                   },
                   "actionType": {
                     "type": "string",
+                    "example": "undefinedAction",
                     "enum": [
                       "undefinedAction",
                       "cameraOutputAction",
@@ -2442,6 +2472,7 @@
                   },
                   "status": {
                     "type": "string",
+                    "example": "Offline",
                     "enum": [
                       "Offline",
                       "Unauthorized",
@@ -2892,6 +2923,7 @@
               "backupType": {
                 "description": "Settings for storage redundancy.\n\nPossible values are:\n- `\"Backup_Manual\"` Backup is performed only at a user's request.\n- `\"Backup_RealTime\"` Backup is performed during recording.\n- `\"Backup_Schedule\"` Backup is performed on schedule.",
                 "type": "string",
+                "example": "Backup_Manual",
                 "enum": [
                   "Backup_Manual",
                   "Backup_RealTime",
@@ -2901,6 +2933,7 @@
               "backupDaysOfTheWeek": {
                 "description": "Combination (via \"|\") of the days of week on which the backup\nis active on.",
                 "type": "string",
+                "example": "Never",
                 "enum": [
                   "Never",
                   "Monday",
@@ -2985,6 +3018,7 @@
               "networkAddresses": {"type": "string"},
               "flags": {
                 "type": "string",
+                "example": "SF_None",
                 "enum": [
                   "SF_None",
                   "SF_Edge",
@@ -3013,6 +3047,7 @@
               "allowAutoRedundancy": {"type": "boolean"},
               "backupType": {
                 "type": "string",
+                "example": "Backup_Manual",
                 "enum": [
                   "Backup_Manual",
                   "Backup_RealTime",
@@ -3021,6 +3056,7 @@
               },
               "backupDaysOfTheWeek": {
                 "type": "string",
+                "example": "Never",
                 "enum": [
                   "Never",
                   "Monday",
@@ -3038,6 +3074,7 @@
               "backupBitrate": {"type": "integer"},
               "status": {
                 "type": "string",
+                "example": "Offline",
                 "enum": [
                   "Offline",
                   "Unauthorized",
@@ -3173,6 +3210,7 @@
               "name": {"type": "string"},
               "permissions": {
                 "type": "string",
+                "example": "NoGlobalPermissions",
                 "enum": [
                   "NoGlobalPermissions",
                   "GlobalAdminPermission",
@@ -3407,6 +3445,7 @@
               },
               "status": {
                 "type": "string",
+                "example": "Offline",
                 "enum": [
                   "Offline",
                   "Unauthorized",
@@ -3623,6 +3662,7 @@
               "name": {"type": "string"},
               "permissions": {
                 "type": "string",
+                "example": "NoGlobalPermissions",
                 "enum": [
                   "NoGlobalPermissions",
                   "GlobalAdminPermission",
@@ -3710,6 +3750,7 @@
               "isAdmin": {"type": "boolean"},
               "permissions": {
                 "type": "string",
+                "example": "NoGlobalPermissions",
                 "enum": [
                   "NoGlobalPermissions",
                   "GlobalAdminPermission",
@@ -4278,6 +4319,7 @@
             "motionType": {
               "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
               "type": "string",
+              "example": "DEFAULT_ALT_CAPTION",
               "enum": [
                 "DEFAULT_ALT_CAPTION",
                 "MT_HardwareGrid",
@@ -4312,6 +4354,7 @@
                   "recordingType": {
                     "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                     "type": "string",
+                    "example": "RT_Always",
                     "enum": [
                       "RT_Always",
                       "RT_MotionOnly",
@@ -4336,6 +4379,7 @@
                   "streamQuality": {
                     "description": "Quality of the recording.",
                     "type": "string",
+                    "example": "QualityLowest",
                     "enum": [
                       "QualityLowest",
                       "QualityLow",
@@ -4401,6 +4445,7 @@
             "failoverPriority": {
               "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
               "type": "string",
+              "example": "FP_Never",
               "enum": [
                 "FP_Never",
                 "FP_Low",
@@ -4412,6 +4457,7 @@
             "backupType": {
               "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
               "type": "string",
+              "example": "CameraBackup_Disabled",
               "enum": [
                 "CameraBackup_Disabled",
                 "CameraBackup_HighQuality",
@@ -4486,6 +4532,7 @@
               "motionType": {
                 "description": "Type of motion detection method.\n\nPossible values are:\n- `\"DEFAULT_ALT_CAPTION\"` Use default method.\n- `\"MT_HardwareGrid\"` Use motion detection grid implemented by the camera.\n- `\"MT_SoftwareGrid\"` Use motion detection grid implemented by the server.\n- `\"MT_MotionWindow\"` Use motion detection window implemented by the camera.\n- `\"MT_NoMotion\"` Do not perform motion detection.",
                 "type": "string",
+                "example": "DEFAULT_ALT_CAPTION",
                 "enum": [
                   "DEFAULT_ALT_CAPTION",
                   "MT_HardwareGrid",
@@ -4520,6 +4567,7 @@
                     "recordingType": {
                       "description": "Possible values are:\n- `\"RT_Always\"` Record always.\n- `\"RT_MotionOnly\"` Record only when the motion is detected.\n- `\"RT_Never\"` Never record.\n- `\"RT_MotionAndLowQuality\"` Always record low quality\nstream, and record high quality stream on motion.\n- `\"RT_Count\"`",
                       "type": "string",
+                      "example": "RT_Always",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
@@ -4544,6 +4592,7 @@
                     "streamQuality": {
                       "description": "Quality of the recording.",
                       "type": "string",
+                      "example": "QualityLowest",
                       "enum": [
                         "QualityLowest",
                         "QualityLow",
@@ -4609,6 +4658,7 @@
               "failoverPriority": {
                 "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
                 "type": "string",
+                "example": "FP_Never",
                 "enum": [
                   "FP_Never",
                   "FP_Low",
@@ -4620,6 +4670,7 @@
               "backupType": {
                 "description": "Combination (via \"|\") of the flags defining backup options.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"CameraBackup_Disabled\"` Backup is disabled.\n- `\"CameraBackup_HighQuality\"` Backup is in high quality.\n- `\"CameraBackup_LowQuality\"` Backup is in low quality.\n- `\"CameraBackup_Both\"` Equivalent of \"CameraBackup_HighQuality|CameraBackup_LowQuality\".\n- `\"CameraBackup_Default\"` A default value is used for backup options.",
                 "type": "string",
+                "example": "CameraBackup_Disabled",
                 "enum": [
                   "CameraBackup_Disabled",
                   "CameraBackup_HighQuality",
@@ -5144,6 +5195,7 @@
             "backupType": {
               "description": "Settings for storage redundancy.\n\nPossible values are:\n- `\"Backup_Manual\"` Backup is performed only at a user's request.\n- `\"Backup_RealTime\"` Backup is performed during recording.\n- `\"Backup_Schedule\"` Backup is performed on schedule.",
               "type": "string",
+              "example": "Backup_Manual",
               "enum": [
                 "Backup_Manual",
                 "Backup_RealTime",
@@ -5153,6 +5205,7 @@
             "backupDaysOfTheWeek": {
               "description": "Combination (via \"|\") of the days of week on which the backup is\nactive.",
               "type": "string",
+              "example": "Never",
               "enum": [
                 "Never",
                 "Monday",
@@ -5225,6 +5278,7 @@
               "backupType": {
                 "description": "Settings for storage redundancy.\n\nPossible values are:\n- `\"Backup_Manual\"` Backup is performed only at a user's request.\n- `\"Backup_RealTime\"` Backup is performed during recording.\n- `\"Backup_Schedule\"` Backup is performed on schedule.",
                 "type": "string",
+                "example": "Backup_Manual",
                 "enum": [
                   "Backup_Manual",
                   "Backup_RealTime",
@@ -5234,6 +5288,7 @@
               "backupDaysOfTheWeek": {
                 "description": "Combination (via \"|\") of weekdays\nthe backup is active on.",
                 "type": "string",
+                "example": "Never",
                 "enum": [
                   "Never",
                   "Monday",
@@ -5410,6 +5465,7 @@
             "permissions": {
               "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
               "type": "string",
+              "example": "NoGlobalPermissions",
               "enum": [
                 "NoGlobalPermissions",
                 "GlobalAdminPermission",
@@ -5513,6 +5569,7 @@
             "permissions": {
               "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"`\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"`\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
               "type": "string",
+              "example": "NoGlobalPermissions",
               "enum": [
                 "NoGlobalPermissions",
                 "GlobalAdminPermission",
@@ -5589,6 +5646,7 @@
               "permissions": {
                 "description": "Combination (via \"|\") of the following flags:\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"`\n- `\"GlobalAdminPermission\"` Admin, can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit camera settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video walls.\n- `\"GlobalViewLogsPermission\"`\n- `\"GlobalViewArchivePermission\"` Can view archives of available cameras.\n- `\"GlobalExportPermission\"` Can export archives of available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view bookmarks of available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify bookmarks of available cameras.\n- `\"GlobalUserInputPermission\"` Can change PTZ state of a camera, use 2-way audio, I/O\nbuttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Flag: this user has custom permissions\n- `\"GlobalLiveViewerPermissionSet\"`\n- `\"GlobalViewerPermissionSet\"`\n- `\"GlobalAdvancedViewerPermissionSet\"`\n- `\"GlobalAdminPermissionSet\"`\n- `\"GlobalVideoWallModePermissionSet\"`\n- `\"GlobalActiveXModePermissionSet\"`",
                 "type": "string",
+                "example": "NoGlobalPermissions",
                 "enum": [
                   "NoGlobalPermissions",
                   "GlobalAdminPermission",
@@ -5758,6 +5816,7 @@
           "properties": {
             "actionType": {
               "type": "string",
+              "example": "undefinedAction",
               "enum": [
                 "undefinedAction",
                 "cameraOutputAction",
@@ -5779,6 +5838,7 @@
             },
             "toggleState": {
               "type": "string",
+              "example": "inactive",
               "enum": [
                 "inactive",
                 "active",
@@ -6118,6 +6178,7 @@
           "required": true,
           "schema": {
             "type": "string",
+            "example": "mediaServerAvailability",
             "enum": [
               "mediaServerAvailability",
               "cameraAvailability",
@@ -6227,6 +6288,7 @@
             "actionType": {
               "description": "Type of the action.\n\nPossible values are:\n- `\"UndefinedAction\"`\n- `\"CameraOutputAction\"` Change camera output state.\n- `\"BookmarkAction\"`\n- `\"CameraRecordingAction\"` Start camera recording.\n- `\"PanicRecordingAction\"` Activate panic recording mode.\n- `\"SendMailAction\"` Send an email.\n- `\"DiagnosticsAction\"` Write a record to the server's log.\n- `\"ShowPopupAction\"`\n- `\"PlaySoundAction\"`\n- `\"PlaySoundOnceAction\"`\n- `\"SayTextAction\"`\n- `\"ExecutePtzPresetAction\"` Execute given PTZ preset.\n- `\"ShowTextOverlayAction\"` Show text overlay over the given camera(s).\n- `\"ShowOnAlarmLayoutAction\"` Put the given camera(s) to the Alarm Layout.\n- `\"ExecHttpRequestAction\"` Send HTTP request as an action.",
               "type": "string",
+              "example": "UndefinedAction",
               "enum": [
                 "UndefinedAction",
                 "CameraOutputAction",
@@ -6266,6 +6328,7 @@
                 "userGroup": {
                   "description": "Popups and System Health.",
                   "type": "string",
+                  "example": "EveryOne",
                   "enum": [
                     "EveryOne",
                     "AdminOnly"
@@ -6278,6 +6341,7 @@
                 "streamQuality": {
                   "description": "Stream quality for recording.",
                   "type": "string",
+                  "example": "QualityLowest",
                   "enum": [
                     "QualityLowest",
                     "QualityLow",
@@ -6372,6 +6436,7 @@
                 "eventType": {
                   "description": "Type of the event.\n\nPossible values are:\n- `\"UndefinedEvent\"` Event type is not defined. Used in rules.\n- `\"CameraMotionEvent\"` Motion has occurred on a camera.\n- `\"CameraInputEvent\"` Camera input signal is received.\n- `\"CameraDisconnectEvent\"` Camera was disconnected.\n- `\"StorageFailureEvent\"` Storage read error has occurred.\n- `\"NetworkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"CameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"ServerFailureEvent\"` Connection to server lost.\n- `\"ServerConflictEvent\"` Two or more servers are running.\n- `\"ServerStartEvent\"` Server started.\n- `\"LicenseIssueEvent\"` Not enough licenses.\n- `\"BackupFinishedEvent\"` Archive backup done.\n- `\"SystemHealthEvent\"` System health message.\n- `\"MaxSystemHealthEvent\"` System health message.\n- `\"AnyCameraEvent\"` Event group.\n- `\"AnyServerEvent\"` Event group.\n- `\"AnyBusinessEvent\"` Event group.\n- `\"UserDefinedEvent\"` Base index for the user-defined events.",
                   "type": "string",
+                  "example": "UndefinedEvent",
                   "enum": [
                     "UndefinedEvent",
                     "CameraMotionEvent",
@@ -6416,6 +6481,7 @@
                 "reasonCode": {
                   "description": "Used in Reasoned Events as a reason code.",
                   "type": "string",
+                  "example": "NoReason",
                   "enum": [
                     "NoReason",
                     "NetworkNoFrameReason",
@@ -6607,6 +6673,7 @@
                     "innerEnumParam": {
                       "description": "Enum description\n\nPossible values are:\n- `\"value1\"` value1 description\n- `\"value2\"` value2 description",
                       "type": "string",
+                      "example": "value1",
                       "enum": [
                         "value1",
                         "value2"
@@ -6642,6 +6709,7 @@
                 "enumParam": {
                   "description": "Enum description\n\nPossible values are:\n- `\"value1\"` value1 description\n- `\"value2\"` value2 description",
                   "type": "string",
+                  "example": "value1",
                   "enum": [
                     "value1",
                     "value2"
@@ -6649,6 +6717,7 @@
                 },
                 "nestedEnumField": {
                   "type": "string",
+                  "example": "nestedEnumValue",
                   "enum": ["nestedEnumValue"]
                 }
               },
@@ -6690,6 +6759,7 @@
                     "innerEnumParam": {
                       "description": "Enum description\n\nPossible values are:\n- `\"value1\"` value1 description\n- `\"value2\"` value2 description",
                       "type": "string",
+                      "example": "value1",
                       "enum": [
                         "value1",
                         "value2"
@@ -6725,6 +6795,7 @@
                 "enumParam": {
                   "description": "Enum description\n\nPossible values are:\n- `\"value1\"` value1 description\n- `\"value2\"` value2 description",
                   "type": "string",
+                  "example": "value1",
                   "enum": [
                     "value1",
                     "value2"
@@ -6732,6 +6803,7 @@
                 },
                 "nestedEnumField": {
                   "type": "string",
+                  "example": "nestedEnumValue",
                   "enum": ["nestedEnumValue"]
                 }
               },
@@ -7290,6 +7362,7 @@
           "required": true,
           "schema": {
             "type": "string",
+            "example": "ContinuousMovePtzCommand",
             "enum": [
               "ContinuousMovePtzCommand",
               "ContinuousFocusPtzCommand",
@@ -9584,6 +9657,7 @@
               "partiallyProprietaryTest": {
                 "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
+                "example": "test4",
                 "enum": [
                   "test4",
                   "test5"
@@ -9592,6 +9666,7 @@
               "partiallyDeprecatedTest": {
                 "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
                 "type": "string",
+                "example": "test7",
                 "enum": [
                   "test7",
                   "test8"
@@ -9604,6 +9679,7 @@
               "errorId": {
                 "description": "Mnemonic error id corresponding to the error code.",
                 "type": "string",
+                "example": "ok",
                 "enum": [
                   "ok",
                   "serviceUnavailable",
@@ -9721,6 +9797,7 @@
               "partiallyProprietaryTest": {
                 "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
                 "type": "string",
+                "example": "test4",
                 "enum": [
                   "test4",
                   "test5"
@@ -9729,6 +9806,7 @@
               "partiallyDeprecatedTest": {
                 "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
                 "type": "string",
+                "example": "test7",
                 "enum": [
                   "test7",
                   "test8"
@@ -9741,6 +9819,7 @@
               "errorId": {
                 "description": "Mnemonic error id corresponding to the error code.",
                 "type": "string",
+                "example": "ok",
                 "enum": [
                   "ok",
                   "serviceUnavailable",
@@ -9830,6 +9909,7 @@
             "partiallyProprietaryTest": {
               "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
+              "example": "test4",
               "enum": [
                 "test4",
                 "test5"
@@ -9851,6 +9931,7 @@
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
               "type": "string",
+              "example": "ok",
               "enum": [
                 "ok",
                 "serviceUnavailable",
@@ -9917,6 +9998,7 @@
             "partiallyDeprecatedTest": {
               "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
               "type": "string",
+              "example": "test7",
               "enum": [
                 "test7",
                 "test8"
@@ -9929,6 +10011,7 @@
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
               "type": "string",
+              "example": "ok",
               "enum": [
                 "ok",
                 "serviceUnavailable",
@@ -9987,6 +10070,7 @@
             "partiallyProprietaryTest": {
               "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
+              "example": "test4",
               "enum": [
                 "test4",
                 "test5"
@@ -9995,6 +10079,7 @@
             "partiallyDeprecatedTest": {
               "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
               "type": "string",
+              "example": "test7",
               "enum": [
                 "test7",
                 "test8"
@@ -10007,6 +10092,7 @@
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
               "type": "string",
+              "example": "ok",
               "enum": [
                 "ok",
                 "serviceUnavailable",
@@ -10017,6 +10103,7 @@
             "inPlaceEnum": {
               "description": "Test in-place enum.\n\nPossible values are:\n- `\"value0\"` Value description\n- `\"value1\"`<p><b>Proprietary.<\/b><\/p>Value description\n- `\"value2\"`<p><b>Deprecated.<\/b><\/p>Value description",
               "type": "string",
+              "example": "value0",
               "enum": [
                 "value0",
                 "value1",
@@ -10075,6 +10162,7 @@
             "partiallyProprietaryTest": {
               "description": "PartiallyProprietaryEnum description.\n\nPossible values are:\n- `\"test4\"`\n- `\"test5\"`<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
+              "example": "test4",
               "enum": [
                 "test4",
                 "test5"
@@ -10083,6 +10171,7 @@
             "partiallyDeprecatedTest": {
               "description": "PartiallyDeprecatedEnum description.\n\nPossible values are:\n- `\"test7\"`\n- `\"test8\"`<p><b>Deprecated.<\/b> Deprecated description<\/p>",
               "type": "string",
+              "example": "test7",
               "enum": [
                 "test7",
                 "test8"
@@ -10095,6 +10184,7 @@
             "errorId": {
               "description": "Mnemonic error id corresponding to the error code.",
               "type": "string",
+              "example": "ok",
               "enum": [
                 "ok",
                 "serviceUnavailable",
@@ -10367,6 +10457,7 @@
                           "isOptional": {"type": "boolean"},
                           "display": {
                             "type": "string",
+                            "example": "none",
                             "enum": [
                               "none",
                               "table",
@@ -10384,6 +10475,7 @@
                               "properties": {
                                 "level": {
                                   "type": "string",
+                                  "example": "none",
                                   "enum": [
                                     "none",
                                     "warning",
@@ -10464,6 +10556,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -10517,6 +10610,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -10560,6 +10654,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -10601,6 +10696,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -10647,6 +10743,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -10693,6 +10790,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -10741,6 +10839,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -10789,6 +10888,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -10851,6 +10951,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -10895,6 +10996,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -10941,6 +11043,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -10988,6 +11091,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11035,6 +11139,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11092,6 +11197,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11144,6 +11250,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -11197,6 +11304,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -11244,6 +11352,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11293,6 +11402,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -11402,6 +11512,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -11443,6 +11554,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -11480,6 +11592,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -11515,6 +11628,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -11555,6 +11669,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11595,6 +11710,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11637,6 +11753,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11679,6 +11796,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -11729,6 +11847,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11767,6 +11886,7 @@
                   "e": {
                     "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                     "type": "string",
+                    "example": "one",
                     "enum": [
                       "one",
                       "two"
@@ -11807,6 +11927,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11848,6 +11969,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11889,6 +12011,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11934,6 +12057,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -11977,6 +12101,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -12021,6 +12146,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -12062,6 +12188,7 @@
                     "e": {
                       "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                       "type": "string",
+                      "example": "one",
                       "enum": [
                         "one",
                         "two"
@@ -12105,6 +12232,7 @@
                       "e": {
                         "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                         "type": "string",
+                        "example": "one",
                         "enum": [
                           "one",
                           "two"
@@ -12213,6 +12341,7 @@
               "e": {
                 "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
+                "example": "one",
                 "enum": [
                   "one",
                   "two"
@@ -12256,6 +12385,7 @@
               "e": {
                 "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
+                "example": "one",
                 "enum": [
                   "one",
                   "two"
@@ -12291,6 +12421,7 @@
               "e": {
                 "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
+                "example": "one",
                 "enum": [
                   "one",
                   "two"
@@ -12337,6 +12468,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -12394,6 +12526,7 @@
               "e": {
                 "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                 "type": "string",
+                "example": "one",
                 "enum": [
                   "one",
                   "two"
@@ -12440,6 +12573,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -12487,6 +12621,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -12534,6 +12669,7 @@
                 "e": {
                   "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
                   "type": "string",
+                  "example": "one",
                   "enum": [
                     "one",
                     "two"
@@ -12588,6 +12724,7 @@
             },
             "status": {
               "type": "string",
+              "example": "Offline",
               "enum": [
                 "Offline",
                 "Unauthorized",
@@ -13053,6 +13190,7 @@
                   },
                   "recordingType": {
                     "type": "string",
+                    "example": "RT_Always",
                     "enum": [
                       "RT_Always",
                       "RT_MotionOnly",
@@ -13168,6 +13306,7 @@
             "backupContentType": {
               "description": "Defines content to backup. It is the set of flags.",
               "type": "string",
+              "example": "archive",
               "enum": [
                 "archive",
                 "motion",
@@ -13177,6 +13316,7 @@
             },
             "backupPolicy": {
               "type": "string",
+              "example": "byDefault",
               "enum": [
                 "byDefault",
                 "off",
@@ -13256,6 +13396,7 @@
                     },
                     "recordingType": {
                       "type": "string",
+                      "example": "RT_Always",
                       "enum": [
                         "RT_Always",
                         "RT_MotionOnly",
@@ -13371,6 +13512,7 @@
               "backupContentType": {
                 "description": "Defines content to backup. It is the set of flags.",
                 "type": "string",
+                "example": "archive",
                 "enum": [
                   "archive",
                   "motion",
@@ -13380,6 +13522,7 @@
               },
               "backupPolicy": {
                 "type": "string",
+                "example": "byDefault",
                 "enum": [
                   "byDefault",
                   "off",
@@ -13491,6 +13634,7 @@
             },
             "flags": {
               "type": "string",
+              "example": "SF_None",
               "enum": [
                 "SF_None",
                 "SF_Edge",
@@ -13591,6 +13735,7 @@
                     "properties": {
                       "day": {
                         "type": "string",
+                        "example": "monday",
                         "enum": [
                           "monday",
                           "tuesday",
@@ -13673,6 +13818,7 @@
                       "properties": {
                         "day": {
                           "type": "string",
+                          "example": "monday",
                           "enum": [
                             "monday",
                             "tuesday",
@@ -13798,6 +13944,7 @@
             },
             "status": {
               "type": "string",
+              "example": "Offline",
               "enum": [
                 "Offline",
                 "Unauthorized",
@@ -13893,6 +14040,7 @@
               },
               "status": {
                 "type": "string",
+                "example": "Offline",
                 "enum": [
                   "Offline",
                   "Unauthorized",
@@ -13988,6 +14136,7 @@
             "permissions": {
               "description": "Flags describing global user capabilities, independently of resources. Stored in the database.\nQFlags uses int internally, so we are limited to 32 bits.\n\nPossible values are one of or the combination by `|` of the following:\n- `\"NoGlobalPermissions\"` Only live video access.\n- `\"GlobalAdminPermission\"` Can edit other non-admins.\n- `\"GlobalEditCamerasPermission\"` Can edit Device settings.\n- `\"GlobalControlVideoWallPermission\"` Can control video-walls.\n- `\"GlobalViewLogsPermission\"` Can access Event Log and Audit Trail.\n- `\"GlobalViewArchivePermission\"` Can view archives of the available cameras.\n- `\"GlobalExportPermission\"` Can export archives of the available cameras.\n- `\"GlobalViewBookmarksPermission\"` Can view Bookmarks on the available cameras.\n- `\"GlobalManageBookmarksPermission\"` Can modify Bookmarks on the available cameras.\n- `\"GlobalUserInputPermission\"` Can change the camera PTZ state, use 2-way audio and I/O buttons.\n- `\"GlobalAccessAllMediaPermission\"` Has access to all media Resources (cameras and web pages).\n- `\"GlobalCustomUserPermission\"` Just marks the new user as \"custom\".",
               "type": "string",
+              "example": "NoGlobalPermissions",
               "enum": [
                 "NoGlobalPermissions",
                 "GlobalAdminPermission",
@@ -14978,6 +15127,7 @@
             },
             "eventType": {
               "type": "string",
+              "example": "undefinedEvent",
               "enum": [
                 "undefinedEvent",
                 "cameraMotionEvent",
@@ -15014,6 +15164,7 @@
             },
             "eventState": {
               "type": "string",
+              "example": "inactive",
               "enum": [
                 "inactive",
                 "active",
@@ -15022,6 +15173,7 @@
             },
             "actionType": {
               "type": "string",
+              "example": "undefinedAction",
               "enum": [
                 "undefinedAction",
                 "cameraOutputAction",
@@ -15115,6 +15267,7 @@
                 },
                 "eventType": {
                   "type": "string",
+                  "example": "undefinedEvent",
                   "enum": [
                     "undefinedEvent",
                     "cameraMotionEvent",
@@ -15151,6 +15304,7 @@
                 },
                 "eventState": {
                   "type": "string",
+                  "example": "inactive",
                   "enum": [
                     "inactive",
                     "active",
@@ -15159,6 +15313,7 @@
                 },
                 "actionType": {
                   "type": "string",
+                  "example": "undefinedAction",
                   "enum": [
                     "undefinedAction",
                     "cameraOutputAction",
@@ -15231,6 +15386,7 @@
           "properties": {
             "actionType": {
               "type": "string",
+              "example": "undefinedAction",
               "enum": [
                 "undefinedAction",
                 "cameraOutputAction",
@@ -15252,6 +15408,7 @@
             },
             "toggleState": {
               "type": "string",
+              "example": "inactive",
               "enum": [
                 "inactive",
                 "active",
@@ -15303,6 +15460,7 @@
           "properties": {
             "actionType": {
               "type": "string",
+              "example": "undefinedAction",
               "enum": [
                 "undefinedAction",
                 "cameraOutputAction",
@@ -15324,6 +15482,7 @@
             },
             "toggleState": {
               "type": "string",
+              "example": "inactive",
               "enum": [
                 "inactive",
                 "active",
@@ -15567,6 +15726,7 @@
             },
             "serverFlags": {
               "type": "string",
+              "example": "SF_None",
               "enum": [
                 "SF_None",
                 "SF_Edge",
@@ -15606,6 +15766,7 @@
             },
             "hwPlatform": {
               "type": "string",
+              "example": "unknown",
               "enum": [
                 "unknown",
                 "raspberryPi",
@@ -15638,6 +15799,7 @@
             },
             "status": {
               "type": "string",
+              "example": "Offline",
               "enum": [
                 "Offline",
                 "Unauthorized",
@@ -15724,6 +15886,7 @@
               },
               "serverFlags": {
                 "type": "string",
+                "example": "SF_None",
                 "enum": [
                   "SF_None",
                   "SF_Edge",
@@ -15763,6 +15926,7 @@
               },
               "hwPlatform": {
                 "type": "string",
+                "example": "unknown",
                 "enum": [
                   "unknown",
                   "raspberryPi",
@@ -15795,6 +15959,7 @@
               },
               "status": {
                 "type": "string",
+                "example": "Offline",
                 "enum": [
                   "Offline",
                   "Unauthorized",

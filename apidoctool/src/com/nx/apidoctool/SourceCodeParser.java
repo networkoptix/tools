@@ -371,14 +371,14 @@ public final class SourceCodeParser
                 error = "\"%example " + param.example + "\" type is invalid.";
             }
         }
-        else
+        if (error == null)
         {
             if (!param.needExample())
                 return;
 
             for (final Apidoc.Value value: param.values)
             {
-                if (value.deprecated || value.proprietary)
+                if (value.deprecated || value.proprietary || value.unused)
                     continue;
 
                 try

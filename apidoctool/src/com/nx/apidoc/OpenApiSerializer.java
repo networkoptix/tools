@@ -586,7 +586,10 @@ public final class OpenApiSerializer
                 return;
             final JSONArray enum_ = getArray(schema, "enum");
             for (final Apidoc.Value value: param.values)
-                enum_.put(value.name);
+            {
+                if (!value.unused)
+                    enum_.put(value.name);
+            }
         }
     }
 
@@ -618,6 +621,9 @@ public final class OpenApiSerializer
             boolean hasDescription = false;
             for (final Apidoc.Value value: param.values)
             {
+                if (value.unused)
+                    continue;
+
                 if (value.deprecated
                     || value.proprietary
                     || !description(
@@ -641,6 +647,9 @@ public final class OpenApiSerializer
             result += "Possible values are:";
         for (final Apidoc.Value value: param.values)
         {
+            if (value.unused)
+                continue;
+
             result += "\n- `" + value.nameForDescription(param.type.fixed) + '`';
             String description = description(
                 value.proprietary,
@@ -734,7 +743,7 @@ public final class OpenApiSerializer
 
         for (final Apidoc.Value value: param.values)
         {
-            if (value.deprecated || value.proprietary)
+            if (value.deprecated || value.proprietary || value.unused)
                 continue;
 
             result.put("example", param.type.parse(value.name));

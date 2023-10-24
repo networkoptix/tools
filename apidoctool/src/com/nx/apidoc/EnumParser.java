@@ -34,6 +34,7 @@ public final class EnumParser
         {
             public String name;
             public String description;
+            public boolean unused = false;
             public boolean proprietary = false;
             public boolean deprecated = false;
             public String deprecatedDescription = "";
@@ -51,6 +52,9 @@ public final class EnumParser
                 result += "Description: " + description + "\n";
             for (Value value: values)
             {
+                if (value.unused)
+                    continue;
+
                 result += "    Value: " + value.name + "\n";
                 if (value.description != null)
                     result += "    Description: " + value.description + "\n";
@@ -240,7 +244,7 @@ public final class EnumParser
             if (ApidocComment.ATTR_PROPRIETARY.equals(apidocAttribute))
                 value.proprietary = true;
             else if (ApidocComment.ATTR_UNUSED.equals(apidocAttribute))
-                return false; //< Currently, there is no `unused` flag for enum items, so ignoring the item.
+                value.unused = true;
             else
                 throw new Error("Unexpected attribute " + apidocAttribute + " in " + apidocItem.getTag() + ".");
         }

@@ -537,6 +537,7 @@ public final class TypeManager
                 value = new Apidoc.Value();
                 value.name = enumValue.name;
                 value.description = enumValue.description;
+                value.unused = enumValue.unused;
                 value.proprietary = enumValue.proprietary;
                 value.deprecated = enumValue.deprecated;
                 value.deprecatedDescription = enumValue.deprecatedDescription;
