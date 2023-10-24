@@ -494,6 +494,7 @@ public final class OpenApiSerializer
             case UUID:
                 schema.put("type", "string");
                 schema.put("format", "uuid");
+                schema.put("example", "89abcdef-0123-4567-89ab-cdef01234567");
                 break;
             case OBJECT:
                 schema.put("type", "object");
