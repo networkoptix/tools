@@ -453,11 +453,13 @@ public final class Tests extends TestBase
         System.out.println("    Output: " + outputStructDescriptionFile);
         final SourceCode reader = new SourceCode(structHeaderFile);
 
-        final EnumParser enumParser = new EnumParser(reader, true, 1);
+        final EnumParser enumParser = new EnumParser(reader, /*verbose*/ true, /*line*/ 1);
         final Map<String, EnumParser.EnumInfo> enums = enumParser.parseEnums();
+        final FlagParser flagParser = new FlagParser(reader, /*verbose*/ true, /*line*/ 1);
+        final Map<String, FlagParser.FlagInfo> flags = flagParser.parseFlags();
         final StructParser structParser =
             new StructParser(reader, /*verbose*/ true, /*invalidChronoFieldSuffixIsError*/ false);
-        final Map<String, StructParser.StructInfo> structs = structParser.parseStructs(enums);
+        final Map<String, StructParser.StructInfo> structs = structParser.parseStructs(enums, flags);
 
         List<EnumParser.EnumInfo> enumList =
             new ArrayList<EnumParser.EnumInfo>(enums.values());

@@ -110,8 +110,9 @@ public final class StructParser
         this.invalidChronoFieldSuffixIsError = invalidChronoFieldSuffixIsError;
     }
 
-    public final Map<String, StructInfo> parseStructs(Map<String, EnumParser.EnumInfo> enumsInFile)
-        throws Error, SourceCode.Error, ApidocTagParser.Error, EnumParser.Error
+    public final Map<String, StructInfo> parseStructs(
+        Map<String, EnumParser.EnumInfo> enumsInFile, Map<String, FlagParser.FlagInfo> flagsInFile)
+        throws Error, SourceCode.Error, ApidocTagParser.Error, EnumParser.Error, FlagParser.Error
     {
         final Map<String, StructInfo> structs = new HashMap<String, StructInfo>();
         for (line = 1; line <= sourceCode.getLineCount(); ++line)
@@ -124,6 +125,7 @@ public final class StructParser
             final StructInfo struct = parseStructHeader(values[0]);
             struct.fields = new ArrayList<StructInfo.Field>();
             final Set<String> enums = new HashSet<String>();
+            final Set<String> flags = new HashSet<String>();
             for (++line; line <= sourceCode.getLineCount(); ++line)
             {
                 if (sourceCode.lineMatches(line, structLastLineRegex))
@@ -145,15 +147,31 @@ public final class StructParser
                 }
                 else
                 {
-                    final String[] match = sourceCode.matchLine(line, fieldRegex);
-                    if (match != null && !"using".equals(match[0]))
+                    FlagParser flagParser = new FlagParser(sourceCode, verbose, line);
+                    FlagParser.FlagInfo flagInfo = flagParser.parseFlag();
+                    if (flagInfo != null)
                     {
-                        final StructInfo.Field field = parseStructField();
-                        if (field != null)
+                        final FlagParser.FlagInfo parsedFlag = flagsInFile.get(flagInfo.name);
+                        if (parsedFlag != null && parsedFlag.toString().equals(flagInfo.toString()))
+                            flagsInFile.remove(flagInfo.name);
+                        flags.add(flagInfo.name);
+                        flagInfo.name = struct.name + "_" + flagInfo.name;
+                        flagInfo.enumName = struct.name + "_" + flagInfo.enumName;
+                        flagsInFile.put(flagInfo.name, flagInfo);
+                        ++line;
+                    }
+                    else
+                    {
+                        final String[] match = sourceCode.matchLine(line, fieldRegex);
+                        if (match != null && !"using".equals(match[0]))
                         {
-                            if (enums.contains(field.type.name))
-                                field.type.name = struct.name + "_" + field.type.name;
-                            struct.fields.add(field);
+                            final StructInfo.Field field = parseStructField();
+                            if (field != null)
+                            {
+                                if (enums.contains(field.type.name) || flags.contains(field.type.name))
+                                    field.type.name = struct.name + "_" + field.type.name;
+                                struct.fields.add(field);
+                            }
                         }
                     }
                 }
@@ -189,7 +207,8 @@ public final class StructParser
                 }
                 else
                 {
-                    struct.baseTypeNames.add(map.mapValueType.name);
+                    if (map.mapValueType.name != null)
+                        struct.baseTypeNames.add(map.mapValueType.name);
                     struct.isMap = true;
                 }
             }

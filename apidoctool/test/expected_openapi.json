@@ -10526,6 +10526,49 @@
       }},
       "tags": ["System"]
     }},
+    "/rest/v{2-}/system/metrics/manifest": {"get": {
+      "summary": "Read metrics rules",
+      "description": "The rules to calculate the final manifest and raise alarms. See metrics.md for details.",
+      "parameters": [{
+        "name": "capabilities",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "noCapabilities",
+          "enum": [
+            "noCapabilities",
+            "disableStreamSelection",
+            "doNotSaveSettingsValuesToProperty"
+          ]
+        },
+        "in": "query"
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {"capabilities": {
+            "type": "string",
+            "example": "noCapabilities",
+            "enum": [
+              "noCapabilities",
+              "needUncompressedVideoFrames_yuv420",
+              "needUncompressedVideoFrames_argb",
+              "needUncompressedVideoFrames_abgr",
+              "needUncompressedVideoFrames_rgba",
+              "needUncompressedVideoFrames_bgra",
+              "needUncompressedVideoFrames_rgb",
+              "needUncompressedVideoFrames_bgr",
+              "deviceDependent",
+              "keepObjectBoundingBoxRotation",
+              "noAutoBestShots"
+            ]
+          }},
+          "required": ["capabilities"]
+        }}}
+      }},
+      "tags": ["System"]
+    }},
     "/rest/v2/example/{name}": {"post": {
       "deprecated": true,
       "description": "<p><b>Deprecated function &ast;.<\/b><\/p>Function with deprecated &ast;.",

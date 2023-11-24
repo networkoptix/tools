@@ -40,20 +40,21 @@ public final class TypeManager
             final EnumParser enumParser = new EnumParser(sourceCode, verbose, 1);
             final Map<String, EnumParser.EnumInfo> enumsInFile = enumParser.parseEnums();
 
-            final FlagParser flagParser = new FlagParser(sourceCode, verbose);
+            final FlagParser flagParser = new FlagParser(sourceCode, verbose, /*line*/ 1);
             final Map<String, FlagParser.FlagInfo> flagsInFile = flagParser.parseFlags();
-            throwIfIntersects(flagsInFile.keySet(), flags.keySet(), "flags", file);
-            flags.putAll(flagsInFile);
 
             final StructParser structParser =
                 new StructParser(sourceCode, verbose, invalidChronoFieldSuffixIsError);
             final Map<String, StructParser.StructInfo> structsInFile =
-                structParser.parseStructs(enumsInFile);
+                structParser.parseStructs(enumsInFile, flagsInFile);
             throwIfIntersects(structsInFile.keySet(), structs.keySet(), "structs", file);
             structs.putAll(structsInFile);
 
             throwIfIntersects(enumsInFile.keySet(), enums.keySet(), "enums", file);
             enums.putAll(enumsInFile);
+
+            throwIfIntersects(flagsInFile.keySet(), flags.keySet(), "flags", file);
+            flags.putAll(flagsInFile);
         }
         makeStructsFlat();
         correctTypes();

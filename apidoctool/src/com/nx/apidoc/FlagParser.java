@@ -20,10 +20,11 @@ public final class FlagParser
         }
     }
 
-    public FlagParser(SourceCode sourceCode, boolean verbose)
+    public FlagParser(SourceCode sourceCode, boolean verbose, int line)
     {
         this.sourceCode = sourceCode;
         this.verbose = verbose;
+        this.line = line;
     }
 
     public static final class FlagInfo
@@ -47,21 +48,27 @@ public final class FlagParser
     public final Map<String, FlagInfo> parseFlags() throws Error, ApidocTagParser.Error
     {
         final Map<String, FlagInfo> flags = new HashMap<String, FlagInfo>();
-        line = 1;
         while (line <= sourceCode.getLineCount())
         {
-            final String[] values = sourceCode.matchLine(line, flagRegex);
-            if (values != null)
-            {
-                final FlagInfo flagInfo = new FlagInfo();
-                flagInfo.name = values[0].trim();
-                flagInfo.enumName = values[1].trim();
-                flagInfo.description = parseDescription();
+            FlagInfo flagInfo = parseFlag();
+            if (flagInfo != null)
                 flags.put(flagInfo.name, flagInfo);
-            }
             ++line;
         }
         return flags;
+    }
+
+    public FlagInfo parseFlag() throws Error, ApidocTagParser.Error
+    {
+        final String[] values = sourceCode.matchLine(line, flagRegex);
+        if (values == null)
+            return null;
+
+        final FlagInfo flagInfo = new FlagInfo();
+        flagInfo.name = values[0].trim();
+        flagInfo.enumName = values[1].trim();
+        flagInfo.description = parseDescription();
+        return flagInfo;
     }
 
     private String parseDescription() throws Error, ApidocTagParser.Error
