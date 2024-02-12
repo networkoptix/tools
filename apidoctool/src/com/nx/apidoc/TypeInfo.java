@@ -301,7 +301,7 @@ public final class TypeInfo
                 put(Apidoc.Type.BOOLEAN, Arrays.asList("bool"));
                 put(Apidoc.Type.INTEGER, Arrays.asList("int", "qint32", "qint16", "qint8"));
                 put(Apidoc.Type.FLOAT, Arrays.asList("float", "qreal"));
-                put(Apidoc.Type.UUID, Arrays.asList("QnUuid"));
+                put(Apidoc.Type.UUID, Arrays.asList("QnUuid", "Uuid", "nx::Uuid"));
                 put(Apidoc.Type.STRING, Arrays.asList(
                     "QString",
                     "QnLatin1Array",

@@ -17,8 +17,8 @@ namespace api {
 /** List of cameras that have footage on the given server. */
 struct NX_VMS_API ServerFootageData
 {
-    QnUuid serverGuid;
-    std::vector<QnUuid> archivedCameras;
+    Uuid serverGuid;
+    std::vector<Uuid> archivedCameras;
 
     ServerFootageData() = default;
 
