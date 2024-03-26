@@ -141,7 +141,8 @@ public final class TypeManager
         }
 
         final StructParser.StructInfo structInfo = structs.get(type.name);
-        if (structInfo == null)
+        if (structInfo == null
+            && (type.fixed == Apidoc.Type.ARRAY || type.fixed == Apidoc.Type.OBJECT))
         {
             if (unknownParamTypeIsError)
                 throw new Error("Struct `" + type.name + "` not found.");
