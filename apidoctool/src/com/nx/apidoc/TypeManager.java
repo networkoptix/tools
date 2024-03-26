@@ -287,8 +287,21 @@ public final class TypeManager
             for (int i = 0; i < type.variantValueTypes.size(); ++i)
             {
                 final TypeInfo subType = type.variantValueTypes.get(i);
-                if (subType.fixed != Apidoc.Type.OBJECT && subType.fixed != Apidoc.Type.ARRAY)
+                if (subType.variantValueTypes == null
+                    && subType.mapValueType == null
+                    && (subType.name == null || TypeInfo.nullType.equals(subType.name)))
+                {
+                    Apidoc.Param param = new Apidoc.Param();
+                    param.isGeneratedFromStruct = true;
+                    param.name = namePrefix + i;
+                    param.type.fillMissingType(subType);
+                    if (subType.isStdOptional)
+                        param.optional = true;
+                    if (subType.fixed == Apidoc.Type.ENUM || subType.fixed == Apidoc.Type.FLAGS)
+                        enumToParam(param, subType.name);
+                    structParams.add(param);
                     continue;
+                }
                 structParams.addAll(structToParams(
                     namePrefix + i, subType, paramDirection, overriddenParams, processedStructs));
             }

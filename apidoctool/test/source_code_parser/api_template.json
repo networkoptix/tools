@@ -1,4 +1,6 @@
-{"groups": [{
+{
+  "openapi": "3.0.0",
+  "groups": [{
   "groupName": "testGroup",
   "urlPrefix": "/urlPrefix",
   "groupDescription": "testGroupDescription"

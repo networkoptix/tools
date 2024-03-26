@@ -78,7 +78,8 @@ public final class OpenApiSerializer
         if (item.startsWith("#"))
         {
             schema = oneOfSchema(schema, item);
-            setRequired(schema, path);
+            if (!path.isEmpty())
+                setRequired(schema, path);
             return;
         }
         if (item.startsWith(TypeInfo.mapKeyPlaceholder))
@@ -246,20 +247,31 @@ public final class OpenApiSerializer
             final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
             if (inPath)
             {
-                final JSONObject parameter = toJson(param);
-                parameter.put("in", "path");
-                parameter.remove("readOnly");
-                parameter.put("required", true);
-                getArray(method, "parameters").put(parameter);
+                fillQueryOrPathParameter(method, param, inPath);
                 continue;
             }
+
+            if (param.isRef)
+            {
+                JSONObject parameter;
+                for (final String ref: param.name.split(","))
+                {
+                    if (!refParameters.has(ref))
+                        throw new Exception("Ref parameter '" + ref + "' is missing");
+                    parameter = new JSONObject();
+                    parameter.put("$ref", "#/components/parameters/" + ref);
+                    getArray(method, "parameters").put(parameter);
+                }
+                continue;
+            }
+
             if (param.immutable)
             {
                 param.optional = true;
                 if (function.method.equals("GET") || function.method.equals("PATCH"))
                     param.readonly = true;
             }
-            if (function.areInBodyParameters() && !param.isRef)
+            if (function.areInBodyParameters())
             {
                 final JSONObject requestBody = getObject(method, "requestBody");
                 if (!param.optional)
@@ -281,26 +293,8 @@ public final class OpenApiSerializer
 
                 continue;
             }
-            JSONObject parameter;
-            if (param.isRef)
-            {
-                for (final String ref: param.name.split(","))
-                {
-                    if (!refParameters.has(ref))
-                        throw new Exception("Ref parameter '" + ref + "' is missing");
-                    parameter = new JSONObject();
-                    parameter.put("$ref", "#/components/parameters/" + ref);
-                    getArray(method, "parameters").put(parameter);
-                }
-            }
-            else
-            {
-                parameter = toJson(param);
-                if (parameter == null)
-                    continue;
-                parameter.put("in", "query");
-                getArray(method, "parameters").put(parameter);
-            }
+
+            fillQueryOrPathParameter(method, param, inPath);
         }
         for (final Apidoc.Param param: function.input.params)
         {
@@ -326,6 +320,97 @@ public final class OpenApiSerializer
                 addReferenceParam(schema, param, componentsSchemas);
             }
         }
+
+        JSONArray parameters = method.optJSONArray("parameters");
+        if (parameters == null)
+            return;
+
+        for (int i = 0; i < parameters.length(); ++i)
+        {
+            JSONObject p = parameters.getJSONObject(i);
+            JSONObject c = p.optJSONObject("content");
+            if (c != null)
+            {
+                String description = p.optString("description");
+                if (!description.isEmpty())
+                    description += "</br>\n";
+                p.put("description", description + fieldsDescription(
+                    getObject(getObject(c, "application/json"), "schema"), "", ""));
+            }
+        }
+    }
+
+    private static String fieldsDescription(JSONObject schema, String indent, String name)
+    {
+        final String kIndent = "&nbsp;&nbsp;&nbsp;&nbsp;";
+        final String kLineBreak = "</br>\n";
+        String result = indent;
+        if (!name.isEmpty())
+            result += name + ": ";
+        final JSONArray oneOf = schema.optJSONArray("oneOf");
+        final JSONObject additionalProperties = schema.optJSONObject("additionalProperties");
+        String type = oneOf != null
+            ? "one of"
+            : additionalProperties != null ? "map" : schema.optString("type");
+        boolean isSimpleType = type.equals("boolean")
+            || type.equals("integer")
+            || type.equals("number")
+            || type.equals("string");
+        if (type.equals("string"))
+        {
+            final String format = schema.optString("format");
+            if (format.equals("uuid"))
+                type = "string($uuid)";
+            final JSONArray enum_ = schema.optJSONArray("enum");
+            if (enum_ != null)
+                type = "string($enum)";
+        }
+        result += "<b>" + type + "</b>" + kLineBreak;
+        String description = schema.optString("description");
+        if (!description.isEmpty())
+        {
+            if (description.startsWith("<p>"))
+                description = description.substring(3, description.length());
+            description = description.replace("\n", kLineBreak + indent + kIndent);
+            description = description.replace("<p>", kLineBreak + indent + kIndent);
+            description = description.replace("</p>", kLineBreak + indent + kIndent);
+            description = description.replace(
+                kLineBreak + indent + kIndent + kLineBreak, kLineBreak);
+            result += indent + kIndent + description + kLineBreak;
+        }
+        if (isSimpleType)
+            return result;
+
+        indent += kIndent;
+
+        if (additionalProperties != null)
+        {
+            result += fieldsDescription(additionalProperties, indent, "");
+            return result;
+        }
+
+        if (type.equals("object"))
+        {
+            JSONObject properties = getObject(schema, "properties");
+            for (final String k: properties.keySet())
+                result += fieldsDescription(getObject(properties, k), indent, k);
+            return result;
+        }
+
+        if (type.equals("array"))
+        {
+            result += fieldsDescription(getObject(schema, "items"), indent, "");
+            return result;
+        }
+
+        if (oneOf != null)
+        {
+            for (int i = 0; i < oneOf.length(); ++i)
+                result += fieldsDescription(oneOf.getJSONObject(i), indent, "");
+            return result;
+        }
+
+        return result;
     }
 
     private static JSONObject fillPath(
@@ -715,19 +800,69 @@ public final class OpenApiSerializer
             param.type.name, recursive.has("items") ? recursive.get("items") : recursive);
     }
 
-    private static JSONObject toJson(Apidoc.Param param) throws Exception
+    private static void fillQueryOrPathParameter(
+        JSONObject method, Apidoc.Param param, boolean inPath) throws Exception
     {
-        final JSONObject result = new JSONObject();
-        result.put("name", param.name);
-        putDescription(param, result);
-        if (param.deprecated)
-            result.put("deprecated", true);
-        if (param.readonly)
-            result.put("readOnly", true);
-        else if (!param.optional)
-            result.put("required", true);
-        fillSchemaType(getObject(result, "schema"), param, /*fillDefaultExample*/ true);
-        return result;
+        JSONArray parameters = getArray(method, "parameters");
+        if (param.name.contains("."))
+        {
+            String[] items = param.name.split("\\.");
+            for (int i = 0; i < parameters.length(); ++i)
+            {
+                JSONObject parameter = parameters.getJSONObject(i);
+                String field = items[0];
+                boolean isArray = field.endsWith("[]");
+                if (isArray)
+                    field = field.substring(0, field.length() - 2);
+                if (parameter.getString("name").equals(field))
+                {
+                    parameter.remove("schema");
+                    JSONObject schema = getObject(getObject(getObject(
+                        parameter, "content"), "application/json"), "schema");
+                    if (isArray || param.type.fixed == Apidoc.Type.ARRAY)
+                    {
+                        schema.put("type", "array");
+                        schema = getObject(schema, "items");
+                    }
+                    boolean readonly = param.readonly;
+                    param.readonly = false;
+                    String name = param.name;
+                    param.name = items[1];
+                    for (int j = 2; j < items.length; ++j)
+                        param.name += '.' + items[j];
+                    addStructParam(schema, param, /*fillDefaultExample*/ true);
+                    param.name = name;
+                    param.readonly = readonly;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            final JSONObject parameter = new JSONObject();
+            parameter.put("name", param.name);
+            putDescription(param, parameter);
+            if (param.deprecated)
+                parameter.put("deprecated", true);
+            if (!param.readonly && !param.optional)
+                parameter.put("required", true);
+            if (inPath)
+            {
+                parameter.put("in", "path");
+                parameter.remove("readOnly");
+                parameter.put("required", true);
+            }
+            else
+            {
+                parameter.put("in", "query");
+            }
+            JSONObject schemaContainer = param.type.fixed == Apidoc.Type.OBJECT
+                ? getObject(getObject(parameter, "content"), "application/json")
+                : parameter;
+            fillSchemaType(
+                getObject(schemaContainer, "schema"), param, /*fillDefaultExample*/ true);
+            parameters.put(parameter);
+        }
     }
 
     private static void putExample(Apidoc.Param param, JSONObject result)

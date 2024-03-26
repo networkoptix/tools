@@ -46,6 +46,10 @@
      *     %param mapWithVariantList.*[].#1.i description
      *     %param mapOfMap.*.*.i description
      *     %param mapOfMapWithVariant.*.*.#1.i description
+     *
+     **%apidoc:{ExampleData} GET /rest/v2/example/{name}
+     * %param:string name
+     *     %example Example param
      */
     reg("example", GlobalPermission::admin);
 
