@@ -340,22 +340,66 @@ public final class OpenApiSerializer
         }
     }
 
-    private static String fieldsDescription(JSONObject schema, String indent, String name)
+    private static boolean isSimpleType(String name)
     {
-        final String kIndent = "&nbsp;&nbsp;&nbsp;&nbsp;";
-        final String kLineBreak = "</br>\n";
-        String result = indent;
-        if (!name.isEmpty())
-            result += name + ": ";
-        final JSONArray oneOf = schema.optJSONArray("oneOf");
+        return name.isEmpty()
+            || name.startsWith("boolean")
+            || name.startsWith("integer")
+            || name.startsWith("number")
+            || name.equals("string")
+            || name.startsWith("string ")
+            || name.startsWith("string($uuid)")
+            || name.startsWith("one of ");
+    }
+
+    private static String oneOfTypeName(JSONArray oneOf)
+    {
+        String result = "one of [";
+        String firstType = typeName(oneOf.getJSONObject(0));
+        if (!isSimpleType(firstType))
+            return "one of";
+
+        result += firstType;
+        for (int i = 1; i < oneOf.length(); ++i)
+        {
+            String name = typeName(oneOf.getJSONObject(i));
+            if (!isSimpleType(name))
+                return "one of";
+
+            result += ", " + name;
+        }
+        return result + "]";
+    }
+
+    private static String mapTypeName(JSONObject additionalProperties)
+    {
+        final String name = typeName(additionalProperties);
+        return isSimpleType(name) ? name + " map" : "map";
+    }
+
+    private static String arrayTypeName(JSONObject items)
+    {
+        final String name = typeName(items);
+        return isSimpleType(name) ? name + " array" : "array";
+    }
+
+    private static String typeName(JSONObject schema)
+    {
         final JSONObject additionalProperties = schema.optJSONObject("additionalProperties");
-        String type = oneOf != null
-            ? "one of"
-            : additionalProperties != null ? "map" : schema.optString("type");
-        boolean isSimpleType = type.equals("boolean")
-            || type.equals("integer")
-            || type.equals("number")
-            || type.equals("string");
+        if (additionalProperties != null)
+            return mapTypeName(additionalProperties);
+
+        final JSONArray oneOf = schema.optJSONArray("oneOf");
+        if (oneOf != null)
+            return oneOfTypeName(oneOf);
+
+        String type = schema.optString("type");
+        if (type == null)
+            return "";
+
+        if (type.equals("array"))
+            return arrayTypeName(getObject(schema, "items"));
+
         if (type.equals("string"))
         {
             final String format = schema.optString("format");
@@ -365,7 +409,20 @@ public final class OpenApiSerializer
             if (enum_ != null)
                 type = "string($enum)";
         }
-        result += "<b>" + type + "</b>" + kLineBreak;
+        return type;
+    }
+
+    private static String fieldsDescription(JSONObject schema, String indent, String name)
+    {
+        final String kIndent = "&nbsp;&nbsp;&nbsp;&nbsp;";
+        final String kLineBreak = "</br>\n";
+        String result = indent;
+        if (!name.isEmpty())
+            result += "<b>" + name + "</b>";
+        final String typeName = typeName(schema);
+        if (!typeName.isEmpty())
+            result += (name.isEmpty() ? "`" : " `") + typeName + "`";
+        result += kLineBreak;
         String description = schema.optString("description");
         if (!description.isEmpty())
         {
@@ -378,36 +435,53 @@ public final class OpenApiSerializer
                 kLineBreak + indent + kIndent + kLineBreak, kLineBreak);
             result += indent + kIndent + description + kLineBreak;
         }
-        if (isSimpleType)
+        if (isSimpleType(typeName))
             return result;
 
         indent += kIndent;
 
+        final JSONObject additionalProperties = schema.optJSONObject("additionalProperties");
         if (additionalProperties != null)
         {
             result += fieldsDescription(additionalProperties, indent, "");
             return result;
         }
 
-        if (type.equals("object"))
+        if (typeName.equals("object"))
         {
-            JSONObject properties = getObject(schema, "properties");
+            JSONObject properties = schema.optJSONObject("properties");
+            if (properties == null)
+                return result;
+
             for (final String k: properties.keySet())
                 result += fieldsDescription(getObject(properties, k), indent, k);
             return result;
         }
 
-        if (type.equals("array"))
+        if (typeName.equals("array"))
         {
             result += fieldsDescription(getObject(schema, "items"), indent, "");
             return result;
         }
 
+        final JSONArray oneOf = schema.optJSONArray("oneOf");
         if (oneOf != null)
         {
             for (int i = 0; i < oneOf.length(); ++i)
                 result += fieldsDescription(oneOf.getJSONObject(i), indent, "");
             return result;
+        }
+
+        if (typeName.equals("string($enum)") && !description.contains("Possible values are"))
+        {
+            final JSONArray enum_ = getArray(schema, "enum");
+            if (enum_.length() > 0)
+            {
+                result += indent + "Possible values are:" + kLineBreak;
+                indent += kIndent;
+                for (int i = 0; i < enum_.length(); ++i)
+                    result += indent + "`" + enum_.getString(i) + "`" + kLineBreak;
+            }
         }
 
         return result;
