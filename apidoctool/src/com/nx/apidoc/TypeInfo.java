@@ -310,7 +310,8 @@ public final class TypeInfo
                     "size_t",
                     "int64_t",
                     "std::string",
-                    "nx::utils::Url"));
+                    "nx::utils::Url",
+                    "nx::TranslatableString"));
             }
         };
     private static final List<String> arrayAliases =
