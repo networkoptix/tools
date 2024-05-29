@@ -168,10 +168,28 @@ public final class SourceCodeParser
 
         if (unknownParamTypeIsError)
         {
+            String prefix = description.function.method + " " + description.urlPrefix + "/" +
+                description.function.name;
             for (Apidoc.Param param: description.function.input.params)
-                throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ false);
+                throwErrorIfUnknownOrUnsupportedParam(prefix + ": ", param);
+            if (description.function.input.type.name != null
+                && !description.function.input.type.name.isEmpty()
+                && !description.function.input.type.name.equals(TypeInfo.nullType))
+            {
+                String error = description.function.input.type.unknownTypeError();
+                if (error != null)
+                    throw new Error(prefix +": " +  error + ".");
+            }
+            prefix += " result: ";
             for (Apidoc.Param param: description.function.result.params)
-                throwErrorIfUnknownOrUnsupportedParam(description, param, /*isResult*/ true);
+                throwErrorIfUnknownOrUnsupportedParam(prefix, param);
+            if (description.function.result.type.name != null
+                && !description.function.result.type.name.isEmpty())
+            {
+                String error = description.function.result.type.unknownTypeError();
+                if (error != null)
+                    throw new Error(prefix +": " +  error + ".");
+            }
         }
 
         for (Apidoc.Param param: description.function.input.params)
@@ -293,43 +311,22 @@ public final class SourceCodeParser
                     param.optional = true;
             }
         }
+
+        for (Apidoc.Param param: description.function.input.params)
+            typeManager.correctType(param.type);
+        for (Apidoc.Param param: description.function.result.params)
+            typeManager.correctType(param.type);
     }
 
-    private void throwErrorIfUnknownOrUnsupportedParam(
-        ApidocCommentParser.FunctionDescription description, Apidoc.Param param, boolean isResult)
+    private void throwErrorIfUnknownOrUnsupportedParam(String prefix, Apidoc.Param param)
         throws Error
     {
         if (param.isRef)
             return;
-        String error = null;
-        if (param.type.mapValueType == null && param.type.variantValueTypes == null)
-        {
-            if (param.type.fixed != Apidoc.Type.UNKNOWN)
-                return;
-            error = "unknown type";
-        }
-        else if (param.type.mapValueType != null)
-        {
-            if (param.type.mapValueType.fixed != Apidoc.Type.UNKNOWN)
-                return;
-            error = "unknown map value type";
-        }
-        else if (param.type.variantValueTypes != null)
-        {
-            for (final TypeInfo variantType: param.type.variantValueTypes)
-            {
-                if (variantType.fixed == Apidoc.Type.UNKNOWN)
-                {
-                    error = "unknown variant value type `" + variantType.name + "`";
-                    break;
-                }
-            }
-            if (error == null)
-                return;
-        }
-        throw new Error(description.function.method + " " + description.urlPrefix + "/" +
-            description.function.name + ": " + error + " of " + (isResult ? "result " : "") +
-            "parameter \"" + param.name + "\".");
+
+        String error = param.type.unknownTypeError();
+        if (error != null)
+            throw new Error(prefix + error + " of parameter \"" + param.name + "\".");
     }
 
     private void throwErrorIfExampleTypeInvalid(

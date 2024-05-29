@@ -1,0 +1,81 @@
+{
+  "tags": [{
+    "name": "Test",
+    "description": ""
+  }],
+  "components": {
+    "parameters": {},
+    "schemas": {}
+  },
+  "paths": {"/rest/test": {"post": {
+    "requestBody": {
+      "content": {"application/json": {"schema": {
+        "type": "object",
+        "properties": {"field": {
+          "type": "object",
+          "properties": {"notFoundField": {
+            "nullable": true,
+            "oneOf": [{
+              "type": "object",
+              "properties": {"field": {"type": "integer"}},
+              "required": ["field"]
+            }]
+          }},
+          "required": ["notFoundField"]
+        }},
+        "required": ["field"]
+      }}},
+      "required": true
+    },
+    "responses": {"default": {
+      "description": "",
+      "content": {"application/json": {"schema": {
+        "type": "object",
+        "properties": {
+          "notFoundParentField": {
+            "type": "object",
+            "properties": {"notFoundField": {
+              "nullable": true,
+              "oneOf": [{
+                "type": "object",
+                "properties": {"field": {"type": "integer"}},
+                "required": ["field"]
+              }]
+            }},
+            "required": ["notFoundField"]
+          },
+          "notFoundObjectField": {
+            "type": "object",
+            "properties": {"field": {"type": "integer"}},
+            "required": ["field"]
+          },
+          "notFoundVariantField": {
+            "nullable": true,
+            "oneOf": [{
+              "type": "object",
+              "properties": {"field": {"type": "integer"}},
+              "required": ["field"]
+            }]
+          },
+          "notFoundStringField": {"type": "string"},
+          "notFoundFieldOverriddenInFunction": {
+            "nullable": true,
+            "oneOf": [{
+              "type": "object",
+              "properties": {"field": {"type": "integer"}},
+              "required": ["field"]
+            }]
+          }
+        },
+        "required": [
+          "notFoundParentField",
+          "notFoundObjectField",
+          "notFoundVariantField",
+          "notFoundStringField",
+          "notFoundFieldOverriddenInFunction"
+        ]
+      }}}
+    }},
+    "tags": ["Test"]
+  }}}
+}

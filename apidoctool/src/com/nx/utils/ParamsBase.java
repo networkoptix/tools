@@ -149,7 +149,7 @@ public abstract class ParamsBase
 
     //---------------------------------------------------------------------------------------------
 
-    private void parsePropertiesFile(File file)
+    public void parsePropertiesFile(File file)
     {
         Properties properties = new Properties();
         try

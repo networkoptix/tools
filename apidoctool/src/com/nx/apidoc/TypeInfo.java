@@ -19,6 +19,14 @@ public final class TypeInfo
     public static final String mapKeyPlaceholder = "*";
     public static final String nullType = "nullptr_t";
 
+    public boolean isParsed()
+    {
+        return fixed != Apidoc.Type.UNKNOWN
+            || (name != null && !name.isEmpty())
+            || mapValueType != null
+            || variantValueTypes != null;
+    }
+
     public void fillFromLabel(final String label) throws Exception
     {
         if (label.startsWith("{") && label.endsWith("}"))
@@ -292,6 +300,30 @@ public final class TypeInfo
             name = Utils.removeCppNamespaces(checkType);
         }
         return type.substring(firstType.length()).trim();
+    }
+
+    public String unknownTypeError()
+    {
+        if (mapValueType == null && variantValueTypes == null)
+        {
+            if (fixed != Apidoc.Type.UNKNOWN)
+                return null;
+            return "unknown type `" + name + "`";
+        }
+
+        if (mapValueType != null)
+        {
+            if (mapValueType.fixed != Apidoc.Type.UNKNOWN)
+                return null;
+            return "unknown map value type `" + mapValueType.name + "`";
+        }
+
+        for (final TypeInfo variantType: variantValueTypes)
+        {
+            if (variantType.fixed == Apidoc.Type.UNKNOWN)
+                return "unknown variant value type `" + variantType.name + "`";
+        }
+        return null;
     }
 
     private static final Map<Apidoc.Type, List<String>> basicTypeAliases =

@@ -250,13 +250,39 @@ public final class StructParser
         final StructInfo.Field field = new StructInfo.Field();
         field.name = name;
         field.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
-        try
+        boolean overridden = false;
+        if (field.items != null && !field.items.isEmpty())
         {
-            field.type.fillFromName(type);
+            final ApidocTagParser.Item item = field.items.get(0);
+            if (ApidocComment.TAG_APIDOC.equals(item.getTag()))
+            {
+                final String label = field.items.get(0).getLabel();
+                if (label != null && !label.isEmpty())
+                {
+                    try
+                    {
+                        field.type.fillFromLabel(label);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Error("Invalid overridden type \"" + label + "\" for field \"" +
+                            type + " " + name + "\" found: " + e.getMessage() + ".");
+                    }
+                    overridden = field.type.isParsed();
+                }
+            }
         }
-        catch (Exception e)
+
+        if (!overridden)
         {
-            throw new Error(e.getMessage());
+            try
+            {
+                field.type.fillFromName(type);
+            }
+            catch (Exception e)
+            {
+                throw new Error(e.getMessage());
+            }
         }
         final String chronoSuffix = TypeInfo.chronoSuffix(field.type.name);
         if (chronoSuffix != null

@@ -19,7 +19,6 @@ public final class VmsCodeToJsonExecutor
     public File vmsPath;
     public File openApiTemplateJsonFile; //< Can be null if not needed.
     public File outputOpenApiJsonFile;
-
     private List<Replacement> urlPrefixReplacements;
     private List<ApiVersion> apiVersions = new ArrayList<>();
     private Apidoc apidoc;
@@ -55,9 +54,8 @@ public final class VmsCodeToJsonExecutor
                         return lhs.getName().compareTo(rhs.getName());
                     }
                 });
-            typeManager = new TypeManager(verbose, params.invalidChronoFieldSuffixIsError(),
-                params.unknownParamTypeIsError());
-            typeManager.processFiles(typeHeaders);
+            typeManager = new TypeManager(verbose);
+            typeManager.processFiles(typeHeaders, params.invalidChronoFieldSuffixIsError());
         }
 
         urlPrefixReplacements = Replacement.parse(params.urlPrefixReplacement());

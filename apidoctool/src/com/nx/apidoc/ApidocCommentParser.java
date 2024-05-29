@@ -45,8 +45,7 @@ public final class ApidocCommentParser
     public static Apidoc.Param parseParam(
         List<ApidocTagParser.Item> tags,
         ParamDirection paramDirection,
-        ParamMode paramMode,
-        TypeManager typeManager)
+        ParamMode paramMode)
         throws Error
     {
         if (tags == null)
@@ -59,7 +58,7 @@ public final class ApidocCommentParser
             final ApidocTagParser.Item item = tagIterator.next();
 
             final Apidoc.Param result =
-                parser.parseParam(item, tagIterator, paramDirection, paramMode, typeManager);
+                parser.parseParam(item, tagIterator, paramDirection, paramMode);
 
             if (tagIterator.hasNext())
             {
@@ -76,8 +75,7 @@ public final class ApidocCommentParser
         List<ApidocTagParser.Item> tags,
         String namePrefix,
         ParamDirection paramDirection,
-        ParamMode paramMode,
-        TypeManager typeManager)
+        ParamMode paramMode)
         throws Error
     {
         List<Apidoc.Param> result = new ArrayList<Apidoc.Param>();
@@ -91,7 +89,7 @@ public final class ApidocCommentParser
             if (TAG_PARAM.equals(item.getTag()))
             {
                 final Apidoc.Param param =
-                    parser.parseParam(item, tagIterator, paramDirection, paramMode, typeManager);
+                    parser.parseParam(item, tagIterator, paramDirection, paramMode);
                 checkDuplicateParam(item, result, param.name);
                 param.name = namePrefix + param.name;
                 result.add(param);
@@ -214,6 +212,11 @@ public final class ApidocCommentParser
             }
             else if (TAG_STRUCT.equals(item.getTag()))
             {
+                if (description.function.input.type.isParsed())
+                {
+                    throw new Error(item.getErrorPrefix() +
+                        "%apidoc type and %struct can not be both specified.");
+                }
                 structParsed = checkTagOnce(item, structParsed, TAG_STRUCT);
                 if (ATTR_OPT.equals(item.getAttribute()))
                     description.function.input.optional = true;
@@ -262,7 +265,7 @@ public final class ApidocCommentParser
             else if (TAG_PARAM.equals(item.getTag()))
             {
                 final Apidoc.Param param = parseParam(
-                    item, tagIterator, ParamDirection.Input, ParamMode.WithToken, typeManager);
+                    item, tagIterator, ParamDirection.Input, ParamMode.WithToken);
 
                 checkDuplicateParam(item, description.function.input.params, param.name);
                 if (param.unused)
@@ -430,8 +433,7 @@ public final class ApidocCommentParser
         ApidocTagParser.Item item,
         ListIterator<ApidocTagParser.Item> tagIterator,
         ParamDirection paramDirection,
-        ParamMode paramMode,
-        TypeManager typeManager)
+        ParamMode paramMode)
         throws Error
     {
         int paramIndentLevel = 0;
@@ -461,17 +463,15 @@ public final class ApidocCommentParser
         param.values.addAll(paramDescription.values);
         if (paramDescription.structName != null && !paramDescription.structName.isEmpty())
         {
-            param.type.name = paramDescription.structName;
-            typeManager.correctType(param.type);
-            if (param.type.fixed != Apidoc.Type.ARRAY
-                && param.type.fixed != Apidoc.Type.OBJECT
-                && param.type.fixed != Apidoc.Type.UNKNOWN)
+            if ((param.type.fixed != Apidoc.Type.OBJECT
+                    && param.type.fixed != Apidoc.Type.ARRAY
+                    && param.type.fixed != Apidoc.Type.UNKNOWN)
+                || (param.type.name != null && !param.type.name.isEmpty()))
             {
-                throw new Error(
-                    "Param `" + param.name + "` has %struct tag, but the param type is `"
-                        + param.type.fixed + "`" + ". "
-                        + "To use %struct tag, the type must be `object` or `array`.");
+                throw new Error(item.getErrorPrefix() + "Param `" + param.name +
+                    "` can not have %struct tag as it has a type specified.");
             }
+            param.type.name = paramDescription.structName;
         }
         param.deprecated = paramDescription.deprecated;
         param.deprecatedDescription = paramDescription.deprecatedDescription;
@@ -663,11 +663,21 @@ public final class ApidocCommentParser
 
         boolean deprecatedAttributeTagFound = false;
         boolean exampleParsed = false;
+        boolean structParsed = false;
         while (tagIterator.hasNext())
         {
             item = tagIterator.next();
             if (TAG_STRUCT.equals(item.getTag()))
             {
+                if ((result.type.fixed != Apidoc.Type.OBJECT
+                    && result.type.fixed != Apidoc.Type.ARRAY
+                    && result.type.fixed != Apidoc.Type.UNKNOWN)
+                    || (result.type.name != null && !result.type.name.isEmpty()))
+                {
+                    throw new Error(item.getErrorPrefix() +
+                        "%return type and %struct can not be both specified.");
+                }
+                structParsed = checkTagOnce(item, structParsed, TAG_STRUCT);
                 try
                 {
                     result.type.fillFromName(item.getFullText(indentLevel));
@@ -679,8 +689,8 @@ public final class ApidocCommentParser
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {
-                Apidoc.Param param = parseParam(
-                    item, tagIterator, ParamDirection.Output, ParamMode.WithToken, typeManager);
+                Apidoc.Param param =
+                    parseParam(item, tagIterator, ParamDirection.Output, ParamMode.WithToken);
 
                 checkDuplicateParam(item, result.params, param.name);
                 if (param.unused)

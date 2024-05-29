@@ -375,7 +375,7 @@ public final class Tests extends TestBase
         TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(templateFunctionsCppFile);
-        typeManager.processFiles(files);
+        typeManager.processFiles(files, /*invalidChronoFieldSuffixIsError*/ false);
 
         System.out.println("test: parsing apidoc in \"template\" functions C++");
         System.out.println("    Sample: " + expectedTemplateFunctionsJsonFile);
@@ -415,7 +415,7 @@ public final class Tests extends TestBase
         TypeManager typeManager = new TypeManager(/*verbose*/ true);
         List<File> files = new ArrayList<File>();
         files.add(handlerFunctionsCppFile);
-        typeManager.processFiles(files);
+        typeManager.processFiles(files, /*invalidChronoFieldSuffixIsError*/ false);
 
         System.out.println("test: parsing apidoc in \"handler\" functions C++");
         System.out.println("    Sample: " + expectedHandlerFunctionsJsonFile);
@@ -522,6 +522,51 @@ public final class Tests extends TestBase
         assertFileContentsEqual(expectedOpenApiJsonFile, executor.outputOpenApiJsonFile);
     }
 
+    private void notFoundException(
+        final VmsCodeToJsonExecutor executor, final String expectedMessage) throws Exception
+    {
+        String actualMessage = "";
+        boolean testFailed = false;
+        try
+        {
+            executor.execute();
+            testFailed = true;
+        }
+        catch (Exception e)
+        {
+            actualMessage = e.getMessage();
+            if (!actualMessage.endsWith(expectedMessage))
+                testFailed = true;
+        }
+        if (testFailed)
+        {
+            throw new Exception("Expected exception thrown with message: `" + expectedMessage
+                + "`, actual message is `" + actualMessage + "`.");
+        }
+    }
+
+    private void notFound() throws Exception
+    {
+        final VmsCodeToJsonExecutor executor = new VmsCodeToJsonExecutor();
+        executor.verbose = verbose;
+        executor.vmsPath = new File(vmsPath, "../notfound");
+        executor.params = new Params();
+
+        final File path = new File(testPath, "notfound");
+        executor.params.parsePropertiesFile(new File(path, "field.properties"));
+        notFoundException(
+            executor, "GET /rest/test: unknown type `NotFound` of parameter \"field\".");
+        executor.params.parsePropertiesFile(new File(path, "parent.properties"));
+        notFoundException(executor, "Base structure `NotFound` of `NotFoundParent` not found.");
+        executor.params.parsePropertiesFile(new File(path, "struct.properties"));
+        notFoundException(executor, "GET /rest/test: unknown type `NotFound`.");
+
+        executor.params.parsePropertiesFile(new File(path, "overridden.properties"));
+        executor.outputOpenApiJsonFile = new File(outputTestPath, "notfound_overridden.json");
+        executor.execute();
+        assertFileContentsEqual(new File(path, "overridden.json"), executor.outputOpenApiJsonFile);
+    }
+
     //---------------------------------------------------------------------------------------------
 
     private final boolean verbose;
@@ -581,6 +626,9 @@ public final class Tests extends TestBase
 
         run("VmsCodeToJsonExecutor", new Run() { public void run() throws Exception {
             testVmsCodeToJsonExecutor(); } });
+
+        run("NotFound", new Run() { public void run() throws Exception {
+            notFound(); } });
 
         printFinalMessage();
     }
