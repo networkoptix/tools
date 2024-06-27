@@ -23,7 +23,7 @@ public class Main
 "         api.json\n" +
 "             Complete Apidoc documentation.\n" +
 "         nx_vms/appserver2/src/connection_factory.cpp\n" +
-"             Source code with /ec2 handler registration calls,with no Apidoc comments.\n" +
+"             Source code with /ec2 handler registration calls, with no Apidoc comments.\n" +
 "\n" +
 " code-to-json -vms-path <nx_vms> [-openapi-template-json <file>] -output-openapi-json <file>\n" +
 "     Parse Apidoc comments in the code, and generate OpenAPI JSON, using the\n" +

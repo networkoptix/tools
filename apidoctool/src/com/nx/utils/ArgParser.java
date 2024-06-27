@@ -182,7 +182,7 @@ public abstract class ArgParser
             " " + command + " -version|--version\n" +
             "\n" +
             "Execute action:\n" +
-            " " + command + " [-verbose] <action> {-<key> [<value>}]...\n");
+            " " + command + " [-verbose] <action> {-<key> [<value>]}...\n");
 
         printUsageHelp();
     }
