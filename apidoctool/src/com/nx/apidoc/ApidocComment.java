@@ -69,7 +69,8 @@ public abstract class ApidocComment
 // If an API function's input, result, or a certain param is an object or an object array, the
 // fields and apidoc comments from its C++ struct can be embedded by specifying the
 // "%struct StructName" tag instead of or additionally (prepending) to "%param" tags for the
-// object fields. If "%param" tags are specified after the "%struct" tag, they override comments // coming from the struct. If the "%struct" tag follows some "%param" tag, it is considered to
+// object fields. If "%param" tags are specified after the "%struct" tag, they override comments
+// coming from the struct. If the "%struct" tag follows some "%param" tag, it is considered to
 // describe the inner fields of that "%param".
 //
 // Each API method documentation is always multiline, and may contain multiple sections (each

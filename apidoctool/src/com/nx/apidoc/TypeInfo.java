@@ -192,7 +192,7 @@ public final class TypeInfo
         return result.substring(1).trim();
     }
 
-    private String extractChronoType(final String type) throws Exception
+    private String extractChronoType(final String type)
     {
         final String firstType = type.split("[>, ]")[0];
         final String checkType = Utils.removeCppNamespaces(firstType.trim());

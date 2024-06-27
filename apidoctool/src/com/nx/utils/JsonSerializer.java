@@ -97,13 +97,7 @@ public final class JsonSerializer
             json.put(name, value);
         }
 
-        public void writeStringAttr(
-            String name, String value, Serializable.Emptiness emptiness)
-        {
-            writeStringValue(name, value, emptiness, "string attribute");
-        }
-
-        public void writeBooleanAttr(
+        public void writeBoolean(
             String name, boolean value, Serializable.BooleanDefault booleanDefault)
         {
             if (booleanDefault == Serializable.BooleanDefault.FALSE && value == false)
@@ -116,12 +110,6 @@ public final class JsonSerializer
         public void writeString(String name, String value, Serializable.Emptiness emptiness)
         {
             writeStringValue(name, value, emptiness, "string");
-        }
-
-        public void writeBoolean(
-            String name, boolean value, Serializable.BooleanDefault booleanDefault)
-        {
-            writeBooleanAttr(name, value, booleanDefault);
         }
 
         public void writeInnerXml(String name, String xml, Serializable.Emptiness emptiness)
@@ -241,8 +229,12 @@ public final class JsonSerializer
             return value;
         }
 
-        private boolean readBooleanField(
-            String name, Serializable.BooleanDefault booleanDefault, String fieldTypeName)
+        public String readString(String name, Serializable.Presence presence) throws Error
+        {
+            return readStringField(name, presence, "string");
+        }
+
+        public boolean readBoolean(String name, Serializable.BooleanDefault booleanDefault)
             throws Error
         {
             if (jsonObject == null)
@@ -252,7 +244,7 @@ public final class JsonSerializer
             if (jsonObject.opt(name) == null)
             {
                 if (booleanDefault == Serializable.BooleanDefault.NONE)
-                    throw new Error("Required " + fieldTypeName + " field is missing: " + fullName);
+                    throw new Error("Required boolean field is missing: " + fullName);
                 return booleanDefault == Serializable.BooleanDefault.TRUE;
             }
 
@@ -262,32 +254,9 @@ public final class JsonSerializer
             }
             catch (JSONException e)
             {
-                throw new Error("Invalid " + fieldTypeName + " value in " + fullName + ": "
+                throw new Error("Invalid boolean value in " + fullName + ": "
                     + e.getMessage());
             }
-        }
-
-        public String readStringAttr(
-            String attrName, Serializable.Presence presence) throws Error
-        {
-            return readStringField(attrName, presence, "string (attribute)");
-        }
-
-        public boolean readBooleanAttr(String attrName, Serializable.BooleanDefault booleanDefault)
-            throws Error
-        {
-            return readBooleanField(attrName, booleanDefault, "boolean (attribute)");
-        }
-
-        public String readString(String name, Serializable.Presence presence) throws Error
-        {
-            return readStringField(name, presence, "string");
-        }
-
-        public boolean readBoolean(String name, Serializable.BooleanDefault booleanDefault)
-            throws Error
-        {
-            return readBooleanField(name, booleanDefault, "boolean");
         }
 
         public String readInnerXml(String name, Serializable.Presence presence) throws Error

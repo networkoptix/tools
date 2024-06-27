@@ -31,11 +31,6 @@ public class SourceCode
             return "Error in " + fileLineRef + ": " + message;
         }
 
-        public Error(File file, int line, String message, Throwable cause)
-        {
-            super(makeMessage(file, line, message), cause);
-        }
-
         public Error(File file, int line, String message)
         {
             super(makeMessage(file, line, message));
@@ -49,7 +44,6 @@ public class SourceCode
     {
         this.file = file;
         lines = Utils.readAllLines(file);
-        lineBreak = Utils.determineLineBreak(file);
     }
 
     /**
@@ -57,11 +51,12 @@ public class SourceCode
      * including the line matching lastLineRegex. After the block of lines is identified, the lines
      * are concatenated replacing line breaks with spaces, and the result is matched with
      * groupRegex.
+     *
      * @param firstLineRegex Should match the first line of the block, otherwise, null is returned.
      * @param lastLineRegex Defines the last line of the block. The last line can be the first line
      *     if it matches both firstLineRegex and lastLineRegex.
      * @return Matched groups in groupRegex (strings may be empty but never null), or null if the
-     *     first line does not match firstLineRegex.
+     * first line does not match firstLineRegex.
      * @throw Error if groupRegex is not matched.
      */
     public final String[] matchMultiline(
@@ -94,10 +89,8 @@ public class SourceCode
         String[] result = Utils.matchRegex(groupRegex, text);
         if (result == null)
         {
-            throw new Error(file, firstLine, "No match for regex: " +
-                groupRegex.pattern() + "\n" +
-                "Text:\n" +
-                text);
+            throw new Error(file, firstLine, "No match for regex: " + groupRegex.pattern() + "\n"
+                + "Text:\n" + text);
         }
         return result;
     }
@@ -156,16 +149,8 @@ public class SourceCode
         return lines.size();
     }
 
-    public String getLineBreak()
-    {
-        return lineBreak;
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     protected final File file;
     protected final List<String> lines;
-    protected final String lineBreak;
-
-
 }

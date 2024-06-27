@@ -24,12 +24,6 @@ public abstract class Executor
     //---------------------------------------------------------------------------------------------
 
     /**
-     * Generated source code files have the name of the original source code file with this suffix
-     * inserted before the extension.
-     */
-    protected static final String OUTPUT_FILE_EXTRA_SUFFIX = ".OUT";
-
-    /**
      * Print file path to a vms source file, treated as a relative to the vms source directory.
      */
     protected static void printVmsFile(String filename)

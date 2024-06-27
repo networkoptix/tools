@@ -107,18 +107,18 @@ public final class Apidoc extends Serializable
         protected void readFromParser(Parser p) throws Parser.Error
         {
             setName(p.readString("name", Presence.REQUIRED));
-            unused = p.readBooleanAttr("unused", BooleanDefault.FALSE);
-            proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
-            deprecated = p.readBooleanAttr("deprecated", BooleanDefault.FALSE);
+            unused = p.readBoolean("unused", BooleanDefault.FALSE);
+            proprietary = p.readBoolean("proprietary", BooleanDefault.FALSE);
+            deprecated = p.readBoolean("deprecated", BooleanDefault.FALSE);
             description = p.readInnerXml("description", Presence.OPTIONAL);
             stripDeprecatedDescriptionFromDescription();
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeBooleanAttr("unused", unused, BooleanDefault.FALSE);
-            g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
-            g.writeBooleanAttr("deprecated", deprecated, BooleanDefault.FALSE);
+            g.writeBoolean("unused", unused, BooleanDefault.FALSE);
+            g.writeBoolean("proprietary", proprietary, BooleanDefault.FALSE);
+            g.writeBoolean("deprecated", deprecated, BooleanDefault.FALSE);
 
             g.writeString(
                 "name",
@@ -371,7 +371,7 @@ public final class Apidoc extends Serializable
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
+            proprietary = p.readBoolean("proprietary", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
             type.fixed = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             description = p.readInnerXml("description", Presence.OPTIONAL);
@@ -382,7 +382,7 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             if (proprietary)
-                g.writeBooleanAttr("proprietary", true, BooleanDefault.NONE);
+                g.writeBoolean("proprietary", true, BooleanDefault.NONE);
 
             g.writeString("name", name, Emptiness.PROHIBIT);
             g.writeEnum("type", type.fixed, Type.class, EnumDefault.OMIT);
@@ -402,19 +402,11 @@ public final class Apidoc extends Serializable
 
     public static class InOutData extends Serializable
     {
-        public TypeInfo type;
-        public List<Param> unusedParams; ///< Internal field.
-        public List<Param> params; ///< optional
-        public boolean optional; ///< attribute; optional(false)
-        public String example; ///< tag; optional
-
-        public InOutData()
-        {
-            type = new TypeInfo();
-            params = new ArrayList<Param>();
-            unusedParams = new ArrayList<Param>();
-            example = "";
-        }
+        public TypeInfo type = new TypeInfo();
+        public List<Param> unusedParams = new ArrayList<Param>(); ///< Internal field.
+        public List<Param> params = new ArrayList<Param>(); ///< optional
+        public boolean optional = false; ///< attribute; optional(false)
+        public String example = ""; ///< tag; optional
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
@@ -433,7 +425,7 @@ public final class Apidoc extends Serializable
 
     public static final class Result extends InOutData
     {
-        public String caption; ///< optional
+        public String caption = ""; ///< optional
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
@@ -454,20 +446,14 @@ public final class Apidoc extends Serializable
         public boolean proprietary; ///< attribute; optional(false)
         public boolean deprecated; ///< attribute; optional(false)
         public String name;
-        public String caption; ///< optional
-        public List<String> groups;
+        public String caption = ""; ///< optional
+        public List<String> groups = new ArrayList<String>();
         public String description; ///< optional
         public String permissions; ///< optional
         public String method; ///< optional
         public String deprecatedDescription = ""; ///< optional
-        public InOutData input; ///< optional
-        public Result result; ///< optional
-
-        public Function()
-        {
-            groups = new ArrayList<String>();
-            input = new InOutData();
-        }
+        public InOutData input = new InOutData(); ///< optional
+        public Result result = new Apidoc.Result(); ///< optional
 
         public boolean areInBodyParameters()
         {
@@ -487,7 +473,7 @@ public final class Apidoc extends Serializable
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
+            proprietary = p.readBoolean("proprietary", BooleanDefault.FALSE);
             arrayParams = p.readBoolean("arrayParams", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
             caption = p.readString("caption", Presence.OPTIONAL);
@@ -501,7 +487,7 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             if (proprietary)
-                g.writeBooleanAttr("proprietary", true, BooleanDefault.NONE);
+                g.writeBoolean("proprietary", true, BooleanDefault.NONE);
 
             g.writeBoolean("arrayParams", arrayParams, BooleanDefault.FALSE);
             g.writeString("name", name, Emptiness.PROHIBIT);

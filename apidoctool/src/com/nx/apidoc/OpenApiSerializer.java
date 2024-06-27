@@ -564,9 +564,6 @@ public final class OpenApiSerializer
         {
             if (orderBy == null)
                 orderBy = orderByTemplate();
-            final String arrayName = (lastCharOfArrayName == -1)
-                ? ""
-                : param.name.substring(0, lastCharOfArrayName);
             final JSONObject schema = orderBy.getJSONObject("schema");
             final JSONArray enum_ = getArray(schema.getJSONObject("items"), "enum");
             enum_.put(param.name);

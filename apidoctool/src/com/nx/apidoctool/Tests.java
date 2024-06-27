@@ -505,14 +505,11 @@ public final class Tests extends TestBase
     private void testVmsCodeToJsonExecutor()
         throws Exception
     {
-        final File openApiTemplateJsonFile = new File(testPath, "api_template.json");
-        final File generatedOpenApiJsonFile = new File(outputTestPath, "openapi.FROM_CPP.json");
-
         final VmsCodeToJsonExecutor executor = new VmsCodeToJsonExecutor();
         executor.verbose = verbose;
         executor.vmsPath = vmsPath;
-        executor.openApiTemplateJsonFile = openApiTemplateJsonFile;
-        executor.outputOpenApiJsonFile = generatedOpenApiJsonFile;
+        executor.openApiTemplateJsonFile = new File(testPath, "api_template.json");
+        executor.outputOpenApiJsonFile = new File(outputTestPath, "openapi.FROM_CPP.json");
         executor.params = params;
 
         final int processedFunctionsCount = executor.execute();
@@ -522,7 +519,7 @@ public final class Tests extends TestBase
                 + " API functions but processed " + processedFunctionsCount);
         }
 
-        assertFileContentsEqual(expectedOpenApiJsonFile, generatedOpenApiJsonFile);
+        assertFileContentsEqual(expectedOpenApiJsonFile, executor.outputOpenApiJsonFile);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -536,7 +533,6 @@ public final class Tests extends TestBase
     private final File outputTestPath;
     private final File testPropertiesFile;
     private final File vmsPath;
-    private final File outputVmsPath;
     private final File expectedApiJsonFile;
     private final File expectedOpenApiJsonFile;
 
@@ -555,7 +551,6 @@ public final class Tests extends TestBase
         this.sourceCodeParserOutputTestPath = new File(outputTestPath, "source_code_parser");
         this.testPropertiesFile = new File(testPath, "test.properties");
         this.vmsPath = new File(testPath, "nx_vms");
-        this.outputVmsPath = new File(outputTestPath, "nx_vms");
         this.expectedApiJsonFile = new File(testPath, "expected_api.json");
         this.expectedOpenApiJsonFile = new File(testPath, "expected_openapi.json");
         sourceCodeParserOutputTestPath.mkdirs();

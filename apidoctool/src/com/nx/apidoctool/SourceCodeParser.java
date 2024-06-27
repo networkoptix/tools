@@ -21,11 +21,6 @@ public final class SourceCodeParser
     public final class Error
         extends Exception
     {
-        public Error(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
-
         public Error(String message)
         {
             super(sourceCode.getFilename() + ":" + mainLine + ": " + message);

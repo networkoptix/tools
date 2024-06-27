@@ -19,10 +19,9 @@ public final class VmsCodeToJsonExecutor
     public File vmsPath;
     public File openApiTemplateJsonFile; //< Can be null if not needed.
     public File outputOpenApiJsonFile;
-    public List<Replacement> urlPrefixReplacements;
-    public List<ApiVersion> apiVersions = new ArrayList<>();
-    public boolean enableEnumValueMerge = false;
 
+    private List<Replacement> urlPrefixReplacements;
+    private List<ApiVersion> apiVersions = new ArrayList<>();
     private Apidoc apidoc;
 
     public int execute()
@@ -32,7 +31,7 @@ public final class VmsCodeToJsonExecutor
 
         if (openApiTemplateJsonFile != null)
             System.out.println("    Input: " + openApiTemplateJsonFile);
-        System.out.println("    Input: " + vmsPath + vmsPath.separatorChar);
+        System.out.println("    Input: " + vmsPath + File.separatorChar);
         apidoc = new Apidoc();
 
         // Add legacy API predefined groups.

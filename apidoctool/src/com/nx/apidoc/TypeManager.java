@@ -68,8 +68,7 @@ public final class TypeManager
             function.result.params = mergeStructParams(
                 outputType,
                 function.result.params,
-                function.result.unusedParams,
-                ApidocCommentParser.ParamDirection.Input);
+                function.result.unusedParams);
             if (function.result.caption.isEmpty())
             {
                 // Take the function result caption from the output struct description.
@@ -82,8 +81,7 @@ public final class TypeManager
             function.input.params = mergeStructParams(
                 inputType,
                 function.input.params,
-                function.input.unusedParams,
-                ApidocCommentParser.ParamDirection.Input);
+                function.input.unusedParams);
         }
     }
 
@@ -120,7 +118,7 @@ public final class TypeManager
         if (copy.retainAll(all) && !copy.isEmpty())
         {
             throw new Error("Found " + setType + ": " + copy +
-                " intersection in file " + file.getName() + ".");
+                " intersection in file " + file);
         }
     }
 
@@ -155,11 +153,11 @@ public final class TypeManager
     private List<Apidoc.Param> mergeStructParams(
         TypeInfo type,
         List<Apidoc.Param> functionParams,
-        List<Apidoc.Param> unusedParams,
-        ApidocCommentParser.ParamDirection paramDirection)
+        List<Apidoc.Param> unusedParams)
         throws Error
     {
-        List<Apidoc.Param> structParams = getStructParams(type, "", paramDirection);
+        List<Apidoc.Param> structParams = getStructParams(
+            type, /*prefix*/ "", ApidocCommentParser.ParamDirection.Input);
         if (structParams.isEmpty())
             return functionParams;
 

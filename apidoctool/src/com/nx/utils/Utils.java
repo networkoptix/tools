@@ -80,44 +80,6 @@ public final class Utils
         return new String(chars);
     }
 
-    public static String determineLineBreak(File file)
-        throws IOException
-    {
-        // Read the file backwards byte-after-byte.
-        RandomAccessFile f = new RandomAccessFile(file, "r");
-        long pos = f.length() - 1;
-        while (pos >= 0)
-        {
-            f.seek(pos);
-            switch (f.readByte())
-            {
-                case '\n':
-                    if (pos > 0)
-                    {
-                        f.seek(pos - 1);
-                        if (f.readByte() == '\r')
-                            return "\r\n";
-                    }
-                    return "\n";
-                case '\r':
-                    return "\r";
-                default:
-                    --pos;
-            }
-        }
-
-        // Return default value if there is no line breaks in the file.
-        return "\n";
-    }
-
-    public static void indentStrings(List<String> strings, int indent)
-    {
-        final String indentString = stringOfSpaces(indent);
-
-        for (int i = 0; i < strings.size(); ++i)
-            strings.set(i, indentString + strings.get(i));
-    }
-
     public static String trimRight(String value)
     {
         int length = value.length();
@@ -290,33 +252,6 @@ public final class Utils
         }
     }
 
-    /**
-     * Insert the specified suffix before the file extension (if any).
-     */
-    public static File insertSuffix(File file, String suffix)
-    {
-        final String[] pathAndExtension = matchRegex(pathAndExtensionPattern, file.getPath());
-
-        if (pathAndExtension == null) //< The file has no extension.
-            return new File(file + suffix);
-
-        return new File(pathAndExtension[0] + suffix + pathAndExtension[1]);
-    }
-
-    /**
-     * Change (or add, if there was none) the extension.
-     * @param newExtension Should include leading dot.
-     */
-    public static File replaceExtension(File file, String newExtension)
-    {
-        final String[] pathAndExtension = matchRegex(pathAndExtensionPattern, file.getPath());
-
-        if (pathAndExtension == null) //< The file has no extension.
-            return new File(file + newExtension);
-
-        return new File(pathAndExtension[0] + newExtension);
-    }
-
     public static <T> T createObject(Class<T> objClass)
     {
         try
@@ -332,9 +267,4 @@ public final class Utils
             throw new IllegalStateException(e);
         }
     }
-
-    //---------------------------------------------------------------------------------------------
-
-    private static final Pattern pathAndExtensionPattern = Pattern.compile(
-        "(.*)(\\.[^./\\\\]+)");
 }

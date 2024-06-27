@@ -14,11 +14,6 @@ public final class ApidocUtils
     public static final class Error
         extends Exception
     {
-        public Error(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
-
         public Error(String message)
         {
             super(message);
@@ -67,55 +62,6 @@ public final class ApidocUtils
         return group;
     }
 
-    /**
-     * Move all functions from newGroup to the group with the same name in
-     * apidoc, replacing old functions with the same name.
-     */
-    public static void replaceFunctions(Apidoc apidoc, Apidoc.Group newGroup)
-        throws Error
-    {
-        for (Apidoc.Group group: apidoc.groups)
-        {
-            if (group.groupName.equals(newGroup.groupName))
-            {
-                replaceFunctionsInGroup(group, newGroup);
-                return;
-            }
-        }
-        throw new Error("Group not found in Apidoc by URL prefix: [" + newGroup.groupName + "]");
-    }
-
-    private static void replaceFunctionsInGroup(
-        Apidoc.Group group, Apidoc.Group newGroup)
-    {
-        for (Iterator<Apidoc.Function> newFuncIt =
-             newGroup.functions.listIterator(); newFuncIt.hasNext();)
-        {
-            Apidoc.Function newFunc = newFuncIt.next();
-
-            boolean found = false;
-            for (ListIterator<Apidoc.Function> funcIt =
-                 group.functions.listIterator(); funcIt.hasNext();)
-            {
-                Apidoc.Function func = funcIt.next();
-                if (func.name.equals(newFunc.name))
-                {
-                    funcIt.set(newFunc);
-                    newFuncIt.remove();
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                group.functions.add(newFunc);
-                newFuncIt.remove();
-            }
-        }
-
-        sortGroup(group);
-    }
-
     public static void sortGroups(Apidoc apidoc, List<String> groupNames)
     {
         if (groupNames == null)
@@ -153,35 +99,5 @@ public final class ApidocUtils
                 return false;
         }
         return true;
-    }
-
-    /**
-     * @return false if duplicate function found in entire group.
-     */
-    public static void checkNoFunctionDuplicates(Apidoc apidoc) throws Error
-    {
-        for (Apidoc.Group group: apidoc.groups)
-        {
-            final Set<String> uniques = new HashSet();
-            for (Apidoc.Function function: group.functions)
-            {
-                if (!uniques.add(function.name + function.method))
-                    throw new Error("Duplicate function found: [" + function.name + "]");
-            }
-        }
-    }
-
-    /**
-     * @return null if not found.
-     */
-    public static Apidoc.Function findFunction(
-        Apidoc.Group group, String functionName)
-    {
-        for (Apidoc.Function function: group.functions)
-        {
-            if (function.name.equals(functionName))
-                return function;
-        }
-        return null;
     }
 }

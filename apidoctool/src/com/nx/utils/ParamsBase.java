@@ -41,8 +41,11 @@ public abstract class ParamsBase
     protected StringBuilder regStringParam(String name, String defaultValue, String description)
     {
         StringBuilder pValue = new StringBuilder(defaultValue);
-        if (params.contains(name))
-            throw new IllegalArgumentException("Param \"" + name + "\" already registered.");
+        for (final AbstractParam param: params)
+        {
+            if (param.name.equals(name))
+                throw new IllegalArgumentException("Param \"" + name + "\" already registered.");
+        }
         params.add(new StringParam(name, description, pValue, defaultValue));
         return pValue;
     }

@@ -32,8 +32,8 @@ public final class ApidocCommentParser
 
     public static class FunctionDescription
     {
-        public String urlPrefix;
-        public Apidoc.Function function;
+        public String urlPrefix = "";
+        public Apidoc.Function function = new Apidoc.Function();
     }
 
     public static final class Error
@@ -147,7 +147,6 @@ public final class ApidocCommentParser
     {
         List<Apidoc.Value> values;
         String structName;
-        boolean proprietary = false;
         boolean deprecated = false;
         String deprecatedDescription = "";
         String example = "";
@@ -191,16 +190,11 @@ public final class ApidocCommentParser
                 break;
             case TRANSACTION:
                 description = new FunctionDescription();
-                description.urlPrefix = "";
-                description.function = new Apidoc.Function();
                 description.function.description = item.getFullText(indentLevel);
                 break;
             default:
                 throw new IllegalStateException();
         }
-        description.function.caption = "";
-        description.function.result = new Apidoc.Result();
-        description.function.result.caption = "";
 
         while (tagIterator.hasNext())
         {
@@ -369,7 +363,6 @@ public final class ApidocCommentParser
         }
 
         FunctionDescription result = new FunctionDescription();
-        result.urlPrefix = "";
         if (!groups.isEmpty())
         {
             for (Apidoc.Group g: groups)
@@ -384,8 +377,6 @@ public final class ApidocCommentParser
         }
         assert values[1].charAt(0) == '/';
         values[1] = values[1].substring(1); //< Removing initial `/`.
-
-        result.function = new Apidoc.Function();
 
         result.function.method = values[0].trim();
         try
