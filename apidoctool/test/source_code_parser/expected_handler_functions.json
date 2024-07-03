@@ -20,7 +20,8 @@
         "caption": {"xml": "some result description"},
         "params": [{
           "name": "someParam",
-          "description": {"xml": "some result param"}
+          "description": {"xml": "some result param"},
+          "optional": false
         }]
       }
     },
@@ -165,12 +166,14 @@
           {
             "name": "outputParam",
             "type": "integer",
-            "description": {"xml": "outputParam Param description"}
+            "description": {"xml": "outputParam Param description"},
+            "optional": false
           },
           {
             "name": "otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -186,6 +189,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -217,6 +221,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "Enum\ndescription"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -265,7 +270,8 @@
           {
             "name": "someParam",
             "type": "object",
-            "description": {"xml": "description"}
+            "description": {"xml": "description"},
+            "optional": false
           },
           {
             "name": "someParam.elements",
@@ -277,6 +283,7 @@
             "name": "someParam.otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -292,6 +299,7 @@
             "name": "someParam.enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -325,6 +333,7 @@
             "name": "someParam.enumParam",
             "type": "enum",
             "description": {"xml": "Enum\ndescription"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -358,7 +367,8 @@
           {
             "name": "someParam.outputParam",
             "type": "integer",
-            "description": {"xml": "overridden description"}
+            "description": {"xml": "overridden description"},
+            "optional": false
           }
         ]
       }
@@ -382,6 +392,7 @@
             "name": "otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -397,6 +408,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructDerived for SomeStruct::enumParam"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -428,6 +440,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructDerived for SomeStruct::enumParam"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -459,7 +472,8 @@
           {
             "name": "addParam",
             "type": "integer",
-            "description": {"xml": "Additional param"}
+            "description": {"xml": "Additional param"},
+            "optional": false
           }
         ]
       }
@@ -476,7 +490,8 @@
           {
             "name": "nested",
             "type": "object",
-            "description": {"xml": "Nested overriden description"}
+            "description": {"xml": "Nested overriden description"},
+            "optional": false
           },
           {
             "name": "nested.elements",
@@ -488,6 +503,7 @@
             "name": "nested.otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -503,6 +519,7 @@
             "name": "nested.enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructNested for nested SomeStruct::enumParam"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -534,6 +551,7 @@
             "name": "nested.enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>Overriding description in StructNested for nested SomeStruct::enumParam"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -565,7 +583,8 @@
           {
             "name": "addParam",
             "type": "integer",
-            "description": {"xml": "Additional param"}
+            "description": {"xml": "Additional param"},
+            "optional": false
           }
         ]
       }
@@ -581,7 +600,8 @@
         "params": [{
           "name": "field",
           "type": "integer",
-          "description": {"xml": "Description for StructWithDescription::field."}
+          "description": {"xml": "Description for StructWithDescription::field."},
+          "optional": false
         }]
       }
     },
@@ -596,7 +616,8 @@
         "params": [{
           "name": "field",
           "type": "integer",
-          "description": {"xml": "Description for StructWithDescription::field."}
+          "description": {"xml": "Description for StructWithDescription::field."},
+          "optional": false
         }]
       }
     },
@@ -611,7 +632,8 @@
         "params": [{
           "name": "field",
           "type": "integer",
-          "description": {"xml": "Description for StructWithDescription::field."}
+          "description": {"xml": "Description for StructWithDescription::field."},
+          "optional": false
         }]
       }
     },
@@ -729,12 +751,14 @@
           {
             "name": "outputParam",
             "type": "integer",
-            "description": {"xml": "outputParam Param description"}
+            "description": {"xml": "outputParam Param description"},
+            "optional": false
           },
           {
             "name": "otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -750,6 +774,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -781,6 +806,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "Enum\ndescription"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -826,11 +852,13 @@
           {
             "name": "field",
             "type": "integer",
-            "description": {"xml": "Description for StructWithFantomParam::field."}
+            "description": {"xml": "Description for StructWithFantomParam::field."},
+            "optional": false
           },
           {
             "name": "fantomParam",
-            "description": {"xml": "Description of fantomParam which is absent in the struct definition."}
+            "description": {"xml": "Description of fantomParam which is absent in the struct definition."},
+            "optional": false
           }
         ]
       }
@@ -866,17 +894,20 @@
           {
             "name": "resultField",
             "type": "integer",
-            "description": {"xml": "Description of resultField."}
+            "description": {"xml": "Description of resultField."},
+            "optional": false
           },
           {
             "name": "reply",
             "type": "object",
-            "description": {"xml": "Description of Reply."}
+            "description": {"xml": "Description of Reply."},
+            "optional": false
           },
           {
             "name": "reply.replyField",
             "type": "integer",
-            "description": {"xml": "Description of replyField."}
+            "description": {"xml": "Description of replyField."},
+            "optional": false
           }
         ]
       }
@@ -890,12 +921,14 @@
         {
           "name": "reply",
           "type": "object",
-          "description": {"xml": "Description of Reply."}
+          "description": {"xml": "Description of Reply."},
+          "optional": false
         },
         {
           "name": "reply.replyField",
           "type": "integer",
-          "description": {"xml": "Description of replyField."}
+          "description": {"xml": "Description of replyField."},
+          "optional": false
         }
       ]}
     },
@@ -908,12 +941,14 @@
         {
           "name": "reply",
           "type": "object",
-          "description": {"xml": "Description of Reply."}
+          "description": {"xml": "Description of Reply."},
+          "optional": false
         },
         {
           "name": "reply.replyField",
           "type": "integer",
-          "description": {"xml": "Description of replyField."}
+          "description": {"xml": "Description of replyField."},
+          "optional": false
         }
       ]}
     },
@@ -935,12 +970,14 @@
           {
             "name": "outputParam",
             "type": "integer",
-            "description": {"xml": "outputParam Param description"}
+            "description": {"xml": "outputParam Param description"},
+            "optional": false
           },
           {
             "name": "otherParam",
             "type": "integer",
             "description": {"xml": "otherParam Param description"},
+            "optional": false,
             "values": [
               {
                 "proprietary": true,
@@ -958,6 +995,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the param is deprecated<\/p>enumParam param description"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -989,6 +1027,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "Enum\ndescription"},
+            "optional": false,
             "values": [
               {
                 "name": "value1",

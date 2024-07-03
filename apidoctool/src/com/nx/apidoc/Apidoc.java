@@ -182,8 +182,6 @@ public final class Apidoc extends Serializable
     public static final class Param extends Serializable
     {
         public boolean isGeneratedFromStruct = false;
-        private boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
-
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
         public boolean isRef = false; ///< Internal field
@@ -212,8 +210,6 @@ public final class Apidoc extends Serializable
             if (!isGeneratedFromStruct)
                 isGeneratedFromStruct = origin.isGeneratedFromStruct;
             type.fillMissingType(origin.type);
-            if (!omitOptionalFieldIfFalse)
-                omitOptionalFieldIfFalse = origin.omitOptionalFieldIfFalse;
             if (!unused)
                 unused = origin.unused;
             if (!hasDefaultDescription)
@@ -393,9 +389,7 @@ public final class Apidoc extends Serializable
                     ? deprecatedString + description
                     : description,
                 Emptiness.ALLOW);
-            g.writeBoolean(
-                "optional", optional,
-                omitOptionalFieldIfFalse ? BooleanDefault.FALSE : BooleanDefault.NONE);
+            g.writeBoolean("optional", optional, BooleanDefault.NONE);
             g.writeObjectList("values", values, Emptiness.OMIT);
         }
     }
@@ -417,8 +411,6 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             g.writeEnum("type", type.fixed, Type.class, EnumDefault.OMIT);
-            for (Param param: params)
-                param.omitOptionalFieldIfFalse = true;
             g.writeObjectList("params", params, Emptiness.OMIT);
         }
     }

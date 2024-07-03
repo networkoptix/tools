@@ -28,12 +28,14 @@
         "params": [
           {
             "name": "someParam",
-            "description": {"xml": "some result param"}
+            "description": {"xml": "some result param"},
+            "optional": false
           },
           {
             "proprietary": true,
             "name": "proprietaryParam",
-            "description": {"xml": "proprietary result param"}
+            "description": {"xml": "proprietary result param"},
+            "optional": false
           }
         ]
       }
@@ -129,6 +131,7 @@
             "name": "outputParam",
             "type": "integer",
             "description": {"xml": "outputParam description"},
+            "optional": false,
             "values": [
               {
                 "name": "1",
@@ -144,6 +147,7 @@
             "name": "enumParam",
             "type": "enum",
             "description": {"xml": "Enum description."},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -159,6 +163,7 @@
             "name": "flagsParam",
             "type": "flags",
             "description": {"xml": "Enum description."},
+            "optional": false,
             "values": [
               {
                 "name": "value1",
@@ -174,6 +179,7 @@
             "name": "nestedEnumField",
             "type": "enum",
             "description": {"xml": ""},
+            "optional": false,
             "values": [{
               "name": "nestedEnumValue",
               "description": {"xml": ""}
