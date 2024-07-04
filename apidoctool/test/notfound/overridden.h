@@ -7,7 +7,7 @@ struct KnownStruct
 
 struct NotFoundField
 {
-    NotFound notFoundField;
+    std::optional<NotFound> notFoundField;
 };
 
 /**%apidoc
@@ -34,7 +34,7 @@ struct NotFoundOverriddenResponse
     NotFound::type notFoundVariantField;
 
     /**%apidoc:string */
-    NotFound notFoundStringField;
+    std::optional<NotFound> notFoundStringField;
 
-    NotFound notFoundFieldOverriddenInFunction;
+    std::optional<NotFound> notFoundFieldOverriddenInFunction;
 };

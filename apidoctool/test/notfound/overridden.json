@@ -20,8 +20,7 @@
               "properties": {"field": {"type": "integer"}},
               "required": ["field"]
             }]
-          }},
-          "required": ["notFoundField"]
+          }}
         }},
         "required": ["field"]
       }}},
@@ -41,8 +40,7 @@
                 "properties": {"field": {"type": "integer"}},
                 "required": ["field"]
               }]
-            }},
-            "required": ["notFoundField"]
+            }}
           },
           "notFoundObjectField": {
             "type": "object",
@@ -70,9 +68,7 @@
         "required": [
           "notFoundParentField",
           "notFoundObjectField",
-          "notFoundVariantField",
-          "notFoundStringField",
-          "notFoundFieldOverriddenInFunction"
+          "notFoundVariantField"
         ]
       }}}
     }},

@@ -188,7 +188,7 @@ public final class TypeInfo
         }
     }
 
-    private String extractOptionalType(final String type) throws Exception
+    public String extractOptionalType(final String type) throws Exception
     {
         if (!type.startsWith("std::optional<"))
             return null;

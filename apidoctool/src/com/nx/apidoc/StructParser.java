@@ -273,16 +273,23 @@ public final class StructParser
             }
         }
 
-        if (!overridden)
+        try
         {
-            try
+            if (overridden)
+            {
+                TypeInfo typeInfo = new TypeInfo();
+                typeInfo.extractOptionalType(type);
+                if (!field.type.isStdOptional)
+                    field.type.isStdOptional = typeInfo.isStdOptional;
+            }
+            else
             {
                 field.type.fillFromName(type);
             }
-            catch (Exception e)
-            {
-                throw new Error(e.getMessage());
-            }
+        }
+        catch (Exception e)
+        {
+            throw new Error(e.getMessage());
         }
         final String chronoSuffix = TypeInfo.chronoSuffix(field.type.name);
         if (chronoSuffix != null
