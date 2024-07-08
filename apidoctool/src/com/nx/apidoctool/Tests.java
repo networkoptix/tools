@@ -522,7 +522,7 @@ public final class Tests extends TestBase
         assertFileContentsEqual(expectedOpenApiJsonFile, executor.outputOpenApiJsonFile);
     }
 
-    private void notFoundException(
+    private void checkException(
         final VmsCodeToJsonExecutor executor, final String expectedMessage) throws Exception
     {
         String actualMessage = "";
@@ -554,17 +554,30 @@ public final class Tests extends TestBase
 
         final File path = new File(testPath, "notfound");
         executor.params.parsePropertiesFile(new File(path, "field.properties"));
-        notFoundException(
+        checkException(
             executor, "GET /rest/test: unknown type `NotFound` of parameter \"field\".");
         executor.params.parsePropertiesFile(new File(path, "parent.properties"));
-        notFoundException(executor, "Base structure `NotFound` of `NotFoundParent` not found.");
+        checkException(executor, "Base structure `NotFound` of `NotFoundParent` not found.");
         executor.params.parsePropertiesFile(new File(path, "struct.properties"));
-        notFoundException(executor, "GET /rest/test: unknown type `NotFound`.");
+        checkException(executor, "GET /rest/test: unknown type `NotFound`.");
 
         executor.params.parsePropertiesFile(new File(path, "overridden.properties"));
         executor.outputOpenApiJsonFile = new File(outputTestPath, "notfound_overridden.json");
         executor.execute();
         assertFileContentsEqual(new File(path, "overridden.json"), executor.outputOpenApiJsonFile);
+    }
+
+    private void errors() throws Exception
+    {
+        final VmsCodeToJsonExecutor executor = new VmsCodeToJsonExecutor();
+        executor.verbose = verbose;
+        executor.vmsPath = new File(vmsPath, "../errors");
+        executor.params = new Params();
+
+        final File path = new File(testPath, "errors");
+        executor.params.parsePropertiesFile(new File(path, "struct_description.properties"));
+        checkException(executor,
+            "unexpected text \"Invalid description\" after declaration of type `SomeStruct`");
     }
 
     //---------------------------------------------------------------------------------------------
@@ -629,6 +642,9 @@ public final class Tests extends TestBase
 
         run("NotFound", new Run() { public void run() throws Exception {
             notFound(); } });
+
+        run("Errors", new Run() { public void run() throws Exception {
+            errors(); } });
 
         printFinalMessage();
     }

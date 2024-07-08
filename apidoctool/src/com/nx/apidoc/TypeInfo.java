@@ -32,7 +32,7 @@ public final class TypeInfo
     {
         if (label.startsWith("{") && label.endsWith("}"))
         {
-            extractType(label.substring(/*beginIndex*/ 1, /*endIndex*/ label.length() - 1));
+            fillFromName(label.substring(/*beginIndex*/ 1, /*endIndex*/ label.length() - 1));
             return;
         }
         fixed = Apidoc.Type.fromString(label);
@@ -41,6 +41,15 @@ public final class TypeInfo
     public void fillFromName(final String type) throws Exception
     {
         extractType(type);
+        if (name == null || name.equals(""))
+            return;
+        String[] lines = name.split("\n");
+        if (lines.length > 1)
+        {
+            lines = type.split("\n");
+            throw new Exception("unexpected text \"" + lines[lines.length - 1] + "\" after " +
+                "declaration of type `" + lines[0] + "`");
+        }
     }
 
     public void fillMissingType(final TypeInfo origin)
