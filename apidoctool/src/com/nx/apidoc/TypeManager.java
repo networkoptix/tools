@@ -292,7 +292,57 @@ public final class TypeManager
 
         if (type.mapValueType != null)
         {
-            if (type.mapValueType.fixed == Apidoc.Type.OBJECT || type.mapValueType.fixed == Apidoc.Type.ARRAY)
+            if (type.mapKeyType.fixed == Apidoc.Type.ENUM)
+            {
+                Apidoc.Param enumParam = new Apidoc.Param();
+                enumToParam(enumParam, type.mapKeyType.name);
+                for (final Apidoc.Value value: enumParam.values)
+                {
+                    if (value.unused)
+                        continue;
+
+                    final String name = namePrefix + value.name;
+                    Apidoc.Param param = new Apidoc.Param();
+                    param.name = name;
+                    param.type = type.mapValueType;
+                    param.optional = true;
+                    param.deprecated = value.deprecated;
+                    param.deprecatedDescription = value.deprecatedDescription;
+                    param.proprietary = value.proprietary;
+                    param.description = value.description;
+                    if (param.type.name != null)
+                    {
+                        if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
+                        {
+                            enumToParam(param, param.type.name);
+                        }
+                        else
+                        {
+                            param.recursiveName = processedStructs.get(param.type.name);
+                            final StructParser.StructInfo fieldStructInfo = structs.get(param.type.name);
+                            if (fieldStructInfo != null)
+                                fieldStructInfo.fillParamAttributes(param);
+                            if (param.description == null || param.description.isEmpty())
+                                param.description = getStructDescription(param.type);
+                        }
+                    }
+                    structParams.add(param);
+                    if (param.recursiveName == null
+                        && (param.type.fixed == Apidoc.Type.OBJECT
+                        || param.type.fixed == Apidoc.Type.ARRAY))
+                    {
+                        structParams.addAll(structToParams( //< Recursion.
+                            name,
+                            param.type,
+                            paramDirection,
+                            overriddenParams,
+                            processedStructs));
+                    }
+                }
+                type.mapValueType = null;
+            }
+            else if (type.mapValueType.fixed == Apidoc.Type.OBJECT
+                || type.mapValueType.fixed == Apidoc.Type.ARRAY)
             {
                 structParams.addAll(structToParams(
                     namePrefix + TypeInfo.mapKeyPlaceholder,
@@ -415,6 +465,7 @@ public final class TypeManager
     {
         if (type.mapValueType != null)
         {
+            correctType(type.mapKeyType);
             correctType(type.mapValueType);
             if (type.fixed == Apidoc.Type.UNKNOWN)
                 type.fixed = Apidoc.Type.OBJECT;

@@ -30,7 +30,6 @@ constexpr auto nxReflectVisitAllEnumItems(AlarmLevel*, Visitor&& visitor)
 
 struct NX_VMS_API AlarmRule
 {
-    AlarmLevel level = AlarmLevel::none;
     QString condition;
     QString text; //< TODO: Optional.
 };
@@ -46,7 +45,7 @@ struct NX_VMS_API ValueRule
     QString format;
     QString calculate;
     QString insert;
-    std::vector<AlarmRule> alarms;
+    std::map<AlarmLevel, AlarmRule> alarms;
 };
 #define ValueRule_Fields (name)(description)(isOptional)(display)(format)(calculate)(insert)(alarms)
 QN_FUSION_DECLARE_FUNCTIONS(ValueRule, (json), NX_VMS_API)

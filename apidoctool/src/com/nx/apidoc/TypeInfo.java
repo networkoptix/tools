@@ -14,6 +14,7 @@ public final class TypeInfo
     public String name = null;
     public boolean isStdOptional = false;
     public boolean canBeNull = false;
+    public TypeInfo mapKeyType = null;
     public TypeInfo mapValueType = null;
     public List<TypeInfo> variantValueTypes = null;
     public static final String mapKeyPlaceholder = "*";
@@ -54,6 +55,8 @@ public final class TypeInfo
             canBeNull = origin.canBeNull;
         if (mapValueType == null)
             mapValueType = origin.mapValueType;
+        if (mapKeyType == null)
+            mapKeyType = origin.mapKeyType;
         if (variantValueTypes == null)
             variantValueTypes = origin.variantValueTypes;
     }
@@ -125,8 +128,8 @@ public final class TypeInfo
         {
             if (!type.startsWith(mapAlias))
                 continue;
-            TypeInfo key = new TypeInfo();
-            String nextType = key.extractType(type.substring(mapAlias.length()).trim()).trim();
+            mapKeyType = new TypeInfo();
+            String nextType = mapKeyType.extractType(type.substring(mapAlias.length()).trim()).trim();
             if (!nextType.startsWith(","))
                 throw new Exception("Invalid map `" + type + "`.");
             mapValueType = new TypeInfo();

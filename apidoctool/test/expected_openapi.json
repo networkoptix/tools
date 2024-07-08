@@ -10470,27 +10470,41 @@
                           "calculate": {"type": "string"},
                           "insert": {"type": "string"},
                           "alarms": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "level": {
-                                  "type": "string",
-                                  "example": "none",
-                                  "enum": [
-                                    "none",
-                                    "warning",
-                                    "error"
-                                  ]
+                            "type": "object",
+                            "properties": {
+                              "none": {
+                                "type": "object",
+                                "properties": {
+                                  "condition": {"type": "string"},
+                                  "text": {"type": "string"}
                                 },
-                                "condition": {"type": "string"},
-                                "text": {"type": "string"}
+                                "required": [
+                                  "condition",
+                                  "text"
+                                ]
                               },
-                              "required": [
-                                "level",
-                                "condition",
-                                "text"
-                              ]
+                              "warning": {
+                                "type": "object",
+                                "properties": {
+                                  "condition": {"type": "string"},
+                                  "text": {"type": "string"}
+                                },
+                                "required": [
+                                  "condition",
+                                  "text"
+                                ]
+                              },
+                              "error": {
+                                "type": "object",
+                                "properties": {
+                                  "condition": {"type": "string"},
+                                  "text": {"type": "string"}
+                                },
+                                "required": [
+                                  "condition",
+                                  "text"
+                                ]
+                              }
                             }
                           }
                         },
