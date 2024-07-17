@@ -17,7 +17,10 @@ APIDOCTOOL_PROPERTIES_FILE_NAME = 'apidoctool.properties'
 
 ENV = os.environ.copy()
 
-PACKAGE_NAME_REGEX = re.compile(r'\b(?:build_)requires\(\s*\"([\w-]+?)\/(\d+\.\d+(?:\.\d+)?)\"')
+PACKAGE_NAME_REGEX = re.compile(
+    r'\b(?:build_)requires\(\s*\"(?P<package_name>[\w-]+?)\/'
+    r'(?P<package_version>\d+\.\d+(?:\.\d+)?)\"\s+'
+    r'\"\#(?P<recipe_id>\w{32})\"')
 
 
 class ToolPaths:
@@ -96,12 +99,12 @@ def run_swagger_codegen(
 
 
 def install_tools(sources_dir: Path, repo_conanfile: Path) -> ToolPaths:
-    artifactory_url = os.getenv('NX_ARTIFACTORY_URL', 'http://artifactory.nxvms.dev/artifactory/')
+    artifactory_url = os.getenv('NX_ARTIFACTORY_URL', 'https://artifactory.nxvms.dev/artifactory/')
     conan_url = f'{artifactory_url}/api/conan/conan'
     (conan_user, conan_password) = (
         os.getenv('NX_ARTIFACTORY_USERNAME'), os.getenv('NX_ARTIFACTORY_PASSWORD'))
 
-    package_full_names = extract_package_full_names(
+    package_references = extract_package_references(
         package_names=list(ToolPaths.TOOL_DESCRIPTORS.keys()),
         sources_dir=sources_dir,
         repo_conanfile=repo_conanfile)
@@ -110,33 +113,34 @@ def install_tools(sources_dir: Path, repo_conanfile: Path) -> ToolPaths:
     if conan_user and conan_password:
         subprocess.run(['conan', 'user', '-r', 'nx', conan_user, '-p', conan_password], env=ENV)
 
-    for full_name in package_full_names:
-        subprocess.run(['conan', 'install', '-r', 'nx', f'{full_name}@'], env=ENV)
+    for pacakge_reference in package_references:
+        subprocess.run(['conan', 'install', '-r', 'nx', pacakge_reference], env=ENV)
 
-    return get_tool_paths(package_full_names)
+    return get_tool_paths(package_references)
 
 
-def extract_package_full_names(
+def extract_package_references(
         package_names: list, sources_dir: Path, repo_conanfile: Path) -> list[str]:
-    full_package_names = []
+    package_references = []
     with open(sources_dir / repo_conanfile, 'r') as f:
         for line in f:
             if (result := PACKAGE_NAME_REGEX.search(line)):
-                package_name = result.group(1)
+                package_name = result.group('package_name')
                 if package_name in package_names:
-                    package_version = result.group(2)
-                    full_package_names.append(f'{package_name}/{package_version}')
+                    package_version = result.group('package_version')
+                    recipe_id = result.group('recipe_id')
+                    package_references.append(f'{package_name}/{package_version}@#{recipe_id}')
 
-    return full_package_names
+    return package_references
 
 
-def get_tool_paths(package_full_names: list[str]) -> ToolPaths:
+def get_tool_paths(package_references: list[str]) -> ToolPaths:
     result = ToolPaths()
 
-    for package_name in package_full_names:
+    for package_reference in package_references:
         conan_info_args = ['conan', 'info', '--paths', '--only', 'package_folder']
         package_info = subprocess.run(
-            conan_info_args + [f'{package_name}@'], env=ENV, encoding='utf-8', capture_output=True)
+            conan_info_args + [package_reference], env=ENV, encoding='utf-8', capture_output=True)
 
         # Get paths for the package and its dependencies.
         package_name = ''
@@ -165,6 +169,7 @@ def generate_openapi_schemas(
     if 'CONAN_USER_HOME' not in ENV:
         ENV['CONAN_USER_HOME'] = str(
             packages_dir if packages_dir else str(Path(tmp_dir.name) / 'packages'))
+    ENV['CONAN_REVISIONS_ENABLED'] = '1'
     tool_paths = install_tools(sources_dir=source_dir, repo_conanfile=repo_conanfile)
 
     for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
