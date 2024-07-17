@@ -153,7 +153,7 @@ def get_tool_paths(package_full_names: list[str]) -> ToolPaths:
 
 
 def generate_openapi_schemas(
-        sources_dir: Path, repo_conanfile: Path, output_dir: Path, packages_dir: Optional[Path]):
+        source_dir: Path, repo_conanfile: Path, output_dir: Path, packages_dir: Optional[Path]):
     tmp_dir = tempfile.TemporaryDirectory()
 
     swagger_output_dir = Path(tmp_dir.name) / 'swagger_output'
@@ -165,15 +165,15 @@ def generate_openapi_schemas(
     if 'CONAN_USER_HOME' not in ENV:
         ENV['CONAN_USER_HOME'] = str(
             packages_dir if packages_dir else str(Path(tmp_dir.name) / 'packages'))
-    tool_paths = install_tools(sources_dir=sources_dir, repo_conanfile=repo_conanfile)
+    tool_paths = install_tools(sources_dir=source_dir, repo_conanfile=repo_conanfile)
 
-    for properties_file in sources_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
+    for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
         generate_openapi_schema(
             properties_file=properties_file,
             swagger_output_dir=swagger_output_dir,
             apidoctool_output_dir=output_dir,
             tool_paths=tool_paths,
-            sources_dir=sources_dir)
+            sources_dir=source_dir)
 
 
 def generate_openapi_schema(
@@ -236,7 +236,7 @@ def main():
     args = parser.parse_args()
 
     generate_openapi_schemas(
-        sources_dir=args.sources_dir,
+        source_dir=args.source_dir,
         output_dir=args.output_dir,
         packages_dir=args.conan_dir,
         repo_conanfile=args.repo_conanfile)
