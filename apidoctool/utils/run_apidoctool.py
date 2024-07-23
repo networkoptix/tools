@@ -9,18 +9,18 @@ import re
 import shutil
 import subprocess
 import tempfile
-from typing import Optional
-
+from urllib.request import urlopen
 
 SWAGGER_TEMPLATE_FILE_NAME = 'openapi_template.yaml'
 APIDOCTOOL_PROPERTIES_FILE_NAME = 'apidoctool.properties'
 
 ENV = os.environ.copy()
 
-PACKAGE_NAME_REGEX = re.compile(
+PACKAGE_REQUIREMENT_REGEX = re.compile(
     r'\b(?:build_)requires\(\s*\"(?P<package_name>[\w-]+?)\/'
     r'(?P<package_version>\d+\.\d+(?:\.\d+)?)\"\s+'
     r'\"\#(?P<recipe_id>\w{32})\"')
+CONAN_PACKAGE_REF_REGEX = re.compile(r'[\w-]+\/\d+\.\d+(?:\.\d+)?\@(?:\#\w{32})?')
 
 
 class ToolPaths:
@@ -48,12 +48,12 @@ class ToolPaths:
         setattr(self, f'{descriptor["attr_name"]}_path', path / descriptor['suffix'])
 
 
-def run_apidoctool(
+def _run_apidoctool(
         java_path: Path,
         apidoctool_path: Path,
         properties_file: Path,
         openapi_template_file: Path,
-        sources_dir: Path,
+        source_dir: Path,
         output: Path)  -> subprocess.CompletedProcess:
 
     return subprocess.run([
@@ -70,11 +70,11 @@ def run_apidoctool(
         '-config',
         properties_file,
         '-vms-path',
-        str(sources_dir)
+        str(source_dir)
     ])
 
 
-def run_swagger_codegen(
+def _run_swagger_codegen(
         java_path: Path,
         swagger_path: Path,
         template_file: Path,
@@ -98,33 +98,71 @@ def run_swagger_codegen(
         ])
 
 
-def install_tools(sources_dir: Path, repo_conanfile: Path) -> ToolPaths:
+def _install_tools(
+        source_dir: Path,
+        repo_conanfile: Path,
+        temp_dir: Path,
+        forced_apidoctool_location: str) -> ToolPaths:
     artifactory_url = os.getenv('NX_ARTIFACTORY_URL', 'https://artifactory.nxvms.dev/artifactory/')
     conan_url = f'{artifactory_url}/api/conan/conan'
     (conan_user, conan_password) = (
         os.getenv('NX_ARTIFACTORY_USERNAME'), os.getenv('NX_ARTIFACTORY_PASSWORD'))
 
-    package_references = extract_package_references(
-        package_names=list(ToolPaths.TOOL_DESCRIPTORS.keys()),
-        sources_dir=sources_dir,
-        repo_conanfile=repo_conanfile)
+    package_names = list(ToolPaths.TOOL_DESCRIPTORS.keys())
+    if _is_conan_package_ref(forced_apidoctool_location):
+        package_names = list(set(package_names) - {'apidoctool'})
+    package_references = _extract_package_references(
+        package_names=package_names, source_dir=source_dir, repo_conanfile=repo_conanfile)
 
     subprocess.run(['conan', 'remote', 'add', '-f', 'nx', conan_url], env=ENV)
     if conan_user and conan_password:
         subprocess.run(['conan', 'user', '-r', 'nx', conan_user, '-p', conan_password], env=ENV)
 
-    for pacakge_reference in package_references:
-        subprocess.run(['conan', 'install', '-r', 'nx', pacakge_reference], env=ENV)
+    if _is_conan_package_ref(forced_apidoctool_location):
+        package_references.append(forced_apidoctool_location)
 
-    return get_tool_paths(package_references)
+    for package_reference in package_references:
+        subprocess.run(['conan', 'install', '-r', 'nx', package_reference], env=ENV)
+
+    tool_paths = _get_tool_paths(package_references)
+    if _is_url(forced_apidoctool_location):
+        tool_paths.apidoctool_path = _download_apidoctool(
+            url=forced_apidoctool_location, temp_dir=temp_dir)
+    elif (not _is_conan_package_ref(forced_apidoctool_location)
+          and forced_apidoctool_location is not None):
+        # Assume forced_apidoctool_location is a path to a local file.
+        tool_paths.apidoctool_path = Path(forced_apidoctool_location)
+
+    return tool_paths
 
 
-def extract_package_references(
-        package_names: list, sources_dir: Path, repo_conanfile: Path) -> list[str]:
+def _is_conan_package_ref(location: str) -> bool:
+    return location and CONAN_PACKAGE_REF_REGEX.match(location)
+
+
+def _is_url(location: str) -> bool:
+    return location and (location.startswith('http://') or location.startswith('https://'))
+
+
+def _download_apidoctool(url: str, temp_dir: Path) -> Path:
+    apidoctool_path = temp_dir / ToolPaths.TOOL_PATH_SUFFIXES['apidoctool']
+    try:
+        with urlopen(url) as response:
+            content = response.read()
+            with open(apidoctool_path, 'wb') as out_file:
+                out_file.write(content)
+    except Exception as e:
+        raise RuntimeError(f"Can't download apidoctool from {url!r}: {e}")
+
+    return apidoctool_path
+
+
+def _extract_package_references(
+        package_names: list, source_dir: Path, repo_conanfile: Path) -> list[str]:
     package_references = []
-    with open(sources_dir / repo_conanfile, 'r') as f:
+    with open(source_dir / repo_conanfile, 'r') as f:
         for line in f:
-            if (result := PACKAGE_NAME_REGEX.search(line)):
+            if (result := PACKAGE_REQUIREMENT_REGEX.search(line)):
                 package_name = result.group('package_name')
                 if package_name in package_names:
                     package_version = result.group('package_version')
@@ -134,7 +172,7 @@ def extract_package_references(
     return package_references
 
 
-def get_tool_paths(package_references: list[str]) -> ToolPaths:
+def _get_tool_paths(package_references: list[str]) -> ToolPaths:
     result = ToolPaths()
 
     for package_reference in package_references:
@@ -157,36 +195,44 @@ def get_tool_paths(package_references: list[str]) -> ToolPaths:
 
 
 def generate_openapi_schemas(
-        source_dir: Path, repo_conanfile: Path, output_dir: Path, packages_dir: Optional[Path]):
-    tmp_dir = tempfile.TemporaryDirectory()
+        source_dir: Path,
+        repo_conanfile: Path,
+        output_dir: Path,
+        packages_dir: Path = None,
+        forced_apidoctool_location: str = None):
+    temp_dir_object = tempfile.TemporaryDirectory()
+    temp_dir = Path(temp_dir_object.name)
 
-    swagger_output_dir = Path(tmp_dir.name) / 'swagger_output'
+    swagger_output_dir = temp_dir / 'swagger_output'
     shutil.rmtree(swagger_output_dir, ignore_errors=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     for f in output_dir.glob('*'):
         f.unlink()
 
     if 'CONAN_USER_HOME' not in ENV:
-        ENV['CONAN_USER_HOME'] = str(
-            packages_dir if packages_dir else str(Path(tmp_dir.name) / 'packages'))
+        ENV['CONAN_USER_HOME'] = str(packages_dir if packages_dir else temp_dir / 'packages')
     ENV['CONAN_REVISIONS_ENABLED'] = '1'
-    tool_paths = install_tools(sources_dir=source_dir, repo_conanfile=repo_conanfile)
+    tool_paths = _install_tools(
+        source_dir=source_dir,
+        repo_conanfile=repo_conanfile,
+        temp_dir=temp_dir,
+        forced_apidoctool_location=forced_apidoctool_location)
 
     for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
-        generate_openapi_schema(
+        _generate_openapi_schema(
             properties_file=properties_file,
             swagger_output_dir=swagger_output_dir,
             apidoctool_output_dir=output_dir,
             tool_paths=tool_paths,
-            sources_dir=source_dir)
+            source_dir=source_dir)
 
 
-def generate_openapi_schema(
+def _generate_openapi_schema(
         properties_file: Path,
         swagger_output_dir: Path,
         apidoctool_output_dir: Path,
         tool_paths: ToolPaths,
-        sources_dir: Path):
+        source_dir: Path):
     properties_dir = properties_file.parent
     template_file = properties_dir / SWAGGER_TEMPLATE_FILE_NAME
     if not template_file.exists():
@@ -198,7 +244,7 @@ def generate_openapi_schema(
     api_tmp_dir = swagger_output_dir / api_tmp_dir_name
     api_tmp_dir.mkdir(parents=True)
 
-    run_swagger_codegen(
+    _run_swagger_codegen(
         java_path=tool_paths.java_path,
         swagger_path=tool_paths.swagger_path,
         template_file=template_file,
@@ -206,16 +252,16 @@ def generate_openapi_schema(
 
     output_file = apidoctool_output_dir / (
         f'{properties_dir.parents[0].name}-{properties_dir.name}.json')
-    run_apidoctool(
+    _run_apidoctool(
         java_path=tool_paths.java_path,
         apidoctool_path=tool_paths.apidoctool_path,
         openapi_template_file=api_tmp_dir / 'openapi.json',
         properties_file=properties_file,
-        sources_dir=sources_dir,
+        source_dir=source_dir,
         output=output_file)
 
 
-def main():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-d", "--source-dir",
@@ -238,13 +284,38 @@ def main():
         default=Path('open/conanfile.py'),
         help='Conan recipe file requiring necessary tools (Swagger codegen and apidoctool).')
 
-    args = parser.parse_args()
+    explicit_apidoctool = parser.add_mutually_exclusive_group()
+    explicit_apidoctool.add_argument(
+        "--apidoctool-package-ref",
+        type=str,
+        help="Specifies the apidoctool Conan package reference.")
+    explicit_apidoctool.add_argument(
+        "--apidoctool-jar-url",
+        type=str,
+        help="Specifies the URL to download the apidoctool .jar from.")
+    explicit_apidoctool.add_argument(
+        "--apidoctool-jar",
+        type=str,
+        help="Specifies the path to a local apidoctool .jar file.")
 
-    generate_openapi_schemas(
-        source_dir=args.source_dir,
-        output_dir=args.output_dir,
-        packages_dir=args.conan_dir,
-        repo_conanfile=args.repo_conanfile)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    forced_apidoctool_location = (
+        args.apidoctool_package_ref or args.apidoctool_jar_url or args.apidoctool_jar)
+
+    try:
+        generate_openapi_schemas(
+            source_dir=args.source_dir,
+            output_dir=args.output_dir,
+            packages_dir=args.conan_dir,
+            repo_conanfile=args.repo_conanfile,
+            forced_apidoctool_location=forced_apidoctool_location)
+    except RuntimeError as e:
+        print(f'Failed to generate schemas: {e}')
+        exit(1)
 
 if __name__ == '__main__':
     main()
