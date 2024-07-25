@@ -237,7 +237,8 @@ def _generate_openapi_schema(
     template_file = properties_dir / SWAGGER_TEMPLATE_FILE_NAME
     if not template_file.exists():
         print(
-            f'File {SWAGGER_TEMPLATE_FILE_NAME!r} not found in {str(properties_dir)!r}/; skipping.')
+            f'File {SWAGGER_TEMPLATE_FILE_NAME!r} not found in {str(properties_dir)!r}/; '
+            'skipping.')
 
     api_tmp_dir_name = (
         f'{properties_dir.parents[1].name}-{properties_dir.parents[0].name}-{properties_dir.name}')
@@ -267,11 +268,11 @@ def parse_args() -> argparse.Namespace:
         "-d", "--source-dir",
         type=Path,
         help="Root directory of the source tree.",
-        default=Path(__file__).parent.parent.parent)
+        default=Path(__file__).resolve().parents[3])
     parser.add_argument(
         "-o", "--output-dir",
         type=Path,
-        default=Path(__file__).parent.parent.parent / 'openapi_schemas',
+        default=None,
         help='Directory to place generated files.')
     parser.add_argument(
         "--conan-dir",
@@ -306,10 +307,12 @@ def main():
     forced_apidoctool_location = (
         args.apidoctool_package_ref or args.apidoctool_jar_url or args.apidoctool_jar)
 
+    output_dir = args.output_dir or (
+        args.source_dir.parent / f'{args.source_dir.name}-openapi_schemas')
     try:
         generate_openapi_schemas(
             source_dir=args.source_dir,
-            output_dir=args.output_dir,
+            output_dir=output_dir,
             packages_dir=args.conan_dir,
             repo_conanfile=args.repo_conanfile,
             forced_apidoctool_location=forced_apidoctool_location)
