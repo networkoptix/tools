@@ -17,7 +17,7 @@ APIDOCTOOL_PROPERTIES_FILE_NAME = 'apidoctool.properties'
 ENV = os.environ.copy()
 
 PACKAGE_REQUIREMENT_REGEX = re.compile(
-    r'\b(?:build_)requires\(\s*\"(?P<package_name>[\w-]+?)\/'
+    r'\b(?:build_|tool_)requires\(\s*\"(?P<package_name>[\w-]+?)\/'
     r'(?P<package_version>\d+\.\d+(?:\.\d+)?)\"\s+'
     r'\"\#(?P<recipe_id>\w{32})\"')
 CONAN_PACKAGE_REF_REGEX = re.compile(r'[\w-]+\/\d+\.\d+(?:\.\d+)?\@(?:\#\w{32})?')
