@@ -104,7 +104,7 @@ def _install_tools(
         temp_dir: Path,
         forced_apidoctool_location: str) -> ToolPaths:
     artifactory_url = os.getenv('NX_ARTIFACTORY_URL', 'https://artifactory.nxvms.dev/artifactory/')
-    conan_url = f'{artifactory_url}/api/conan/conan'
+    conan_url = os.getenv('NX_CONAN_URL', f'{artifactory_url}/api/conan/conan')
     (conan_user, conan_password) = (
         os.getenv('NX_ARTIFACTORY_USERNAME'), os.getenv('NX_ARTIFACTORY_PASSWORD'))
 
