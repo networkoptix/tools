@@ -111,6 +111,9 @@ def _install_tools(
         package_names=package_names, source_dir=source_dir, repo_conanfile=repo_conanfile)
 
     subprocess.run(['conan', 'remote', 'add', '-f', 'nx', conan_url], env=ENV)
+    if download_cache := os.getenv('NX_CONAN_DOWNLOAD_CACHE'):
+        subprocess.run(
+            ['conan', 'config', 'set', f'storage.download_cache={download_cache}'], env=ENV)
     if conan_user and conan_password:
         subprocess.run(['conan', 'user', '-r', 'nx', conan_user, '-p', conan_password], env=ENV)
 
