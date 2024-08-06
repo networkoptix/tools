@@ -28,18 +28,14 @@ class ToolPaths:
         'swagger-codegen': {'attr_name': 'swagger', 'suffix': 'cli.jar'},
         'apidoctool': {'attr_name': 'apidoctool', 'suffix': 'apidoctool.jar'},
         'openjdk-jre': {'attr_name': 'java', 'suffix': 'bin/java'},
-    }
-
-    TOOL_PATH_SUFFIXES = {
-        'swagger-codegen': 'cli.jar',
-        'apidoctool': 'apidoctool.jar',
-        'openjdk-jre': 'bin/java',
+        'oasdiff': {'attr_name': 'oasdiff', 'suffix': 'bin/oasdiff'}
     }
 
     def __init__(self):
         self.java_path: Path
         self.apidoctool_path: Path
         self.swagger_path: Path
+        self.oasdiff_path: Path
 
     def set_path_by_package_name(self, name: str, path: Path):
         if name not in self.TOOL_DESCRIPTORS:
@@ -145,7 +141,7 @@ def _is_url(location: str) -> bool:
 
 
 def _download_apidoctool(url: str, temp_dir: Path) -> Path:
-    apidoctool_path = temp_dir / ToolPaths.TOOL_PATH_SUFFIXES['apidoctool']
+    apidoctool_path = temp_dir / ToolPaths.TOOL_DESCRIPTORS['apidoctool']['suffix']
     try:
         with urlopen(url) as response:
             content = response.read()
