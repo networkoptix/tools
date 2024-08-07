@@ -107,7 +107,7 @@ def _install_tools(
     package_names = list(ToolPaths.TOOL_DESCRIPTORS.keys())
     if _is_conan_package_ref(forced_apidoctool_location):
         package_names = list(set(package_names) - {'apidoctool'})
-    package_references = _extract_package_references(
+    package_references = extract_package_references(
         package_names=package_names, source_dir=source_dir, repo_conanfile=repo_conanfile)
 
     subprocess.run(['conan', 'remote', 'add', '-f', 'nx', conan_url], env=ENV)
@@ -123,7 +123,7 @@ def _install_tools(
     for package_reference in package_references:
         subprocess.run(['conan', 'install', '-r', 'nx', package_reference], env=ENV)
 
-    tool_paths = _get_tool_paths(package_references)
+    tool_paths = get_tool_paths(package_references)
     if _is_url(forced_apidoctool_location):
         tool_paths.apidoctool_path = _download_apidoctool(
             url=forced_apidoctool_location, temp_dir=temp_dir)
@@ -156,7 +156,7 @@ def _download_apidoctool(url: str, temp_dir: Path) -> Path:
     return apidoctool_path
 
 
-def _extract_package_references(
+def extract_package_references(
         package_names: list, source_dir: Path, repo_conanfile: Path) -> list[str]:
     package_references = []
     with open(source_dir / repo_conanfile, 'r') as f:
@@ -171,7 +171,7 @@ def _extract_package_references(
     return package_references
 
 
-def _get_tool_paths(package_references: list[str]) -> ToolPaths:
+def get_tool_paths(package_references: list[str]) -> ToolPaths:
     result = ToolPaths()
 
     for package_reference in package_references:
