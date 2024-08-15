@@ -537,20 +537,33 @@
     }},
     "/ec2/getAccessRights": {"get": {
       "description": "Return list of ids of accessible resources for each user in the System.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["userId"]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of access rights data objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -582,20 +595,33 @@
     }},
     "/ec2/getCameraHistoryItems": {"get": {
       "description": "Read information about which server was hosting the camera at which period.\nThis information is used for archive playback if camera has been moved from\none server to another.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["serverGuid"]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of camera history items in the requested format.",
         "content": {"application/json": {"schema": {
@@ -651,6 +677,45 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cameraId",
+                "cameraName",
+                "userDefinedGroupName",
+                "scheduleEnabled",
+                "licenseUsed",
+                "motionType",
+                "motionMask",
+                "scheduleTasks[].startTime",
+                "scheduleTasks[].endTime",
+                "scheduleTasks[].recordAudio",
+                "scheduleTasks[].recordingType",
+                "scheduleTasks[].dayOfWeek",
+                "scheduleTasks[].beforeThreshold",
+                "scheduleTasks[].afterThreshold",
+                "scheduleTasks[].streamQuality",
+                "scheduleTasks[].fps",
+                "scheduleTasks[].bitrateKbps",
+                "audioEnabled",
+                "disableDualStreaming",
+                "controlEnabled",
+                "dewarpingParams",
+                "minArchiveDays",
+                "maxArchiveDays",
+                "preferredServerId",
+                "failoverPriority",
+                "backupType",
+                "logicalId"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -883,6 +948,61 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "mac",
+                "physicalId",
+                "manuallyAdded",
+                "model",
+                "groupId",
+                "groupName",
+                "statusFlags",
+                "vendor",
+                "cameraId",
+                "cameraName",
+                "userDefinedGroupName",
+                "scheduleEnabled",
+                "licenseUsed",
+                "motionType",
+                "motionMask",
+                "scheduleTasks[].startTime",
+                "scheduleTasks[].endTime",
+                "scheduleTasks[].recordAudio",
+                "scheduleTasks[].recordingType",
+                "scheduleTasks[].dayOfWeek",
+                "scheduleTasks[].beforeThreshold",
+                "scheduleTasks[].afterThreshold",
+                "scheduleTasks[].streamQuality",
+                "scheduleTasks[].fps",
+                "scheduleTasks[].bitrateKbps",
+                "audioEnabled",
+                "disableDualStreaming",
+                "controlEnabled",
+                "dewarpingParams",
+                "minArchiveDays",
+                "maxArchiveDays",
+                "preferredServerId",
+                "failoverPriority",
+                "backupType",
+                "logicalId",
+                "status",
+                "addParams[].value",
+                "addParams[].name"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -1274,6 +1394,33 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "eventType",
+                "eventCondition",
+                "eventCondition.resourceName",
+                "eventCondition.inputPortId",
+                "eventCondition.caption",
+                "eventCondition.description",
+                "eventState",
+                "actionType",
+                "actionParams",
+                "aggregationPeriod",
+                "disabled",
+                "comment",
+                "schedule",
+                "system"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -1441,20 +1588,222 @@
     }},
     "/ec2/getFullInfo": {"get": {
       "description": "Read all data such as all servers, cameras, users, etc.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "resourceTypes[].id",
+                "resourceTypes[].name",
+                "resourceTypes[].vendor",
+                "resourceTypes[].propertyTypes[].resourceTypeId",
+                "resourceTypes[].propertyTypes[].name",
+                "resourceTypes[].propertyTypes[].defaultValue",
+                "servers[].id",
+                "servers[].parentId",
+                "servers[].name",
+                "servers[].url",
+                "servers[].typeId",
+                "servers[].networkAddresses",
+                "servers[].flags",
+                "servers[].version",
+                "servers[].systemInfo",
+                "servers[].authKey",
+                "serversUserAttributesList[].serverId",
+                "serversUserAttributesList[].serverName",
+                "serversUserAttributesList[].maxCameras",
+                "serversUserAttributesList[].allowAutoRedundancy",
+                "serversUserAttributesList[].backupType",
+                "serversUserAttributesList[].backupDaysOfTheWeek",
+                "serversUserAttributesList[].backupStart",
+                "serversUserAttributesList[].backupDuration",
+                "serversUserAttributesList[].backupBitrate",
+                "cameras[].id",
+                "cameras[].parentId",
+                "cameras[].name",
+                "cameras[].url",
+                "cameras[].typeId",
+                "cameras[].mac",
+                "cameras[].physicalId",
+                "cameras[].manuallyAdded",
+                "cameras[].model",
+                "cameras[].groupId",
+                "cameras[].groupName",
+                "cameras[].statusFlags",
+                "cameras[].vendor",
+                "cameraUserAttributesList[].cameraId",
+                "cameraUserAttributesList[].cameraName",
+                "cameraUserAttributesList[].userDefinedGroupName",
+                "cameraUserAttributesList[].scheduleEnabled",
+                "cameraUserAttributesList[].licenseUsed",
+                "cameraUserAttributesList[].motionType",
+                "cameraUserAttributesList[].motionMask",
+                "cameraUserAttributesList[].scheduleTasks[].startTime",
+                "cameraUserAttributesList[].scheduleTasks[].endTime",
+                "cameraUserAttributesList[].scheduleTasks[].recordAudio",
+                "cameraUserAttributesList[].scheduleTasks[].recordingType",
+                "cameraUserAttributesList[].scheduleTasks[].dayOfWeek",
+                "cameraUserAttributesList[].scheduleTasks[].beforeThreshold",
+                "cameraUserAttributesList[].scheduleTasks[].afterThreshold",
+                "cameraUserAttributesList[].scheduleTasks[].streamQuality",
+                "cameraUserAttributesList[].scheduleTasks[].fps",
+                "cameraUserAttributesList[].scheduleTasks[].bitrateKbps",
+                "cameraUserAttributesList[].audioEnabled",
+                "cameraUserAttributesList[].disableDualStreaming",
+                "cameraUserAttributesList[].controlEnabled",
+                "cameraUserAttributesList[].dewarpingParams",
+                "cameraUserAttributesList[].minArchiveDays",
+                "cameraUserAttributesList[].maxArchiveDays",
+                "cameraUserAttributesList[].preferredServerId",
+                "cameraUserAttributesList[].failoverPriority",
+                "cameraUserAttributesList[].backupType",
+                "cameraUserAttributesList[].logicalId",
+                "users[].id",
+                "users[].parentId",
+                "users[].name",
+                "users[].url",
+                "users[].typeId",
+                "users[].isAdmin",
+                "users[].permissions",
+                "users[].userRoleId",
+                "users[].email",
+                "users[].digest",
+                "users[].hash",
+                "users[].cryptSha512Hash",
+                "users[].realm",
+                "users[].isLdap",
+                "users[].isEnabled",
+                "users[].isCloud",
+                "users[].fullName",
+                "userRoles[].id",
+                "userRoles[].name",
+                "userRoles[].permissions",
+                "accessRights[].userId",
+                "layouts[].id",
+                "layouts[].parentId",
+                "layouts[].name",
+                "layouts[].url",
+                "layouts[].typeId",
+                "layouts[].cellAspectRatio",
+                "layouts[].horizontalSpacing",
+                "layouts[].verticalSpacing",
+                "layouts[].items[].id",
+                "layouts[].items[].flags",
+                "layouts[].items[].left",
+                "layouts[].items[].top",
+                "layouts[].items[].right",
+                "layouts[].items[].bottom",
+                "layouts[].items[].rotation",
+                "layouts[].items[].resourceId",
+                "layouts[].items[].resourcePath",
+                "layouts[].items[].zoomLeft",
+                "layouts[].items[].zoomTop",
+                "layouts[].items[].zoomRight",
+                "layouts[].items[].zoomBottom",
+                "layouts[].items[].zoomTargetId",
+                "layouts[].items[].contrastParams",
+                "layouts[].items[].dewarpingParams",
+                "layouts[].items[].displayInfo",
+                "layouts[].locked",
+                "layouts[].backgroundImageFilename",
+                "layouts[].backgroundWidth",
+                "layouts[].backgroundHeight",
+                "layouts[].backgroundOpacity",
+                "videowalls[].id",
+                "videowalls[].parentId",
+                "videowalls[].name",
+                "videowalls[].url",
+                "videowalls[].typeId",
+                "videowalls[].autorun",
+                "videowalls[].items[].guid",
+                "videowalls[].items[].pcGuid",
+                "videowalls[].items[].layoutGuid",
+                "videowalls[].items[].name",
+                "videowalls[].items[].snapLeft",
+                "videowalls[].items[].snapTop",
+                "videowalls[].items[].snapRight",
+                "videowalls[].items[].snapBottom",
+                "videowalls[].screens[].pcGuid",
+                "videowalls[].screens[].pcIndex",
+                "videowalls[].screens[].desktopLeft",
+                "videowalls[].screens[].desktopTop",
+                "videowalls[].screens[].desktopWidth",
+                "videowalls[].screens[].desktopHeight",
+                "videowalls[].screens[].layoutLeft",
+                "videowalls[].screens[].layoutTop",
+                "videowalls[].screens[].layoutWidth",
+                "videowalls[].screens[].layoutHeight",
+                "videowalls[].matrices[].id",
+                "videowalls[].matrices[].name",
+                "videowalls[].matrices[].items[].itemGuid",
+                "videowalls[].matrices[].items[].layoutGuid",
+                "rules[].id",
+                "rules[].eventType",
+                "rules[].eventCondition",
+                "rules[].eventState",
+                "rules[].actionType",
+                "rules[].actionParams",
+                "rules[].aggregationPeriod",
+                "rules[].disabled",
+                "rules[].comment",
+                "rules[].schedule",
+                "rules[].system",
+                "cameraHistory[].serverGuid",
+                "licenses[].key",
+                "licenses[].licenseBlock",
+                "discoveryData[].id",
+                "discoveryData[].url",
+                "discoveryData[].ignore",
+                "allProperties[].value",
+                "allProperties[].name",
+                "allProperties[].resourceId",
+                "storages[].id",
+                "storages[].parentId",
+                "storages[].name",
+                "storages[].url",
+                "storages[].typeId",
+                "storages[].spaceLimit",
+                "storages[].usedForWriting",
+                "storages[].storageType",
+                "storages[].addParams[].value",
+                "storages[].addParams[].name",
+                "storages[].isBackup",
+                "resStatusList[].id",
+                "resStatusList[].status",
+                "webPages[].id",
+                "webPages[].parentId",
+                "webPages[].name",
+                "webPages[].url",
+                "webPages[].typeId",
+                "layoutTours[].id",
+                "layoutTours[].parentId",
+                "layoutTours[].name",
+                "layoutTours[].items[].resourceId",
+                "layoutTours[].items[].delayMs",
+                "layoutTours[].settings.manual"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "Object in the requested format.",
         "content": {"application/json": {"schema": {
@@ -2627,20 +2976,40 @@
     }},
     "/ec2/getLayoutTours": {"get": {
       "description": "Return list of layout tours",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "items[].resourceId",
+                "items[].delayMs",
+                "settings.manual"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of layout tour objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -2721,6 +3090,48 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "cellAspectRatio",
+                "horizontalSpacing",
+                "verticalSpacing",
+                "items[].id",
+                "items[].flags",
+                "items[].left",
+                "items[].top",
+                "items[].right",
+                "items[].bottom",
+                "items[].rotation",
+                "items[].resourceId",
+                "items[].resourcePath",
+                "items[].zoomLeft",
+                "items[].zoomTop",
+                "items[].zoomRight",
+                "items[].zoomBottom",
+                "items[].zoomTargetId",
+                "items[].contrastParams",
+                "items[].dewarpingParams",
+                "items[].displayInfo",
+                "locked",
+                "backgroundImageFilename",
+                "backgroundWidth",
+                "backgroundHeight",
+                "backgroundOpacity"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -2835,20 +3246,36 @@
     }},
     "/ec2/getLicenses": {"get": {
       "description": "Read license list",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "key",
+                "licenseBlock"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of license objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -2894,6 +3321,27 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "serverId",
+                "serverName",
+                "maxCameras",
+                "allowAutoRedundancy",
+                "backupType",
+                "backupDaysOfTheWeek",
+                "backupStart",
+                "backupDuration",
+                "backupBitrate"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -2978,20 +3426,67 @@
     }},
     "/ec2/getMediaServersEx": {"get": {
       "description": "Return server list.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "networkAddresses",
+                "flags",
+                "version",
+                "systemInfo",
+                "authKey",
+                "serverId",
+                "serverName",
+                "maxCameras",
+                "allowAutoRedundancy",
+                "backupType",
+                "backupDaysOfTheWeek",
+                "backupStart",
+                "backupDuration",
+                "backupBitrate",
+                "status",
+                "addParams[].value",
+                "addParams[].name",
+                "storages[].id",
+                "storages[].parentId",
+                "storages[].name",
+                "storages[].url",
+                "storages[].typeId",
+                "storages[].spaceLimit",
+                "storages[].usedForWriting",
+                "storages[].storageType",
+                "storages[].addParams[].value",
+                "storages[].addParams[].name",
+                "storages[].isBackup"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "Server object in the requested format.",
         "content": {"application/json": {"schema": {
@@ -3187,20 +3682,37 @@
     }},
     "/ec2/getPredefinedRoles": {"get": {
       "description": "Return list of predefined user roles.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "name",
+                "permissions",
+                "isOwner"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of predefined user role objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -3272,6 +3784,21 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "value",
+                "name",
+                "resourceId"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -3301,20 +3828,40 @@
     }},
     "/ec2/getResourceTypes": {"get": {
       "description": "Read all resource types. Resource type contains object type such as\n\"Server\", \"Camera\", etc. Also, resource type contains additional information\nfor cameras such as maximum FPS, resolution, etc.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "vendor",
+                "propertyTypes[].resourceTypeId",
+                "propertyTypes[].name",
+                "propertyTypes[].defaultValue"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "Object in the requested format.",
         "content": {"application/json": {"schema": {
@@ -3371,20 +3918,36 @@
     }},
     "/ec2/getSettings": {"get": {
       "description": "Read general System settings such as email address, etc.",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "value",
+                "name"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -3430,6 +3993,20 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "status"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -3493,6 +4070,29 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "spaceLimit",
+                "usedForWriting",
+                "storageType",
+                "addParams[].value",
+                "addParams[].name",
+                "isBackup"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -3646,6 +4246,21 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "permissions"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -3722,6 +4337,35 @@
             "format": "uuid",
             "example": "89abcdef-0123-4567-89ab-cdef01234567"
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "isAdmin",
+                "permissions",
+                "userRoleId",
+                "email",
+                "digest",
+                "hash",
+                "cryptSha512Hash",
+                "realm",
+                "isLdap",
+                "isEnabled",
+                "isCloud",
+                "fullName"
+              ]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -3817,20 +4461,62 @@
     }},
     "/ec2/getVideowalls": {"get": {
       "description": "Return list of video walls",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId",
+                "autorun",
+                "items[].guid",
+                "items[].pcGuid",
+                "items[].layoutGuid",
+                "items[].name",
+                "items[].snapLeft",
+                "items[].snapTop",
+                "items[].snapRight",
+                "items[].snapBottom",
+                "screens[].pcGuid",
+                "screens[].pcIndex",
+                "screens[].desktopLeft",
+                "screens[].desktopTop",
+                "screens[].desktopWidth",
+                "screens[].desktopHeight",
+                "screens[].layoutLeft",
+                "screens[].layoutTop",
+                "screens[].layoutWidth",
+                "screens[].layoutHeight",
+                "matrices[].id",
+                "matrices[].name",
+                "matrices[].items[].itemGuid",
+                "matrices[].items[].layoutGuid"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of video wall objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -3988,20 +4674,39 @@
     }},
     "/ec2/getWebPages": {"get": {
       "description": "Return list of web pages",
-      "parameters": [{
-        "name": "format",
-        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-        "in": "query",
-        "schema": {
-          "type": "string",
-          "enum": [
-            "ubjson",
-            "json",
-            "xml",
-            "csv"
-          ]
+      "parameters": [
+        {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "id",
+                "parentId",
+                "name",
+                "url",
+                "typeId"
+              ]
+            }
+          },
+          "in": "query"
         }
-      }],
+      ],
       "responses": {"default": {
         "description": "List of web page objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -4064,6 +4769,17 @@
             "type": "string",
             "example": ""
           }
+        },
+        {
+          "name": "_orderBy",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["path"]
+            }
+          },
+          "in": "query"
         }
       ],
       "responses": {"default": {
@@ -11534,15 +12250,98 @@
           }}},
           "required": true
         },
-        "parameters": [{
-          "name": "name",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "example": "Example param"
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Example param"
+            }
+          },
+          {
+            "name": "_orderBy",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "variantList[].#0",
+                  "variantList[].#1.id",
+                  "variantList[].#1.i",
+                  "variantList[].#1.e",
+                  "variantList[].#1.secondsS",
+                  "variantWithMap.#0",
+                  "variantWithMap.#1.*.id",
+                  "variantWithMap.#1.*.i",
+                  "variantWithMap.#1.*.e",
+                  "variantWithMap.#1.*.secondsS",
+                  "variantWithList.#0",
+                  "variantWithList.#1[].id",
+                  "variantWithList.#1[].i",
+                  "variantWithList.#1[].e",
+                  "variantWithList.#1[].secondsS",
+                  "variantWithMapList.#0",
+                  "variantWithMapList.#1[].*.id",
+                  "variantWithMapList.#1[].*.i",
+                  "variantWithMapList.#1[].*.e",
+                  "variantWithMapList.#1[].*.secondsS",
+                  "variantWithChrono.#0",
+                  "variantWithVariant.#0",
+                  "variantWithVariant.#1.#0",
+                  "variantWithVariant.#1.#1.id",
+                  "variantWithVariant.#1.#1.i",
+                  "variantWithVariant.#1.#1.e",
+                  "variantWithVariant.#1.#1.secondsS",
+                  "map.*.id",
+                  "map.*.i",
+                  "map.*.e",
+                  "map.*.secondsS",
+                  "mapList[].*.id",
+                  "mapList[].*.i",
+                  "mapList[].*.e",
+                  "mapList[].*.secondsS",
+                  "mapOfList.*[].id",
+                  "mapOfList.*[].i",
+                  "mapOfList.*[].e",
+                  "mapOfList.*[].secondsS",
+                  "mapOfNamedMap.*.*.id",
+                  "mapOfNamedMap.*.*.i",
+                  "mapOfNamedMap.*.*.e",
+                  "mapOfNamedMap.*.*.secondsS",
+                  "mapWithVariant.*.#0",
+                  "mapWithVariant.*.#1.id",
+                  "mapWithVariant.*.#1.i",
+                  "mapWithVariant.*.#1.e",
+                  "mapWithVariant.*.#1.secondsS",
+                  "mapListWithVariant[].*.#0",
+                  "mapListWithVariant[].*.#1.id",
+                  "mapListWithVariant[].*.#1.i",
+                  "mapListWithVariant[].*.#1.e",
+                  "mapListWithVariant[].*.#1.secondsS",
+                  "mapWithVariantList.*[].#0",
+                  "mapWithVariantList.*[].#1.id",
+                  "mapWithVariantList.*[].#1.i",
+                  "mapWithVariantList.*[].#1.e",
+                  "mapWithVariantList.*[].#1.secondsS",
+                  "mapOfMap.*.*.id",
+                  "mapOfMap.*.*.i",
+                  "mapOfMap.*.*.e",
+                  "mapOfMap.*.*.secondsS",
+                  "mapOfMapWithVariant.*.*.#0",
+                  "mapOfMapWithVariant.*.*.#1.id",
+                  "mapOfMapWithVariant.*.*.#1.i",
+                  "mapOfMapWithVariant.*.*.#1.e",
+                  "mapOfMapWithVariant.*.*.#1.secondsS",
+                  "immutableStruct.i",
+                  "immutableField"
+                ]
+              }
+            },
+            "in": "query"
           }
-        }],
+        ],
         "responses": {"default": {
           "description": "Function response &ast;.",
           "content": {"application/json": {"schema": {
@@ -13413,6 +14212,14 @@
           ]}
         }}}
       }},
+      "parameters": [{
+        "name": "_orderBy",
+        "schema": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "in": "query"
+      }],
       "tags": ["Test"]
     }},
     "/rest/v2/example/variant": {"get": {
@@ -13586,6 +14393,23 @@
           ]}
         }}}
       }},
+      "parameters": [{
+        "name": "_orderBy",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "#0",
+              "#1.id",
+              "#1.i",
+              "#1.e",
+              "#1.secondsS"
+            ]
+          }
+        },
+        "in": "query"
+      }],
       "tags": ["Test"]
     }},
     "/rest/v2/example/variantWithChrono": {"get": {
@@ -13692,6 +14516,22 @@
           }
         }}}
       }},
+      "parameters": [{
+        "name": "_orderBy",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "*.id",
+              "*.i",
+              "*.e",
+              "*.secondsS"
+            ]
+          }
+        },
+        "in": "query"
+      }],
       "tags": ["Test"]
     }},
     "/rest/v2/example/mapOfList": {"get": {
@@ -13740,6 +14580,22 @@
           "type": "object"
         }}}
       }},
+      "parameters": [{
+        "name": "_orderBy",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "*[].id",
+              "*[].i",
+              "*[].e",
+              "*[].secondsS"
+            ]
+          }
+        },
+        "in": "query"
+      }],
       "tags": ["Test"]
     }},
     "/rest/v2/example/mapOfNamedMap": {"get": {
