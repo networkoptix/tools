@@ -1061,6 +1061,9 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
     /**%apidoc GET /ec2/getVideowalls
      * Return list of video walls
      * %param[default] format
+     * %param[opt]:enum _orderBy
+     *     %value id
+     *     %value name
      * %return List of video wall objects in the requested format.
      * %// AbstractVideowallManager::getVideowalls
      */

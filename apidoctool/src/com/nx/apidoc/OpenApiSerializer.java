@@ -535,6 +535,14 @@ public final class OpenApiSerializer
                 schema.put("example", function.input.type.parse(function.input.example));
         }
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
+        for (final Apidoc.Param param: function.input.params)
+        {
+            if (param.name.equals("_orderBy"))
+            {
+                generateOrderByParameters = false;
+                break;
+            }
+        }
         fillResult(method, function, componentsSchemas, generateOrderByParameters);
         return method;
     }

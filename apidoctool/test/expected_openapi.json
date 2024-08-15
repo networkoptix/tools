@@ -4478,43 +4478,14 @@
         },
         {
           "name": "_orderBy",
+          "in": "query",
           "schema": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "id",
-                "parentId",
-                "name",
-                "url",
-                "typeId",
-                "autorun",
-                "items[].guid",
-                "items[].pcGuid",
-                "items[].layoutGuid",
-                "items[].name",
-                "items[].snapLeft",
-                "items[].snapTop",
-                "items[].snapRight",
-                "items[].snapBottom",
-                "screens[].pcGuid",
-                "screens[].pcIndex",
-                "screens[].desktopLeft",
-                "screens[].desktopTop",
-                "screens[].desktopWidth",
-                "screens[].desktopHeight",
-                "screens[].layoutLeft",
-                "screens[].layoutTop",
-                "screens[].layoutWidth",
-                "screens[].layoutHeight",
-                "matrices[].id",
-                "matrices[].name",
-                "matrices[].items[].itemGuid",
-                "matrices[].items[].layoutGuid"
-              ]
-            }
-          },
-          "in": "query"
+            "type": "string",
+            "enum": [
+              "id",
+              "name"
+            ]
+          }
         }
       ],
       "responses": {"default": {
