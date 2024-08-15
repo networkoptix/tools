@@ -46,6 +46,11 @@ struct ImmutableStruct
     int i;
 };
 
+struct StructSeconds
+{
+    std::chrono::seconds secondsS;
+};
+
 //struct NamedVariantMap: std::map<QnUuid, std::variant<int, ExampleStruct>>
 //{
 //};

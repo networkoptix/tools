@@ -53,7 +53,7 @@
      */
     reg("example", GlobalPermission::admin);
 
-    /**%apidoc GET /rest/v2/example/secondS
+    /**%apidoc:{StructSeconds} GET /rest/v2/example/secondS
      * %ingroup Test
      * %return:{std::chrono::seconds}
      */
