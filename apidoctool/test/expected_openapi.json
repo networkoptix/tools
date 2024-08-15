@@ -14167,14 +14167,13 @@
         "name": "secondsS",
         "required": true,
         "in": "query",
-        "content": {"application/json": {"schema": {"oneOf": [
+        "schema": {"oneOf": [
           {"type": "integer"},
           {
             "type": "string",
             "example": ""
           }
-        ]}}},
-        "description": "`one of [integer, string]`<\/br>\n"
+        ]}
       }],
       "responses": {"default": {
         "description": "",

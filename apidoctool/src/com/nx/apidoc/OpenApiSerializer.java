@@ -935,7 +935,7 @@ public final class OpenApiSerializer
             {
                 parameter.put("in", "query");
             }
-            JSONObject schemaContainer = param.type.fixed == Apidoc.Type.OBJECT
+            JSONObject schemaContainer = (param.type.fixed == Apidoc.Type.OBJECT && !param.type.isChrono())
                 ? getObject(getObject(parameter, "content"), "application/json")
                 : parameter;
             fillSchemaType(
