@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+# Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
+
 import logging
+import json
 import subprocess as sp
 import sys
 from contextlib import contextmanager
@@ -9,7 +12,9 @@ from tempfile import TemporaryDirectory
 from typing import Generator, Union
 
 sys.path.append(str(Path(__file__).parent))
-import run_apidoctool as rat
+from run_apidoctool import generate_openapi_schemas
+from apidoc_diff.process_json import save_sorted_json
+from apidoc_diff.segment_apis import dump_endpoints
 
 DEFAULT_CONANFILE = Path("open/conanfile.py")
 # This tuple eagerly lists all present and future schemas, but the script will only compare schemas
@@ -28,18 +33,15 @@ API_SCHEMAS = (
 )
 
 
-def _run(cmd: list[Union[str, Path]]):
+def _run(cmd: list[Union[str, Path]], check=True, log=True, silent=False):
     cmds = [str(item) for item in cmd]
-    logging.info(f"> {' '.join(cmds)}")
-    sp.run(cmd, check=True)
-
-
-def run_apidoctool(source_dir: Path, output_dir: Path, conan_dir: Path, repo_conanfile: Path):
-    rat.generate_openapi_schemas(source_dir, repo_conanfile, output_dir, packages_dir=conan_dir)
+    if log:
+        logging.info(f"> {' '.join(cmds)}")
+    sp.run(cmd, check=check, capture_output=silent)
 
 
 def git(*args):
-    _run(["git", *args])
+    _run(["git", *args], silent=True)
 
 
 @contextmanager
@@ -52,46 +54,90 @@ def worktree(commit_ref: str) -> Generator[Path, None, None]:
             git("worktree", "remove", temp_directory)
 
 
-def gather_apidoc(commit_ref: str, output_dir: Path, conan_dir: Path):
+def preprocess_json(json_path: Path):
+    data = json.load(json_path.open())
+    save_sorted_json(data, output_file=json_path)
+
+
+def gather_apidoc(commit_ref: str, output_dir: Path, conan_dir: Path, silent: bool):
+    logging.info(f"Gathering OpenAPI schemas in {str(output_dir)}")
     with worktree(commit_ref) as base_dir:
         output_dir.mkdir(parents=False, exist_ok=True)
-        run_apidoctool(
+        generate_openapi_schemas(
             source_dir=base_dir,
-            output_dir=output_dir,
-            conan_dir=conan_dir,
-            repo_conanfile=DEFAULT_CONANFILE,
+            repo_conanfile=DEFAULT_CONANFILE, 
+            output_dir=output_dir, 
+            packages_dir=conan_dir,
+            forced_apidoctool_location=None,
+            silent=silent
         )
+        for schema in API_SCHEMAS:
+            if (output_dir / schema).is_file():
+                preprocess_json(output_dir / schema)
 
 
-def get_oasdiff_path(source_dir: Path) -> Path:
-    package_ref = rat.extract_package_references(["oasdiff"], source_dir, DEFAULT_CONANFILE)[0]
-    tools = rat.get_tool_paths([package_ref])
-    return tools.oasdiff_path
+def segment_apis(json_path: Path):
+    data = json.load(json_path.open())
+    dump_endpoints(data, json_path.parent / json_path.stem)
 
 
-def run_oasdiff(base_commit_ref: str):
+def path_to_endpoint(relative_json_path: Path):
+    return f"{relative_json_path.stem.upper()} /{relative_json_path.parent}"
+
+
+def identical(first: Path, second: Path) -> bool:
+    return sp.run(["cmp", str(first), str(second)], check=False, stdout=sp.PIPE).returncode == 0
+
+
+def generate_diffs(base_commit_ref: str, silent: bool):
     with TemporaryDirectory(suffix="_apidiff") as temp_directory:
+        logging.debug(f"Running in {temp_directory}")
         base_schema_dir = Path(temp_directory) / "base"
         head_schema_dir = Path(temp_directory) / "head"
         conan_dir = Path(temp_directory) / "packages"
-        gather_apidoc(base_commit_ref, base_schema_dir, conan_dir)
-        gather_apidoc("HEAD", head_schema_dir, conan_dir)
-        oasdiff = str(get_oasdiff_path(Path(".")))
+        gather_apidoc(base_commit_ref, base_schema_dir, conan_dir, silent)
+        gather_apidoc("HEAD", head_schema_dir, conan_dir, silent)
 
         for schema in API_SCHEMAS:
             base_schema = base_schema_dir / schema
             head_schema = head_schema_dir / schema
-            if not base_schema.is_file():
+
+            if base_schema.is_file():
+                segment_apis(base_schema)
+            else:
                 logging.warning(f"{base_schema.name} does not exist in the base version")
-            if not head_schema.is_file():
+
+            if head_schema.is_file():
+                segment_apis(head_schema)
+            else:
                 logging.warning(f"{head_schema.name} does not exist in the head version")
-            if base_schema.is_file() and head_schema.is_file():
-                _run([
-                    oasdiff,
-                    "changelog",
-                    str(base_schema_dir / schema),
-                    str(head_schema_dir / schema),
-                ])
+
+            if not (head_schema.is_file() and base_schema.is_file()):
+                logging.warning(
+                    f"Skipping comparison for {schema} because it doesn't exist in both versions"
+                )
+                continue
+
+            schema_sub_dir = head_schema_dir / Path(schema).stem
+            for file in schema_sub_dir.rglob("*"):
+                rel_name = file.relative_to(schema_sub_dir)
+                matching_file = base_schema_dir / Path(schema).stem / rel_name
+                if matching_file.is_file() and not identical(matching_file, file):
+                    title = path_to_endpoint(rel_name)
+                    print("=" * 99)
+                    print(title)
+                    print("=" * 99)
+                    _run(["jd", matching_file, file], check=False, log=False)
+                    _run([
+                        "delta", 
+                        "--no-gitconfig", 
+                        "--dark", 
+                        "--side-by-side", 
+                        "--paging", "never", 
+                        "--file-decoration-style", "none", 
+                        matching_file, file],
+                        check=False, log=False)
+                    print()
 
 
 if __name__ == "__main__":
@@ -103,6 +149,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path
     )
+    parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
     args = parser.parse_args()
 
-    run_oasdiff(args.base_commit_ref)
+    generate_diffs(args.base_commit_ref, not args.verbose)

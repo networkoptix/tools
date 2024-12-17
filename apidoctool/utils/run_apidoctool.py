@@ -4,11 +4,12 @@
 
 import argparse
 import os
-from pathlib import Path
 import re
 import shutil
-import subprocess
+import subprocess as sp
 import tempfile
+from typing import Optional
+from pathlib import Path
 from urllib.request import urlopen
 
 SWAGGER_TEMPLATE_FILE_NAME = 'openapi_template.yaml'
@@ -21,6 +22,14 @@ PACKAGE_REQUIREMENT_REGEX = re.compile(
     r'(?P<package_version>\d+\.\d+(?:\.\d+)?)\"\s+'
     r'\"\#(?P<recipe_id>\w{32})\"')
 CONAN_PACKAGE_REF_REGEX = re.compile(r'[\w-]+\/\d+\.\d+(?:\.\d+)?\@(?:\#\w{32})?')
+
+
+def _run(
+        cmd: list[str], 
+        check: bool = False, 
+        env: Optional[dict] = None, 
+        silent: bool = False) -> sp.CompletedProcess:
+    return sp.run(cmd, check=check, env=env, capture_output=silent)
 
 
 class ToolPaths:
@@ -50,9 +59,9 @@ def _run_apidoctool(
         properties_file: Path,
         openapi_template_file: Path,
         source_dir: Path,
-        output: Path)  -> subprocess.CompletedProcess:
-
-    return subprocess.run([
+        output: Path,
+        silent: bool) -> sp.CompletedProcess:
+    return _run([
         str(java_path),
         '-Dfile.encoding=UTF-8',
         '-jar',
@@ -60,23 +69,24 @@ def _run_apidoctool(
         '-verbose',
         'code-to-json',
         '-openapi-template-json',
-        openapi_template_file,
+        str(openapi_template_file),
         '-output-openapi-json',
-        output,
+        str(output),
         '-config',
-        properties_file,
+        str(properties_file),
         '-vms-path',
         str(source_dir)
-    ])
+    ], silent=silent)
 
 
 def _run_swagger_codegen(
         java_path: Path,
         swagger_path: Path,
         template_file: Path,
-        api_tmp_dir: Path) -> subprocess.CompletedProcess:
+        api_tmp_dir: Path,
+        silent: bool) -> sp.CompletedProcess:
 
-    return subprocess.run(
+    return _run(
         [
             str(java_path),
             '-Dfile.encoding=UTF-8',
@@ -91,14 +101,15 @@ def _run_swagger_codegen(
             str(api_tmp_dir),
             '--skip-overwrite',
              'true',
-        ])
+        ], silent=silent)
 
 
 def _install_tools(
         source_dir: Path,
         repo_conanfile: Path,
         temp_dir: Path,
-        forced_apidoctool_location: str) -> ToolPaths:
+        forced_apidoctool_location: Optional[str],
+        silent: bool = False) -> ToolPaths:
     artifactory_url = os.getenv('NX_ARTIFACTORY_URL', 'https://artifactory.nxvms.dev/artifactory/')
     conan_url = os.getenv('NX_CONAN_URL', f'{artifactory_url}/api/conan/conan')
     (conan_user, conan_password) = (
@@ -110,23 +121,30 @@ def _install_tools(
     package_references = extract_package_references(
         package_names=package_names, source_dir=source_dir, repo_conanfile=repo_conanfile)
 
-    subprocess.run(['conan', 'remote', 'add', '-f', 'nx', conan_url], env=ENV)
+    _run(['conan', 'remote', 'add', '-f', 'nx', conan_url], env=ENV, silent=silent)
     if download_cache := os.getenv('NX_CONAN_DOWNLOAD_CACHE'):
-        subprocess.run(
-            ['conan', 'config', 'set', f'storage.download_cache={download_cache}'], env=ENV)
+        _run(
+            ['conan', 'config', 'set', f'storage.download_cache={download_cache}'],
+            env=ENV,
+            silent=silent
+        )
     if conan_user and conan_password:
-        subprocess.run(['conan', 'user', '-r', 'nx', conan_user, '-p', conan_password], env=ENV)
+        _run(
+            ['conan', 'user', '-r', 'nx', conan_user, '-p', conan_password],
+            env=ENV,
+            silent=silent
+        )
 
     if _is_conan_package_ref(forced_apidoctool_location):
-        package_references.append(forced_apidoctool_location)
+        package_references.append(str(forced_apidoctool_location))
 
     for package_reference in package_references:
-        subprocess.run(['conan', 'install', '-r', 'nx', package_reference], env=ENV)
+        _run(['conan', 'install', '-r', 'nx', package_reference], env=ENV, silent=silent)
 
     tool_paths = get_tool_paths(package_references)
     if _is_url(forced_apidoctool_location):
         tool_paths.apidoctool_path = _download_apidoctool(
-            url=forced_apidoctool_location, temp_dir=temp_dir)
+            url=str(forced_apidoctool_location), temp_dir=temp_dir)
     elif (not _is_conan_package_ref(forced_apidoctool_location)
           and forced_apidoctool_location is not None):
         # Assume forced_apidoctool_location is a path to a local file.
@@ -135,12 +153,13 @@ def _install_tools(
     return tool_paths
 
 
-def _is_conan_package_ref(location: str) -> bool:
-    return location and CONAN_PACKAGE_REF_REGEX.match(location)
+def _is_conan_package_ref(location: Optional[str]) -> bool:
+    return bool(location) and bool(location and CONAN_PACKAGE_REF_REGEX.match(location))
 
 
-def _is_url(location: str) -> bool:
-    return location and (location.startswith('http://') or location.startswith('https://'))
+def _is_url(location: Optional[str]) -> bool:
+    return bool(location) \
+        and bool(location and (location.startswith('http://') or location.startswith('https://')))
 
 
 def _download_apidoctool(url: str, temp_dir: Path) -> Path:
@@ -176,7 +195,7 @@ def get_tool_paths(package_references: list[str]) -> ToolPaths:
 
     for package_reference in package_references:
         conan_info_args = ['conan', 'info', '--paths', '--only', 'package_folder']
-        package_info = subprocess.run(
+        package_info = sp.run(
             conan_info_args + [package_reference], env=ENV, encoding='utf-8', capture_output=True)
 
         # Get paths for the package and its dependencies.
@@ -185,7 +204,7 @@ def get_tool_paths(package_references: list[str]) -> ToolPaths:
             if not info_line:
                 continue
             if 'package_folder' in info_line:
-                _, __, package_path = info_line.partition(':')
+                _, _, package_path = info_line.partition(':')
                 result.set_path_by_package_name(package_name, Path(package_path.strip()))
             else:
                 package_name = info_line[:info_line.index('/')]
@@ -197,8 +216,9 @@ def generate_openapi_schemas(
         source_dir: Path,
         repo_conanfile: Path,
         output_dir: Path,
-        packages_dir: Path = None,
-        forced_apidoctool_location: str = None):
+        packages_dir: Path,
+        forced_apidoctool_location: Optional[str],
+        silent: bool = False):
     temp_dir_object = tempfile.TemporaryDirectory()
     temp_dir = Path(temp_dir_object.name)
 
@@ -215,7 +235,8 @@ def generate_openapi_schemas(
         source_dir=source_dir,
         repo_conanfile=repo_conanfile,
         temp_dir=temp_dir,
-        forced_apidoctool_location=forced_apidoctool_location)
+        forced_apidoctool_location=forced_apidoctool_location,
+        silent=silent)
 
     for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
         _generate_openapi_schema(
@@ -223,7 +244,8 @@ def generate_openapi_schemas(
             swagger_output_dir=swagger_output_dir,
             apidoctool_output_dir=output_dir,
             tool_paths=tool_paths,
-            source_dir=source_dir)
+            source_dir=source_dir,
+            silent=silent)
 
 
 def _generate_openapi_schema(
@@ -231,7 +253,8 @@ def _generate_openapi_schema(
         swagger_output_dir: Path,
         apidoctool_output_dir: Path,
         tool_paths: ToolPaths,
-        source_dir: Path):
+        source_dir: Path,
+        silent: bool):
     properties_dir = properties_file.parent
     template_file = properties_dir / SWAGGER_TEMPLATE_FILE_NAME
     if not template_file.exists():
@@ -248,7 +271,8 @@ def _generate_openapi_schema(
         java_path=tool_paths.java_path,
         swagger_path=tool_paths.swagger_path,
         template_file=template_file,
-        api_tmp_dir=api_tmp_dir)
+        api_tmp_dir=api_tmp_dir,
+        silent=silent)
 
     output_file = apidoctool_output_dir / (
         f'{properties_dir.parents[0].name}-{properties_dir.name}.json')
@@ -258,7 +282,8 @@ def _generate_openapi_schema(
         openapi_template_file=api_tmp_dir / 'openapi.json',
         properties_file=properties_file,
         source_dir=source_dir,
-        output=output_file)
+        output=output_file,
+        silent=silent)
 
 
 def parse_args() -> argparse.Namespace:
@@ -273,6 +298,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         help='Directory to place generated files.')
+    parser.add_argument(
+        "-s", "--silent",
+        type=bool,
+        action="store_true",
+        default=False,
+        help='When set, output from conan and apidoctool are silenced.')
     parser.add_argument(
         "--conan-dir",
         type=Path,
