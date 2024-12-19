@@ -2,8 +2,9 @@
 
 # Copyright 2018-present Network Optix, Inc. Licensed under MPL 2.0: www.mozilla.org/MPL/2.0/
 
-import logging
 import json
+import logging
+import os
 import subprocess as sp
 import sys
 from contextlib import contextmanager
@@ -65,8 +66,8 @@ def gather_apidoc(commit_ref: str, output_dir: Path, conan_dir: Path, silent: bo
         output_dir.mkdir(parents=False, exist_ok=True)
         generate_openapi_schemas(
             source_dir=base_dir,
-            repo_conanfile=DEFAULT_CONANFILE, 
-            output_dir=output_dir, 
+            repo_conanfile=DEFAULT_CONANFILE,
+            output_dir=output_dir,
             packages_dir=conan_dir,
             forced_apidoctool_location=None,
             silent=silent
@@ -90,6 +91,7 @@ def identical(first: Path, second: Path) -> bool:
 
 
 def generate_diffs(base_commit_ref: str, silent: bool):
+    output_width = int(os.environ.get("APIDOC_DIFF_OUTPUT_WIDTH", 99))
     with TemporaryDirectory(suffix="_apidiff") as temp_directory:
         logging.debug(f"Running in {temp_directory}")
         base_schema_dir = Path(temp_directory) / "base"
@@ -124,17 +126,19 @@ def generate_diffs(base_commit_ref: str, silent: bool):
                 matching_file = base_schema_dir / Path(schema).stem / rel_name
                 if matching_file.is_file() and not identical(matching_file, file):
                     title = path_to_endpoint(rel_name)
-                    print("=" * 99)
+                    print("=" * output_width)
                     print(title)
-                    print("=" * 99)
+                    print("=" * output_width)
                     _run(["jd", matching_file, file], check=False, log=False)
                     _run([
-                        "delta", 
-                        "--no-gitconfig", 
-                        "--dark", 
-                        "--side-by-side", 
-                        "--paging", "never", 
-                        "--file-decoration-style", "none", 
+                        "delta",
+                        "--no-gitconfig",
+                        "--dark",
+                        "--side-by-side",
+                        "--paging", "never",
+                        "--width", str(output_width),
+                        "--wrap-max-lines", "unlimited",
+                        "--file-decoration-style", "none",
                         matching_file, file],
                         check=False, log=False)
                     print()

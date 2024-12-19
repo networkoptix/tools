@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
     git \
+    jq \
     python3 \
     && python3 -m pip install --no-cache-dir conan==1.64.1 \
     && rm -rf /var/lib/apt/lists/*
