@@ -41,18 +41,18 @@ def _run(cmd: list[Union[str, Path]], check=True, log=True, silent=False):
     sp.run(cmd, check=check, capture_output=silent)
 
 
-def git(*args):
-    _run(["git", *args], silent=True)
+def git(*args, silent: bool=True):
+    _run(["git", *args], silent=silent)
 
 
 @contextmanager
-def worktree(commit_ref: str) -> Generator[Path, None, None]:
+def worktree(commit_ref: str, silent: bool=True) -> Generator[Path, None, None]:
     with TemporaryDirectory(suffix="_apidiff_worktree") as temp_directory:
         try:
-            git("worktree", "add", temp_directory, commit_ref)
+            git("worktree", "add", temp_directory, commit_ref, silent=silent)
             yield Path(temp_directory)
         finally:
-            git("worktree", "remove", temp_directory)
+            git("worktree", "remove", temp_directory, silent=silent)
 
 
 def preprocess_json(json_path: Path):
@@ -151,8 +151,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("base_commit_ref", help="The diff base commit hash.")
     parser.add_argument(
-        "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path
-    )
+        "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path)
     parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
     args = parser.parse_args()
 
