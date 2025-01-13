@@ -78,8 +78,8 @@ def replacements_from_args(args: Optional[list[str]]) -> Optional[dict[str, str]
         return None
     """Convert a list of "key:value" strings into a dictionary mapping keys to values."""
     return {
-        key.strip(): value.strip() 
-        for arg in args 
+        key.strip(): value.strip()
+        for arg in args
         for key, value in [arg.split(":", 1)]
     }
 
@@ -123,4 +123,3 @@ if __name__ == "__main__":
     remove_keys(data, keys_to_remove)
     replace_keys(data, replacements)
     save_sorted_json(data, output_file=args.output)
-

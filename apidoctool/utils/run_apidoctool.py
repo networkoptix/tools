@@ -25,9 +25,9 @@ CONAN_PACKAGE_REF_REGEX = re.compile(r'[\w-]+\/\d+\.\d+(?:\.\d+)?\@(?:\#\w{32})?
 
 
 def _run(
-        cmd: list[str], 
-        check: bool = False, 
-        env: Optional[dict] = None, 
+        cmd: list[str],
+        check: bool = False,
+        env: Optional[dict] = None,
         silent: bool = False) -> sp.CompletedProcess:
     return sp.run(cmd, check=check, env=env, capture_output=silent)
 

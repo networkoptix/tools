@@ -101,4 +101,3 @@ if __name__ == "__main__":
 
     # Dump the endpoints
     dump_endpoints(openapi_schema, args.output)
-

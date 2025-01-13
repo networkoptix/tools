@@ -29,7 +29,7 @@ ARG APP_GID=1000
 RUN addgroup --gid $APP_GID user && \
     adduser --uid $APP_UID --disabled-password --ingroup user user && \
     install -d /workdir/ -o $APP_UID -g $APP_GID && \
-    mkdir -p /app/apidoc_diff && chown user:user /workdir 
+    mkdir -p /app/apidoc_diff && chown user:user /workdir
 
 WORKDIR /app
 COPY ./apidoc_diff.py ./run_apidoctool.py /app/
@@ -42,4 +42,3 @@ USER user
 WORKDIR /workdir
 
 ENTRYPOINT ["bash", "-c"]
-
