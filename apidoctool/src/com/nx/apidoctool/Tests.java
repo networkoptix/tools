@@ -580,6 +580,21 @@ public final class Tests extends TestBase
             "unexpected text \"Invalid description\" after declaration of type `SomeStruct`");
     }
 
+    private void subscribe() throws Exception
+    {
+        final VmsCodeToJsonExecutor executor = new VmsCodeToJsonExecutor();
+        executor.verbose = verbose;
+        executor.vmsPath = new File(vmsPath, "../subscribe");
+        executor.params = new Params();
+
+        final File path = new File(testPath, "subscribe");
+        executor.openApiTemplateJsonFile = new File(path, "template.json");
+        executor.params.parsePropertiesFile(new File(path, "apidoctool.properties"));
+        executor.outputOpenApiJsonFile = new File(outputTestPath, "subscribe.json");
+        executor.execute();
+        assertFileContentsEqual(new File(path, "expected.json"), executor.outputOpenApiJsonFile);
+    }
+
     //---------------------------------------------------------------------------------------------
 
     private final boolean verbose;
@@ -645,6 +660,9 @@ public final class Tests extends TestBase
 
         run("Errors", new Run() { public void run() throws Exception {
             errors(); } });
+
+        run("Subscribe", new Run() { public void run() throws Exception {
+            subscribe(); } });
 
         printFinalMessage();
     }

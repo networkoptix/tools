@@ -145,7 +145,8 @@ public final class OpenApiSerializer
         Apidoc apidoc,
         JSONObject root,
         int requiredGroupNameLenLimit,
-        boolean generateOrderByParameters) throws Exception
+        boolean generateOrderByParameters,
+        boolean jsonrpc) throws Exception
     {
         if (apidoc.groups.isEmpty())
             return "";
@@ -160,7 +161,8 @@ public final class OpenApiSerializer
                 group,
                 refParameters,
                 componentsSchemas,
-                generateOrderByParameters))
+                generateOrderByParameters,
+                jsonrpc))
             {
                 continue;
             }
@@ -219,13 +221,18 @@ public final class OpenApiSerializer
         Apidoc.Group group,
         JSONObject refParameters,
         JSONObject componentsSchemas,
-        boolean generateOrderByParameters) throws Exception
+        boolean generateOrderByParameters,
+        boolean jsonrpc) throws Exception
     {
         boolean filled = false;
         for (final Apidoc.Function function: group.functions)
         {
-            final JSONObject path = getObject(paths, group.urlPrefix + "/" + function.name);
-            final JSONObject method = fillPath(path, function, refParameters, componentsSchemas, generateOrderByParameters);
+            final String pathString = group.urlPrefix + "/" + function.name;
+            final JSONObject path = getObject(paths, pathString);
+            final JSONObject method = fillPath(path, function, refParameters, componentsSchemas,
+                generateOrderByParameters);
+            if (jsonrpc)
+                addJsonRpcMethods(function, pathString, method);
             if (!group.groupName.isEmpty())
             {
                 final JSONArray tags = getArray(method, "tags");
@@ -234,6 +241,35 @@ public final class OpenApiSerializer
             filled = true;
         }
         return filled;
+    }
+
+    private static void addJsonRpcMethods(Apidoc.Function function, String path, JSONObject method)
+    {
+        if (function.jsonrpc.unused)
+            return;
+
+        String jsonRpcPath = function.pathForJsonRpc(path);
+        JSONObject analog = new JSONObject();
+        analog.put(function.addJsonRpcSuffix(jsonRpcPath), "Same result.");
+        if (function.jsonrpc.subscribe == null)
+        {
+            method.put("x-jsonrpc-methods", analog);
+            return;
+        }
+
+        assert function.method.equals("GET");
+        JSONObject subscribe = new JSONObject();
+        subscribe.put(jsonRpcPath + ".subscribe",
+            function.jsonrpc.subscribe.trim().isEmpty()
+                ? "Same result and `update` & `delete` notifications over time."
+                : function.jsonrpc.subscribe.trim());
+        JSONObject unsubscribe = new JSONObject();
+        unsubscribe.put(jsonRpcPath + ".unsubscribe", "Stop over time notifications.");
+        JSONArray list = new JSONArray();
+        list.put(analog);
+        list.put(subscribe);
+        list.put(unsubscribe);
+        method.put("x-jsonrpc-methods", list);
     }
 
     private static void processFunctionInputParams(

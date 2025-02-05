@@ -134,7 +134,8 @@ public final class VmsCodeToJsonExecutor
                         apidoc,
                         openApi,
                         params.requiredGroupNameLenLimit(),
-                        params.generateOrderByParameters()),
+                        params.generateOrderByParameters(),
+                        params.jsonrpc()),
                     apiVersions);
             }
             catch (Exception e)

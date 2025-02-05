@@ -52,6 +52,16 @@ public class Params
 "Whether the default query parameter `_orderBy` must be generated to sort response lists by\n" +
 "their fields.");
 
+    public boolean jsonrpc() throws Exception
+    {
+        return toBoolean(jsonrpc, "jsonrpc");
+    }
+
+    private final StringBuilder jsonrpc = regStringParam(
+        "jsonrpc",
+        "false",
+"Whether %jsonrpc tags must be processed and jsonrpc extensions generated for each function.");
+
     public int requiredFunctionCaptionLenLimit() throws Exception
     {
         return toNonNegativeInt(

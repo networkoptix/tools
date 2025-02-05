@@ -2,14 +2,15 @@
 
 package com.nx.apidoc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.nx.utils.Serializable;
 import com.nx.utils.Utils;
+
+import static com.nx.apidoc.ApidocComment.ATTR_UNUSED;
+import static com.nx.apidoc.ApidocComment.TAG_JSONRPC;
 
 /**
  * Object representation of apidoc elements. Empty Strings and ArrayLists
@@ -432,6 +433,51 @@ public final class Apidoc extends Serializable
         }
     }
 
+    public static final class JsonRpcExt
+    {
+        boolean unused = false;
+        public String subscribe;
+
+        void parse(ApidocTagParser.Item item, int indentLevel) throws ApidocCommentParser.Error
+        {
+            String name = item.getInitialToken();
+            if (ATTR_UNUSED.equals(item.getAttribute()))
+            {
+                if (unused)
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + ATTR_UNUSED +
+                        " for " + TAG_JSONRPC + " is specified more than once.");
+                }
+                if (!"".equals(name))
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() +
+                        TAG_JSONRPC + ATTR_UNUSED + " must not specify anything.");
+                }
+                unused = true;
+                return;
+            }
+
+            if (!"".equals(item.getAttribute()))
+            {
+                throw new ApidocCommentParser.Error(item.getErrorPrefix() +
+                    "Unsupported attribute `" + item.getAttribute() + "` for " + TAG_JSONRPC + ".");
+            }
+
+            if (!name.equals("subscribe"))
+            {
+                throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Unknown " +
+                    TAG_JSONRPC + " extension name `" + name + "`.");
+            }
+
+            if (subscribe != null)
+            {
+                throw new ApidocCommentParser.Error(item.getErrorPrefix() +
+                    "More than one `" + TAG_JSONRPC + " subscribe` found.");
+            }
+            subscribe = item.getTextAfterInitialToken(indentLevel);
+        }
+    }
+
     public static final class Function extends Serializable
     {
         public boolean arrayParams; ///< optional(false)
@@ -446,6 +492,7 @@ public final class Apidoc extends Serializable
         public String deprecatedDescription = ""; ///< optional
         public InOutData input = new InOutData(); ///< optional
         public Result result = new Apidoc.Result(); ///< optional
+        public JsonRpcExt jsonrpc = new JsonRpcExt(); ///< optional
 
         public boolean areInBodyParameters()
         {
@@ -461,6 +508,31 @@ public final class Apidoc extends Serializable
                 "get", "post", "put", "patch", "delete", "head", "options", "trace");
             final String result = method.toLowerCase();
             return knownMethods.contains(result) ? result : "trace";
+        }
+
+        public String pathForJsonRpc(final String originPath)
+        {
+            assert originPath.length() > 1 && originPath.charAt(0) == '/';
+            String path = originPath.substring(1);
+            for (Param p: input.params)
+            {
+                path = path.replace("/{" + p.name + "}", "");
+                path = path.replace("/*", "");
+            }
+            return path.replace("/", ".");
+        }
+
+        public String addJsonRpcSuffix(final String path)
+        {
+            if (method.equals("GET"))
+            {
+                return path + (result.type.fixed == Type.ARRAY
+                    || result.type.fixed == Type.STRING_ARRAY
+                    || result.type.fixed == Type.UUID_ARRAY
+                        ? ".list"
+                        : ".get");
+            }
+            return path + jsonRpcMethods.get(method);
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
@@ -501,6 +573,16 @@ public final class Apidoc extends Serializable
                     : "")
                 : "";
         }
+
+        private static final Map<String, String> jsonRpcMethods = new HashMap<String, String>()
+        {
+            {
+                put("POST", ".create");
+                put("PUT", ".set");
+                put("PATCH", ".update");
+                put("DELETE", ".delete");
+            }
+        };
     }
 
     public static final class Group extends Serializable

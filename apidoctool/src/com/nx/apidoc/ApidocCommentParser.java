@@ -178,6 +178,7 @@ public final class ApidocCommentParser
         boolean returnParsed = false;
         boolean structParsed = false;
         boolean exampleParsed = false;
+        boolean subscribeParsed = false;
 
         FunctionDescription description = null;
         switch (functionType)
@@ -261,6 +262,10 @@ public final class ApidocCommentParser
             {
                 permissionsParsed = checkTagOnce(item, permissionsParsed, TAG_PERMISSIONS);
                 description.function.permissions = item.getFullText(indentLevel + 1);
+            }
+            else if (TAG_JSONRPC.equals(item.getTag()))
+            {
+                description.function.jsonrpc.parse(item, indentLevel + 1);
             }
             else if (TAG_PARAM.equals(item.getTag()))
             {

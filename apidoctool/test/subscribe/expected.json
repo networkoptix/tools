@@ -1,0 +1,201 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "test",
+    "version": "0.0.0"
+  },
+  "tags": [],
+  "components": {
+    "parameters": {},
+    "schemas": {}
+  },
+  "paths": {
+    "/rest/test": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
+      }},
+      "x-jsonrpc-methods": {"rest.test.list": "Same result."}
+    }},
+    "/rest/test/{id}": {
+      "get": {
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {}
+        }],
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        }},
+        "x-jsonrpc-methods": {"rest.test.get": "Same result."}
+      },
+      "post": {
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {}
+        }],
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        }},
+        "x-jsonrpc-methods": {"rest.test.create": "Same result."}
+      },
+      "put": {
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {}
+        }],
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        }},
+        "x-jsonrpc-methods": {"rest.test.set": "Same result."}
+      },
+      "patch": {
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {}
+        }],
+        "responses": {"default": {
+          "description": "",
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        }},
+        "x-jsonrpc-methods": {"rest.test.update": "Same result."}
+      },
+      "delete": {
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {}
+        }],
+        "responses": {"default": {"description": ""}},
+        "x-jsonrpc-methods": {"rest.test.delete": "Same result."}
+      }
+    },
+    "/rest/test/{id}/afterId": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": {"rest.test.afterId.get": "Same result."}
+    }},
+    "/rest/test/*/asterisk/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": {"rest.test.asterisk.get": "Same result."}
+    }},
+    "/rest/test/*/asterisk/{id}/afterId": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": {"rest.test.asterisk.afterId.get": "Same result."}
+    }},
+    "/rest/test/subscribe": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribe.list": "Same result."},
+        {"rest.test.subscribe.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribe.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribe/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribe.get": "Same result."},
+        {"rest.test.subscribe.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribe.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/unused/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }}
+    }},
+    "/rest/test/subscribeDescription": {"get": {
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeDescription.list": "Same result."},
+        {"rest.test.subscribeDescription.subscribe": "Custom description"},
+        {"rest.test.subscribeDescription.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeDescription/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeDescription.get": "Same result."},
+        {"rest.test.subscribeDescription.subscribe": "Custom description\n   multiline"},
+        {"rest.test.subscribeDescription.unsubscribe": "Stop over time notifications."}
+      ]
+    }}
+  }
+}
