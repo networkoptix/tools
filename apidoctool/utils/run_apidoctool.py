@@ -14,6 +14,7 @@ from urllib.request import urlopen
 
 SWAGGER_TEMPLATE_FILE_NAME = 'openapi_template.yaml'
 APIDOCTOOL_PROPERTIES_FILE_NAME = 'apidoctool.properties'
+OPEN_SOURCE_ROOT_DIR_NAME = 'open'
 
 ENV = os.environ.copy()
 
@@ -239,13 +240,21 @@ def generate_openapi_schemas(
         silent=silent)
 
     for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
+        project_root = (source_dir / OPEN_SOURCE_ROOT_DIR_NAME
+            if _is_file_placed_in_open_source_part(file=properties_file, repo_path=source_dir)
+            else source_dir)
         _generate_openapi_schema(
             properties_file=properties_file,
             swagger_output_dir=swagger_output_dir,
             apidoctool_output_dir=output_dir,
             tool_paths=tool_paths,
-            source_dir=source_dir,
+            source_dir=project_root,
             silent=silent)
+
+
+def _is_file_placed_in_open_source_part(file: Path, repo_path: Path) -> bool:
+    relative_path = file.relative_to(repo_path)
+    return relative_path.parts[0] == OPEN_SOURCE_ROOT_DIR_NAME
 
 
 def _generate_openapi_schema(
