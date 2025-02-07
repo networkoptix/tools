@@ -76,7 +76,7 @@ def _run_apidoctool(
         str(properties_file),
         '-vms-path',
         str(source_dir)
-    ], silent=silent)
+    ], check=True, silent=silent)
 
 
 def _run_swagger_codegen(
@@ -101,7 +101,7 @@ def _run_swagger_codegen(
             str(api_tmp_dir),
             '--skip-overwrite',
              'true',
-        ], silent=silent)
+        ], check=True, silent=silent)
 
 
 def _install_tools(
@@ -267,23 +267,26 @@ def _generate_openapi_schema(
     api_tmp_dir = swagger_output_dir / api_tmp_dir_name
     api_tmp_dir.mkdir(parents=True)
 
-    _run_swagger_codegen(
-        java_path=tool_paths.java_path,
-        swagger_path=tool_paths.swagger_path,
-        template_file=template_file,
-        api_tmp_dir=api_tmp_dir,
-        silent=silent)
+    try:
+        _run_swagger_codegen(
+            java_path=tool_paths.java_path,
+            swagger_path=tool_paths.swagger_path,
+            template_file=template_file,
+            api_tmp_dir=api_tmp_dir,
+            silent=silent)
 
-    output_file = apidoctool_output_dir / (
-        f'{properties_dir.parents[0].name}-{properties_dir.name}.json')
-    _run_apidoctool(
-        java_path=tool_paths.java_path,
-        apidoctool_path=tool_paths.apidoctool_path,
-        openapi_template_file=api_tmp_dir / 'openapi.json',
-        properties_file=properties_file,
-        source_dir=source_dir,
-        output=output_file,
-        silent=silent)
+        output_file = apidoctool_output_dir / (
+            f'{properties_dir.parents[0].name}-{properties_dir.name}.json')
+        _run_apidoctool(
+            java_path=tool_paths.java_path,
+            apidoctool_path=tool_paths.apidoctool_path,
+            openapi_template_file=api_tmp_dir / 'openapi.json',
+            properties_file=properties_file,
+            source_dir=source_dir,
+            output=output_file,
+            silent=silent)
+    except sp.CalledProcessError as e:
+        raise RuntimeError(f"Failed to generate OpenAPI schema for {properties_file!r}: {e}\n")
 
 
 def parse_args() -> argparse.Namespace:
