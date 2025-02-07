@@ -300,7 +300,6 @@ def parse_args() -> argparse.Namespace:
         help='Directory to place generated files.')
     parser.add_argument(
         "-s", "--silent",
-        type=bool,
         action="store_true",
         default=False,
         help='When set, output from conan and apidoctool are silenced.')
