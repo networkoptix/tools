@@ -90,7 +90,7 @@ def identical(first: Path, second: Path) -> bool:
     return sp.run(["cmp", str(first), str(second)], check=False, stdout=sp.PIPE).returncode == 0
 
 
-def generate_diffs(base_commit_ref: str, silent: bool):
+def generate_diffs(base_commit_ref: str, head_commit_ref: str, silent: bool):
     output_width = int(os.environ.get("APIDOC_DIFF_OUTPUT_WIDTH", 99))
     with TemporaryDirectory(suffix="_apidiff") as temp_directory:
         logging.debug(f"Running in {temp_directory}")
@@ -98,7 +98,7 @@ def generate_diffs(base_commit_ref: str, silent: bool):
         head_schema_dir = Path(temp_directory) / "head"
         conan_dir = Path(temp_directory) / "packages"
         gather_apidoc(base_commit_ref, base_schema_dir, conan_dir, silent)
-        gather_apidoc("HEAD", head_schema_dir, conan_dir, silent)
+        gather_apidoc(head_commit_ref, head_schema_dir, conan_dir, silent)
 
         for schema in API_SCHEMAS:
             base_schema = base_schema_dir / schema
@@ -152,7 +152,8 @@ if __name__ == "__main__":
     parser.add_argument("base_commit_ref", help="The diff base commit hash.")
     parser.add_argument(
         "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path)
+    parser.add_argument("--head", help="The diff head commit hash.", default="HEAD")
     parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
     args = parser.parse_args()
 
-    generate_diffs(args.base_commit_ref, not args.verbose)
+    generate_diffs(args.base_commit_ref, args.head, not args.verbose)

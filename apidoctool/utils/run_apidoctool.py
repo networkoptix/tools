@@ -197,7 +197,11 @@ def get_tool_paths(package_references: list[str]) -> ToolPaths:
     for package_reference in package_references:
         conan_info_args = ['conan', 'info', '--paths', '--only', 'package_folder']
         package_info = sp.run(
-            conan_info_args + [package_reference], env=ENV, encoding='utf-8', capture_output=True)
+            conan_info_args + [package_reference],
+            env=ENV,
+            encoding='utf-8',
+            stdout=sp.PIPE,
+            check=True)
 
         # Get paths for the package and its dependencies.
         package_name = ''
@@ -240,9 +244,7 @@ def generate_openapi_schemas(
         silent=silent)
 
     for properties_file in source_dir.glob(f'**/{APIDOCTOOL_PROPERTIES_FILE_NAME}'):
-        project_root = (source_dir / OPEN_SOURCE_ROOT_DIR_NAME
-            if _is_file_placed_in_open_source_part(file=properties_file, repo_path=source_dir)
-            else source_dir)
+        project_root = _heuristic_project_root(properties_file, source_dir)
         _generate_openapi_schema(
             properties_file=properties_file,
             swagger_output_dir=swagger_output_dir,
@@ -252,9 +254,39 @@ def generate_openapi_schemas(
             silent=silent)
 
 
-def _is_file_placed_in_open_source_part(file: Path, repo_path: Path) -> bool:
-    relative_path = file.relative_to(repo_path)
-    return relative_path.parts[0] == OPEN_SOURCE_ROOT_DIR_NAME
+def _get_type_header_paths(properties_file: Path) -> list[str]:
+    type_header_paths = []
+    content = properties_file.read_text()
+
+    # Match 'typeHeaderPaths' followed by optional whitespace, '=', optional whitespace, and
+    # capture everything after until a non-continued line or end of file.
+    pattern = r'typeHeaderPaths\s*=\s*((?:[^\\,\n]+(?:\s*,\s*)?|\\\s*\n\s*)+)'
+    match = re.search(pattern, content, re.MULTILINE)
+
+    if match:
+        paths_str = re.sub(r'\\\s*\n\s*', '', match.group(1))
+        type_header_paths = [p.strip() for p in paths_str.split(',') if p.strip()]
+
+    return type_header_paths
+
+
+def _heuristic_project_root(properties_file: Path, source_dir: Path) -> Path:
+    # Determines project root by checking if type header paths from properties file exist either
+    # directly in source_dir or source_dir/open. Falls back to source_dir/open if no paths found,
+    # or source_dir if no matches found.
+    type_header_paths = _get_type_header_paths(properties_file)
+    if not type_header_paths:
+        print(f"No typeHeaderPaths found in {properties_file!r}, using "
+            f"{source_dir / OPEN_SOURCE_ROOT_DIR_NAME} as project root")
+        return source_dir / OPEN_SOURCE_ROOT_DIR_NAME
+    for path in type_header_paths:
+        if (source_dir / path).exists():
+            return source_dir
+    for path in type_header_paths:
+        if (source_dir / OPEN_SOURCE_ROOT_DIR_NAME / path).exists():
+            return source_dir / OPEN_SOURCE_ROOT_DIR_NAME
+    # If no matches found, default to source_dir
+    return source_dir
 
 
 def _generate_openapi_schema(
