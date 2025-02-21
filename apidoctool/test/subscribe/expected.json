@@ -154,6 +154,40 @@
         {"rest.test.subscribe.unsubscribe": "Stop over time notifications."}
       ]
     }},
+    "/rest/test/subscribeOne": {"get": {
+      "parameters": [{
+        "name": "id",
+        "required": true,
+        "in": "query",
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeOne.get": "Same result."},
+        {"rest.test.subscribeOne.subscribeOne": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeOne.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeOne/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeOne.get": "Same result."},
+        {"rest.test.subscribeOne.subscribeOne": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeOne.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
     "/rest/test/unused/{id}": {"get": {
       "parameters": [{
         "name": "id",
@@ -195,6 +229,40 @@
         {"rest.test.subscribeDescription.get": "Same result."},
         {"rest.test.subscribeDescription.subscribe": "Custom description\n   multiline"},
         {"rest.test.subscribeDescription.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeOneDescription": {"get": {
+      "parameters": [{
+        "name": "id",
+        "required": true,
+        "in": "query",
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeOneDescription.get": "Same result."},
+        {"rest.test.subscribeOneDescription.subscribeOne": "Custom description"},
+        {"rest.test.subscribeOneDescription.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeOneDescription/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeOneDescription.get": "Same result."},
+        {"rest.test.subscribeOneDescription.subscribeOne": "Custom description\n   multiline"},
+        {"rest.test.subscribeOneDescription.unsubscribe": "Stop over time notifications."}
       ]
     }}
   }

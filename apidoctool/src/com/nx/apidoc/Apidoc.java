@@ -435,8 +435,10 @@ public final class Apidoc extends Serializable
 
     public static final class JsonRpcExt
     {
+        enum SubscribeMethod {no, list, one};
+        SubscribeMethod subscribeMethod = SubscribeMethod.no;
+        String subscribeDescription;
         boolean unused = false;
-        public String subscribe;
 
         void parse(ApidocTagParser.Item item, int indentLevel) throws ApidocCommentParser.Error
         {
@@ -453,6 +455,13 @@ public final class Apidoc extends Serializable
                     throw new ApidocCommentParser.Error(item.getErrorPrefix() +
                         TAG_JSONRPC + ATTR_UNUSED + " must not specify anything.");
                 }
+                if (subscribeMethod != SubscribeMethod.no)
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() +
+                        TAG_JSONRPC + ATTR_UNUSED + " can not be used in conjunction with `" +
+                        (subscribeMethod == SubscribeMethod.list ? "subscribe" : "subscribeOne") +
+                        "`.");
+                }
                 unused = true;
                 return;
             }
@@ -463,18 +472,34 @@ public final class Apidoc extends Serializable
                     "Unsupported attribute `" + item.getAttribute() + "` for " + TAG_JSONRPC + ".");
             }
 
-            if (!name.equals("subscribe"))
+            SubscribeMethod previousSubscribeMethod = subscribeMethod;
+            if (name.equals("subscribe"))
+            {
+                subscribeMethod = SubscribeMethod.list;
+            }
+            else if (name.equals("subscribeOne"))
+            {
+                subscribeMethod = SubscribeMethod.one;
+            }
+            else
             {
                 throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Unknown " +
                     TAG_JSONRPC + " extension name `" + name + "`.");
             }
 
-            if (subscribe != null)
+            if (unused)
             {
                 throw new ApidocCommentParser.Error(item.getErrorPrefix() +
-                    "More than one `" + TAG_JSONRPC + " subscribe` found.");
+                    TAG_JSONRPC + " " + name + " can not be used in conjunction with [unused].");
             }
-            subscribe = item.getTextAfterInitialToken(indentLevel);
+
+            if (previousSubscribeMethod != SubscribeMethod.no)
+            {
+                throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
+                    " `subscribe` or `subscribeOne` must be specified only once.");
+            }
+
+            subscribeDescription = item.getTextAfterInitialToken(indentLevel);
         }
     }
 

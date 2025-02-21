@@ -45,6 +45,16 @@
      * %jsonrpc subscribe
      * %return:object
      *
+     **%apidoc GET /rest/test/subscribeOne
+     * %param id
+     * %jsonrpc subscribeOne
+     * %return:object
+     *
+     **%apidoc GET /rest/test/subscribeOne/{id}
+     * %param id
+     * %jsonrpc subscribeOne
+     * %return:object
+     *
      **%apidoc GET /rest/test/unused/{id}
      * %param id
      * %jsonrpc[unused]
@@ -59,6 +69,17 @@
      **%apidoc GET /rest/test/subscribeDescription/{id}
      * %param id
      * %jsonrpc subscribe Custom description
+     *    multiline
+     * %return:object
+     *
+     **%apidoc GET /rest/test/subscribeOneDescription
+     * %param id
+     * %jsonrpc subscribeOne Custom description
+     * %return:object
+     *
+     **%apidoc GET /rest/test/subscribeOneDescription/{id}
+     * %param id
+     * %jsonrpc subscribeOne Custom description
      *    multiline
      * %return:object
      */
