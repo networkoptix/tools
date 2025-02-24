@@ -248,10 +248,13 @@ public final class OpenApiSerializer
         if (function.jsonrpc.unused)
             return;
 
-        String jsonRpcPath = function.pathForJsonRpc(path);
         JSONObject analog = new JSONObject();
-        analog.put(function.addJsonRpcSuffix(jsonRpcPath), "Same result.");
-        if (function.jsonrpc.subscribeMethod == Apidoc.JsonRpcExt.SubscribeMethod.no)
+        String jsonRpcMethod = function.jsonRpcMethod(path);
+        analog.put(jsonRpcMethod,
+            function.jsonrpc.resultDescription.isEmpty()
+                ? "Same result."
+                : function.jsonrpc.resultDescription);
+        if (function.jsonrpc.subscribeDescription == null)
         {
             method.put("x-jsonrpc-methods", analog);
             return;
@@ -259,16 +262,12 @@ public final class OpenApiSerializer
 
         assert function.method.equals("GET");
         JSONObject subscribe = new JSONObject();
-        subscribe.put(
-            jsonRpcPath + "." +
-                (function.jsonrpc.subscribeMethod == Apidoc.JsonRpcExt.SubscribeMethod.list
-                    ? "subscribe"
-                    : "subscribeOne"),
-            function.jsonrpc.subscribeDescription.trim().isEmpty()
+        subscribe.put(jsonRpcMethod + ".subscribe",
+            function.jsonrpc.subscribeDescription.isEmpty()
                 ? "Same result and `update` & `delete` notifications over time."
-                : function.jsonrpc.subscribeDescription.trim());
+                : function.jsonrpc.subscribeDescription);
         JSONObject unsubscribe = new JSONObject();
-        unsubscribe.put(jsonRpcPath + ".unsubscribe", "Stop over time notifications.");
+        unsubscribe.put(jsonRpcMethod + ".unsubscribe", "Stop over time notifications.");
         JSONArray list = new JSONArray();
         list.put(analog);
         list.put(subscribe);

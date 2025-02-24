@@ -47,12 +47,26 @@
      *
      **%apidoc GET /rest/test/subscribeOne
      * %param id
-     * %jsonrpc subscribeOne
-     * %return:object
+     * %jsonrpc[result] one
+     * %jsonrpc subscribe
+     * %return:array
      *
      **%apidoc GET /rest/test/subscribeOne/{id}
      * %param id
-     * %jsonrpc subscribeOne
+     * %jsonrpc[result] one
+     * %jsonrpc subscribe
+     * %return:array
+     *
+     **%apidoc GET /rest/test/subscribeAll
+     * %param id
+     * %jsonrpc[result] all
+     * %jsonrpc subscribe
+     * %return:object
+     *
+     **%apidoc GET /rest/test/subscribeAll/{id}
+     * %param id
+     * %jsonrpc[result] all
+     * %jsonrpc subscribe
      * %return:object
      *
      **%apidoc GET /rest/test/unused/{id}
@@ -71,15 +85,16 @@
      * %jsonrpc subscribe Custom description
      *    multiline
      * %return:object
+     */
+    reg("/rest/test");
+
+    /**%apidoc GET /rest/test/resultDescription
+     * %jsonrpc[result] one Custom description
+     * %return:array
      *
-     **%apidoc GET /rest/test/subscribeOneDescription
+     **%apidoc GET /rest/test/resultDescription/{id}
      * %param id
-     * %jsonrpc subscribeOne Custom description
-     * %return:object
-     *
-     **%apidoc GET /rest/test/subscribeOneDescription/{id}
-     * %param id
-     * %jsonrpc subscribeOne Custom description
+     * %jsonrpc[result] all Custom description
      *    multiline
      * %return:object
      */

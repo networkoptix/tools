@@ -32,10 +32,14 @@ public abstract class ApidocComment
     protected static final String ATTR_REF = "[ref]";
     protected static final String ATTR_UNUSED = "[unused]";
     protected static final String ATTR_IMMUTABLE = "[immutable]";
+    protected static final String ATTR_RESULT = "[result]";
 
     protected static final String LABEL_ARRAY_PARAMS = "arrayParams";
 
     protected static final String PARAM_FORMAT = "format";
+    protected static final String PARAM_SUBSCRIBE = "subscribe";
+    protected static final String PARAM_ONE = "one";
+    protected static final String PARAM_ALL = "all";
 
 //-------------------------------------------------------------------------------------------------
 // Apidoc comment format

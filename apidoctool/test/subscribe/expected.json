@@ -18,7 +18,7 @@
           "items": {}
         }}}
       }},
-      "x-jsonrpc-methods": {"rest.test.list": "Same result."}
+      "x-jsonrpc-methods": {"rest.test.all": "Same result."}
     }},
     "/rest/test/{id}": {
       "get": {
@@ -32,7 +32,7 @@
           "description": "",
           "content": {"application/json": {"schema": {"type": "object"}}}
         }},
-        "x-jsonrpc-methods": {"rest.test.get": "Same result."}
+        "x-jsonrpc-methods": {"rest.test.one": "Same result."}
       },
       "post": {
         "parameters": [{
@@ -95,7 +95,7 @@
         "description": "",
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
-      "x-jsonrpc-methods": {"rest.test.afterId.get": "Same result."}
+      "x-jsonrpc-methods": {"rest.test.afterId.one": "Same result."}
     }},
     "/rest/test/*/asterisk/{id}": {"get": {
       "parameters": [{
@@ -108,7 +108,7 @@
         "description": "",
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
-      "x-jsonrpc-methods": {"rest.test.asterisk.get": "Same result."}
+      "x-jsonrpc-methods": {"rest.test.asterisk.one": "Same result."}
     }},
     "/rest/test/*/asterisk/{id}/afterId": {"get": {
       "parameters": [{
@@ -121,7 +121,7 @@
         "description": "",
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
-      "x-jsonrpc-methods": {"rest.test.asterisk.afterId.get": "Same result."}
+      "x-jsonrpc-methods": {"rest.test.asterisk.afterId.one": "Same result."}
     }},
     "/rest/test/subscribe": {"get": {
       "responses": {"default": {
@@ -132,9 +132,9 @@
         }}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribe.list": "Same result."},
-        {"rest.test.subscribe.subscribe": "Same result and `update` & `delete` notifications over time."},
-        {"rest.test.subscribe.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribe.all": "Same result."},
+        {"rest.test.subscribe.all.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribe.all.unsubscribe": "Stop over time notifications."}
       ]
     }},
     "/rest/test/subscribe/{id}": {"get": {
@@ -149,9 +149,9 @@
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribe.get": "Same result."},
-        {"rest.test.subscribe.subscribe": "Same result and `update` & `delete` notifications over time."},
-        {"rest.test.subscribe.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribe.one": "Same result."},
+        {"rest.test.subscribe.one.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribe.one.unsubscribe": "Stop over time notifications."}
       ]
     }},
     "/rest/test/subscribeOne": {"get": {
@@ -163,12 +163,15 @@
       }],
       "responses": {"default": {
         "description": "",
-        "content": {"application/json": {"schema": {"type": "object"}}}
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribeOne.get": "Same result."},
-        {"rest.test.subscribeOne.subscribeOne": "Same result and `update` & `delete` notifications over time."},
-        {"rest.test.subscribeOne.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribeOne.one": "Same result."},
+        {"rest.test.subscribeOne.one.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeOne.one.unsubscribe": "Stop over time notifications."}
       ]
     }},
     "/rest/test/subscribeOne/{id}": {"get": {
@@ -180,12 +183,49 @@
       }],
       "responses": {"default": {
         "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeOne.one": "Same result."},
+        {"rest.test.subscribeOne.one.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeOne.one.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeAll": {"get": {
+      "parameters": [{
+        "name": "id",
+        "required": true,
+        "in": "query",
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribeOne.get": "Same result."},
-        {"rest.test.subscribeOne.subscribeOne": "Same result and `update` & `delete` notifications over time."},
-        {"rest.test.subscribeOne.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribeAll.all": "Same result."},
+        {"rest.test.subscribeAll.all.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeAll.all.unsubscribe": "Stop over time notifications."}
+      ]
+    }},
+    "/rest/test/subscribeAll/{id}": {"get": {
+      "parameters": [{
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {}
+      }],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {"type": "object"}}}
+      }},
+      "x-jsonrpc-methods": [
+        {"rest.test.subscribeAll.all": "Same result."},
+        {"rest.test.subscribeAll.all.subscribe": "Same result and `update` & `delete` notifications over time."},
+        {"rest.test.subscribeAll.all.unsubscribe": "Stop over time notifications."}
       ]
     }},
     "/rest/test/unused/{id}": {"get": {
@@ -209,9 +249,9 @@
         }}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribeDescription.list": "Same result."},
-        {"rest.test.subscribeDescription.subscribe": "Custom description"},
-        {"rest.test.subscribeDescription.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribeDescription.all": "Same result."},
+        {"rest.test.subscribeDescription.all.subscribe": "Custom description"},
+        {"rest.test.subscribeDescription.all.unsubscribe": "Stop over time notifications."}
       ]
     }},
     "/rest/test/subscribeDescription/{id}": {"get": {
@@ -226,29 +266,22 @@
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
       "x-jsonrpc-methods": [
-        {"rest.test.subscribeDescription.get": "Same result."},
-        {"rest.test.subscribeDescription.subscribe": "Custom description\n   multiline"},
-        {"rest.test.subscribeDescription.unsubscribe": "Stop over time notifications."}
+        {"rest.test.subscribeDescription.one": "Same result."},
+        {"rest.test.subscribeDescription.one.subscribe": "Custom description\n   multiline"},
+        {"rest.test.subscribeDescription.one.unsubscribe": "Stop over time notifications."}
       ]
     }},
-    "/rest/test/subscribeOneDescription": {"get": {
-      "parameters": [{
-        "name": "id",
-        "required": true,
-        "in": "query",
-        "schema": {}
-      }],
+    "/rest/test/resultDescription": {"get": {
       "responses": {"default": {
         "description": "",
-        "content": {"application/json": {"schema": {"type": "object"}}}
+        "content": {"application/json": {"schema": {
+          "type": "array",
+          "items": {}
+        }}}
       }},
-      "x-jsonrpc-methods": [
-        {"rest.test.subscribeOneDescription.get": "Same result."},
-        {"rest.test.subscribeOneDescription.subscribeOne": "Custom description"},
-        {"rest.test.subscribeOneDescription.unsubscribe": "Stop over time notifications."}
-      ]
+      "x-jsonrpc-methods": {"rest.test.resultDescription.one": "Custom description"}
     }},
-    "/rest/test/subscribeOneDescription/{id}": {"get": {
+    "/rest/test/resultDescription/{id}": {"get": {
       "parameters": [{
         "name": "id",
         "in": "path",
@@ -259,11 +292,7 @@
         "description": "",
         "content": {"application/json": {"schema": {"type": "object"}}}
       }},
-      "x-jsonrpc-methods": [
-        {"rest.test.subscribeOneDescription.get": "Same result."},
-        {"rest.test.subscribeOneDescription.subscribeOne": "Custom description\n   multiline"},
-        {"rest.test.subscribeOneDescription.unsubscribe": "Stop over time notifications."}
-      ]
+      "x-jsonrpc-methods": {"rest.test.resultDescription.all": "Custom description\n   multiline"}
     }}
   }
 }

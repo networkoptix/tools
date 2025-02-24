@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
 import com.nx.utils.Serializable;
 import com.nx.utils.Utils;
 
-import static com.nx.apidoc.ApidocComment.ATTR_UNUSED;
-import static com.nx.apidoc.ApidocComment.TAG_JSONRPC;
+import static com.nx.apidoc.ApidocComment.*;
 
 /**
  * Object representation of apidoc elements. Empty Strings and ArrayLists
@@ -435,10 +434,10 @@ public final class Apidoc extends Serializable
 
     public static final class JsonRpcExt
     {
-        enum SubscribeMethod {no, list, one};
-        SubscribeMethod subscribeMethod = SubscribeMethod.no;
-        String subscribeDescription;
         boolean unused = false;
+        String resultMethod = "";
+        String resultDescription = "";
+        String subscribeDescription = null;
 
         void parse(ApidocTagParser.Item item, int indentLevel) throws ApidocCommentParser.Error
         {
@@ -447,22 +446,49 @@ public final class Apidoc extends Serializable
             {
                 if (unused)
                 {
-                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + ATTR_UNUSED +
-                        " for " + TAG_JSONRPC + " is specified more than once.");
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
+                        ATTR_UNUSED + " is specified more than once.");
                 }
                 if (!"".equals(name))
                 {
                     throw new ApidocCommentParser.Error(item.getErrorPrefix() +
                         TAG_JSONRPC + ATTR_UNUSED + " must not specify anything.");
                 }
-                if (subscribeMethod != SubscribeMethod.no)
+                if (!resultMethod.isEmpty() || subscribeDescription != null)
                 {
-                    throw new ApidocCommentParser.Error(item.getErrorPrefix() +
-                        TAG_JSONRPC + ATTR_UNUSED + " can not be used in conjunction with `" +
-                        (subscribeMethod == SubscribeMethod.list ? "subscribe" : "subscribeOne") +
-                        "`.");
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
+                        ATTR_UNUSED + " can not be specified in conjunction with any other " +
+                        TAG_JSONRPC + ".");
                 }
                 unused = true;
+                return;
+            }
+
+            if (unused)
+            {
+                throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Any other " +
+                    TAG_JSONRPC + " usages can not be specified in conjunction with " +
+                    TAG_JSONRPC + ATTR_UNUSED + ".");
+            }
+
+            if (ATTR_RESULT.equals(item.getAttribute()))
+            {
+                if (!resultMethod.isEmpty())
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
+                        ATTR_RESULT + " is specified more than once.");
+                }
+                if (name.equals(PARAM_ONE) || name.equals(PARAM_ALL))
+                {
+                    resultMethod = name;
+                }
+                else
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Unknown " +
+                        TAG_JSONRPC + ATTR_RESULT + " type `" + name + "`.");
+                }
+
+                resultDescription = item.getTextAfterInitialToken(indentLevel).trim();
                 return;
             }
 
@@ -472,34 +498,19 @@ public final class Apidoc extends Serializable
                     "Unsupported attribute `" + item.getAttribute() + "` for " + TAG_JSONRPC + ".");
             }
 
-            SubscribeMethod previousSubscribeMethod = subscribeMethod;
-            if (name.equals("subscribe"))
+            if (name.equals(PARAM_SUBSCRIBE))
             {
-                subscribeMethod = SubscribeMethod.list;
-            }
-            else if (name.equals("subscribeOne"))
-            {
-                subscribeMethod = SubscribeMethod.one;
-            }
-            else
-            {
-                throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Unknown " +
-                    TAG_JSONRPC + " extension name `" + name + "`.");
+                if (subscribeDescription != null)
+                {
+                    throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
+                        " " + PARAM_SUBSCRIBE + " must be specified only once.");
+                }
+                subscribeDescription = item.getTextAfterInitialToken(indentLevel).trim();
+                return;
             }
 
-            if (unused)
-            {
-                throw new ApidocCommentParser.Error(item.getErrorPrefix() +
-                    TAG_JSONRPC + " " + name + " can not be used in conjunction with [unused].");
-            }
-
-            if (previousSubscribeMethod != SubscribeMethod.no)
-            {
-                throw new ApidocCommentParser.Error(item.getErrorPrefix() + TAG_JSONRPC +
-                    " `subscribe` or `subscribeOne` must be specified only once.");
-            }
-
-            subscribeDescription = item.getTextAfterInitialToken(indentLevel);
+            throw new ApidocCommentParser.Error(item.getErrorPrefix() + "Unknown " + TAG_JSONRPC +
+                " extension name `" + name + "`.");
         }
     }
 
@@ -535,7 +546,7 @@ public final class Apidoc extends Serializable
             return knownMethods.contains(result) ? result : "trace";
         }
 
-        public String pathForJsonRpc(final String originPath)
+        public String jsonRpcMethod(final String originPath)
         {
             assert originPath.length() > 1 && originPath.charAt(0) == '/';
             String path = originPath.substring(1);
@@ -544,20 +555,22 @@ public final class Apidoc extends Serializable
                 path = path.replace("/{" + p.name + "}", "");
                 path = path.replace("/*", "");
             }
-            return path.replace("/", ".");
-        }
+            path = path.replace("/", ".");
 
-        public String addJsonRpcSuffix(final String path)
-        {
-            if (method.equals("GET"))
+            if (jsonrpc.resultMethod.isEmpty())
             {
-                return path + (result.type.fixed == Type.ARRAY
-                    || result.type.fixed == Type.STRING_ARRAY
-                    || result.type.fixed == Type.UUID_ARRAY
-                        ? ".list"
-                        : ".get");
+                if (method.equals("GET"))
+                {
+                    return path + "." + (result.type.fixed == Type.ARRAY
+                        || result.type.fixed == Type.STRING_ARRAY
+                        || result.type.fixed == Type.UUID_ARRAY
+                            ? PARAM_ALL
+                            : PARAM_ONE);
+                }
+                return path + jsonRpcMethods.get(method);
             }
-            return path + jsonRpcMethods.get(method);
+
+            return path + "." + jsonrpc.resultMethod;
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
