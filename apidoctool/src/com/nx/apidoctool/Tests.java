@@ -578,6 +578,9 @@ public final class Tests extends TestBase
         executor.params.parsePropertiesFile(new File(path, "struct_description.properties"));
         checkException(executor,
             "unexpected text \"Invalid description\" after declaration of type `SomeStruct`");
+        executor.params.parsePropertiesFile(new File(path, "invalid_order_by.properties"));
+        checkException(executor,
+            "Conflict: Both used and unused _orderBy parameters are supplied.");
     }
 
     private void subscribe() throws Exception

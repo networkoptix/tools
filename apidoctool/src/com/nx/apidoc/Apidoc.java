@@ -181,6 +181,7 @@ public final class Apidoc extends Serializable
 
     public static final class Param extends Serializable
     {
+
         public boolean isGeneratedFromStruct = false;
         public boolean unused = false; ///< Internal field, omit param from apidoc.
         public boolean hasDefaultDescription = false; ///< Internal field
@@ -287,6 +288,11 @@ public final class Apidoc extends Serializable
             }
 
             return true;
+        }
+
+        public boolean isUnusedOrderBy()
+        {
+            return unused && PARAM_ORDER_BY.equals(name);
         }
 
         private void mergeEnumValues(List<Apidoc.Value> originValues) throws Error

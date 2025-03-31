@@ -283,7 +283,10 @@ public final class OpenApiSerializer
     {
         for (final Apidoc.Param param: function.input.params)
         {
-            final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
+            if (param.isUnusedOrderBy())
+                continue;
+
+            final boolean inPath = function.name.contains("{" + param.name + "}");
             if (inPath)
             {
                 fillQueryOrPathParameter(method, param, inPath);
@@ -337,9 +340,13 @@ public final class OpenApiSerializer
         }
         for (final Apidoc.Param param: function.input.params)
         {
-            final boolean inPath = function.name.indexOf("{" + param.name + "}") >= 0;
+            final boolean inPath = function.name.contains("{" + param.name + "}");
             if (inPath)
                 continue;
+
+            if (param.isUnusedOrderBy())
+                continue;
+
             if (function.areInBodyParameters() && !param.isRef && param.recursiveName != null)
             {
                 final JSONObject requestBody = getObject(method, "requestBody");
@@ -546,7 +553,6 @@ public final class OpenApiSerializer
             if (!cleanedDescription.isEmpty())
                 description += String.format("<p><b>%s</b></p>", cleanedDescription);
         }
-
         if (function.proprietary)
             description += "<p><b>Proprietary.</b></p>";
 
@@ -576,7 +582,7 @@ public final class OpenApiSerializer
         processFunctionInputParams(function, method, refParameters, componentsSchemas);
         for (final Apidoc.Param param: function.input.params)
         {
-            if (param.name.equals("_orderBy"))
+            if (param.name.equals(ApidocComment.PARAM_ORDER_BY))
             {
                 generateOrderByParameters = false;
                 break;
@@ -589,7 +595,7 @@ public final class OpenApiSerializer
     private static JSONObject orderByTemplate()
     {
         JSONObject result = new JSONObject();
-        result.put("name", "_orderBy");
+        result.put("name", ApidocComment.PARAM_ORDER_BY);
         JSONObject schema = getObject(result, "schema");
         schema.put("type", "array");
         getObject(schema, "items").put("type", "string");
@@ -879,6 +885,9 @@ public final class OpenApiSerializer
     private static void addStructParam(
         JSONObject schema, Apidoc.Param param, boolean fillDefaultExample) throws Exception
     {
+        if (param.isUnusedOrderBy())
+            return;
+
         final JSONObject parameter = getParamByPath(schema, param.name);
         putDescription(param, parameter);
         if (param.deprecated)

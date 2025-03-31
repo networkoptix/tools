@@ -171,7 +171,10 @@ public final class SourceCodeParser
             String prefix = description.function.method + " " + description.urlPrefix + "/" +
                 description.function.name;
             for (Apidoc.Param param: description.function.input.params)
-                throwErrorIfUnknownOrUnsupportedParam(prefix + ": ", param);
+            {
+                if (!param.name.equals(ApidocComment.PARAM_ORDER_BY))
+                    throwErrorIfUnknownOrUnsupportedParam(prefix + ": ", param);
+            }
             if (description.function.input.type.name != null
                 && !description.function.input.type.name.isEmpty()
                 && !description.function.input.type.name.equals(TypeInfo.nullType))
@@ -182,7 +185,10 @@ public final class SourceCodeParser
             }
             prefix += " result: ";
             for (Apidoc.Param param: description.function.result.params)
-                throwErrorIfUnknownOrUnsupportedParam(prefix, param);
+            {
+                if (!param.name.equals(ApidocComment.PARAM_ORDER_BY))
+                    throwErrorIfUnknownOrUnsupportedParam(prefix, param);
+            }
             if (description.function.result.type.name != null
                 && !description.function.result.type.name.isEmpty())
             {
@@ -208,6 +214,8 @@ public final class SourceCodeParser
         }
         for (Apidoc.Param param: description.function.result.params)
             param.type.setFixedChrono(responseChronoAsString);
+
+        throwErrorIfOrderByInvalid(description.function.input.params);
 
         if (description.function.groups.isEmpty())
         {
@@ -345,6 +353,25 @@ public final class SourceCodeParser
                 description.function.name + ": " + (isResult ? "result " : "") + "\" \"%example " +
                 data.example + "\" type is invalid.");
         }
+    }
+
+    private void throwErrorIfOrderByInvalid(List<Apidoc.Param> params)
+        throws Error
+    {
+        boolean usedFound = false;
+        boolean unusedFound = false;
+        for (Apidoc.Param param: params)
+        {
+            if (ApidocComment.PARAM_ORDER_BY.equals(param.name))
+            {
+                if (param.unused)
+                    unusedFound = true;
+                else
+                    usedFound = true;
+            }
+        }
+        if (usedFound && unusedFound)
+            throw new Error("Conflict: Both used and unused _orderBy parameters are supplied.");
     }
 
     private void throwErrorIfExampleTypeInvalid(

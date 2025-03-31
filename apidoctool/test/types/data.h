@@ -98,3 +98,27 @@ struct ExampleData
      */
     int immutableField;
 };
+
+/**%apidoc
+ * Simple structure for order by testing
+ */
+struct StringOrderByExampleData
+{
+    /**%apidoc
+     *   %value id
+     *   %value name
+     */
+    std::string _orderBy;
+    int id;
+    int name;
+};
+
+/**%apidoc
+ * Simple structure for order by testing
+ */
+struct EnumOrderByExampleData
+{
+    ExampleEnum _orderBy;
+    std::string one;
+    std::string two;
+};

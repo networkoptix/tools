@@ -36,6 +36,7 @@ public abstract class ApidocComment
 
     protected static final String LABEL_ARRAY_PARAMS = "arrayParams";
 
+    public static final String PARAM_ORDER_BY = "_orderBy";
     protected static final String PARAM_FORMAT = "format";
     protected static final String PARAM_SUBSCRIBE = "subscribe";
     protected static final String PARAM_ONE = "one";

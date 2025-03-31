@@ -5,6 +5,20 @@
       "description": "Read bookmarks using the specified parameters.",
       "parameters": [
         {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
           "name": "cameraId",
           "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
           "required": true,
@@ -90,7 +104,14 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
+        }
+      ],
+      "responses": {"default": {"description": ""}},
+      "tags": ["System API"]
+    }},
+    "/ec2/bookmarks/add": {"get": {
+      "description": "Add a bookmark to the target server.",
+      "parameters": [
         {
           "name": "format",
           "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
@@ -104,14 +125,7 @@
               "csv"
             ]
           }
-        }
-      ],
-      "responses": {"default": {"description": ""}},
-      "tags": ["System API"]
-    }},
-    "/ec2/bookmarks/add": {"get": {
-      "description": "Add a bookmark to the target server.",
-      "parameters": [
+        },
         {
           "name": "guid",
           "description": "Identifier of the bookmark.",
@@ -198,7 +212,14 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
+        }
+      ],
+      "responses": {"default": {"description": ""}},
+      "tags": ["System API"]
+    }},
+    "/ec2/bookmarks/delete": {"get": {
+      "description": "Remove a bookmark with the specified identifier.",
+      "parameters": [
         {
           "name": "format",
           "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
@@ -212,14 +233,7 @@
               "csv"
             ]
           }
-        }
-      ],
-      "responses": {"default": {"description": ""}},
-      "tags": ["System API"]
-    }},
-    "/ec2/bookmarks/delete": {"get": {
-      "description": "Remove a bookmark with the specified identifier.",
-      "parameters": [
+        },
         {
           "name": "guid",
           "description": "Identifier of the bookmark.",
@@ -248,7 +262,14 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
+        }
+      ],
+      "responses": {"default": {"description": ""}},
+      "tags": ["System API"]
+    }},
+    "/ec2/bookmarks/tags": {"get": {
+      "description": "Return currently used tags.",
+      "parameters": [
         {
           "name": "format",
           "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
@@ -262,14 +283,7 @@
               "csv"
             ]
           }
-        }
-      ],
-      "responses": {"default": {"description": ""}},
-      "tags": ["System API"]
-    }},
-    "/ec2/bookmarks/tags": {"get": {
-      "description": "Return currently used tags.",
-      "parameters": [
+        },
         {
           "name": "limit",
           "description": "Maximum number of tags to return.",
@@ -293,7 +307,14 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
+        }
+      ],
+      "responses": {"default": {"description": ""}},
+      "tags": ["System API"]
+    }},
+    "/ec2/bookmarks/update": {"get": {
+      "description": "Update information for a bookmark.",
+      "parameters": [
         {
           "name": "format",
           "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
@@ -307,14 +328,7 @@
               "csv"
             ]
           }
-        }
-      ],
-      "responses": {"default": {"description": ""}},
-      "tags": ["System API"]
-    }},
-    "/ec2/bookmarks/update": {"get": {
-      "description": "Update information for a bookmark.",
-      "parameters": [
+        },
         {
           "name": "guid",
           "description": "Identifier of the bookmark.",
@@ -401,7 +415,14 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
+        }
+      ],
+      "responses": {"default": {"description": ""}},
+      "tags": ["System API"]
+    }},
+    "/ec2/cameraThumbnail": {"get": {
+      "description": "Get the static image from the camera.",
+      "parameters": [
         {
           "name": "format",
           "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
@@ -415,14 +436,7 @@
               "csv"
             ]
           }
-        }
-      ],
-      "responses": {"default": {"description": ""}},
-      "tags": ["System API"]
-    }},
-    "/ec2/cameraThumbnail": {"get": {
-      "description": "Get the static image from the camera.",
-      "parameters": [
+        },
         {
           "name": "cameraId",
           "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).",
@@ -516,20 +530,6 @@
             "enum": ["true"],
             "type": "boolean"
           }
-        },
-        {
-          "name": "format",
-          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-          "in": "query",
-          "schema": {
-            "type": "string",
-            "enum": [
-              "ubjson",
-              "json",
-              "xml",
-              "csv"
-            ]
-          }
         }
       ],
       "responses": {"default": {"description": ""}},
@@ -537,33 +537,20 @@
     }},
     "/ec2/getAccessRights": {"get": {
       "description": "Return list of ids of accessible resources for each user in the System.",
-      "parameters": [
-        {
-          "name": "format",
-          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-          "in": "query",
-          "schema": {
-            "type": "string",
-            "enum": [
-              "ubjson",
-              "json",
-              "xml",
-              "csv"
-            ]
-          }
-        },
-        {
-          "name": "_orderBy",
-          "schema": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": ["userId"]
-            }
-          },
-          "in": "query"
+      "parameters": [{
+        "name": "format",
+        "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ubjson",
+            "json",
+            "xml",
+            "csv"
+          ]
         }
-      ],
+      }],
       "responses": {"default": {
         "description": "List of access rights data objects in the requested format.",
         "content": {"application/json": {"schema": {
@@ -4770,6 +4757,19 @@
       "description": "Return the recorded chunks info for the specified cameras.",
       "parameters": [
         {
+          "name": "format",
+          "description": "<p><b>Proprietary.<\/b><\/p>Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "periods"
+            ]
+          }
+        },
+        {
           "name": "cameraId",
           "description": "Camera id (can be obtained from \"id\" field via /ec2/getCamerasEx or\n/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).\nThis parameter can be used several times to define a list of cameras.",
           "required": true,
@@ -4802,19 +4802,6 @@
           "description": "This parameter is used for motion search (\"periodsType\" must\nbe 1). Match motion on a video by specified rectangle.\n<br/>Format: string with a JSON list of <i>sensors<\/i>,\neach <i>sensor<\/i> is a JSON list of <i>rects<\/i>, each <i>rect<\/i> is:\n<br/>\n<code>\n    {\"x\": <i>x<\/i>, \"y\": <i>y<\/i>, \"width\": <i>width<\/i>,\"height\": <i>height<\/i>}\n<\/code>\n<br/>All values are measured in relative portions of a video frame,\n<i>x<\/i> and <i>width<\/i> in range [0..43], <i>y<\/i> and <i>height<\/i> in range [0..31],\nzero is the left-top corner.\n<br/>Example of a full-frame rectangle for a single-sensor camera:\n<code>[[{\"x\":0,\"y\":0,\"width\":43,\"height\":31}]]<\/code>\n<br/>Example of two rectangles for a single-sensor camera:\n<code>[[{\"x\":0,\"y\":0,\"width\":5,\"height\":7},{\"x\":12,\"y\":10,\"width\":8,\"height\":6}]]<\/code>",
           "in": "query",
           "schema": {"type": "string"}
-        },
-        {
-          "name": "format",
-          "description": "<p><b>Proprietary.<\/b><\/p>Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"periods\"` Internal comperssed binary format.",
-          "in": "query",
-          "schema": {
-            "type": "string",
-            "enum": [
-              "ubjson",
-              "json",
-              "periods"
-            ]
-          }
         },
         {
           "name": "detail",
@@ -6576,6 +6563,20 @@
       "description": "<p><b>Proprietary.<\/b><\/p>Get free space available for downloading and extracting update files.",
       "parameters": [
         {
+          "name": "format",
+          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ubjson",
+              "json",
+              "xml",
+              "csv"
+            ]
+          }
+        },
+        {
           "name": "local",
           "description": "<p><b>Proprietary.<\/b><\/p>If present, the request should not be redirected to another\nserver.",
           "in": "query",
@@ -6591,20 +6592,6 @@
           "schema": {
             "enum": ["true"],
             "type": "boolean"
-          }
-        },
-        {
-          "name": "format",
-          "description": "Data format. Default value is \"json\".\n\nPossible values are:\n- `\"ubjson\"` Universal Binary JSON data format.\n- `\"json\"` JSON data format.\n- `\"xml\"` XML data format.\n- `\"csv\"` CSV data format. In case of a hierarchical structure,\nonly the top level data is provided.",
-          "in": "query",
-          "schema": {
-            "type": "string",
-            "enum": [
-              "ubjson",
-              "json",
-              "xml",
-              "csv"
-            ]
           }
         }
       ],
@@ -14628,6 +14615,2200 @@
         }}}
       }},
       "tags": ["Test"]
+    }},
+    "/rest/v2/example/enumOrderBy": {"get": {
+      "parameters": [
+        {
+          "name": "_orderBy",
+          "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "example": "one",
+            "enum": [
+              "one",
+              "two"
+            ]
+          }
+        },
+        {
+          "name": "one",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        {
+          "name": "two",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "example": ""
+          }
+        }
+      ],
+      "responses": {"default": {
+        "description": "Simple structure for order by testing",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "_orderBy": {
+              "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+              "type": "string",
+              "example": "one",
+              "enum": [
+                "one",
+                "two"
+              ]
+            },
+            "one": {"type": "string"},
+            "two": {"type": "string"}
+          },
+          "required": [
+            "_orderBy",
+            "one",
+            "two"
+          ]
+        }}}
+      }}
+    }},
+    "/rest/v2/example/stringOrderBy": {"get": {
+      "parameters": [
+        {
+          "name": "_orderBy",
+          "description": "Possible values are:\n- `\"id\"`\n- `\"name\"`",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "example": "id"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "in": "query",
+          "schema": {"type": "integer"}
+        },
+        {
+          "name": "name",
+          "required": true,
+          "in": "query",
+          "schema": {"type": "integer"}
+        }
+      ],
+      "responses": {"default": {
+        "description": "Simple structure for order by testing",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "_orderBy": {
+              "description": "Possible values are:\n- `\"id\"`\n- `\"name\"`",
+              "type": "string",
+              "example": "id"
+            },
+            "id": {"type": "integer"},
+            "name": {"type": "integer"}
+          },
+          "required": [
+            "_orderBy",
+            "id",
+            "name"
+          ]
+        }}}
+      }}
+    }},
+    "/rest/v2/example/paramOrderBy": {"get": {
+      "parameters": [
+        {
+          "name": "idWithValue",
+          "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` Value &ast;.",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        },
+        {
+          "name": "inner",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
+              },
+              "i": {
+                "type": "integer",
+                "example": 0
+              },
+              "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                "type": "string",
+                "example": "one",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
+                "oneOf": [
+                  {"type": "integer"},
+                  {
+                    "type": "string",
+                    "example": ""
+                  }
+                ],
+                "example": 0
+              }
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          }}},
+          "description": "Field of struct &ast;.<\/br>\n`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "secondListS",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "string",
+                "example": ""
+              }
+            ]}
+          }
+        },
+        {
+          "name": "variant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantOfTwoStructs",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithMapList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "array",
+              "items": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
+              }
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithChrono",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "string",
+                "example": ""
+              }
+            ]}
+          ]}}},
+          "description": "`one of [integer, one of [integer, string]]`<\/br>\n"
+        },
+        {
+          "name": "variantWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {"oneOf": [
+              {
+                "type": "string",
+                "example": ""
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]}
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "map",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfNamedMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "chronoMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"additionalProperties": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "string",
+              "example": ""
+            }
+          ]}}}},
+          "description": "`one of [integer, string] map`<\/br>\n"
+        },
+        {
+          "name": "mapWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {"oneOf": [
+              {
+                "type": "string",
+                "example": ""
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapListWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {
+              "type": "object",
+              "additionalProperties": {"oneOf": [
+                {
+                  "type": "string",
+                  "example": ""
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]}
+            },
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapWithVariantList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "array",
+              "items": {"oneOf": [
+                {
+                  "type": "string",
+                  "example": ""
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]}
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfMapWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "additionalProperties": {"oneOf": [
+                {"type": "integer"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]},
+              "type": "object"
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "immutableStruct",
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {"i": {"type": "integer"}},
+            "required": ["i"]
+          }}},
+          "description": "Immutable struct.<\/br>\n`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n"
+        },
+        {
+          "name": "immutableField",
+          "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
+          "in": "query",
+          "schema": {"type": "integer"}
+        },
+        {
+          "name": "_orderBy",
+          "description": "Possible values are:\n- `\"id\"`\n- `\"name\"`",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "example": "id"
+          }
+        }
+      ],
+      "responses": {"default": {
+        "description": "Simple structure for order by testing",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {
+            "_orderBy": {
+              "description": "Possible values are:\n- `\"id\"`\n- `\"name\"`",
+              "type": "string",
+              "example": "id"
+            },
+            "id": {"type": "integer"},
+            "name": {"type": "integer"}
+          },
+          "required": [
+            "_orderBy",
+            "id",
+            "name"
+          ]
+        }}}
+      }}
+    }},
+    "/rest/v2/example/unusedOrderBy": {"get": {
+      "parameters": [
+        {
+          "name": "idWithValue",
+          "description": "Possible values are:\n- `\"01234567-89ab-cdef-0123-456789abcdef\"` Value &ast;.",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        },
+        {
+          "name": "inner",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "01234567-89ab-cdef-0123-456789abcdef"
+              },
+              "i": {
+                "type": "integer",
+                "example": 0
+              },
+              "e": {
+                "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                "type": "string",
+                "example": "one",
+                "enum": [
+                  "one",
+                  "two"
+                ]
+              },
+              "secondsS": {
+                "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                "deprecated": true,
+                "oneOf": [
+                  {"type": "integer"},
+                  {
+                    "type": "string",
+                    "example": ""
+                  }
+                ],
+                "example": 0
+              }
+            },
+            "required": [
+              "id",
+              "i",
+              "e",
+              "secondsS"
+            ]
+          }}},
+          "description": "Field of struct &ast;.<\/br>\n`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "secondListS",
+          "required": true,
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "string",
+                "example": ""
+              }
+            ]}
+          }
+        },
+        {
+          "name": "variant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantOfTwoStructs",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithMapList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "array",
+              "items": {
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                },
+                "type": "object"
+              }
+            }
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "variantWithChrono",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {"oneOf": [
+              {"type": "integer"},
+              {
+                "type": "string",
+                "example": ""
+              }
+            ]}
+          ]}}},
+          "description": "`one of [integer, one of [integer, string]]`<\/br>\n"
+        },
+        {
+          "name": "variantWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"oneOf": [
+            {"type": "integer"},
+            {"oneOf": [
+              {
+                "type": "string",
+                "example": ""
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]}
+          ]}}},
+          "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "map",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "01234567-89ab-cdef-0123-456789abcdef"
+                },
+                "i": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "e": {
+                  "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                  "type": "string",
+                  "example": "one",
+                  "enum": [
+                    "one",
+                    "two"
+                  ]
+                },
+                "secondsS": {
+                  "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                  "deprecated": true,
+                  "oneOf": [
+                    {"type": "integer"},
+                    {
+                      "type": "string",
+                      "example": ""
+                    }
+                  ],
+                  "example": 0
+                }
+              },
+              "required": [
+                "id",
+                "i",
+                "e",
+                "secondsS"
+              ]
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfNamedMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "chronoMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"additionalProperties": {"oneOf": [
+            {"type": "integer"},
+            {
+              "type": "string",
+              "example": ""
+            }
+          ]}}}},
+          "description": "`one of [integer, string] map`<\/br>\n"
+        },
+        {
+          "name": "mapWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {"oneOf": [
+              {
+                "type": "string",
+                "example": ""
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              }
+            ]},
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapListWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "items": {
+              "type": "object",
+              "additionalProperties": {"oneOf": [
+                {
+                  "type": "string",
+                  "example": ""
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]}
+            },
+            "type": "array"
+          }}},
+          "description": "`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapWithVariantList",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "type": "array",
+              "items": {"oneOf": [
+                {
+                  "type": "string",
+                  "example": ""
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]}
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`array`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`string`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfMap",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef"
+                  },
+                  "i": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "e": {
+                    "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                    "type": "string",
+                    "example": "one",
+                    "enum": [
+                      "one",
+                      "two"
+                    ]
+                  },
+                  "secondsS": {
+                    "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                    "deprecated": true,
+                    "oneOf": [
+                      {"type": "integer"},
+                      {
+                        "type": "string",
+                        "example": ""
+                      }
+                    ],
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "i",
+                  "e",
+                  "secondsS"
+                ]
+              },
+              "type": "object"
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapOfMapWithVariant",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "additionalProperties": {
+              "additionalProperties": {"oneOf": [
+                {"type": "integer"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "01234567-89ab-cdef-0123-456789abcdef"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "e": {
+                      "description": "Enum &ast;.\n\nPossible values are:\n- `\"one\"` Enum value &ast;.\n- `\"two\"`<p><b>Deprecated.<\/b> Deprecated enum value &ast;.<\/p>Enum value with deprecated &ast;.",
+                      "type": "string",
+                      "example": "one",
+                      "enum": [
+                        "one",
+                        "two"
+                      ]
+                    },
+                    "secondsS": {
+                      "description": "<p><b>Deprecated.<\/b> Deprecated field &ast;.<\/p>Field with deprecated &ast;.",
+                      "deprecated": true,
+                      "oneOf": [
+                        {"type": "integer"},
+                        {
+                          "type": "string",
+                          "example": ""
+                        }
+                      ],
+                      "example": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "i",
+                    "e",
+                    "secondsS"
+                  ]
+                }
+              ]},
+              "type": "object"
+            },
+            "type": "object"
+          }}},
+          "description": "`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "immutableStruct",
+          "in": "query",
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "properties": {"i": {"type": "integer"}},
+            "required": ["i"]
+          }}},
+          "description": "Immutable struct.<\/br>\n`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n"
+        },
+        {
+          "name": "immutableField",
+          "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
+          "in": "query",
+          "schema": {"type": "integer"}
+        }
+      ],
+      "responses": {"default": {
+        "description": "",
+        "content": {"application/json": {"schema": {
+          "type": "object",
+          "properties": {"secondsS": {"type": "integer"}},
+          "required": ["secondsS"]
+        }}}
+      }}
     }},
     "/cdb/maintenance/malloc_info": {"get": {"responses": {"default": {"description": "malloc_info(3) output. See https://man7.org/linux/man-pages/man3/malloc_info.3.html\nfor details."}}}},
     "/removeResource #201": {"trace": {

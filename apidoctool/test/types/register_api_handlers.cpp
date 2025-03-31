@@ -53,6 +53,30 @@
      */
     reg("example", GlobalPermission::admin);
 
+    /**%apidoc:{EnumOrderByExampleData} GET /rest/v2/example/enumOrderBy
+     * %return:{EnumOrderByExampleData}
+     */
+    reg("example", GlobalPermission::admin);
+
+    /**%apidoc:{StringOrderByExampleData} GET /rest/v2/example/stringOrderBy
+     * %return:{StringOrderByExampleData}
+     */
+    reg("example", GlobalPermission::admin);
+
+    /**%apidoc:{ExampleData} GET /rest/v2/example/paramOrderBy
+     * %param:string _orderBy
+     * %value id
+     * %value name
+     * %return:{StringOrderByExampleData}
+     */
+    reg("example", GlobalPermission::admin);
+
+    /**%apidoc:{ExampleData} GET /rest/v2/example/unusedOrderBy
+     * %param[unused] _orderBy
+     * %return:{StructSeconds}
+     */
+    reg("example", GlobalPermission::admin);
+
     /**%apidoc:{StructSeconds} GET /rest/v2/example/secondS
      * %ingroup Test
      * %return:{std::chrono::seconds}

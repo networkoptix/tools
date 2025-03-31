@@ -48,6 +48,9 @@ struct ApiScheduleTaskData: ApiData
 
 //-------------------------------------------------------------------------------------------------
 
+/**%apidoc Test not sorting the struct
+ * %param [unused] _orderBy
+ */
 struct ApiScheduleTaskWithRefData: ApiScheduleTaskData
 {
     QnUuid sourceId;

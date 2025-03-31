@@ -866,6 +866,7 @@ void Ec2DirectConnectionFactory::registerRestHandlers(QnRestProcessorPool* const
     /**%apidoc GET /ec2/getAccessRights
      * Return list of ids of accessible resources for each user in the System.
      * %param[default] format
+     * %param[unused] _orderBy
      * %return List of access rights data objects in the requested format.
      * %// AbstractUserManager::getAccessRights
      */

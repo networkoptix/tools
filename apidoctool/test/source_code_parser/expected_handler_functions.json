@@ -330,34 +330,6 @@
             "optional": true
           },
           {
-            "name": "someParam.enumParam",
-            "type": "enum",
-            "description": {"xml": "Enum\ndescription"},
-            "optional": false,
-            "values": [
-              {
-                "name": "value1",
-                "description": {"xml": "value1 description"}
-              },
-              {
-                "deprecated": true,
-                "name": "value2",
-                "description": {"xml": "<p><b>Deprecated.<\/b> Explanation why the enum value is deprecated<\/p>value2 description"}
-              },
-              {
-                "proprietary": true,
-                "name": "value3",
-                "description": {"xml": "value3 description\nProprietary description"}
-              },
-              {
-                "proprietary": true,
-                "deprecated": true,
-                "name": "value4",
-                "description": {"xml": "<p><b>Deprecated.<\/b> Deprecated description<\/p>value3 description\nProprietary description"}
-              }
-            ]
-          },
-          {
             "proprietary": true,
             "name": "someParam.optUuids",
             "type": "uuidArray",

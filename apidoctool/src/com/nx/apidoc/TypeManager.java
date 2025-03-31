@@ -141,16 +141,17 @@ public final class TypeManager
     {
         List<Apidoc.Param> structParams = getStructParams(
             type, /*prefix*/ "", ApidocCommentParser.ParamDirection.Input);
-        if (structParams.isEmpty())
-            return functionParams;
 
         final List<Apidoc.Param> mergedParams = new ArrayList<Apidoc.Param>();
         for (Apidoc.Param structParam: structParams)
         {
-            if (structParam.unused)
-                continue;
-            if (findParam(unusedParams, structParam.name) != null) //< Skip unused params.
-                continue;
+            if (!structParam.name.equals(ApidocComment.PARAM_ORDER_BY))
+            {
+                if (structParam.unused)
+                    continue;
+                if (findParam(unusedParams, structParam.name) != null) //< Skip unused params.
+                    continue;
+            }
             boolean isUnusedStructParam = false;
             for (Apidoc.Param unusedParam: unusedParams)
             {
@@ -213,6 +214,11 @@ public final class TypeManager
                 mergedParams.add(param);
             }
         }
+
+        Apidoc.Param unusedOrderBy = findParam(unusedParams, ApidocComment.PARAM_ORDER_BY);
+        if (unusedOrderBy != null)
+            mergedParams.add(unusedOrderBy);
+
         return mergedParams;
     }
 
@@ -454,6 +460,14 @@ public final class TypeManager
         {
             if (findParam(params, paramFromItems.name) == null)
                 params.add(paramFromItems);
+        }
+
+        // Preserve unused orderBy parameter if specified so we can omit orderBy
+        // during json generation.
+        for (final Apidoc.Param overwrittenParam: overriddenParams)
+        {
+            if (overwrittenParam.isUnusedOrderBy())
+                params.add(overwrittenParam);
         }
 
         processedStructs.remove(structInfo.name);
