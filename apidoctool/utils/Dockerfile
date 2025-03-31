@@ -37,6 +37,8 @@ COPY ./apidoc_diff/* /app/apidoc_diff
 
 RUN ln -s /app/apidoc_diff.py /usr/local/bin/apidoc_diff
 
+ENV PYTHONUNBUFFERED=1
+
 USER user
 
 WORKDIR /workdir

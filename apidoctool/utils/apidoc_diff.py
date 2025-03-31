@@ -5,6 +5,7 @@
 import json
 import logging
 import os
+import shutil
 import subprocess as sp
 import sys
 from contextlib import contextmanager
@@ -91,7 +92,16 @@ def identical(first: Path, second: Path) -> bool:
 
 
 def generate_diffs(base_commit_ref: str, head_commit_ref: str, silent: bool):
-    output_width = int(os.environ.get("APIDOC_DIFF_OUTPUT_WIDTH", 99))
+    # Get terminal width from environment variable or detect from terminal
+    if output_width := os.environ.get("APIDOC_DIFF_OUTPUT_WIDTH"):
+        output_width = int(output_width)
+    else:
+        # Get actual terminal width or fall back to 99 if not in a terminal
+        try:
+            output_width = shutil.get_terminal_size().columns
+        except OSError:
+            # Not a terminal or can't detect size
+            output_width = 99
     with TemporaryDirectory(suffix="_apidiff") as temp_directory:
         logging.debug(f"Running in {temp_directory}")
         base_schema_dir = Path(temp_directory) / "base"
@@ -134,7 +144,6 @@ def generate_diffs(base_commit_ref: str, head_commit_ref: str, silent: bool):
                         "delta",
                         "--no-gitconfig",
                         "--dark",
-                        "--side-by-side",
                         "--paging", "never",
                         "--width", str(output_width),
                         "--wrap-max-lines", "unlimited",
@@ -144,16 +153,48 @@ def generate_diffs(base_commit_ref: str, head_commit_ref: str, silent: bool):
                     print()
 
 
+# Custom log handler that stores logs in memory.
+class MemoryLogHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.log_records: list[logging.LogRecord] = []
+
+    def emit(self, record):
+        self.log_records.append(record)
+
+    def flush(self):
+        pass
+
+    def print_logs(self):
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', 
+                                     datefmt='%Y-%m-%d %H:%M:%S')
+        for record in self.log_records:
+            print(formatter.format(record), file=sys.stderr)
+
+
 if __name__ == "__main__":
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-    from argparse import ArgumentParser
+    try:
+        # Setting up memory log handler - we collect logs instead of immediately printing them, so
+        # that the delta output is printed first, which is more useful on the CI.
+        memory_handler = MemoryLogHandler()
+        from argparse import ArgumentParser
 
-    parser = ArgumentParser()
-    parser.add_argument("base_commit_ref", help="The diff base commit hash.")
-    parser.add_argument(
-        "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path)
-    parser.add_argument("--head", help="The diff head commit hash.", default="HEAD")
-    parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
-    args = parser.parse_args()
+        parser = ArgumentParser()
+        parser.add_argument("base_commit_ref", help="The diff base commit hash.")
+        parser.add_argument(
+            "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path)
+        parser.add_argument("--head", help="The diff head commit hash.", default="HEAD")
+        parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
+        parser.add_argument("--log-level", help="Set the logging level", 
+                            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                            default="INFO")
+        args = parser.parse_args()
+        
+        log_level = getattr(logging, args.log_level)
+        logging.basicConfig(handlers=[memory_handler], level=log_level)
 
-    generate_diffs(args.base_commit_ref, args.head, not args.verbose)
+        print("apidoc_diff is running. Logs will be printed at the end.")
+        generate_diffs(args.base_commit_ref, args.head, not args.verbose)
+    finally:
+        print("\nLog output:", file=sys.stderr)
+        memory_handler.print_logs()
