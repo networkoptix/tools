@@ -59,7 +59,7 @@ def main():
     hash_obj = scrypt.from_string(hash)
 
     # Converting byte array to 16bit numbers array to make symbol distribution more even
-    int_array = np.frombuffer(hash_obj.checksum, dtype=np.uint16)
+    int_array = np.frombuffer(hash_obj.checksum, dtype=np.dtype('<u2'))
     alpha_num_code = to_alpha_num(int_array)
     print(alpha_num_code)
 
