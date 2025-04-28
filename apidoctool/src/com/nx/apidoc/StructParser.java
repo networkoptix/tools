@@ -6,6 +6,7 @@ import com.nx.utils.SourceCode;
 import com.nx.utils.Utils;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class StructParser
@@ -102,6 +103,17 @@ public final class StructParser
         }
     }
 
+    private static class CollectResult
+    {
+        final String text;
+        final int lastLine;
+        CollectResult(String text, int lastLine)
+        {
+            this.text = text;
+            this.lastLine = lastLine;
+        }
+    }
+
     public StructParser(
         SourceCode sourceCode, boolean verbose, boolean invalidChronoFieldSuffixIsError)
     {
@@ -162,23 +174,65 @@ public final class StructParser
                     }
                     else
                     {
-                        final String[] match = sourceCode.matchLine(line, fieldRegex);
+                        String[] match = sourceCode.matchLine(line, fieldRegex);
+
+                        String currLine = sourceCode.getLine(line);
+                        // Not a full match, but looks like the start of a match.  Start multi-line logic
+                        if (match == null && prefixRegex.matcher(currLine).find())
+                        {
+                            CollectResult r = collectUntilSemicolon(line);
+                            String merged = "    " + r.text.replaceAll("\\s+", " ");
+                            Matcher m = fieldRegex.matcher(merged);
+
+                            if (m.matches())
+                            {
+                                match = new String[]{ m.group(1), m.group(2) };
+                                line = r.lastLine;
+                            }
+                        }
+
                         if (match != null && !"using".equals(match[0]))
                         {
-                            final StructInfo.Field field = parseStructField();
-                            if (field != null)
-                            {
-                                if (enums.contains(field.type.name) || flags.contains(field.type.name))
-                                    field.type.name = struct.name + "_" + field.type.name;
-                                struct.fields.add(field);
-                            }
+                            StructInfo.Field field = parseField(match[0], match[1]);
+                            if (enums.contains(field.type.name) || flags.contains(field.type.name))
+                                field.type.name = struct.name + "_" + field.type.name;
+                            struct.fields.add(field);
                         }
                     }
                 }
             }
+
             structs.put(struct.name, struct);
         }
+
         return structs;
+    }
+
+    private CollectResult collectUntilSemicolon(int startLine) throws Error
+    {
+        StringBuilder sb = new StringBuilder();
+        int total = sourceCode.getLineCount();
+        int current = startLine;
+
+        while (current  < total)
+        {
+            String raw = sourceCode.getLine(current);
+            int idx = raw.indexOf("//");
+            String noComment = (idx >= 0 ? raw.substring(0, idx) : raw).trim();
+
+            sb.append(noComment);
+            if (noComment.endsWith(";"))
+                break;
+
+            current++;
+        }
+        String result = sb.toString().trim();
+
+        if (current == total && !result.endsWith(";"))
+            throw new Error("Was unable to parse a multiline type before hitting the end of the file.");
+
+        result = result.replaceAll(",", ", ");
+        return new CollectResult(result, current);
     }
 
     private StructInfo parseStructHeader(String header) throws Error, ApidocTagParser.Error
@@ -223,13 +277,6 @@ public final class StructParser
         struct.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
 
         return struct;
-    }
-
-    private StructInfo.Field parseStructField() throws ApidocTagParser.Error, Error
-    {
-        final String[] match = sourceCode.matchLine(line, fieldRegex);
-        return match != null && !"using".equals(match[0]) ?
-            parseField(match[0], match[1]) : null;
     }
 
     private static boolean hasDeprecatedTag(List<ApidocTagParser.Item> items)
@@ -319,6 +366,9 @@ public final class StructParser
 
     private static final Pattern structLastLineRegex = Pattern.compile(
         "};");
+
+    private static final Pattern prefixRegex = Pattern.compile(
+        "^ {4}((?:::)*\\w+(?:(?:::|<|, )\\w+)*)");
 
     private static final Pattern fieldRegex = Pattern.compile(
         " {4}((?:::)*\\w+(?:(?:::|<|, )\\w+>*)*)\\s+(\\w+)(?:\\s=\\s.*)?(?:\\s*\\{.*}\\s*)?;.*");

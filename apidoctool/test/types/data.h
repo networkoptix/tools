@@ -69,10 +69,25 @@ struct ExampleData
     /**%apidoc Field of struct &ast;. */
     ExampleStruct inner;
     std::vector<std::chrono::seconds> secondListS;
-    std::variant<int, ExampleStruct> variant;
-    std::variant<ExampleStruct, ExampleStruct> variantOfTwoStructs;
-    std::vector<std::variant<int, ExampleStruct>> variantList;
-    std::variant<int, std::map<QString, ExampleStruct>> variantWithMap;
+    // Separate line comment.
+    std::variant<int,
+        ExampleStruct> variant;
+    std::variant<ExampleStruct,
+        ExampleStruct> variantOfTwoStructs;
+    std::vector< // Extra comments to check
+        std::variant< // Big multi line
+            // Separate line comment
+            int,
+            ExampleStruct
+        >
+    > variantList; // End with a comment
+    std::variant<
+        int,
+        std::map<
+            QString,
+            ExampleStruct
+        >
+    > variantWithMap;
     std::variant<int, std::vector<ExampleStruct>>> variantWithList;
     std::variant<int, std::vector<std::map<QString, ExampleStruct>>> variantWithMapList;
     std::variant<int, std::chrono::seconds> variantWithChrono;
@@ -84,7 +99,8 @@ struct ExampleData
     std::map<QString, std::chrono::seconds> chronoMap;
     std::map<QString, std::variant<QString, ExampleStruct>> mapWithVariant;
     std::vector<std::map<QString, std::variant<QString, ExampleStruct>>> mapListWithVariant;
-    std::map<QString, std::vector<std::variant<QString, ExampleStruct>>> mapWithVariantList;
+    std::map<QString, std::vector<std::variant<QString,
+        ExampleStruct>>> mapWithVariantList;
     std::map<QString, std::map<QnUuid, ExampleStruct>> mapOfMap;
     std::map<QString, std::map<QnUuid, std::variant<int, ExampleStruct>>> mapOfMapWithVariant;
 //    std::map<QString, NamedVariantMap> mapOfNamedVariantMap;
