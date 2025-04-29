@@ -127,8 +127,24 @@ public final class StructParser
         throws Error, SourceCode.Error, ApidocTagParser.Error, EnumParser.Error, FlagParser.Error
     {
         final Map<String, StructInfo> structs = new HashMap<String, StructInfo>();
+        final Map<String,String> typeAliases = new HashMap<>();
         for (line = 1; line <= sourceCode.getLineCount(); ++line)
         {
+            String rawTrim = sourceCode.getLine(line).trim();
+            if (rawTrim.startsWith("using") && !rawTrim.startsWith("using namespace"))
+            {
+                CollectResult cr = collectUntilSemicolon(line);
+                String usingStmt = cr.text.trim();
+
+                Matcher um = usingRegex.matcher(usingStmt);
+                if (um.matches())
+                {
+                    typeAliases.put(um.group(1), um.group(2));
+                    line = cr.lastLine;
+                    continue;
+                }
+            }
+
             final String[] values = sourceCode.matchMultiline(
                 line, structFirstLineRegex, structHeaderRegex, structHeaderLastLineRegex);
             if (values == null)
@@ -193,7 +209,8 @@ public final class StructParser
 
                         if (match != null && !"using".equals(match[0]))
                         {
-                            StructInfo.Field field = parseField(match[0], match[1]);
+                            String resolvedType = expandTypeAliases(match[0], typeAliases);
+                            StructInfo.Field field = parseField(resolvedType, match[1]);
                             if (enums.contains(field.type.name) || flags.contains(field.type.name))
                                 field.type.name = struct.name + "_" + field.type.name;
                             struct.fields.add(field);
@@ -231,8 +248,30 @@ public final class StructParser
         if (current == total && !result.endsWith(";"))
             throw new Error("Was unable to parse a multiline type before hitting the end of the file.");
 
-        result = result.replaceAll(",", ", ");
+        result = result.replaceAll(",\\s*", ", ");
         return new CollectResult(result, current);
+    }
+
+    private String expandTypeAliases(String rawType, Map<String, String> typeAliases)
+    {
+        String result = rawType;
+        boolean changed;
+        do
+        {
+            changed = false;
+            for (Map.Entry<String,String> e: typeAliases.entrySet())
+            {
+                String alias  = e.getKey();
+                String target = e.getValue();
+                String next = result.replaceAll("\\b" + alias + "\\b", target);
+                if (!next.equals(result))
+                {
+                    result = next;
+                    changed = true;
+                }
+            }
+        } while (changed);
+        return result;
     }
 
     private StructInfo parseStructHeader(String header) throws Error, ApidocTagParser.Error
@@ -366,6 +405,9 @@ public final class StructParser
 
     private static final Pattern structLastLineRegex = Pattern.compile(
         "};");
+
+    private static final Pattern usingRegex = Pattern.compile(
+        "^using\\s+(\\w+)\\s*=\\s*([^;]+);");
 
     private static final Pattern prefixRegex = Pattern.compile(
         "^ {4}((?:::)*\\w+(?:(?:::|<|, )\\w+)*)");

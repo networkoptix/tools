@@ -17843,6 +17843,10 @@
               "description": "Backup bitrate per day of week and hour, as a JSON array of key-value objects, structured\naccording to the following example:\n<pre><code>\n[\n    {\n        \"key\": { \"day\": \"DAY_OF_WEEK\", \"hour\": HOUR },\n        \"value\": BYTES_PER_SECOND\n    },\n    ...\n]\n<\/code><\/pre>\nHere <code>DAY_OF_WEEK<\/code> is one of <code>monday<\/code>, <code>tuesday<\/code>,\n<code>wednesday<\/code>, <code>thursday<\/code>, <code>friday<\/code>, <code>saturday<\/code>,\n<code>sunday<\/code>; <code>HOUR<\/code> is an integer in range 0..23;\n<code>BYTES_PER_SECOND<\/code> is an integer.\n<br/>\nFor any day-hour position, a missing value means \"unlimited bitrate\", and a zero value means\n\"don't perform backup\".",
               "type": "array",
               "items": {
+                "additionalProperties": {
+                  "type": "string",
+                  "example": ""
+                },
                 "type": "object",
                 "properties": {
                   "key": {
@@ -17926,6 +17930,10 @@
                 "description": "Backup bitrate per day of week and hour, as a JSON array of key-value objects, structured\naccording to the following example:\n<pre><code>\n[\n    {\n        \"key\": { \"day\": \"DAY_OF_WEEK\", \"hour\": HOUR },\n        \"value\": BYTES_PER_SECOND\n    },\n    ...\n]\n<\/code><\/pre>\nHere <code>DAY_OF_WEEK<\/code> is one of <code>monday<\/code>, <code>tuesday<\/code>,\n<code>wednesday<\/code>, <code>thursday<\/code>, <code>friday<\/code>, <code>saturday<\/code>,\n<code>sunday<\/code>; <code>HOUR<\/code> is an integer in range 0..23;\n<code>BYTES_PER_SECOND<\/code> is an integer.\n<br/>\nFor any day-hour position, a missing value means \"unlimited bitrate\", and a zero value means\n\"don't perform backup\".",
                 "type": "array",
                 "items": {
+                  "additionalProperties": {
+                    "type": "string",
+                    "example": ""
+                  },
                   "type": "object",
                   "properties": {
                     "key": {

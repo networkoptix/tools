@@ -59,6 +59,18 @@ struct StructSeconds
  * Struct with deprecated &ast;.
  * %deprecated Deprecated struct &ast;.
  */
+
+ // Test multiline and nested using statements
+ using MapToStruct = std::map<
+    QString,
+    ExampleStruct // Comment in test
+    // Comment in its own line
+>;
+using VariantWithMap = std::variant<
+    int,
+    MapToStruct
+>;
+
 struct ExampleData
 {
     /**%apidoc
@@ -81,13 +93,7 @@ struct ExampleData
             ExampleStruct
         >
     > variantList; // End with a comment
-    std::variant<
-        int,
-        std::map<
-            QString,
-            ExampleStruct
-        >
-    > variantWithMap;
+    VariantWithMap variantWithMap;
     std::variant<int, std::vector<ExampleStruct>>> variantWithList;
     std::variant<int, std::vector<std::map<QString, ExampleStruct>>> variantWithMapList;
     std::variant<int, std::chrono::seconds> variantWithChrono;
