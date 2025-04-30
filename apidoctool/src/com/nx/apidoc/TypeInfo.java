@@ -355,6 +355,8 @@ public final class TypeInfo
                     "int64_t",
                     "std::string",
                     "nx::utils::Url",
+                    "Url",
+                    "nx::Url",
                     "nx::TranslatableString"));
             }
         };
