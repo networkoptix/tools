@@ -119,6 +119,11 @@ struct ExampleData
      * %value 1
      */
     int immutableField;
+
+    std::optional<nx::Uuid> optionalUuid;
+
+    /**%apidoc[opt] */
+    nx::Uuid optionalUuid2;
 };
 
 /**%apidoc

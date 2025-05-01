@@ -560,8 +560,7 @@
             "properties": {
               "userId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "resourceIds": {
                 "type": "array",
@@ -618,8 +617,7 @@
             "properties": {
               "serverGuid": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "archivedCameras": {
                 "type": "array",
@@ -661,8 +659,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -715,8 +712,7 @@
               "cameraId": {
                 "description": "Camera unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "cameraName": {
                 "description": "Camera name.",
@@ -855,8 +851,7 @@
               "preferredServerId": {
                 "description": "Unique id of a server which has the highest priority of hosting\nthe camera for failover (if the current server fails).",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "failoverPriority": {
                 "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
@@ -932,8 +927,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -1002,14 +996,12 @@
               "id": {
                 "description": "Camera unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "description": "Unique id of the server hosting the camera.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {
                 "description": "Camera name.",
@@ -1022,8 +1014,7 @@
               "typeId": {
                 "description": "Unique id of the camera type. A camera type can describe predefined\ninformation such as camera maximum resolution, FPS, etc. Detailed type information\ncan be obtained via GET /ec2/getResourceTypes request.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "mac": {
                 "description": "Camera MAC address.",
@@ -1065,8 +1056,7 @@
               "cameraId": {
                 "description": "Camera unique id. If such object exists, omitted fields will not be\n  changed.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "cameraName": {
                 "description": "Camera name.",
@@ -1205,8 +1195,7 @@
               "preferredServerId": {
                 "description": "Unique id of a server which has the highest priority of hosting\nthe camera for failover (if the current server fails).",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "failoverPriority": {
                 "description": "Priority for the camera to be moved\nto another server for failover (if the current server fails).\n\nPossible values are:\n- `\"FP_Never\"` Will never be moved to another server.\n- `\"FP_Low\"` Low priority against other cameras.\n- `\"FP_Medium\"` Medium priority against other cameras.\n- `\"FP_High\"` High priority against other cameras.\n- `\"FP_Count\"`",
@@ -1329,8 +1318,7 @@
             "isPrimaryTimeServer": {"type": "boolean"},
             "primaryTimeServerGuid": {
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "syncTimeFlags": {
               "type": "string",
@@ -1378,8 +1366,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -1420,8 +1407,7 @@
               "id": {
                 "description": "Event rule unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "eventType": {
                 "description": "One of the fixed values.\n\nPossible values are:\n- `\"undefinedEvent\"` Event type is not defined.\n- `\"cameraMotionEvent\"` Motion has occurred on a camera.\n- `\"cameraInputEvent\"` Camera input signal is received.\n- `\"cameraDisconnectEvent\"` Camera was disconnected.\n- `\"storageFailureEvent\"` Storage read error has occurred.\n- `\"networkIssueEvent\"` Network issue: packet lost, RTP timeout, etc.\n- `\"cameraIpConflictEvent\"` Found some cameras with same IP address.\n- `\"serverFailureEvent\"` Connection to server lost.\n- `\"serverConflictEvent\"` Two or more servers are running.\n- `\"serverStartEvent\"` Server started.\n- `\"licenseIssueEvent\"` Not enough licenses.\n- `\"backupFinishedEvent\"` Archive backup done.\n- `\"softwareTriggerEvent\"` Software triggers.\n- `\"analyticsSdkEvent\"`\n- `\"systemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 500. First system health message.\n- `\"maxSystemHealthEvent\"`<p><b>Proprietary.<\/b><\/p>Equals 599. Last possible system health\nmessage.\n- `\"anyCameraEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyServerEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"anyEvent\"`<p><b>Proprietary.<\/b><\/p>Event group.\n- `\"userDefinedEvent\"` Custom event defined by the user.",
@@ -1803,8 +1789,7 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "vendor": {"type": "string"},
@@ -1822,8 +1807,7 @@
                       "properties": {
                         "resourceTypeId": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "name": {"type": "string"},
                         "defaultValue": {"type": "string"}
@@ -1852,20 +1836,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "networkAddresses": {"type": "string"},
                   "flags": {
@@ -1911,8 +1892,7 @@
                 "properties": {
                   "serverId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "serverName": {"type": "string"},
                   "maxCameras": {"type": "integer"},
@@ -1965,20 +1945,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "mac": {"type": "string"},
                   "physicalId": {"type": "string"},
@@ -2020,8 +1997,7 @@
                 "properties": {
                   "cameraId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "cameraName": {"type": "string"},
                   "userDefinedGroupName": {"type": "string"},
@@ -2101,8 +2077,7 @@
                   "maxArchiveDays": {"type": "integer"},
                   "preferredServerId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "failoverPriority": {
                     "type": "string",
@@ -2157,20 +2132,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "isAdmin": {"type": "boolean"},
                   "permissions": {
@@ -2199,8 +2171,7 @@
                   },
                   "userRoleId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "email": {"type": "string"},
                   "digest": {"type": "string"},
@@ -2243,8 +2214,7 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "permissions": {
@@ -2286,8 +2256,7 @@
                 "properties": {
                   "userId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "resourceIds": {
                     "type": "array",
@@ -2310,20 +2279,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "cellAspectRatio": {"type": "number"},
                   "horizontalSpacing": {"type": "number"},
@@ -2335,8 +2301,7 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "flags": {"type": "integer"},
                         "left": {"type": "number"},
@@ -2346,8 +2311,7 @@
                         "rotation": {"type": "number"},
                         "resourceId": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "resourcePath": {"type": "string"},
                         "zoomLeft": {"type": "number"},
@@ -2356,8 +2320,7 @@
                         "zoomBottom": {"type": "number"},
                         "zoomTargetId": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "contrastParams": {"type": "string"},
                         "dewarpingParams": {"type": "string"},
@@ -2415,20 +2378,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "autorun": {"type": "boolean"},
                   "items": {
@@ -2438,18 +2398,15 @@
                       "properties": {
                         "guid": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "pcGuid": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "layoutGuid": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "name": {"type": "string"},
                         "snapLeft": {"type": "integer"},
@@ -2476,8 +2433,7 @@
                       "properties": {
                         "pcGuid": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "pcIndex": {"type": "integer"},
                         "desktopLeft": {"type": "integer"},
@@ -2510,8 +2466,7 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "name": {"type": "string"},
                         "items": {
@@ -2521,13 +2476,11 @@
                             "properties": {
                               "itemGuid": {
                                 "type": "string",
-                                "format": "uuid",
-                                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                                "format": "uuid"
                               },
                               "layoutGuid": {
                                 "type": "string",
-                                "format": "uuid",
-                                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                                "format": "uuid"
                               }
                             },
                             "required": [
@@ -2565,8 +2518,7 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "eventType": {
                     "type": "string",
@@ -2671,8 +2623,7 @@
                 "properties": {
                   "serverGuid": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "archivedCameras": {
                     "type": "array",
@@ -2709,8 +2660,7 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "url": {"type": "string"},
                   "ignore": {"type": "boolean"}
@@ -2731,8 +2681,7 @@
                   "name": {"type": "string"},
                   "resourceId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   }
                 },
                 "required": [
@@ -2749,20 +2698,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "spaceLimit": {"type": "string"},
                   "usedForWriting": {"type": "boolean"},
@@ -2804,8 +2750,7 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "status": {
                     "type": "string",
@@ -2834,20 +2779,17 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "url": {"type": "string"},
                   "typeId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   }
                 },
                 "required": [
@@ -2866,13 +2808,11 @@
                 "properties": {
                   "id": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "parentId": {
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "name": {"type": "string"},
                   "items": {
@@ -2882,8 +2822,7 @@
                       "properties": {
                         "resourceId": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                          "format": "uuid"
                         },
                         "delayMs": {"type": "integer"}
                       },
@@ -2944,8 +2883,7 @@
             "serverId": {
               "description": "Id of a server.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "hardwareIds": {
               "description": "All Hardware Ids of the server, as a list of strings.",
@@ -3006,13 +2944,11 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "items": {
@@ -3022,8 +2958,7 @@
                   "properties": {
                     "resourceId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "delayMs": {"type": "integer"}
                   },
@@ -3074,8 +3009,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -3130,20 +3064,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "url": {"type": "string"},
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "cellAspectRatio": {"type": "number"},
               "horizontalSpacing": {"type": "number"},
@@ -3155,8 +3086,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "flags": {"type": "integer"},
                     "left": {"type": "number"},
@@ -3166,8 +3096,7 @@
                     "rotation": {"type": "number"},
                     "resourceId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "resourcePath": {"type": "string"},
                     "zoomLeft": {"type": "number"},
@@ -3176,8 +3105,7 @@
                     "zoomBottom": {"type": "number"},
                     "zoomTargetId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "contrastParams": {"type": "string"},
                     "dewarpingParams": {"type": "string"},
@@ -3305,8 +3233,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -3341,8 +3268,7 @@
               "serverId": {
                 "description": "Server unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "serverName": {
                 "description": "Server name.",
@@ -3483,20 +3409,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "url": {"type": "string"},
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "networkAddresses": {"type": "string"},
               "flags": {
@@ -3522,8 +3445,7 @@
               "authKey": {"type": "string"},
               "serverId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "serverName": {"type": "string"},
               "maxCameras": {"type": "integer"},
@@ -3589,20 +3511,17 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "parentId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "name": {"type": "string"},
                     "url": {"type": "string"},
                     "typeId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "spaceLimit": {"type": "string"},
                     "usedForWriting": {"type": "boolean"},
@@ -3799,8 +3718,7 @@
               "name": {"type": "string"},
               "resourceId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               }
             },
             "required": [
@@ -3858,8 +3776,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "vendor": {"type": "string"},
@@ -3877,8 +3794,7 @@
                   "properties": {
                     "resourceTypeId": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "name": {"type": "string"},
                     "defaultValue": {"type": "string"}
@@ -3977,8 +3893,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -4005,8 +3920,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "status": {
                 "type": "string",
@@ -4054,8 +3968,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -4092,14 +4005,12 @@
               "id": {
                 "description": "Storage unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "description": "Id of a server to which the storage belongs.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {
                 "description": "Storage name.",
@@ -4111,8 +4022,7 @@
               },
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "spaceLimit": {
                 "description": "Storage space to leave free on the storage,\nin bytes.",
@@ -4230,8 +4140,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -4259,8 +4168,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "permissions": {
@@ -4321,8 +4229,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         },
         {
@@ -4364,20 +4271,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "url": {"type": "string"},
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "isAdmin": {"type": "boolean"},
               "permissions": {
@@ -4406,8 +4310,7 @@
               },
               "userRoleId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "email": {"type": "string"},
               "digest": {"type": "string"},
@@ -4484,20 +4387,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "url": {"type": "string"},
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "autorun": {"type": "boolean"},
               "items": {
@@ -4507,18 +4407,15 @@
                   "properties": {
                     "guid": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "pcGuid": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "layoutGuid": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "name": {"type": "string"},
                     "snapLeft": {"type": "integer"},
@@ -4545,8 +4442,7 @@
                   "properties": {
                     "pcGuid": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "pcIndex": {"type": "integer"},
                     "desktopLeft": {"type": "integer"},
@@ -4579,8 +4475,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "name": {"type": "string"},
                     "items": {
@@ -4590,13 +4485,11 @@
                         "properties": {
                           "itemGuid": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                            "format": "uuid"
                           },
                           "layoutGuid": {
                             "type": "string",
-                            "format": "uuid",
-                            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                            "format": "uuid"
                           }
                         },
                         "required": [
@@ -4674,20 +4567,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {"type": "string"},
               "url": {"type": "string"},
               "typeId": {
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               }
             },
             "required": [
@@ -5396,8 +5286,7 @@
             "id": {
               "description": "Layout unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Unique id of the user owning the layout.",
@@ -5418,8 +5307,7 @@
             "typeId": {
               "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "cellAspectRatio": {
               "description": "Aspect ratio of a cell for layout items\n(floating-point).",
@@ -5590,8 +5478,7 @@
             "id": {
               "description": "Layout tour unique id. Can be omitted when creating a new object. If such\nobject exists, omitted fields will not be changed.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "type": "string",
@@ -5677,8 +5564,7 @@
               "typeId": {
                 "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{e02fdf56-e399-2d8f-731d-7a457333af7f}\"`",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "cellAspectRatio": {
                 "description": "Aspect ratio of a cell for layout items\n(floating-point).",
@@ -6017,8 +5903,7 @@
             "id": {
               "description": "Storage unique id. Can be omitted when creating a new object.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Parent server unique id.",
@@ -6108,14 +5993,12 @@
             "id": {
               "description": "User unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Should be empty.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "User name.",
@@ -6130,8 +6013,7 @@
             "typeId": {
               "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "isAdmin": {
               "description": "<p><b>Proprietary.<\/b><\/p>Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
@@ -6165,8 +6047,7 @@
             "userRoleId": {
               "description": "User role unique id.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "email": {
               "description": "User's email.",
@@ -6233,8 +6114,7 @@
             "id": {
               "description": "User role unique id. Can be omitted when creating a new object. If such\nobject exists, omitted fields will not be changed.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "User role name.",
@@ -6289,14 +6169,12 @@
               "id": {
                 "description": "User unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "description": "Should be empty.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {
                 "description": "User name.",
@@ -6311,8 +6189,7 @@
               "typeId": {
                 "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}\"`",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "isAdmin": {
                 "description": "<p><b>Proprietary.<\/b><\/p>Indended for internal use; keep the value when saving\na previously received object, use false when creating a new one.",
@@ -6346,8 +6223,7 @@
               "userRoleId": {
                 "description": "User role unique id.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "email": {
                 "description": "User's email.",
@@ -6415,8 +6291,7 @@
             "id": {
               "description": "Web page unique id. Can be omitted when creating a new object. If such object\nexists, omitted fields will not be changed.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "type": "string",
@@ -6436,8 +6311,7 @@
             "typeId": {
               "description": "<p><b>Proprietary.<\/b><\/p>Should have fixed value.\n\nPossible values are:\n- `\"{57d7112a-b9c3-247b-c045-1660250adae5}\"`",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             }
           },
           "required": [
@@ -6950,8 +6824,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         }
       ],
@@ -6989,8 +6862,7 @@
                 "actionResourceId": {
                   "description": "Additional parameter for event log\nconvenience.",
                   "type": "string",
-                  "format": "uuid",
-                  "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                  "format": "uuid"
                 },
                 "url": {
                   "description": "Play Sound / exec HTTP action.",
@@ -7140,8 +7012,7 @@
                 "eventResourceId": {
                   "description": "Event source - camera or server id.",
                   "type": "string",
-                  "format": "uuid",
-                  "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                  "format": "uuid"
                 },
                 "resourceName": {
                   "description": "Name of the resource which caused the event.\nUsed if no resource is actually registered in the system. Generic event can\nprovide some resource name which doesn't match any resourceId in the system. In\nthis case resourceName is filled and resourceId remains empty.",
@@ -7150,8 +7021,7 @@
                 "sourceServerId": {
                   "description": "Id of a server that generated the event.",
                   "type": "string",
-                  "format": "uuid",
-                  "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                  "format": "uuid"
                 },
                 "reasonCode": {
                   "description": "Used in Reasoned Events as a reason code.",
@@ -7212,8 +7082,7 @@
             "businessRuleId": {
               "description": "Id of the event rule.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "aggregationCount": {
               "description": "Number of identical events groupped into one.",
@@ -10377,8 +10246,7 @@
                   "settingsModelId": {
                     "description": "Current id of the Settings Model. Such ids are used to check that values match the Model.",
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "settingsErrors": {
                     "description": "Name-value map with errors that occurred while performing the current settings operation.",
@@ -10517,8 +10385,7 @@
                   "settingsModelId": {
                     "description": "Current id of the Settings Model. Such ids are used to check that values match the Model.",
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "settingsErrors": {
                     "description": "Name-value map with errors that occurred while performing the current settings operation.",
@@ -10920,8 +10787,7 @@
           "in": "query",
           "schema": {
             "type": "string",
-            "format": "uuid",
-            "example": "89abcdef-0123-4567-89ab-cdef01234567"
+            "format": "uuid"
           }
         }
       ],
@@ -12176,6 +12042,14 @@
                 "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
                 "type": "integer"
               },
+              "optionalUuid": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "optionalUuid2": {
+                "type": "string",
+                "format": "uuid"
+              },
               "funcParam": {
                 "type": "string",
                 "example": ""
@@ -12293,7 +12167,9 @@
                   "mapOfMapWithVariant.*.*.#1.e",
                   "mapOfMapWithVariant.*.*.#1.secondsS",
                   "immutableStruct.i",
-                  "immutableField"
+                  "immutableField",
+                  "optionalUuid",
+                  "optionalUuid2"
                 ]
               }
             },
@@ -13084,6 +12960,14 @@
                 "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
                 "readOnly": true,
                 "type": "integer"
+              },
+              "optionalUuid": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "optionalUuid2": {
+                "type": "string",
+                "format": "uuid"
               }
             },
             "required": [
@@ -14135,6 +14019,22 @@
             "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
             "in": "query",
             "schema": {"type": "integer"}
+          },
+          {
+            "name": "optionalUuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "optionalUuid2",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           {
             "name": "name",
@@ -15746,6 +15646,22 @@
           "schema": {"type": "integer"}
         },
         {
+          "name": "optionalUuid",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "optionalUuid2",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
           "name": "_orderBy",
           "description": "Possible values are:\n- `\"id\"`\n- `\"name\"`",
           "required": true,
@@ -16799,6 +16715,22 @@
           "description": "Possible values are:\n- `0`<p><b>Deprecated.<\/b> Deprecated value &ast;.<\/p>Value with deprecated &ast;.\n- `1`",
           "in": "query",
           "schema": {"type": "integer"}
+        },
+        {
+          "name": "optionalUuid",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "optionalUuid2",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "responses": {"default": {
@@ -17025,8 +16957,7 @@
               "description": "Internal Device identifier. This identifier can be used as {id} path\nparameter in requests related to the Device.",
               "readOnly": true,
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Unique id of the server hosting the device.",
@@ -17119,8 +17050,7 @@
                 "description": "Internal Device identifier. This identifier can be used as {id} path\nparameter in requests related to the Device.",
                 "readOnly": true,
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "description": "Unique id of the server hosting the device.",
@@ -17380,8 +17310,7 @@
             "preferredServerId": {
               "description": "Unique id of a server which has the highest priority of hosting the device for\nfailover (if the current server fails).",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "failoverPriority": {
               "description": "Priority for the device to be moved to another server for failover (if the\ncurrent server fails).",
@@ -17586,8 +17515,7 @@
               "preferredServerId": {
                 "description": "Unique id of a server which has the highest priority of hosting the device for\nfailover (if the current server fails).",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "failoverPriority": {
                 "description": "Priority for the device to be moved to another server for failover (if the\ncurrent server fails).",
@@ -18391,8 +18319,7 @@
               "description": "Internal user role identifier. This identifier can be used as {id} path\nparameter in requests related to a user role.",
               "readOnly": true,
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "Name of the user role.",
@@ -18504,14 +18431,12 @@
               "description": "Layout unique id.",
               "readOnly": true,
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Unique id of the user owning the layout.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "Layout name.",
@@ -18536,8 +18461,7 @@
                     "description": "Item unique id.",
                     "readOnly": true,
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "flags": {
                     "description": "Should have fixed value.",
@@ -18597,8 +18521,7 @@
                   "zoomTargetId": {
                     "description": "Unique id of the original layout item for which the zoom window was created.",
                     "type": "string",
-                    "format": "uuid",
-                    "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                    "format": "uuid"
                   },
                   "contrastParams": {
                     "description": "Image enhancement parameters.",
@@ -18738,14 +18661,12 @@
                 "description": "Layout unique id.",
                 "readOnly": true,
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "parentId": {
                 "description": "Unique id of the user owning the layout.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "name": {
                 "description": "Layout name.",
@@ -18770,8 +18691,7 @@
                       "description": "Item unique id.",
                       "readOnly": true,
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "flags": {
                       "description": "Should have fixed value.",
@@ -18831,8 +18751,7 @@
                     "zoomTargetId": {
                       "description": "Unique id of the original layout item for which the zoom window was created.",
                       "type": "string",
-                      "format": "uuid",
-                      "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                      "format": "uuid"
                     },
                     "contrastParams": {
                       "description": "Image enhancement parameters.",
@@ -19053,14 +18972,12 @@
               "description": "Video wall unique id.",
               "readOnly": true,
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "Id of a User who created this video wall.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "Video wall name.",
@@ -19070,8 +18987,7 @@
             "typeId": {
               "description": "<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "autorun": {"type": "boolean"},
             "timeline": {"type": "boolean"},
@@ -19909,8 +19825,7 @@
             "cloudOwnerId": {
               "description": "Presented if the System is bound to the Cloud.",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "remoteAddresses": {
               "description": "If any of these addresses don't contain port, ModuleInformation::port must be used.",
@@ -20069,8 +19984,7 @@
               "cloudOwnerId": {
                 "description": "Presented if the System is bound to the Cloud.",
                 "type": "string",
-                "format": "uuid",
-                "example": "89abcdef-0123-4567-89ab-cdef01234567"
+                "format": "uuid"
               },
               "remoteAddresses": {
                 "description": "If any of these addresses don't contain port, ModuleInformation::port must be used.",
@@ -20209,14 +20123,12 @@
               "description": "Web page unique id.",
               "readOnly": true,
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "parentId": {
               "description": "<p><b>Proprietary.<\/b><\/p>",
               "type": "string",
-              "format": "uuid",
-              "example": "89abcdef-0123-4567-89ab-cdef01234567"
+              "format": "uuid"
             },
             "name": {
               "description": "Web page name.",

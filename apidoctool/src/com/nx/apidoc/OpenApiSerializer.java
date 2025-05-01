@@ -703,7 +703,8 @@ public final class OpenApiSerializer
             case UUID:
                 schema.put("type", "string");
                 schema.put("format", "uuid");
-                schema.put("example", "89abcdef-0123-4567-89ab-cdef01234567");
+                if (fillDefaultExample)
+                    schema.put("example", "89abcdef-0123-4567-89ab-cdef01234567");
                 break;
             case OBJECT:
                 schema.put("type", "object");
@@ -787,7 +788,9 @@ public final class OpenApiSerializer
     private static void fillSchemaType(
         JSONObject schema, Apidoc.Param param, boolean fillDefaultExample)
     {
-        fillSchemaType(schema, param.type, fillDefaultExample);
+        // Do not fill the default for optional UUIDs
+        boolean shouldDefault = fillDefaultExample && !(param.optional && param.type.fixed == Apidoc.Type.UUID);
+        fillSchemaType(schema, param.type, shouldDefault);
         putExample(param, schema);
         if (param.type.fixed == Apidoc.Type.ENUM || param.type.fixed == Apidoc.Type.FLAGS)
         {
@@ -994,6 +997,10 @@ public final class OpenApiSerializer
 
     private static void putExample(Apidoc.Param param, JSONObject result)
     {
+        // Skip examples on optional UUID fields
+        if (param.optional && param.type.fixed == Apidoc.Type.UUID)
+            return;
+
         if (!param.example.isEmpty())
         {
             result.put("example", param.type.parse(param.example));
