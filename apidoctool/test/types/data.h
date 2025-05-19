@@ -62,7 +62,7 @@ struct StructSeconds
 
  // Test multiline and nested using statements
  using MapToStruct = std::map<
-    QString,
+    /*more comments*/ QString /*comments here too*/,
     ExampleStruct // Comment in test
     // Comment in its own line
 >;
@@ -70,6 +70,8 @@ using VariantWithMap = std::variant<
     int,
     MapToStruct
 >;
+
+using MapSingleLineComment = std::map<std::string /*comment*/, std::string>;
 
 struct ExampleData
 {
@@ -94,6 +96,7 @@ struct ExampleData
         >
     > variantList; // End with a comment
     VariantWithMap variantWithMap;
+    MapSingleLineComment mapSingleLineComment;
     std::variant<int, std::vector<ExampleStruct>>> variantWithList;
     std::variant<int, std::vector<std::map<QString, ExampleStruct>>> variantWithMapList;
     std::variant<int, std::chrono::seconds> variantWithChrono;

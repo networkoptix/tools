@@ -10,7 +10,25 @@
 #include <nx/fusion/model_functions_fwd.h>
 #include <nx/reflect/instrument.h>
 
-namespace nx::vms::api {
+namespace nx::vms {
+namespace test {
+
+// Standard defined error codes for `code` field.
+enum Code
+{
+    InvalidJson = -32700,
+    InvalidRequest = -32600,
+    MethodNotFound = -32601,
+    InvalidParams = -32602,
+    InternalError = -32603,
+    RequestError = 0,
+};
+
+} // namespace test
+
+namespace api {
+
+using Code = nx::vms::test::Code;
 
 struct NX_VMS_API JsonRpcRequest
 {
@@ -21,6 +39,7 @@ struct NX_VMS_API JsonRpcRequest
     std::string method;
     std::optional<std::variant<QJsonObject, QJsonArray>> params;
     std::optional<std::variant<int, std::string>> id;
+    Code code;
 };
 #define JsonRpcRequest_Fields (jsonrpc)(method)(params)(id)
 QN_FUSION_DECLARE_FUNCTIONS(JsonRpcRequest, (json), NX_VMS_API)
@@ -28,16 +47,6 @@ NX_REFLECTION_INSTRUMENT(JsonRpcRequest, JsonRpcRequest_Fields);
 
 struct NX_VMS_API JsonRpcError
 {
-    // Standard defined error codes for `code` field.
-    enum Code
-    {
-        InvalidJson = -32700,
-        InvalidRequest = -32600,
-        MethodNotFound = -32601,
-        InvalidParams = -32602,
-        InternalError = -32603,
-        RequestError = 0,
-    };
 
     int code = RequestError;
     std::string message;
@@ -70,4 +79,8 @@ struct NX_VMS_API JsonRpcResponse
 QN_FUSION_DECLARE_FUNCTIONS(JsonRpcResponse, (json), NX_VMS_API)
 NX_REFLECTION_INSTRUMENT(JsonRpcResponse, JsonRpcResponse_Fields);
 
-} // namespace nx::vms::api
+} // namespace api
+
+} // namespace nx::vms
+
+using Code = nx::vms::test::Code;

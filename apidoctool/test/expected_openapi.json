@@ -10912,11 +10912,24 @@
                   "type": "string",
                   "example": ""
                 }
-              ]}
+              ]},
+              "code": {
+                "type": "string",
+                "example": "InvalidJson",
+                "enum": [
+                  "InvalidJson",
+                  "InvalidRequest",
+                  "MethodNotFound",
+                  "InvalidParams",
+                  "InternalError",
+                  "RequestError"
+                ]
+              }
             },
             "required": [
               "jsonrpc",
-              "method"
+              "method",
+              "code"
             ]
           }}},
           "required": true
@@ -11418,6 +11431,10 @@
                   "type": "object"
                 }
               ]},
+              "mapSingleLineComment": {"additionalProperties": {
+                "type": "string",
+                "example": ""
+              }},
               "variantWithList": {"oneOf": [
                 {"type": "integer"},
                 {
@@ -12063,6 +12080,7 @@
               "variantOfTwoStructs",
               "variantList",
               "variantWithMap",
+              "mapSingleLineComment",
               "variantWithList",
               "variantWithMapList",
               "variantWithChrono",
@@ -12425,6 +12443,7 @@
                   "type": "object"
                 }
               ]},
+              "mapSingleLineComment": {"additionalProperties": {"type": "string"}},
               "variantWithList": {"oneOf": [
                 {"type": "integer"},
                 {
@@ -12978,6 +12997,7 @@
               "variantOfTwoStructs",
               "variantList",
               "variantWithMap",
+              "mapSingleLineComment",
               "variantWithList",
               "variantWithMapList",
               "variantWithChrono",
@@ -13317,6 +13337,16 @@
               }
             ]}}},
             "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+          },
+          {
+            "name": "mapSingleLineComment",
+            "required": true,
+            "in": "query",
+            "content": {"application/json": {"schema": {"additionalProperties": {
+              "type": "string",
+              "example": ""
+            }}}},
+            "description": "`string map`<\/br>\n"
           },
           {
             "name": "variantWithList",
@@ -14944,6 +14974,16 @@
           "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
         },
         {
+          "name": "mapSingleLineComment",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"additionalProperties": {
+            "type": "string",
+            "example": ""
+          }}}},
+          "description": "`string map`<\/br>\n"
+        },
+        {
           "name": "variantWithList",
           "required": true,
           "in": "query",
@@ -16013,6 +16053,16 @@
             }
           ]}}},
           "description": "`one of`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;`map`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`object`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>e<\/b> `string($enum)`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Possible values are:<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"one\"` Enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- `\"two\"`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated enum value &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enum value with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>secondsS<\/b> `one of [integer, string]`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Deprecated.<\/b> Deprecated field &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field with deprecated &ast;.<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i<\/b> `integer`<\/br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>id<\/b> `string($uuid)`<\/br>\n"
+        },
+        {
+          "name": "mapSingleLineComment",
+          "required": true,
+          "in": "query",
+          "content": {"application/json": {"schema": {"additionalProperties": {
+            "type": "string",
+            "example": ""
+          }}}},
+          "description": "`string map`<\/br>\n"
         },
         {
           "name": "variantWithList",

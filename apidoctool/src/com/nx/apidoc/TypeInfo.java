@@ -133,18 +133,20 @@ public final class TypeInfo
 
     public String extractMapType(final String type) throws Exception
     {
+        // Remove any embedded comments from map.
+        String cleanType = type.replaceAll("(?s)/\\*[\\s\\S]*?\\*/", "").trim();
         for (final String mapAlias: mapAliases)
         {
-            if (!type.startsWith(mapAlias))
+            if (!cleanType.startsWith(mapAlias))
                 continue;
             mapKeyType = new TypeInfo();
-            String nextType = mapKeyType.extractType(type.substring(mapAlias.length()).trim()).trim();
+            String nextType = mapKeyType.extractType(cleanType.substring(mapAlias.length()).trim()).trim();
             if (!nextType.startsWith(","))
-                throw new Exception("Invalid map `" + type + "`.");
+                throw new Exception("Invalid map `" + cleanType + "`.");
             mapValueType = new TypeInfo();
             String result = mapValueType.extractType(nextType.substring(1).trim()).trim();
             if (!result.startsWith(">"))
-                throw new Exception("Invalid map `" + type + "`.");
+                throw new Exception("Invalid map `" + cleanType + "`.");
             if (mapValueType.fixed == Apidoc.Type.ANY)
             {
                 fixed = Apidoc.Type.OBJECT;

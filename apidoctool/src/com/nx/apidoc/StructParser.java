@@ -228,6 +228,11 @@ public final class StructParser
     private CollectResult collectUntilSemicolon(int startLine) throws Error
     {
         StringBuilder sb = new StringBuilder();
+
+        String first = sourceCode.getLine(startLine).trim();
+        if (first.endsWith(";"))
+            return new CollectResult(first, startLine);
+
         int total = sourceCode.getLineCount();
         int current = startLine;
 
@@ -245,6 +250,9 @@ public final class StructParser
         }
         String result = sb.toString().trim();
 
+        // Remove any inline class or struct keywords
+        result = result.replaceAll("\\b(struct|class)\\s+", "");
+
         if (current == total && !result.endsWith(";"))
             throw new Error("Was unable to parse a multiline type before hitting the end of the file.");
 
@@ -255,18 +263,31 @@ public final class StructParser
     private String expandTypeAliases(String rawType, Map<String, String> typeAliases)
     {
         String result = rawType;
+        Set<String> applied = new HashSet<>();
         boolean changed;
+
         do
         {
             changed = false;
-            for (Map.Entry<String,String> e: typeAliases.entrySet())
+            for (Map.Entry<String, String> e: typeAliases.entrySet())
             {
                 String alias  = e.getKey();
                 String target = e.getValue();
-                String next = result.replaceAll("\\b" + alias + "\\b", target);
+
+                // Skip any alias once it’s been successfully applied.
+                if (applied.contains(alias))
+                    continue;
+
+                // Do a whole word replacement with proper escaping
+                String next = result.replaceAll(
+                    "\\b" + Pattern.quote(alias) + "\\b",
+                    Matcher.quoteReplacement(target)
+                );
+
                 if (!next.equals(result))
                 {
                     result = next;
+                    applied.add(alias);
                     changed = true;
                 }
             }
