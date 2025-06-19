@@ -83,6 +83,7 @@ def gather_packages(source_dir, signature_key=None):
         with ZipFile(file) as zip:
             with zip.open("package.json", "r") as package_json:
                 info = json.load(package_json)
+                info["comment_length"] = len(zip.comment)
                 result[file] = info
 
         file_version = info["version"]
@@ -100,11 +101,11 @@ def gather_packages(source_dir, signature_key=None):
         info["size"] = file.stat().st_size
         info["md5"] = calculate_md5(file)
         if signature_key and OPENSSL_EXECUTABLE:
-            # Two last bytes of the ZIP file relate to its empty comment. We are skipping them
-            # because these bytes will be changed after embedding the signature.
-            # When VMS verifies the signature, it also skips the whole ZIP comment including its
-            # length bytes.
-            info["signature"] = sign_file(file, signature_key, trim_bytes=2)
+            # Calculate a signature which is intended to be embedded into the update package
+            # archive. It should ignore the ZIP comment entirely. The comment is located in the end
+            # of the ZIP file and preceeded by two bytes specifying its length.
+            info["signature"] = sign_file(
+                file, signature_key, trim_bytes=info["comment_length"] + 2)
         else:
             signature_file = Path(f"{file}.sig")
             if signature_file.exists():
