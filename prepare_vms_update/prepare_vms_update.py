@@ -26,12 +26,35 @@ def calculate_md5(file_name):
         return hashlib.md5(file).hexdigest()
 
 
-def sign_file(file_name, key_file):
-    logging.debug(f"Signing update package {file_name} with key {key_file}")
-    return base64.b64encode(subprocess.check_output([
-        OPENSSL_EXECUTABLE, "dgst",
-        "-sign", key_file, "-keyform", "PEM",
-        "-sha256", "-binary", file_name])).decode("utf-8")
+def sign_file(file_name, key_file, trim_bytes=0):
+    logging.debug(
+        f"Signing update package {file_name} with key {key_file}. Trim {trim_bytes} bytes")
+
+    size_left = os.path.getsize(file_name) - trim_bytes
+    if size_left < 0:
+        logging.error(f"File is shorter than trimming length by {-size_left} bytes")
+        return
+
+    with open(file_name, "rb") as input_file:
+        process = subprocess.Popen(
+            [OPENSSL_EXECUTABLE, "dgst",
+                "-sign", key_file, "-keyform", "PEM", "-sha256", "-binary"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        while size_left > 0:
+            chunk_size = min(size_left, 1024)
+            chunk = input_file.read(chunk_size)
+            process.stdin.write(chunk)
+            size_left -= len(chunk)
+
+    signature, _ = process.communicate()
+
+    return base64.b64encode(signature).decode("ascii")
+
+
+def embed_signaure(file_name, signature):
+    with ZipFile(file_name, "a") as zip:
+        zip.comment = ("signature,digest,sha256,base64:" + signature).encode(encoding="ascii")
 
 
 def get_file_contents(path):
@@ -77,7 +100,11 @@ def gather_packages(source_dir, signature_key=None):
         info["size"] = file.stat().st_size
         info["md5"] = calculate_md5(file)
         if signature_key and OPENSSL_EXECUTABLE:
-            info["signature"] = sign_file(file, signature_key)
+            # Two last bytes of the ZIP file relate to its empty comment. We are skipping them
+            # because these bytes will be changed after embedding the signature.
+            # When VMS verifies the signature, it also skips the whole ZIP comment including its
+            # length bytes.
+            info["signature"] = sign_file(file, signature_key, trim_bytes=2)
         else:
             signature_file = Path(f"{file}.sig")
             if signature_file.exists():
@@ -127,7 +154,7 @@ def make_packages_json(source_dir, packages):
     return packages_json
 
 
-def make_output_dir(source_dir, output_dir_base, packages_json):
+def make_output_dir(source_dir, output_dir_base, packages_json, signature_key=None):
     source_dir = Path(source_dir)
     output_dir = Path(output_dir_base) / packages_json["version"]
     logging.info(f"Generating output directory: {output_dir}")
@@ -138,7 +165,18 @@ def make_output_dir(source_dir, output_dir_base, packages_json):
 
     for package in packages_json["packages"]:
         logging.info(f"Copying {package['file']}")
+        dst_file = output_dir / package["file"]
         shutil.copy2(source_dir / package["file"], output_dir)
+
+        if signature_key and OPENSSL_EXECUTABLE:
+            # At this point package contains a signature to be embedded into the ZIP file comment.
+            # We need to embed it, then recalculate a signature for the updated file and put it
+            # into packages.json.
+            inner_signature = package.get("signature")
+            if inner_signature:
+                embed_signaure(dst_file, inner_signature)
+            if signature_key:
+                package["signature"] = sign_file(dst_file, signature_key)
 
     logging.info(f"Saving {output_dir / 'packages.json'}")
     with open(output_dir / "packages.json", "w") as json_file:
@@ -253,7 +291,8 @@ def main():
 
     packages = gather_packages(args.source_dir, signature_key=args.signature_key)
     packages_json = make_packages_json(args.source_dir, packages)
-    make_output_dir(args.source_dir, args.output_dir, packages_json)
+    make_output_dir(
+        args.source_dir, args.output_dir, packages_json, signature_key=args.signature_key)
     if args.releases_json:
         update_releases_json(
             args.releases_json,
