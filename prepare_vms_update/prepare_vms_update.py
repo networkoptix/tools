@@ -99,7 +99,6 @@ def gather_packages(source_dir, signature_key=None):
 
     for file, info in result.items():
         info["size"] = file.stat().st_size
-        info["md5"] = calculate_md5(file)
         if signature_key and OPENSSL_EXECUTABLE:
             # Calculate a signature which is intended to be embedded into the update package
             # archive. It should ignore the ZIP comment entirely. The comment is located in the end
@@ -144,7 +143,6 @@ def make_packages_json(source_dir, packages):
             "platform": info["platform"],
             "variants": info["variants"],
             "size": info["size"],
-            "md5": info["md5"],
             "signature": info.get("signature", ""),
         }
 
@@ -178,6 +176,8 @@ def make_output_dir(source_dir, output_dir_base, packages_json, signature_key=No
                 embed_signaure(dst_file, inner_signature)
             if signature_key:
                 package["signature"] = sign_file(dst_file, signature_key)
+
+        package["md5"] = calculate_md5(dst_file)
 
     logging.info(f"Saving {output_dir / 'packages.json'}")
     with open(output_dir / "packages.json", "w") as json_file:
