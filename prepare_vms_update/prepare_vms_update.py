@@ -57,6 +57,11 @@ def embed_signaure(file_name, signature):
         zip.comment = ("signature,digest,sha256,base64:" + signature).encode(encoding="ascii")
 
 
+def get_zip_comment_length(file_name):
+    with ZipFile(file_name, "r") as zip:
+        return len(zip.comment) + 2 #< 2 extra bytes specify the comment length.
+
+
 def get_file_contents(path):
     if Path(path).exists():
         with open(path) as file:
@@ -66,7 +71,7 @@ def get_file_contents(path):
     return None
 
 
-def gather_packages(source_dir, signature_key=None):
+def gather_packages(source_dir):
     source_dir = Path(source_dir)
     logging.info(f"Gathering packages in {source_dir}")
 
@@ -78,15 +83,11 @@ def gather_packages(source_dir, signature_key=None):
         if not file.is_file() or not str(file).endswith(".zip"):
             continue
 
-        info = {}
-
         with ZipFile(file) as zip:
             with zip.open("package.json", "r") as package_json:
-                info = json.load(package_json)
-                info["comment_length"] = len(zip.comment)
-                result[file] = info
+                result[file] = json.load(package_json)
 
-        file_version = info["version"]
+        file_version = result[file]["version"]
 
         if version:
             if version != file_version:
@@ -96,19 +97,6 @@ def gather_packages(source_dir, signature_key=None):
         else:
             reference_package = file
             version = file_version
-
-    for file, info in result.items():
-        info["size"] = file.stat().st_size
-        if signature_key and OPENSSL_EXECUTABLE:
-            # Calculate a signature which is intended to be embedded into the update package
-            # archive. It should ignore the ZIP comment entirely. The comment is located in the end
-            # of the ZIP file and preceeded by two bytes specifying its length.
-            info["signature"] = sign_file(
-                file, signature_key, trim_bytes=info["comment_length"] + 2)
-        else:
-            signature_file = Path(f"{file}.sig")
-            if signature_file.exists():
-                info["signature"] = get_file_contents(signature_file)
 
     return result
 
@@ -142,8 +130,6 @@ def make_packages_json(source_dir, packages):
             "component": info["component"],
             "platform": info["platform"],
             "variants": info["variants"],
-            "size": info["size"],
-            "signature": info.get("signature", ""),
         }
 
         package_list.append(package)
@@ -168,16 +154,19 @@ def make_output_dir(source_dir, output_dir_base, packages_json, signature_key=No
         shutil.copy2(source_dir / package["file"], output_dir)
 
         if signature_key and OPENSSL_EXECUTABLE:
-            # At this point package contains a signature to be embedded into the ZIP file comment.
-            # We need to embed it, then recalculate a signature for the updated file and put it
-            # into packages.json.
-            inner_signature = package.get("signature")
-            if inner_signature:
-                embed_signaure(dst_file, inner_signature)
+            # Calculate a signature which is intended to be embedded into the update package
+            # archive. It should ignore the ZIP comment located in the end of the archive.
+            embed_signaure(dst_file,
+                sign_file(dst_file, signature_key, trim_bytes=get_zip_comment_length(dst_file)))
             if signature_key:
                 package["signature"] = sign_file(dst_file, signature_key)
+        else:
+            signature_file = Path(f"{dst_file}.sig")
+            if signature_file.exists():
+                package["signature"] = get_file_contents(signature_file)
 
         package["md5"] = calculate_md5(dst_file)
+        package["size"] = dst_file.stat().st_size
 
     logging.info(f"Saving {output_dir / 'packages.json'}")
     with open(output_dir / "packages.json", "w") as json_file:
@@ -290,7 +279,7 @@ def main():
 
     args = parser.parse_args()
 
-    packages = gather_packages(args.source_dir, signature_key=args.signature_key)
+    packages = gather_packages(args.source_dir)
     packages_json = make_packages_json(args.source_dir, packages)
     make_output_dir(
         args.source_dir, args.output_dir, packages_json, signature_key=args.signature_key)
