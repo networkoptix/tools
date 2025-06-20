@@ -20,4 +20,4 @@ then
     fi
 fi
 
-ninja "$@"
+@NX_NINJA_EXECUTABLE@ "$@"
