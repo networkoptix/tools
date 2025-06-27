@@ -30,9 +30,9 @@ function(nx_setup_ninja_preprocessor)
             configure_file(
                 "${CMAKE_CURRENT_LIST_DIR}/ninja_launcher.${scriptExtension}.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/ninja_launcher.${scriptExtension}"
-                @ONLY
-            )
+                @ONLY)
 
+            nx_store_known_files(${launcher_name})
             set(launcher_name  "${CMAKE_CURRENT_BINARY_DIR}/ninja_launcher.${scriptExtension}")
         else()
             find_program(launcher_name ninja)
