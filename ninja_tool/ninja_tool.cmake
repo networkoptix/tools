@@ -32,11 +32,12 @@ function(nx_setup_ninja_preprocessor)
                 "${CMAKE_CURRENT_BINARY_DIR}/ninja_launcher.${scriptExtension}"
                 @ONLY)
 
-            nx_store_known_files(${launcher_name})
             set(launcher_name  "${CMAKE_CURRENT_BINARY_DIR}/ninja_launcher.${scriptExtension}")
         else()
             find_program(launcher_name ninja)
         endif()
+
+        nx_store_known_files(${launcher_name})
 
         set(CMAKE_MAKE_PROGRAM ${launcher_name}
             CACHE FILEPATH "Path to ninja launcher"
