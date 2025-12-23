@@ -445,7 +445,10 @@ public final class ApidocCommentParser
         if (paramMode == ParamMode.WithToken)
         {
             final String paramName = item.getInitialToken();
-            paramIndentLevel = Utils.substringCount(paramName, ".") + 1;
+            paramIndentLevel = 1
+                + Utils.substringCount(paramName, ".") //< Subpaths.
+                - Utils.substringCount(paramName, "*") //< Maps.
+                - Utils.substringCount(paramName, "#"); //< Variants.
         }
         indentLevel += paramIndentLevel;
 
