@@ -204,8 +204,15 @@ public final class TypeManager
 
             if (findParam(mergedParams, param.name) == null)
             {
-                // Ignore built-in parameters starting with the "_" prefix and not present in structs.
-                if (verbose && !param.name.startsWith("_"))
+                // Ignore deprecated, proprietary or built-in parameters starting with the "_"
+                // prefix and not present in structs.
+                if (verbose
+                    && type.name != null
+                    && !param.deprecated
+                    && !param.proprietary
+                    && !param.name.startsWith("_")
+                    // Check for variant.
+                    && findParam(mergedParams, param.name.replaceFirst("\\.#\\d+$", "")) == null)
                 {
                     System.out.println(
                         "WARNING: Param in function apidoc comment: \"" + param.name
