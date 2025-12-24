@@ -60,7 +60,8 @@ public final class TypeManager
             function.result.params = mergeStructParams(
                 outputType,
                 function.result.params,
-                function.result.unusedParams);
+                function.result.unusedParams,
+                /*endpoint*/ null);
             if (function.result.caption.isEmpty())
             {
                 // Take the function result caption from the output struct description.
@@ -73,7 +74,8 @@ public final class TypeManager
             function.input.params = mergeStructParams(
                 inputType,
                 function.input.params,
-                function.input.unusedParams);
+                function.input.unusedParams,
+                function.name);
         }
     }
 
@@ -136,7 +138,8 @@ public final class TypeManager
     private List<Apidoc.Param> mergeStructParams(
         TypeInfo type,
         List<Apidoc.Param> functionParams,
-        List<Apidoc.Param> unusedParams)
+        List<Apidoc.Param> unusedParams,
+        String endpoint)
         throws Error
     {
         List<Apidoc.Param> structParams = getStructParams(
@@ -204,13 +207,14 @@ public final class TypeManager
 
             if (findParam(mergedParams, param.name) == null)
             {
-                // Ignore deprecated, proprietary or built-in parameters starting with the "_"
+                // Ignore deprecated, proprietary, path or built-in parameters starting with the "_"
                 // prefix and not present in structs.
                 if (verbose
                     && type.name != null
                     && !param.deprecated
                     && !param.proprietary
                     && !param.name.startsWith("_")
+                    && (endpoint == null || !endpoint.contains("{" + param.name + "}")) //< Path parameter check.
                     // Check for variant.
                     && findParam(mergedParams, param.name.replaceFirst("\\.#\\d+$", "")) == null)
                 {
