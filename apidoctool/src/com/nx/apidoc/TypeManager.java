@@ -207,12 +207,13 @@ public final class TypeManager
 
             if (findParam(mergedParams, param.name) == null)
             {
-                // Ignore deprecated, proprietary, path or built-in parameters starting with the "_"
-                // prefix and not present in structs.
+                // Ignore deprecated, proprietary, ref, path or built-in parameters starting with
+                // the "_" prefix and not present in structs.
                 if (verbose
                     && type.name != null
                     && !param.deprecated
                     && !param.proprietary
+                    && !param.isRef
                     && !param.name.startsWith("_")
                     && (endpoint == null || !endpoint.contains("{" + param.name + "}")) //< Path parameter check.
                     // Check for variant.
