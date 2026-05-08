@@ -1,0 +1,63 @@
+variables:
+  APIDOCTOOL_DIR: open/apidoctool
+  APIDOC_DIFF_VERSION: "2.0"
+  TARGET_IMAGE: "${CI_REGISTRY_IMAGE}/apidoc_diff"
+  TARGET_IMAGE_TAG: "$APIDOC_DIFF_VERSION"
+
+# Build apidoc_diff docker image.
+docker:build:apidoc_diff:
+  extends: .docker.template
+  stage: "docker image"
+  tags:
+  - primary
+  variables:
+    DOCKER_DIR: "$APIDOCTOOL_DIR/utils"
+    DOCKER_CONTEXT: "$APIDOCTOOL_DIR"
+    USE_GITLAB_REGISTRY: "true"
+    CONAN_SOURCE_URL: "${ARTIFACTORY_URL}/nx"
+    BUILD_OPTIONS: "--build-arg CONAN_SOURCE_URL"
+  script:
+  - !reference [.docker.template, script]
+  - |
+    TARGET_IMAGE_TAG=$(awk '{print $1}' <<< "$PUSH_TAGS")
+    echo "TARGET_IMAGE_TAG=${TARGET_IMAGE_TAG##*:}" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+    # set expire time to match docker image retention period
+    # artifact is required to allow to restart pipeline
+    # when docker image modified
+    expire_in: 14 days
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_COMMIT_BRANCH
+      changes:
+      - $DOCKER_DIR/**/*
+    - when: never
+
+# Tests
+apidoctool:test:
+  image: gradle:8-alpine
+  stage: tests
+  script:
+  - gradle -b $APIDOCTOOL_DIR/build.gradle test
+  - find ./ -name apidoctool.jar
+  artifacts:
+    expose_as: apidoctool
+    when: always
+    paths: [ 'open/apidoctool/build/libs/apidoctool.jar' ]
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    changes:
+    - $APIDOCTOOL_DIR/**/*
+
+apidoctool_diff:test:
+  image: "$TARGET_IMAGE:$TARGET_IMAGE_TAG"
+  stage: tests
+  needs: ["docker:build:apidoc_diff"]
+  script:
+  - cd "$APIDOCTOOL_DIR/utils"
+  - pytest -v
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    changes:
+    - $APIDOCTOOL_DIR/utils/**/*

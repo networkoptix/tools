@@ -18,7 +18,6 @@ from run_apidoctool import generate_openapi_schemas
 from apidoc_diff.process_json import save_sorted_json
 from apidoc_diff.segment_apis import dump_endpoints
 
-DEFAULT_CONANFILE = Path("open/conanfile.py")
 # This tuple eagerly lists all present and future schemas, but the script will only compare schemas
 # that exist in both the "base" and "head" versions.
 API_SCHEMAS = (
@@ -61,16 +60,13 @@ def preprocess_json(json_path: Path):
     save_sorted_json(data, output_file=json_path)
 
 
-def gather_apidoc(commit_ref: str, output_dir: Path, conan_dir: Path, silent: bool):
+def gather_apidoc(commit_ref: str, output_dir: Path, silent: bool):
     logging.info(f"Gathering OpenAPI schemas in {str(output_dir)}")
     with worktree(commit_ref) as base_dir:
         output_dir.mkdir(parents=False, exist_ok=True)
         generate_openapi_schemas(
             source_dir=base_dir,
-            repo_conanfile=DEFAULT_CONANFILE,
             output_dir=output_dir,
-            packages_dir=conan_dir,
-            forced_apidoctool_location=None,
             silent=silent
         )
         for schema in API_SCHEMAS:
@@ -106,9 +102,8 @@ def generate_diffs(base_commit_ref: str, head_commit_ref: str, silent: bool):
         logging.debug(f"Running in {temp_directory}")
         base_schema_dir = Path(temp_directory) / "base"
         head_schema_dir = Path(temp_directory) / "head"
-        conan_dir = Path(temp_directory) / "packages"
-        gather_apidoc(base_commit_ref, base_schema_dir, conan_dir, silent)
-        gather_apidoc(head_commit_ref, head_schema_dir, conan_dir, silent)
+        gather_apidoc(base_commit_ref, base_schema_dir, silent)
+        gather_apidoc(head_commit_ref, head_schema_dir, silent)
 
         for schema in API_SCHEMAS:
             base_schema = base_schema_dir / schema
@@ -166,7 +161,7 @@ class MemoryLogHandler(logging.Handler):
         pass
 
     def print_logs(self):
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', 
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
                                      datefmt='%Y-%m-%d %H:%M:%S')
         for record in self.log_records:
             print(formatter.format(record), file=sys.stderr)
@@ -181,15 +176,13 @@ if __name__ == "__main__":
 
         parser = ArgumentParser()
         parser.add_argument("base_commit_ref", help="The diff base commit hash.")
-        parser.add_argument(
-            "-c", "--conanfile", help="The conanfile to use.", default=DEFAULT_CONANFILE, type=Path)
         parser.add_argument("--head", help="The diff head commit hash.", default="HEAD")
         parser.add_argument("--verbose", help="Verbose output.", default=False, action="store_true")
-        parser.add_argument("--log-level", help="Set the logging level", 
+        parser.add_argument("--log-level", help="Set the logging level",
                             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                             default="INFO")
         args = parser.parse_args()
-        
+
         log_level = getattr(logging, args.log_level)
         logging.basicConfig(handlers=[memory_handler], level=log_level)
 
